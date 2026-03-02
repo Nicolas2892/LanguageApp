@@ -211,10 +211,11 @@ Migrations (run once in Supabase SQL editor):
 
 ### Phase 6 — Remaining (ordered by priority)
 
-**P6-F: Google OAuth**
-- Enable Google provider in Supabase dashboard (Auth → Providers)
-- Add Google sign-in button to `/auth/login` and `/auth/signup`
-- `/auth/callback` already handles the code exchange — no new route needed
+**P6-F: Google OAuth** ✓ complete
+- `src/components/auth/GoogleButton.tsx` — calls `signInWithOAuth({ provider: 'google' })`, redirects to `/auth/callback`
+- Both `/auth/login` and `/auth/signup` have Google button + "or" divider above email/password form
+- Login page handles `?error=auth_callback_failed` from callback route
+- **Requires**: Google provider enabled in Supabase dashboard (Auth → Providers → Google) with a Google Cloud OAuth client ID + secret
 
 **P6-G: Email notifications** (lowest priority)
 - Supabase Edge Functions for daily reminder emails
