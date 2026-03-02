@@ -75,6 +75,9 @@ ANTHROPIC_API_KEY
 | `POST /api/chat` | Route handler | Streaming tutor chat (plain text ReadableStream) |
 | `POST /api/onboarding/complete` | Route handler | Bulk SRS seed from diagnostic scores → set `onboarding_completed = true` |
 | `POST /api/sessions/complete` | Route handler | Insert `study_sessions` row with timing + accuracy |
+| `/write` | Server + Client | AI-generated free-write prompt for a concept; `?concept=<id>` required |
+| `POST /api/topic` | Route handler | Claude generates a writing prompt for a given concept (non-streaming) |
+| `POST /api/grade` | Route handler | Grade free-write answer (no exercise DB row); SM-2 + streak; `exercise_id: null` |
 
 ### Middleware Rules (`src/lib/supabase/middleware.ts`)
 - Unauthenticated → redirect to `/auth/login` (except `/auth/*`)
@@ -145,6 +148,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/001_initial_schema.sql`
 - `supabase/migrations/002_onboarding_flag.sql`
 - `supabase/migrations/003_indexes.sql` — study_sessions index (already applied)
+- inline (applied) — `ALTER TABLE exercise_attempts ALTER COLUMN exercise_id DROP NOT NULL;`
 
 ### Dashboard Stats
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
@@ -161,8 +165,16 @@ Migrations (run once in Supabase SQL editor):
 - `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21
 - `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map used by FeedbackPanel + DiagnosticSession)
 - `src/components/exercises/ExerciseRenderer.tsx` — shared exercise switch (used by StudySession + DiagnosticSession)
-- `src/components/ErrorBoundary.tsx` — wraps StudySession and DiagnosticSession
+- `src/components/exercises/FreeWritePrompt.tsx` — AI prompt display + textarea; used by WriteSession
+- `src/components/ErrorBoundary.tsx` — wraps StudySession, DiagnosticSession, WriteSession
 - `src/lib/curriculum/run-truncate.ts` — deletes curriculum tables in FK order; `pnpm truncate`
+
+### Free-Write Flow (P6-A)
+- `/write?concept=<id>` — dedicated page; not part of SRS study queue
+- `POST /api/topic` — generates prompt; Claude non-streaming, max_tokens 256
+- `POST /api/grade` — grades answer; mirrors `/api/submit` but no exercise lookup; inserts `exercise_attempts` with `exercise_id: null`
+- `exercise_attempts.exercise_id` is nullable in DB and in `src/lib/supabase/types.ts`
+- Dashboard shows "Free write" card pointing to weakest unmastered concept (hidden for new users)
 
 ### API Security (added in pre-Phase 6 audit)
 - All 5 POST routes validated with Zod v3 schemas (submit, hint, chat, onboarding/complete, sessions/complete)
@@ -172,7 +184,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-### Completed — Phases 1–5 + Pre-Phase 6 Audit
+### Completed — Phases 1–5 + Pre-Phase 6 Audit + P6-A
 - Full auth flow (email/password, Supabase)
 - SM-2 SRS engine with Claude-only scoring
 - All 6 exercise types with dedicated UI components
@@ -181,29 +193,22 @@ Migrations (run once in Supabase SQL editor):
 - Streaming AI tutor chat with context injection
 - Progress analytics (mastery chart, accuracy chart, activity heatmap)
 - Curriculum browser with mastery badges and direct practice links
-- Dashboard with due count, streak, mastered count, progress bar, quick-nav
+- Dashboard with due count, streak, mastered count, progress bar, quick-nav, free-write card
 - Onboarding diagnostic (6 questions, SRS pre-seeded from scores)
 - Streak tracking (profiles.streak updated on first daily submit)
 - study_sessions table fully wired (written on session completion)
 - Vitest test suite: 25 tests across sm2, scoreToInterval, FeedbackPanel
 - Mobile polish: h-[100dvh], safe-area-inset-bottom, flex-wrap, overflow-x-auto
-- **Pre-Phase 6 audit complete**: Zod validation, security headers, shared components, ErrorBoundary, constants, scoring module, 003_indexes.sql applied
+- **Pre-Phase 6 audit complete**: Zod validation, security headers, shared components, ErrorBoundary, constants, scoring module
 - **63 exercises seeded** (3 per concept; 3rd is free_write or error_correction)
-- Concept badge no longer leaks the answer — shows type label (e.g. "connector practice")
+- **P6-A complete**: /api/topic, /api/grade, FreeWritePrompt.tsx, WriteSession.tsx, /write page, dashboard free-write card; exercise_id nullable
 
-### Phase 6 — Ordered by Priority
+### Phase 6 — Remaining (ordered by priority)
 
-**P6-A: Free-write focus + AI-generated topics** ← START HERE
-- `free_write` should be the primary exercise type (not gap_fill)
-- New `POST /api/topic` route: Claude generates a writing topic + prompt for a given concept
-- New `FreeWritePrompt.tsx` component: shows AI topic, textarea, submits to `/api/submit` as usual
-- Dashboard "Write today" card: one AI-generated free-write challenge per day
-- Concept badge on exercise screen already fixed (audit) — no longer leaks answer
-
-**P6-B: Exercise type selection UX**
-- Dashboard: quick-launch buttons for each exercise type (gap_fill, free_write, translation, etc.)
-- Curriculum: per-concept type buttons alongside existing "Practice" link
-- `/study/configure` already supports `?types=` — improve discoverability
+**P6-B: Exercise type selection UX** ← NEXT
+- Dashboard: quick-launch buttons for each exercise type linking to `/study?types=<type>`
+- Curriculum: per-concept type buttons linking to `/study?concept=<id>&types=<type>`
+- No new infra needed — `/study?types=` already works; this is discoverability only
 
 **P6-C: Account management page**
 - New `/account` page: edit display_name, current_level (A2/B1/B2), daily_goal_minutes
