@@ -156,6 +156,26 @@ export default async function DashboardPage() {
         </div>
       )}
 
+      {/* Practice by type */}
+      {!isNewUser && (
+        <div className="space-y-3">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Practice by type</p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { type: 'gap_fill',         label: 'Gap fill' },
+              { type: 'translation',       label: 'Translation' },
+              { type: 'transformation',    label: 'Transformation' },
+              { type: 'sentence_builder',  label: 'Sentence builder' },
+              { type: 'error_correction',  label: 'Error correction' },
+            ].map(({ type, label }) => (
+              <Button key={type} asChild variant="outline" size="sm">
+                <Link href={`/study?types=${type}`}>{label}</Link>
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Quick nav */}
       <div className="grid grid-cols-1 gap-3">
         {[

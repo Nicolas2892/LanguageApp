@@ -26,6 +26,14 @@ const DIFFICULTY_DOTS: Record<number, string> = {
   1: '●○○○○', 2: '●●○○○', 3: '●●●○○', 4: '●●●●○', 5: '●●●●●',
 }
 
+const EXERCISE_TYPES = [
+  { type: 'gap_fill',        label: 'Gap fill' },
+  { type: 'translation',     label: 'Translation' },
+  { type: 'transformation',  label: 'Transformation' },
+  { type: 'sentence_builder', label: 'Sentence builder' },
+  { type: 'error_correction', label: 'Error correction' },
+] as const
+
 export default async function CurriculumPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -124,14 +132,10 @@ export default async function CurriculumPage() {
                       const cfg = MASTERY_BADGE[state]
 
                       return (
-                        <Link
-                          key={concept.id}
-                          href={`/study?concept=${concept.id}`}
-                          className="block border rounded-lg p-3.5 hover:bg-muted/50 transition-colors group"
-                        >
+                        <div key={concept.id} className="border rounded-lg p-3.5 space-y-3">
                           <div className="flex items-start justify-between gap-3">
                             <div className="space-y-0.5 min-w-0">
-                              <p className="font-medium text-sm group-hover:underline">{concept.title}</p>
+                              <p className="font-medium text-sm">{concept.title}</p>
                               <p className="text-xs text-muted-foreground line-clamp-2">{concept.explanation}</p>
                               <p className="text-xs text-muted-foreground mt-1 font-mono tracking-tight">
                                 {DIFFICULTY_DOTS[concept.difficulty] ?? ''}
@@ -148,7 +152,18 @@ export default async function CurriculumPage() {
                               )}
                             </div>
                           </div>
-                        </Link>
+                          {/* Practice buttons */}
+                          <div className="flex flex-wrap gap-1.5">
+                            <Button asChild variant="outline" size="sm" className="h-7 text-xs">
+                              <Link href={`/study?concept=${concept.id}`}>Practice all</Link>
+                            </Button>
+                            {EXERCISE_TYPES.map(({ type, label }) => (
+                              <Button key={type} asChild variant="ghost" size="sm" className="h-7 text-xs">
+                                <Link href={`/study?concept=${concept.id}&types=${type}`}>{label}</Link>
+                              </Button>
+                            ))}
+                          </div>
+                        </div>
                       )
                     })}
                   </div>
