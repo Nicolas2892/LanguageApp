@@ -174,6 +174,7 @@ export default async function DashboardPage() {
           { href: '/tutor', label: 'AI Tutor', desc: 'Ask questions, get examples, practice freely' },
           { href: '/progress', label: 'Progress', desc: 'Charts, accuracy stats, activity heatmap' },
           { href: '/curriculum', label: 'Curriculum', desc: 'Browse all concepts and your mastery status' },
+          { href: '/account', label: 'Account', desc: 'Edit your name, level, and daily goal' },
         ].map(({ href, label, desc }) => (
           <div key={href} className="border rounded-xl p-4 flex items-center justify-between">
             <div>
