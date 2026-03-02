@@ -2,12 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { GapFill } from '@/components/exercises/GapFill'
-import { TextAnswer } from '@/components/exercises/TextAnswer'
-import { SentenceBuilder } from '@/components/exercises/SentenceBuilder'
-import { ErrorCorrection } from '@/components/exercises/ErrorCorrection'
+import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { SCORE_CONFIG } from '@/lib/scoring'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
 
@@ -32,29 +30,6 @@ type SessionState =
   | { phase: 'feedback'; result: GradeResult; userAnswer: string }
   | { phase: 'done' }
 
-function ExerciseRenderer({ exercise, onSubmit, disabled }: {
-  exercise: Exercise
-  onSubmit: (answer: string) => void
-  disabled: boolean
-}) {
-  switch (exercise.type) {
-    case 'gap_fill':
-      return <GapFill exercise={exercise} onSubmit={onSubmit} disabled={disabled} />
-    case 'sentence_builder':
-      return <SentenceBuilder exercise={exercise} onSubmit={onSubmit} disabled={disabled} />
-    case 'error_correction':
-      return <ErrorCorrection exercise={exercise} onSubmit={onSubmit} disabled={disabled} />
-    default:
-      return <TextAnswer exercise={exercise} onSubmit={onSubmit} disabled={disabled} />
-  }
-}
-
-const SCORE_CONFIG = {
-  3: { label: 'Perfect', className: 'bg-green-100 text-green-800 border-green-200' },
-  2: { label: 'Good', className: 'bg-blue-100 text-blue-800 border-blue-200' },
-  1: { label: 'Needs work', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-  0: { label: 'Incorrect', className: 'bg-red-100 text-red-800 border-red-200' },
-} as const
 
 export function DiagnosticSession({ items }: Props) {
   const router = useRouter()
@@ -149,7 +124,7 @@ export function DiagnosticSession({ items }: Props) {
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>Question {index + 1} of {items.length}</span>
-          <Badge variant="outline">{current.concept.title}</Badge>
+          <Badge variant="outline" className="capitalize">{current.concept.type} practice</Badge>
         </div>
         <Progress value={progress} className="h-1.5" />
       </div>

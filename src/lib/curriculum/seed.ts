@@ -767,4 +767,237 @@ export const SEED_EXERCISES: ExerciseSeed[] = [
     hint_1: 'Sequence of tenses: past main verb → imperfect subjunctive in subordinate.',
     hint_2: '"Recuperarse" imperfect subjunctive = se recuperara / se recuperase.',
   },
+
+  // ─── Extra exercises (one per concept) ───────────────────────────────────
+
+  // aunque + indicativo (concept 0)
+  {
+    concept_index: 0,
+    type: 'free_write',
+    prompt: 'Write two sentences about your own life using "aunque" + indicative. Show a real concession where one fact does not prevent another.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: 'Pattern: Aunque [known fact], [main clause].',
+    hint_2: null,
+  },
+
+  // aunque + subjuntivo (concept 1)
+  {
+    concept_index: 1,
+    type: 'free_write',
+    prompt: 'Write a short paragraph (3–4 sentences) describing a hypothetical scenario using "aunque" + subjunctive at least twice.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: '"Aunque" + subjunctive = "even if" (uncertain/hypothetical concession).',
+    hint_2: null,
+  },
+
+  // a pesar de que (concept 2)
+  {
+    concept_index: 2,
+    type: 'error_correction',
+    prompt: 'Correct if necessary: "A pesar de que el tiempo era malo, pero decidimos salir."',
+    expected_answer: 'A pesar de que el tiempo era malo, decidimos salir.',
+    answer_variants: null,
+    hint_1: '"A pesar de que" already expresses contrast — "pero" is redundant.',
+    hint_2: null,
+  },
+
+  // sin embargo (concept 3)
+  {
+    concept_index: 3,
+    type: 'free_write',
+    prompt: 'Write a 3-sentence mini-paragraph about a film or book you enjoyed. Use "sin embargo" to introduce a reservation or contrast in the second or third sentence.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: '"Sin embargo" follows a full stop or semicolon and is followed by a comma.',
+    hint_2: null,
+  },
+
+  // por más que (concept 4)
+  {
+    concept_index: 4,
+    type: 'error_correction',
+    prompt: 'Correct: "Por más que estudia, no aprueba los exámenes."',
+    expected_answer: 'Por más que estudie, no aprueba los exámenes.',
+    answer_variants: ['Por más que estudie, no aprueba.'],
+    hint_1: '"Por más que" expressing a general/habitual situation requires the subjunctive.',
+    hint_2: '"Estudiar" present subjunctive (él/ella) = estudie.',
+  },
+
+  // puesto que / ya que (concept 5)
+  {
+    concept_index: 5,
+    type: 'free_write',
+    prompt: 'Write two sentences explaining decisions you made today, using "puesto que" in one and "ya que" in the other.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: 'Both connectors present the cause as already known. Place them at the start of the sentence.',
+    hint_2: null,
+  },
+
+  // dado que (concept 6)
+  {
+    concept_index: 6,
+    type: 'error_correction',
+    prompt: 'Correct: "Dado que no hay entradas, así que no podemos ir al concierto."',
+    expected_answer: 'Dado que no hay entradas, no podemos ir al concierto.',
+    answer_variants: null,
+    hint_1: '"Dado que" already introduces the cause — "así que" is redundant.',
+    hint_2: null,
+  },
+
+  // por lo tanto (concept 7)
+  {
+    concept_index: 7,
+    type: 'free_write',
+    prompt: 'Write a short argument (3–4 sentences) presenting a problem and its logical consequence. Use "por lo tanto" or "por consiguiente" to introduce the conclusion.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: '"Por lo tanto" / "por consiguiente" follow a semicolon or full stop.',
+    hint_2: null,
+  },
+
+  // de ahí que (concept 8)
+  {
+    concept_index: 8,
+    type: 'free_write',
+    prompt: 'Describe a quality a person has and use "de ahí que" + subjunctive to explain a consequence of that quality.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: '"De ahí que" always requires the subjunctive in the following clause.',
+    hint_2: null,
+  },
+
+  // no obstante (concept 9)
+  {
+    concept_index: 9,
+    type: 'free_write',
+    prompt: 'Write a short formal opinion paragraph (3 sentences) about a controversial topic. Use "no obstante" to acknowledge the opposing view.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: '"No obstante" is more formal than "sin embargo" — suitable for written opinions.',
+    hint_2: null,
+  },
+
+  // en cambio / por el contrario (concept 10)
+  {
+    concept_index: 10,
+    type: 'free_write',
+    prompt: 'Compare two people you know (real or fictional) across two traits. Use "en cambio" in one sentence and "por el contrario" in another.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: '"En cambio" contrasts two different things; "por el contrario" directly contradicts.',
+    hint_2: null,
+  },
+
+  // mientras que (concept 11)
+  {
+    concept_index: 11,
+    type: 'free_write',
+    prompt: 'Write three sentences contrasting life in a big city with life in a small town. Use "mientras que" at least once.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: '"Mientras que" can appear at the start or in the middle of the sentence.',
+    hint_2: null,
+  },
+
+  // verbos de deseo (concept 12)
+  {
+    concept_index: 12,
+    type: 'free_write',
+    prompt: 'Write 3 sentences expressing wishes for yourself and others using querer que, esperar que, and desear que.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: 'Change of subject triggers the subjunctive: Quiero que tú... / Espero que él...',
+    hint_2: null,
+  },
+
+  // verbos de emoción (concept 13)
+  {
+    concept_index: 13,
+    type: 'error_correction',
+    prompt: 'Correct: "Me alegra que has venido. Temo que no llegan a tiempo."',
+    expected_answer: 'Me alegra que hayas venido. Temo que no lleguen a tiempo.',
+    answer_variants: null,
+    hint_1: 'Emotion verbs (alegrarse, temer) + que trigger the subjunctive.',
+    hint_2: null,
+  },
+
+  // verbos de duda (concept 14)
+  {
+    concept_index: 14,
+    type: 'free_write',
+    prompt: 'Write two contrasting sentences: one with "creo que" (indicative) and one with "no creo que" (subjunctive) about the same topic.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: 'Affirmative "creer que" → indicative. Negated "no creer que" → subjunctive.',
+    hint_2: null,
+  },
+
+  // temporal conjunctions (concept 15)
+  {
+    concept_index: 15,
+    type: 'free_write',
+    prompt: 'Write your plans for this evening using "cuando", "en cuanto", and "hasta que" at least once each. All future-reference temporal clauses need the subjunctive.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: 'Future reference: cuando llegue, en cuanto termine, hasta que sea tarde...',
+    hint_2: null,
+  },
+
+  // para que (concept 16)
+  {
+    concept_index: 16,
+    type: 'error_correction',
+    prompt: 'Correct: "Te lo digo para que puedes mejorar tu español."',
+    expected_answer: 'Te lo digo para que puedas mejorar tu español.',
+    answer_variants: null,
+    hint_1: '"Para que" always requires the subjunctive.',
+    hint_2: '"Poder" present subjunctive (tú) = puedas.',
+  },
+
+  // condicional tipo 2 (concept 17)
+  {
+    concept_index: 17,
+    type: 'free_write',
+    prompt: 'Write a paragraph of 3–4 sentences describing what you would do differently if you had more money, time, or a different career. Use the type 2 conditional throughout.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: 'Si + imperfect subjunctive, + conditional. e.g. Si tuviera..., haría...',
+    hint_2: null,
+  },
+
+  // condicional tipo 3 (concept 18)
+  {
+    concept_index: 18,
+    type: 'free_write',
+    prompt: 'Think of a past decision you made. Write 3 sentences expressing regret or speculation about what might have happened if things had been different. Use the type 3 conditional.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: 'Si + pluperfect subjunctive, + conditional perfect.',
+    hint_2: null,
+  },
+
+  // ojalá (concept 19)
+  {
+    concept_index: 19,
+    type: 'free_write',
+    prompt: 'Write three sentences starting with "Ojalá": one for an achievable wish (present subjunctive), one for an unlikely wish (imperfect subjunctive), and one expressing past regret (pluperfect subjunctive).',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: 'Ojalá + present subj. (achievable) / imperfect subj. (unlikely) / pluperfect subj. (past regret).',
+    hint_2: null,
+  },
+
+  // estilo indirecto (concept 20)
+  {
+    concept_index: 20,
+    type: 'free_write',
+    prompt: 'Imagine a conversation you had yesterday. Report what was said using the imperfect subjunctive sequence of tenses. Write at least 3 reported speech sentences.',
+    expected_answer: null,
+    answer_variants: null,
+    hint_1: 'Past reporting: present subjunctive in original → imperfect subjunctive in reported speech.',
+    hint_2: null,
+  },
 ]

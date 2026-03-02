@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
 import { buildTutorSystemPrompt } from '@/lib/claude/tutor'
@@ -5,15 +6,24 @@ import type { Profile } from '@/lib/supabase/types'
 
 export const runtime = 'nodejs'
 
+const ChatSchema = z.object({
+  messages: z.array(z.object({
+    role: z.enum(['user', 'assistant']),
+    content: z.string().min(1).max(8000),
+  })).min(1).max(50),
+  conceptId: z.string().uuid().optional(),
+})
+
 export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new Response('Unauthorized', { status: 401 })
 
-  const { messages, conceptId } = await request.json() as {
-    messages: Array<{ role: 'user' | 'assistant'; content: string }>
-    conceptId?: string
+  const parsed = ChatSchema.safeParse(await request.json())
+  if (!parsed.success) {
+    return new Response('Invalid request', { status: 400 })
   }
+  const { messages, conceptId } = parsed.data
 
   // Fetch profile for name + level
   const { data: profile } = await supabase
@@ -64,15 +74,20 @@ export async function POST(request: Request) {
 
   const readable = new ReadableStream({
     async start(controller) {
-      for await (const chunk of stream) {
-        if (
-          chunk.type === 'content_block_delta' &&
-          chunk.delta.type === 'text_delta'
-        ) {
-          controller.enqueue(encoder.encode(chunk.delta.text))
+      try {
+        for await (const chunk of stream) {
+          if (
+            chunk.type === 'content_block_delta' &&
+            chunk.delta.type === 'text_delta'
+          ) {
+            controller.enqueue(encoder.encode(chunk.delta.text))
+          }
         }
+        controller.close()
+      } catch (err) {
+        console.error('[chat] stream error:', err)
+        controller.error(err)
       }
-      controller.close()
     },
   })
 

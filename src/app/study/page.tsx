@@ -2,11 +2,10 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { StudySession } from './StudySession'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { SESSION_SIZE, BOOTSTRAP_SIZE } from '@/lib/constants'
 import type { StudyItem } from './StudySession'
 import type { Concept, Exercise } from '@/lib/supabase/types'
-
-const SESSION_SIZE = 10
-const BOOTSTRAP_SIZE = 5
 
 export default async function StudyPage({
   searchParams,
@@ -146,7 +145,9 @@ export default async function StudyPage({
           {backLabel}
         </Link>
       </div>
-      <StudySession items={items} />
+      <ErrorBoundary>
+        <StudySession items={items} />
+      </ErrorBoundary>
     </main>
   )
 }

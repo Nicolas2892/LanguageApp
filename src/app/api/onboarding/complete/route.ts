@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 
-interface DiagnosticResult {
-  concept_id: string
-  exercise_id: string
-  user_answer: string
-  score: number
-}
+const DiagnosticResultSchema = z.object({
+  concept_id: z.string().uuid(),
+  exercise_id: z.string().uuid(),
+  user_answer: z.string().max(2000),
+  score: z.number().int().min(0).max(3),
+})
+
+const OnboardingCompleteSchema = z.object({
+  results: z.array(DiagnosticResultSchema).min(1).max(20),
+})
 
 // Map score → initial interval_days for SRS seeding
 function scoreToInterval(score: number): number {
@@ -22,12 +27,11 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const body = await request.json() as { results: DiagnosticResult[] }
-    const { results } = body
-
-    if (!Array.isArray(results) || results.length === 0) {
-      return NextResponse.json({ error: 'No results provided' }, { status: 400 })
+    const parsed = OnboardingCompleteSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
     }
+    const { results } = parsed.data
 
     const now = new Date()
 

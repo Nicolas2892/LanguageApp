@@ -2,10 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { GapFill } from '@/components/exercises/GapFill'
-import { TextAnswer } from '@/components/exercises/TextAnswer'
-import { SentenceBuilder } from '@/components/exercises/SentenceBuilder'
-import { ErrorCorrection } from '@/components/exercises/ErrorCorrection'
+import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
 import { Badge } from '@/components/ui/badge'
@@ -26,24 +23,6 @@ type SessionState =
   | { phase: 'answering' }
   | { phase: 'feedback'; result: GradeResult & { next_review_in_days: number }; userAnswer: string }
   | { phase: 'done'; correct: number; total: number }
-
-function ExerciseRenderer({ exercise, onSubmit, disabled }: {
-  exercise: Exercise
-  onSubmit: (answer: string) => void
-  disabled: boolean
-}) {
-  switch (exercise.type) {
-    case 'gap_fill':
-      return <GapFill exercise={exercise} onSubmit={onSubmit} disabled={disabled} />
-    case 'sentence_builder':
-      return <SentenceBuilder exercise={exercise} onSubmit={onSubmit} disabled={disabled} />
-    case 'error_correction':
-      return <ErrorCorrection exercise={exercise} onSubmit={onSubmit} disabled={disabled} />
-    default:
-      // transformation, translation, free_write
-      return <TextAnswer exercise={exercise} onSubmit={onSubmit} disabled={disabled} />
-  }
-}
 
 export function StudySession({ items }: Props) {
   const router = useRouter()
@@ -162,7 +141,7 @@ export function StudySession({ items }: Props) {
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>{index + 1} / {items.length}</span>
-          <Badge variant="outline">{current.concept.title}</Badge>
+          <Badge variant="outline" className="capitalize">{current.concept.type} practice</Badge>
         </div>
         <Progress value={progress} className="h-1.5" />
       </div>

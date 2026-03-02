@@ -2,8 +2,9 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
+import { MASTERY_THRESHOLD } from '@/lib/constants'
 
-const MASTERED_THRESHOLD = 21
+const MASTERED_THRESHOLD = MASTERY_THRESHOLD
 
 type MasteryState = 'mastered' | 'learning' | 'seen' | 'new'
 

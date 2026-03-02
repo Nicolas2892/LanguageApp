@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DiagnosticSession } from './DiagnosticSession'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { DIAGNOSTIC_CONCEPT_TITLES } from './diagnosticConcepts'
 import type { Concept, Exercise, Profile } from '@/lib/supabase/types'
 
@@ -63,7 +64,9 @@ export default async function OnboardingPage() {
             personalise your study queue from the start.
           </p>
         </div>
-        <DiagnosticSession items={items} />
+        <ErrorBoundary>
+          <DiagnosticSession items={items} />
+        </ErrorBoundary>
       </div>
     </main>
   )

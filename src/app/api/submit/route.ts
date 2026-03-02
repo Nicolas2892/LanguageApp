@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { gradeAnswer } from '@/lib/claude/grader'
 import { sm2, DEFAULT_PROGRESS } from '@/lib/srs'
 import type { SRSScore } from '@/lib/srs'
 import type { Concept, Exercise, UserProgress } from '@/lib/supabase/types'
+
+const SubmitSchema = z.object({
+  exercise_id: z.string().uuid(),
+  concept_id: z.string().uuid(),
+  user_answer: z.string().min(1).max(2000),
+})
 
 export async function POST(request: Request) {
   try {
@@ -11,12 +18,11 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const body = await request.json() as {
-      exercise_id: string
-      concept_id: string
-      user_answer: string
+    const parsed = SubmitSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
     }
-    const { exercise_id, concept_id, user_answer } = body
+    const { exercise_id, concept_id, user_answer } = parsed.data
 
     // 1. Fetch exercise + concept
     const { data: exercise, error: exErr } = await supabase

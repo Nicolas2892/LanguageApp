@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+
+const SessionCompleteSchema = z.object({
+  started_at: z.string().datetime(),
+  concepts_reviewed: z.number().int().min(0).max(500),
+  accuracy: z.number().int().min(0).max(100),
+})
 
 export async function POST(request: Request) {
   try {
@@ -7,11 +14,11 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { started_at, concepts_reviewed, accuracy } = await request.json() as {
-      started_at: string
-      concepts_reviewed: number
-      accuracy: number
+    const parsed = SessionCompleteSchema.safeParse(await request.json())
+    if (!parsed.success) {
+      return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
     }
+    const { started_at, concepts_reviewed, accuracy } = parsed.data
 
     await supabase.from('study_sessions').insert({
       user_id: user.id,

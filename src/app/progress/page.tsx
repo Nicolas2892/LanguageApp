@@ -4,11 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { MasteryChart } from './MasteryChart'
 import { AccuracyChart } from './AccuracyChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
+import { MASTERY_THRESHOLD } from '@/lib/constants'
 import type { ModuleMastery } from './MasteryChart'
 import type { ExerciseAccuracy } from './AccuracyChart'
 import type { DayActivity } from './ActivityHeatmap'
 
-const MASTERED_THRESHOLD = 21  // interval_days >= this = mastered
+const MASTERED_THRESHOLD = MASTERY_THRESHOLD
 
 export default async function ProgressPage() {
   const supabase = await createClient()
