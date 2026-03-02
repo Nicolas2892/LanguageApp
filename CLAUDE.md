@@ -185,7 +185,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-### Completed — Phases 1–5 + Pre-Phase 6 Audit + P6-A + P6-B + Dashboard redesign
+### Completed — Phases 1–6E
 - Full auth flow (email/password, Supabase)
 - SM-2 SRS engine with Claude-only scoring
 - All 6 exercise types with dedicated UI components
@@ -197,30 +197,19 @@ Migrations (run once in Supabase SQL editor):
 - Onboarding diagnostic (6 questions, SRS pre-seeded from scores)
 - Streak tracking (profiles.streak updated on first daily submit)
 - study_sessions table fully wired (written on session completion)
-- Vitest test suite: 25 tests across sm2, scoreToInterval, FeedbackPanel
+- Vitest test suite: 122 tests across 8 files — sm2, scoreToInterval, FeedbackPanel, FreeWritePrompt, ExerciseRenderer, ConceptPicker, AccountForm, account/update route
 - Mobile polish: h-[100dvh], safe-area-inset-bottom, flex-wrap, overflow-x-auto
 - **Pre-Phase 6 audit complete**: Zod validation, security headers, shared components, ErrorBoundary, constants, scoring module
 - **63 exercises seeded** (3 per concept; 3rd is free_write or error_correction)
 - **P6-A complete**: /api/topic, /api/grade, FreeWritePrompt.tsx, WriteSession.tsx, /write page; exercise_id nullable
 - **P6-B complete**: Curriculum per-concept type buttons; `/study?types=` discoverability
 - **Dashboard redesign complete**: Three mode cards — Review, Learn new, Free write; type pills removed; `/study?mode=new` queue for unlearned concepts
+- **Free-write concept picker complete**: ConceptPicker.tsx (checkbox grouped by module/unit, Surprise me, sticky footer with difficulty label); /write branches on ?concepts= vs picker; WriteSession accepts conceptIds[]; /api/topic and /api/grade accept concept_ids[]; FreeWritePrompt has 200-word live counter (Submit disabled <20 or >200 words)
+- **P6-C complete**: `/account` page (display_name, current_level A2/B1/B2, daily_goal_minutes); `POST /api/account/update` Zod validated; Account added to dashboard quick-nav
+- **P6-D complete**: PWA — `src/app/manifest.ts` (standalone, theme #18181b, start_url /dashboard); `icon.tsx` 192×192 + `apple-icon.tsx` 180×180 via ImageResponse; layout.tsx `appleWebApp` metadata; `public/sw.js` cache-first for `/_next/static/` assets; `ServiceWorkerRegistration.tsx` client component
+- **P6-E complete**: Babbel-inspired UX redesign — orange primary token (`oklch(0.65 0.20 35)`), orange accent strips on mode cards, stat row with Flame/Trophy icons, segmented progress bar, exercise type icon badges, FeedbackPanel accent strips, orange SentenceBuilder chips, word-count bar, ConceptPicker card-style rows with DifficultyBars, curriculum module progress bars, auth ES logo mark, AccountForm level cards
 
 ### Phase 6 — Remaining (ordered by priority)
-
-**P6-C: Account management page** ← NEXT
-- New `/account` page: edit display_name, current_level (A2/B1/B2), daily_goal_minutes
-- New `POST /api/account/update` route with Zod validation
-- Nav link from dashboard
-
-**P6-D: PWA (iPhone support)**
-- `/public/manifest.webmanifest` + icons
-- Add `<link rel="manifest">` and Apple meta tags to `src/app/layout.tsx`
-- next-pwa or manual service worker for offline shell
-
-**P6-E: UX redesign (Babbel-style)**
-- New color palette: warm green primary, clean white, bold sans-serif typography
-- Update Tailwind theme in `src/app/globals.css`
-- Redesign dashboard, study session, and nav — modern card-based layout
 
 **P6-F: Google OAuth**
 - Enable Google provider in Supabase dashboard (Auth → Providers)
