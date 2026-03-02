@@ -120,6 +120,17 @@ export function DiagnosticSession({ items }: Props) {
     }
   }
 
+  if (items.length === 0) {
+    return (
+      <div className="space-y-4 text-center py-8">
+        <p className="text-muted-foreground text-sm">
+          No diagnostic exercises found. Please contact support or{' '}
+          <a href="/dashboard" className="underline">skip to dashboard</a>.
+        </p>
+      </div>
+    )
+  }
+
   if (state.phase === 'done') {
     return (
       <div className="space-y-4 text-center py-8">
