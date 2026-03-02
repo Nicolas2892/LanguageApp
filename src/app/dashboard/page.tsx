@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import type { Profile } from '@/lib/supabase/types'
+import type { Profile, Concept } from '@/lib/supabase/types'
+import { MASTERY_THRESHOLD } from '@/lib/constants'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -12,7 +13,7 @@ export default async function DashboardPage() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes] = await Promise.all([
+  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase
       .from('user_progress')
@@ -27,12 +28,20 @@ export default async function DashboardPage() {
       .from('user_progress')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id),
-    // interval_days >= 21 = mastered (matches curriculum page threshold)
+    // interval_days >= MASTERY_THRESHOLD = mastered
     supabase
       .from('user_progress')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
-      .gte('interval_days', 21),
+      .gte('interval_days', MASTERY_THRESHOLD),
+    // Weakest unmastered concept for free-write card
+    supabase
+      .from('user_progress')
+      .select('concept_id, interval_days')
+      .eq('user_id', user.id)
+      .lt('interval_days', MASTERY_THRESHOLD)
+      .order('interval_days', { ascending: true })
+      .limit(1),
   ])
 
   const profile = profileRes.data as Profile | null
@@ -43,6 +52,18 @@ export default async function DashboardPage() {
   const masteryPct = totalConcepts > 0 ? Math.round((masteredCount / totalConcepts) * 100) : 0
 
   const isNewUser = studiedCount === 0
+
+  // Fetch the concept title for the free-write card
+  const weakestConceptId = (weakestProgressRes.data?.[0] as { concept_id: string } | undefined)?.concept_id ?? null
+  let writeConcept: Pick<Concept, 'id' | 'title'> | null = null
+  if (!isNewUser && weakestConceptId) {
+    const { data: conceptData } = await supabase
+      .from('concepts')
+      .select('id, title')
+      .eq('id', weakestConceptId)
+      .single()
+    writeConcept = conceptData as Pick<Concept, 'id' | 'title'> | null
+  }
 
   return (
     <main className="max-w-xl mx-auto p-6 md:p-10 space-y-8">
@@ -109,6 +130,20 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground text-xs">of {totalConcepts}</p>
         </div>
       </div>
+
+      {/* Free write card */}
+      {!isNewUser && writeConcept && (
+        <div className="border rounded-xl p-5 space-y-3">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Free write</p>
+          <p className="font-semibold">Practice: {writeConcept.title}</p>
+          <p className="text-sm text-muted-foreground">
+            Claude will generate a writing topic for this concept on-demand.
+          </p>
+          <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Link href={`/write?concept=${writeConcept.id}`}>Write about this →</Link>
+          </Button>
+        </div>
+      )}
 
       {/* Curriculum progress */}
       {!isNewUser && (

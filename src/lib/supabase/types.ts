@@ -224,7 +224,7 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          exercise_id: string
+          exercise_id: string | null
           user_answer: string
           is_correct: boolean | null
           ai_score: number | null
@@ -234,7 +234,7 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          exercise_id: string
+          exercise_id?: string | null
           user_answer: string
           is_correct?: boolean | null
           ai_score?: number | null
@@ -244,7 +244,7 @@ export interface Database {
         Update: {
           id?: string
           user_id?: string
-          exercise_id?: string
+          exercise_id?: string | null
           user_answer?: string
           is_correct?: boolean | null
           ai_score?: number | null
