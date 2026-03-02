@@ -42,7 +42,8 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect authenticated users who haven't completed onboarding
-  if (user && !isPublic && pathname !== '/onboarding') {
+  // Skip API routes — they must never be redirected to a page
+  if (user && !isPublic && pathname !== '/onboarding' && !pathname.startsWith('/api/')) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('onboarding_completed')
