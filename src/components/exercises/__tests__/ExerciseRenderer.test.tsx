@@ -1,0 +1,214 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { ExerciseRenderer } from '../ExerciseRenderer'
+import type { Exercise } from '@/lib/supabase/types'
+
+function makeExercise(overrides: Partial<Exercise> & { type: string }): Exercise {
+  return {
+    id: 'ex-1',
+    concept_id: 'con-1',
+    prompt: 'Test prompt',
+    expected_answer: 'expected',
+    answer_variants: null,
+    hint_1: null,
+    hint_2: null,
+    created_at: '2026-01-01',
+    ...overrides,
+  }
+}
+
+describe('ExerciseRenderer', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+  })
+
+  // --- gap_fill → GapFill (single-line input) ---
+
+  it('renders a single-line input for gap_fill', () => {
+    const onSubmit = vi.fn()
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'gap_fill', prompt: 'Yo ___ estudiante.' })}
+        onSubmit={onSubmit}
+        disabled={false}
+      />
+    )
+    expect(screen.getByPlaceholderText('Type your answer…')).toBeTruthy()
+    // Input, not textarea
+    expect(screen.getByPlaceholderText('Type your answer…').tagName).toBe('INPUT')
+  })
+
+  it('submits gap_fill answer on form submit', async () => {
+    const onSubmit = vi.fn()
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'gap_fill', prompt: 'Complete: ___' })}
+        onSubmit={onSubmit}
+        disabled={false}
+      />
+    )
+    await userEvent.type(screen.getByPlaceholderText('Type your answer…'), 'soy')
+    await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    expect(onSubmit).toHaveBeenCalledWith('soy')
+  })
+
+  // --- transformation → TextAnswer (textarea) ---
+
+  it('renders a textarea for transformation', () => {
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'transformation', prompt: 'Transform this sentence.' })}
+        onSubmit={vi.fn()}
+        disabled={false}
+      />
+    )
+    expect(screen.getByPlaceholderText('Write your answer in Spanish…').tagName).toBe('TEXTAREA')
+  })
+
+  // --- translation → TextAnswer ---
+
+  it('renders a textarea for translation', () => {
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'translation', prompt: 'Translate this.' })}
+        onSubmit={vi.fn()}
+        disabled={false}
+      />
+    )
+    expect(screen.getByPlaceholderText('Write your answer in Spanish…').tagName).toBe('TEXTAREA')
+  })
+
+  // --- free_write → TextAnswer ---
+
+  it('renders a textarea for free_write', () => {
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'free_write', prompt: 'Write freely.' })}
+        onSubmit={vi.fn()}
+        disabled={false}
+      />
+    )
+    expect(screen.getByPlaceholderText('Write your answer in Spanish…').tagName).toBe('TEXTAREA')
+  })
+
+  // --- error_correction → ErrorCorrection ---
+
+  it('renders ErrorCorrection and pre-populates textarea with quoted sentence', () => {
+    const prompt = 'Find and correct the error: "El alumno estudia mucho pero no aprueba."'
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'error_correction', prompt })}
+        onSubmit={vi.fn()}
+        disabled={false}
+      />
+    )
+    // Pre-populated textarea value
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement
+    expect(textarea.value).toBe('El alumno estudia mucho pero no aprueba.')
+    // Erroneous sentence callout
+    expect(screen.getByText('Erroneous sentence:')).toBeTruthy()
+    // Reset button specific to ErrorCorrection
+    expect(screen.getByRole('button', { name: 'Reset' })).toBeTruthy()
+  })
+
+  it('resets ErrorCorrection textarea to original sentence on Reset click', async () => {
+    const prompt = 'Correct this: "Ella va a la mercado."'
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'error_correction', prompt })}
+        onSubmit={vi.fn()}
+        disabled={false}
+      />
+    )
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement
+    await userEvent.clear(textarea)
+    await userEvent.type(textarea, 'changed text')
+    await userEvent.click(screen.getByRole('button', { name: 'Reset' }))
+    expect(textarea.value).toBe('Ella va a la mercado.')
+  })
+
+  // --- sentence_builder → SentenceBuilder ---
+
+  it('renders SentenceBuilder word bank for sentence_builder', () => {
+    const prompt = 'Arrange: [quiero/ir/al/mercado]'
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'sentence_builder', prompt })}
+        onSubmit={vi.fn()}
+        disabled={false}
+      />
+    )
+    // All 4 words should appear as clickable buttons in the word bank
+    expect(screen.getByRole('button', { name: 'quiero' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'ir' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'al' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'mercado' })).toBeTruthy()
+  })
+
+  it('moves word from bank to construction area on click', async () => {
+    const prompt = 'Build: [yo/soy/estudiante]'
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'sentence_builder', prompt })}
+        onSubmit={vi.fn()}
+        disabled={false}
+      />
+    )
+    // Click one of the word bank buttons
+    const yoBtn = screen.getByRole('button', { name: 'yo' })
+    await userEvent.click(yoBtn)
+    // Submit button should now be enabled (something selected)
+    expect(screen.getByRole('button', { name: 'Submit' })).not.toBeDisabled()
+  })
+
+  // --- disabled prop propagation ---
+
+  it('disables GapFill submit when disabled=true', () => {
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'gap_fill', prompt: 'Test' })}
+        onSubmit={vi.fn()}
+        disabled={true}
+      />
+    )
+    expect(screen.getByPlaceholderText('Type your answer…')).toBeDisabled()
+  })
+
+  it('disables TextAnswer submit when disabled=true', () => {
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'translation', prompt: 'Test' })}
+        onSubmit={vi.fn()}
+        disabled={true}
+      />
+    )
+    expect(screen.getByPlaceholderText('Write your answer in Spanish…')).toBeDisabled()
+  })
+
+  it('disables ErrorCorrection controls when disabled=true', () => {
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'error_correction', prompt: 'Fix: "error aqui."' })}
+        onSubmit={vi.fn()}
+        disabled={true}
+      />
+    )
+    expect(screen.getByRole('textbox')).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Reset' })).toBeDisabled()
+  })
+
+  // --- unknown type falls back to TextAnswer ---
+
+  it('falls back to TextAnswer for unknown exercise type', () => {
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'unknown_future_type', prompt: 'Test' })}
+        onSubmit={vi.fn()}
+        disabled={false}
+      />
+    )
+    expect(screen.getByPlaceholderText('Write your answer in Spanish…')).toBeTruthy()
+  })
+})
