@@ -12,7 +12,7 @@ export default async function DashboardPage() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  const [profileRes, dueRes, totalConceptsRes] = await Promise.all([
+  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase
       .from('user_progress')
@@ -22,22 +22,27 @@ export default async function DashboardPage() {
     supabase
       .from('concepts')
       .select('id', { count: 'exact', head: true }),
+    // Any user_progress row = "ever studied" (for isNewUser check)
+    supabase
+      .from('user_progress')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id),
+    // interval_days >= 21 = mastered (matches curriculum page threshold)
+    supabase
+      .from('user_progress')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .gte('interval_days', 21),
   ])
 
   const profile = profileRes.data as Profile | null
   const dueCount = dueRes.count ?? 0
   const totalConcepts = totalConceptsRes.count ?? 0
-
-  // Count concepts the user has ever studied
-  const { count: studiedCount } = await supabase
-    .from('user_progress')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-
-  const masteredCount = studiedCount ?? 0
+  const studiedCount = studiedRes.count ?? 0
+  const masteredCount = masteredRes.count ?? 0
   const masteryPct = totalConcepts > 0 ? Math.round((masteredCount / totalConcepts) * 100) : 0
 
-  const isNewUser = masteredCount === 0
+  const isNewUser = studiedCount === 0
 
   return (
     <main className="max-w-xl mx-auto p-6 md:p-10 space-y-8">
@@ -99,7 +104,7 @@ export default async function DashboardPage() {
           <p className="text-muted-foreground text-xs">days</p>
         </div>
         <div className="border rounded-lg p-4 space-y-1">
-          <p className="text-muted-foreground text-xs uppercase tracking-wide">Concepts studied</p>
+          <p className="text-muted-foreground text-xs uppercase tracking-wide">Mastered</p>
           <p className="text-2xl font-bold">{masteredCount}</p>
           <p className="text-muted-foreground text-xs">of {totalConcepts}</p>
         </div>

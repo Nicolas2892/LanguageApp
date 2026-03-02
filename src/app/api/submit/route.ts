@@ -93,6 +93,26 @@ export async function POST(request: Request) {
         ai_feedback: gradeResult.feedback,
       })
 
+    // 7. Update streak — once per day on first submit
+    const todayDate = new Date().toISOString().split('T')[0]
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('streak, last_studied_date')
+      .eq('id', user.id)
+      .single()
+    const p = profileData as { streak: number; last_studied_date: string | null } | null
+    if (p && p.last_studied_date !== todayDate) {
+      const yesterday = new Date()
+      yesterday.setDate(yesterday.getDate() - 1)
+      const newStreak = p.last_studied_date === yesterday.toISOString().split('T')[0]
+        ? p.streak + 1
+        : 1
+      await supabase
+        .from('profiles')
+        .update({ streak: newStreak, last_studied_date: todayDate })
+        .eq('id', user.id)
+    }
+
     return NextResponse.json({
       ...gradeResult,
       next_review_in_days: newSRS.interval_days,

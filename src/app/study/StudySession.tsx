@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { GapFill } from '@/components/exercises/GapFill'
 import { TextAnswer } from '@/components/exercises/TextAnswer'
@@ -47,6 +47,7 @@ function ExerciseRenderer({ exercise, onSubmit, disabled }: {
 
 export function StudySession({ items }: Props) {
   const router = useRouter()
+  const startedAt = useRef(new Date().toISOString())
   const [index, setIndex] = useState(0)
   const [state, setState] = useState<SessionState>({ phase: 'answering' })
   const [submitting, setSubmitting] = useState(false)
@@ -115,6 +116,16 @@ export function StudySession({ items }: Props) {
     if (index + 1 >= items.length) {
       const correct = scores.filter((s) => s >= 2).length
       setState({ phase: 'done', correct, total: items.length })
+      // Best-effort — record the session
+      fetch('/api/sessions/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          started_at: startedAt.current,
+          concepts_reviewed: items.length,
+          accuracy: Math.round((correct / items.length) * 100),
+        }),
+      }).catch(() => {})
     } else {
       setIndex((i) => i + 1)
       setState({ phase: 'answering' })
