@@ -23,7 +23,7 @@ export default async function DashboardPage() {
     supabase
       .from('concepts')
       .select('id', { count: 'exact', head: true }),
-    // Any user_progress row = "ever studied" (for isNewUser check)
+    // Any user_progress row = "ever studied"
     supabase
       .from('user_progress')
       .select('id', { count: 'exact', head: true })
@@ -50,6 +50,7 @@ export default async function DashboardPage() {
   const studiedCount = studiedRes.count ?? 0
   const masteredCount = masteredRes.count ?? 0
   const masteryPct = totalConcepts > 0 ? Math.round((masteredCount / totalConcepts) * 100) : 0
+  const newConceptsCount = totalConcepts - studiedCount
 
   const isNewUser = studiedCount === 0
 
@@ -77,13 +78,14 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Today's study card */}
+      {/* Review card */}
       <div className="border rounded-xl p-6 space-y-4">
-        {isNewUser ? (
+        <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Review</p>
+        {studiedCount === 0 ? (
           <>
-            <p className="font-semibold text-lg">Ready to start learning?</p>
+            <p className="font-semibold text-lg">No reviews yet</p>
             <p className="text-muted-foreground text-sm">
-              Your first session will introduce 5 concepts from the curriculum.
+              Complete your first session to begin spaced repetition.
             </p>
           </>
         ) : dueCount > 0 ? (
@@ -94,28 +96,52 @@ export default async function DashboardPage() {
             <p className="text-muted-foreground text-sm">
               The SRS has selected these based on your past performance.
             </p>
+            <Button asChild className="w-full">
+              <Link href="/study">Start review →</Link>
+            </Button>
           </>
         ) : (
           <>
             <p className="font-semibold text-lg">All caught up!</p>
             <p className="text-muted-foreground text-sm">
-              No reviews due today. Come back tomorrow — or practice freely now.
+              No reviews due today. Come back tomorrow.
             </p>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/study/configure">Practice anyway →</Link>
+            </Button>
           </>
         )}
-
-        {(isNewUser || dueCount > 0) ? (
-          <Button asChild className="w-full">
-            <Link href={isNewUser ? '/study' : '/study/configure'}>
-              {isNewUser ? 'Start learning →' : `Start review (${dueCount}) →`}
-            </Link>
-          </Button>
-        ) : (
-          <Button asChild variant="outline" className="w-full">
-            <Link href="/study/configure">Practice anyway →</Link>
-          </Button>
-        )}
       </div>
+
+      {/* Learn new card — hidden when all concepts studied */}
+      {newConceptsCount > 0 && (
+        <div className="border rounded-xl p-6 space-y-4">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Learn new</p>
+          <p className="font-semibold text-lg">
+            {newConceptsCount} new concept{newConceptsCount !== 1 ? 's' : ''} waiting
+          </p>
+          <p className="text-muted-foreground text-sm">
+            Start working through concepts you haven&apos;t studied yet.
+          </p>
+          <Button asChild className="w-full">
+            <Link href="/study?mode=new">Start learning →</Link>
+          </Button>
+        </div>
+      )}
+
+      {/* Free write card — hidden for new users */}
+      {!isNewUser && writeConcept && (
+        <div className="border rounded-xl p-6 space-y-4">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Free write</p>
+          <p className="font-semibold text-lg">Practice: {writeConcept.title}</p>
+          <p className="text-muted-foreground text-sm">
+            Claude will generate a writing topic for this concept on-demand.
+          </p>
+          <Button asChild variant="outline" className="w-full">
+            <Link href={`/write?concept=${writeConcept.id}`}>Write about this →</Link>
+          </Button>
+        </div>
+      )}
 
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-4 text-sm">
@@ -131,20 +157,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Free write card */}
-      {!isNewUser && writeConcept && (
-        <div className="border rounded-xl p-5 space-y-3">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Free write</p>
-          <p className="font-semibold">Practice: {writeConcept.title}</p>
-          <p className="text-sm text-muted-foreground">
-            Claude will generate a writing topic for this concept on-demand.
-          </p>
-          <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link href={`/write?concept=${writeConcept.id}`}>Write about this →</Link>
-          </Button>
-        </div>
-      )}
-
       {/* Curriculum progress */}
       {!isNewUser && (
         <div className="space-y-2">
@@ -153,26 +165,6 @@ export default async function DashboardPage() {
             <span className="font-medium">{masteryPct}%</span>
           </div>
           <Progress value={masteryPct} className="h-2" />
-        </div>
-      )}
-
-      {/* Practice by type */}
-      {!isNewUser && (
-        <div className="space-y-3">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Practice by type</p>
-          <div className="flex flex-wrap gap-2">
-            {[
-              { type: 'gap_fill',         label: 'Gap fill' },
-              { type: 'translation',       label: 'Translation' },
-              { type: 'transformation',    label: 'Transformation' },
-              { type: 'sentence_builder',  label: 'Sentence builder' },
-              { type: 'error_correction',  label: 'Error correction' },
-            ].map(({ type, label }) => (
-              <Button key={type} asChild variant="outline" size="sm">
-                <Link href={`/study?types=${type}`}>{label}</Link>
-              </Button>
-            ))}
-          </div>
         </div>
       )}
 

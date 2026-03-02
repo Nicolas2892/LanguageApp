@@ -93,6 +93,7 @@ ANTHROPIC_API_KEY
 | `?unit=<id>` | All concepts in a unit |
 | `?module=<id>` | All concepts in a module |
 | `?types=gap_fill,translation,...` | Filter exercises by type (comma-separated) |
+| `?mode=new` | Unlearned concepts queue (not in `user_progress`), ordered by difficulty; redirects `/dashboard` if none remain |
 
 Session configure page (`/study/configure`) builds these params via a UI before redirecting to `/study`.
 

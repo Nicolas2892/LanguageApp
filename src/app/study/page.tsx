@@ -15,7 +15,7 @@ export default async function StudyPage({
     unit?: string
     module?: string
     types?: string        // comma-separated exercise types
-    mode?: string         // 'due' (default) | 'all'
+    mode?: string         // 'new' = unlearned concepts queue
   }>
 }) {
   const supabase = await createClient()
@@ -47,6 +47,25 @@ export default async function StudyPage({
         .from('concepts').select('id').in('unit_id', unitIds)
       conceptIds = (data ?? []).map((c) => (c as { id: string }).id)
     }
+  } else if (params.mode === 'new') {
+    // Learn new: concepts not yet studied (not in user_progress)
+    const { data: studiedProgress } = await supabase
+      .from('user_progress')
+      .select('concept_id')
+      .eq('user_id', user.id)
+    const studiedIds = new Set(
+      (studiedProgress ?? []).map((p) => (p as { concept_id: string }).concept_id)
+    )
+    const { data: allConcepts } = await supabase
+      .from('concepts')
+      .select('id')
+      .order('difficulty', { ascending: true })
+    const unlearnedIds = (allConcepts ?? [])
+      .map((c) => (c as { id: string }).id)
+      .filter((id) => !studiedIds.has(id))
+      .slice(0, SESSION_SIZE)
+    if (unlearnedIds.length === 0) redirect('/dashboard')
+    conceptIds = unlearnedIds
   } else {
     // Default: SRS due queue
     const { data: dueProgress } = await supabase
