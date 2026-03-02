@@ -185,7 +185,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-### Completed — Phases 1–5 + Pre-Phase 6 Audit + P6-A
+### Completed — Phases 1–5 + Pre-Phase 6 Audit + P6-A + P6-B + Dashboard redesign
 - Full auth flow (email/password, Supabase)
 - SM-2 SRS engine with Claude-only scoring
 - All 6 exercise types with dedicated UI components
@@ -194,7 +194,6 @@ Migrations (run once in Supabase SQL editor):
 - Streaming AI tutor chat with context injection
 - Progress analytics (mastery chart, accuracy chart, activity heatmap)
 - Curriculum browser with mastery badges and direct practice links
-- Dashboard with due count, streak, mastered count, progress bar, quick-nav, free-write card
 - Onboarding diagnostic (6 questions, SRS pre-seeded from scores)
 - Streak tracking (profiles.streak updated on first daily submit)
 - study_sessions table fully wired (written on session completion)
@@ -202,16 +201,13 @@ Migrations (run once in Supabase SQL editor):
 - Mobile polish: h-[100dvh], safe-area-inset-bottom, flex-wrap, overflow-x-auto
 - **Pre-Phase 6 audit complete**: Zod validation, security headers, shared components, ErrorBoundary, constants, scoring module
 - **63 exercises seeded** (3 per concept; 3rd is free_write or error_correction)
-- **P6-A complete**: /api/topic, /api/grade, FreeWritePrompt.tsx, WriteSession.tsx, /write page, dashboard free-write card; exercise_id nullable
+- **P6-A complete**: /api/topic, /api/grade, FreeWritePrompt.tsx, WriteSession.tsx, /write page; exercise_id nullable
+- **P6-B complete**: Curriculum per-concept type buttons; `/study?types=` discoverability
+- **Dashboard redesign complete**: Three mode cards — Review, Learn new, Free write; type pills removed; `/study?mode=new` queue for unlearned concepts
 
 ### Phase 6 — Remaining (ordered by priority)
 
-**P6-B: Exercise type selection UX** ← NEXT
-- Dashboard: quick-launch buttons for each exercise type linking to `/study?types=<type>`
-- Curriculum: per-concept type buttons linking to `/study?concept=<id>&types=<type>`
-- No new infra needed — `/study?types=` already works; this is discoverability only
-
-**P6-C: Account management page**
+**P6-C: Account management page** ← NEXT
 - New `/account` page: edit display_name, current_level (A2/B1/B2), daily_goal_minutes
 - New `POST /api/account/update` route with Zod validation
 - Nav link from dashboard
