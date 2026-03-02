@@ -101,7 +101,7 @@ Session configure page (`/study/configure`) builds these params via a UI before 
 | `sentence_builder` | `SentenceBuilder.tsx` | Word chip bank; parses `[w1/w2/w3]` tokens from prompt |
 | `error_correction` | `ErrorCorrection.tsx` | Extracts `"quoted sentence"` from prompt, pre-populates textarea with warning |
 
-All routed through `ExerciseRenderer` switch in `StudySession.tsx`.
+All routed through shared `ExerciseRenderer` in `src/components/exercises/ExerciseRenderer.tsx`.
 
 ### Core Learning Loop
 1. `StudySession.tsx` state: `answering → feedback → [try again | next] → done`
@@ -144,6 +144,7 @@ All routes except `/auth/*` redirect unauthenticated users to `/auth/login`. Pro
 Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/001_initial_schema.sql`
 - `supabase/migrations/002_onboarding_flag.sql`
+- `supabase/migrations/003_indexes.sql` — study_sessions index (already applied)
 
 ### Dashboard Stats
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
@@ -154,11 +155,24 @@ Migrations (run once in Supabase SQL editor):
 ### Curriculum Seed Content
 - Module 1: Connectors & Discourse Markers (3 units: Concessive, Causal/Consecutive, Adversative)
 - Module 2: Subjunctive Mastery (2 units: Present Triggers, Imperfect/Hypotheticals)
-- 21 concepts, 2 exercises each = 42 exercises total
+- 21 concepts, 3 exercises each = 63 exercises total (3rd exercise is free_write or error_correction)
+
+### Shared Modules (added in pre-Phase 6 audit)
+- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21
+- `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map used by FeedbackPanel + DiagnosticSession)
+- `src/components/exercises/ExerciseRenderer.tsx` — shared exercise switch (used by StudySession + DiagnosticSession)
+- `src/components/ErrorBoundary.tsx` — wraps StudySession and DiagnosticSession
+- `src/lib/curriculum/run-truncate.ts` — deletes curriculum tables in FK order; `pnpm truncate`
+
+### API Security (added in pre-Phase 6 audit)
+- All 5 POST routes validated with Zod v3 schemas (submit, hint, chat, onboarding/complete, sessions/complete)
+- `/api/hint` cross-validates exercise.concept_id === requested concept_id
+- `/api/chat` ReadableStream has try/catch for mid-stream errors
+- `next.config.ts` — reactStrictMode=true + X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy
 
 ## Current Status
 
-### Completed — Phases 1–5 + polish
+### Completed — Phases 1–5 + Pre-Phase 6 Audit
 - Full auth flow (email/password, Supabase)
 - SM-2 SRS engine with Claude-only scoring
 - All 6 exercise types with dedicated UI components
@@ -173,6 +187,43 @@ Migrations (run once in Supabase SQL editor):
 - study_sessions table fully wired (written on session completion)
 - Vitest test suite: 25 tests across sm2, scoreToInterval, FeedbackPanel
 - Mobile polish: h-[100dvh], safe-area-inset-bottom, flex-wrap, overflow-x-auto
+- **Pre-Phase 6 audit complete**: Zod validation, security headers, shared components, ErrorBoundary, constants, scoring module, 003_indexes.sql applied
+- **63 exercises seeded** (3 per concept; 3rd is free_write or error_correction)
+- Concept badge no longer leaks the answer — shows type label (e.g. "connector practice")
 
-### Pending — Phase 6
-- Email notifications (Supabase Edge Functions)
+### Phase 6 — Ordered by Priority
+
+**P6-A: Free-write focus + AI-generated topics** ← START HERE
+- `free_write` should be the primary exercise type (not gap_fill)
+- New `POST /api/topic` route: Claude generates a writing topic + prompt for a given concept
+- New `FreeWritePrompt.tsx` component: shows AI topic, textarea, submits to `/api/submit` as usual
+- Dashboard "Write today" card: one AI-generated free-write challenge per day
+- Concept badge on exercise screen already fixed (audit) — no longer leaks answer
+
+**P6-B: Exercise type selection UX**
+- Dashboard: quick-launch buttons for each exercise type (gap_fill, free_write, translation, etc.)
+- Curriculum: per-concept type buttons alongside existing "Practice" link
+- `/study/configure` already supports `?types=` — improve discoverability
+
+**P6-C: Account management page**
+- New `/account` page: edit display_name, current_level (A2/B1/B2), daily_goal_minutes
+- New `POST /api/account/update` route with Zod validation
+- Nav link from dashboard
+
+**P6-D: PWA (iPhone support)**
+- `/public/manifest.webmanifest` + icons
+- Add `<link rel="manifest">` and Apple meta tags to `src/app/layout.tsx`
+- next-pwa or manual service worker for offline shell
+
+**P6-E: UX redesign (Babbel-style)**
+- New color palette: warm green primary, clean white, bold sans-serif typography
+- Update Tailwind theme in `src/app/globals.css`
+- Redesign dashboard, study session, and nav — modern card-based layout
+
+**P6-F: Google OAuth**
+- Enable Google provider in Supabase dashboard (Auth → Providers)
+- Add Google sign-in button to `/auth/login` and `/auth/signup`
+- `/auth/callback` already handles the code exchange — no new route needed
+
+**P6-G: Email notifications** (lowest priority)
+- Supabase Edge Functions for daily reminder emails
