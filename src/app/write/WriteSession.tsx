@@ -7,7 +7,7 @@ import { FreeWritePrompt } from '@/components/exercises/FreeWritePrompt'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import type { GradeResult } from '@/lib/claude/grader'
 
-interface Concept {
+interface ConceptInfo {
   id: string
   title: string
 }
@@ -19,10 +19,11 @@ type State =
   | { phase: 'feedback'; prompt: string; answer: string; result: GradeResult & { next_review_in_days: number } }
 
 interface Props {
-  concept: Concept
+  conceptIds: string[]
+  conceptInfos: ConceptInfo[]
 }
 
-export function WriteSession({ concept }: Props) {
+export function WriteSession({ conceptIds, conceptInfos }: Props) {
   const router = useRouter()
   const [state, setState] = useState<State>({ phase: 'loading_prompt' })
   const [error, setError] = useState<string | null>(null)
@@ -34,7 +35,7 @@ export function WriteSession({ concept }: Props) {
       const res = await fetch('/api/topic', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ concept_id: concept.id }),
+        body: JSON.stringify({ concept_ids: conceptIds }),
       })
       if (!res.ok) throw new Error('Failed to generate prompt')
       const data = await res.json() as { topic: string }
@@ -43,7 +44,7 @@ export function WriteSession({ concept }: Props) {
       setError('Could not generate a prompt. Please try again.')
       setState({ phase: 'writing', prompt: '' })
     }
-  }, [concept.id])
+  }, [conceptIds])
 
   useEffect(() => {
     fetchPrompt()
@@ -59,7 +60,7 @@ export function WriteSession({ concept }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          concept_id: concept.id,
+          concept_ids: conceptIds,
           ai_prompt: prompt,
           user_answer: answer,
         }),
@@ -75,6 +76,7 @@ export function WriteSession({ concept }: Props) {
 
   const loadingPrompt = state.phase === 'loading_prompt'
   const currentPrompt = state.phase !== 'loading_prompt' ? state.prompt : ''
+  const conceptTitle = conceptInfos.map((c) => c.title).join(' + ')
 
   return (
     <div className="space-y-6">
@@ -102,7 +104,7 @@ export function WriteSession({ concept }: Props) {
       ) : (
         <FreeWritePrompt
           prompt={currentPrompt}
-          conceptTitle={concept.title}
+          conceptTitle={conceptTitle}
           onSubmit={handleSubmit}
           onRefreshPrompt={fetchPrompt}
           disabled={state.phase === 'submitting'}

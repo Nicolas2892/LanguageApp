@@ -7,7 +7,7 @@ import type { SRSScore } from '@/lib/srs'
 import type { Concept, UserProgress } from '@/lib/supabase/types'
 
 const GradeSchema = z.object({
-  concept_id: z.string().uuid(),
+  concept_ids: z.array(z.string().uuid()).min(1).max(5),
   ai_prompt: z.string().min(1).max(2000),
   user_answer: z.string().min(1).max(2000),
 })
@@ -22,59 +22,70 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
     }
-    const { concept_id, ai_prompt, user_answer } = parsed.data
+    const { concept_ids, ai_prompt, user_answer } = parsed.data
 
-    // 1. Fetch concept
-    const { data: concept, error: conceptErr } = await supabase
+    // 1. Fetch all concepts
+    const { data: concepts, error: conceptErr } = await supabase
       .from('concepts')
       .select('*')
-      .eq('id', concept_id)
-      .single()
+      .in('id', concept_ids)
 
-    if (conceptErr || !concept) {
+    if (conceptErr || !concepts || concepts.length === 0) {
       return NextResponse.json({ error: 'Concept not found' }, { status: 404 })
     }
-    const typedConcept = concept as Concept
+    const typedConcepts = concepts as Concept[]
 
-    // 2. Grade with Claude
+    const conceptTitles = typedConcepts.map((c) => c.title).join(', ')
+    const conceptExplanations = typedConcepts.map((c) => `${c.title}: ${c.explanation}`).join('\n')
+
+    // 2. Grade with Claude (holistic score across all concepts)
     const gradeResult = await gradeAnswer({
-      conceptTitle: typedConcept.title,
-      conceptExplanation: typedConcept.explanation,
+      conceptTitle: conceptTitles,
+      conceptExplanation: conceptExplanations,
       exerciseType: 'free_write',
       prompt: ai_prompt,
       expectedAnswer: null,
       userAnswer: user_answer,
     })
 
-    // 3. Fetch current user_progress (or use defaults)
-    const { data: existingProgress } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('concept_id', concept_id)
-      .single()
+    // 3. Upsert user_progress for each concept with the same holistic score
+    for (const concept_id of concept_ids) {
+      const { data: existingProgress } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('concept_id', concept_id)
+        .single()
 
-    const currentProgress = existingProgress ?? {
-      ...DEFAULT_PROGRESS,
-      user_id: user.id,
-      concept_id,
-    }
-
-    // 4. Calculate new SRS values
-    const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore)
-
-    // 5. Upsert user_progress
-    await supabase
-      .from('user_progress')
-      .upsert({
+      const currentProgress = existingProgress ?? {
+        ...DEFAULT_PROGRESS,
         user_id: user.id,
         concept_id,
-        ease_factor: newSRS.ease_factor,
-        interval_days: newSRS.interval_days,
-        due_date: newSRS.due_date,
-        repetitions: newSRS.repetitions,
-        last_reviewed_at: new Date().toISOString(),
-      }, { onConflict: 'user_id,concept_id' })
+      }
+
+      const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore)
+
+      await supabase
+        .from('user_progress')
+        .upsert({
+          user_id: user.id,
+          concept_id,
+          ease_factor: newSRS.ease_factor,
+          interval_days: newSRS.interval_days,
+          due_date: newSRS.due_date,
+          repetitions: newSRS.repetitions,
+          last_reviewed_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,concept_id' })
+    }
+
+    // Use the first concept's SRS for the response (for next_review_in_days display)
+    const { data: firstProgress } = await supabase
+      .from('user_progress')
+      .select('interval_days')
+      .eq('user_id', user.id)
+      .eq('concept_id', concept_ids[0])
+      .single()
+    const nextReviewDays = (firstProgress as { interval_days: number } | null)?.interval_days ?? 1
 
     // 6. Record the attempt (exercise_id is null for AI-generated prompts)
     await supabase
@@ -110,7 +121,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ...gradeResult,
-      next_review_in_days: newSRS.interval_days,
+      next_review_in_days: nextReviewDays,
     })
   } catch (err) {
     console.error('[grade] error:', err)

@@ -138,7 +138,7 @@ export default async function DashboardPage() {
             Claude will generate a writing topic for this concept on-demand.
           </p>
           <Button asChild variant="outline" className="w-full">
-            <Link href={`/write?concept=${writeConcept.id}`}>Write about this →</Link>
+            <Link href={`/write?suggested=${writeConcept.id}`}>Write about this →</Link>
           </Button>
         </div>
       )}

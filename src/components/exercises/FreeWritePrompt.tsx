@@ -23,8 +23,12 @@ export function FreeWritePrompt({
 }: FreeWritePromptProps) {
   const [answer, setAnswer] = useState('')
 
+  const wordCount = answer.trim() ? answer.trim().split(/\s+/).length : 0
+  const overLimit = wordCount > 200
+  const underMinimum = wordCount > 0 && wordCount < 20
+
   function handleSubmit() {
-    if (answer.trim()) {
+    if (answer.trim() && !overLimit && !underMinimum) {
       onSubmit(answer.trim())
     }
   }
@@ -65,6 +69,13 @@ export function FreeWritePrompt({
         className="resize-none"
       />
 
+      {/* Word counter */}
+      <div className="flex justify-end">
+        <span className={`text-xs ${overLimit ? 'text-red-500' : wordCount >= 150 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+          {wordCount} / 200 words
+        </span>
+      </div>
+
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-2">
         <Button
@@ -77,7 +88,7 @@ export function FreeWritePrompt({
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={!answer.trim() || disabled || loadingPrompt}
+          disabled={wordCount === 0 || overLimit || underMinimum || disabled || loadingPrompt}
           className="flex-1"
         >
           Submit →
