@@ -1,36 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Spanish B1→B2 Language Learning App
+
+A full-stack web app for learning Spanish at B1→B2 level. Combines spaced repetition (SM-2 algorithm), AI-graded writing exercises, and a context-aware AI tutor.
+
+## Tech Stack
+
+- **Next.js 16** (App Router, TypeScript)
+- **Supabase** (Postgres, Auth, RLS)
+- **Claude API** (`claude-sonnet-4-20250514`) — exercise grading + AI tutor
+- **shadcn/ui** + Tailwind CSS v4
+- **recharts** — analytics charts
+- **pnpm** — package manager
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js (via Homebrew: `brew install node`)
+- pnpm (`npm install -g pnpm`)
+- A Supabase project
+- An Anthropic API key
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Environment Variables
+
+Create `.env.local`:
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+ANTHROPIC_API_KEY=your_anthropic_key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Database Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run `supabase/migrations/001_initial_schema.sql` in the Supabase SQL editor. This creates all tables, RLS policies, and the auto-profile trigger.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Seed Curriculum
 
-## Learn More
+```bash
+NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... pnpm seed
+```
 
-To learn more about Next.js, take a look at the following resources:
+Seeds 2 modules, 5 units, 21 concepts, 42 exercises (B1→B2 Spanish grammar content).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Run Dev Server
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm dev
+```
 
-## Deploy on Vercel
+Open [http://localhost:3000](http://localhost:3000).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Study Sessions
+- SM-2 spaced repetition — due concepts surface automatically each day
+- 6 exercise types: Gap fill, Transformation, Translation, Error correction, Sentence builder, Free write
+- Every answer graded by Claude (score 0–3); score feeds directly into SM-2
+- Progressive hints: hint 1 → hint 2 → Claude-generated worked example
+- Try Again on incorrect answers before moving on
+- Session configure screen: pick a module and/or specific exercise types
+
+### Curriculum Browser
+- Full module → unit → concept tree
+- Mastery badges: New / Seen / Learning / Mastered (based on SRS interval)
+- Click any concept, unit, or module to start a targeted practice session
+
+### AI Tutor
+- Streaming chat powered by Claude
+- Context-aware: inject the current concept from any study card
+- Knows your recent mistakes to give targeted help
+
+### Progress Analytics
+- Module mastery stacked bar chart
+- Accuracy by exercise type bar chart
+- 14-week activity heatmap (GitHub-style)
+
+## Project Structure
+
+```
+src/
+  app/
+    api/          # Route handlers: /submit, /hint, /chat
+    auth/         # Login, signup, callback pages
+    curriculum/   # Curriculum browser
+    dashboard/    # Main dashboard
+    progress/     # Analytics charts
+    study/        # Study session + configure screen
+    tutor/        # AI tutor chat
+  components/
+    exercises/    # GapFill, TextAnswer, SentenceBuilder, ErrorCorrection, FeedbackPanel, HintPanel
+    ui/           # shadcn/ui components
+  lib/
+    claude/       # Anthropic client, grader, tutor system prompt
+    curriculum/   # Seed data + runner
+    srs/          # SM-2 algorithm
+    supabase/     # Client, server, middleware helpers, DB types
+supabase/
+  migrations/     # SQL schema (run manually in Supabase SQL editor)
+```
+
+## Build Status
+
+All Phases 1–4 complete. See `CLAUDE.md` for detailed architecture notes and phase 5 roadmap.
