@@ -7,6 +7,11 @@ import { Label } from '@/components/ui/label'
 import type { Profile } from '@/lib/supabase/types'
 
 const LEVELS = ['A2', 'B1', 'B2'] as const
+const LEVEL_DESCRIPTIONS: Record<string, string> = {
+  A2: 'Foundation',
+  B1: 'Intermediate',
+  B2: 'Advanced',
+}
 
 interface Props {
   profile: Profile
@@ -68,21 +73,22 @@ export function AccountForm({ profile }: Props) {
         />
       </div>
 
-      {/* Level */}
+      {/* Level picker — card style */}
       <div className="space-y-1.5">
         <Label>Current level</Label>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {LEVELS.map((l) => (
             <button
               key={l}
               onClick={() => { setLevel(l); setSaved(false) }}
-              className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
+              className={`rounded-xl border p-3 text-left transition-colors ${
                 level === l
-                  ? 'border-foreground bg-foreground text-background'
-                  : 'hover:bg-muted/40'
+                  ? 'border-orange-500 bg-orange-50 text-orange-700'
+                  : 'border-gray-200 hover:border-gray-300 hover:bg-muted/30'
               }`}
             >
-              {l}
+              <p className="font-bold text-base">{l}</p>
+              <p className="text-xs mt-0.5 font-normal text-current opacity-70">{LEVEL_DESCRIPTIONS[l]}</p>
             </button>
           ))}
         </div>
@@ -110,7 +116,7 @@ export function AccountForm({ profile }: Props) {
         <p className="text-sm text-green-700 border border-green-200 rounded-lg p-3">Changes saved.</p>
       )}
 
-      <Button onClick={handleSave} disabled={saving} className="w-full">
+      <Button onClick={handleSave} disabled={saving} className="w-full active:scale-95 transition-transform">
         {saving ? 'Saving…' : 'Save changes'}
       </Button>
     </div>

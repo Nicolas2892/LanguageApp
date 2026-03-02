@@ -5,6 +5,7 @@ import { MasteryChart } from './MasteryChart'
 import { AccuracyChart } from './AccuracyChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { Trophy, BookOpen, BarChart2, CalendarDays } from 'lucide-react'
 import type { ModuleMastery } from './MasteryChart'
 import type { ExerciseAccuracy } from './AccuracyChart'
 import type { DayActivity } from './ActivityHeatmap'
@@ -17,7 +18,6 @@ export default async function ProgressPage() {
   if (!user) redirect('/auth/login')
 
   // ── 1. Module mastery ─────────────────────────────────────────────────────
-  // Fetch all concepts with their module info + user progress
   const { data: conceptRows } = await supabase
     .from('concepts')
     .select('id, unit_id, units(module_id, modules(title))')
@@ -32,7 +32,6 @@ export default async function ProgressPage() {
       .map((p) => [p.concept_id, p.interval_days])
   )
 
-  // Group by module
   type ModuleAgg = { mastered: number; learning: number; total: number }
   const moduleAgg = new Map<string, ModuleAgg>()
 
@@ -114,41 +113,54 @@ export default async function ProgressPage() {
     <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-10">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Progress</h1>
+        <h1 className="text-3xl font-extrabold tracking-tight">Progress</h1>
         <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Dashboard
+          ← Back
         </Link>
       </div>
 
       {!hasAnyData ? (
-        <div className="text-center py-16 space-y-3">
-          <p className="text-4xl">📊</p>
-          <p className="text-lg font-medium">No data yet</p>
+        <div className="text-center py-16 space-y-4">
+          <BarChart2 className="h-14 w-14 text-orange-300 mx-auto" />
+          <p className="text-xl font-bold">No data yet</p>
           <p className="text-muted-foreground text-sm">Complete some exercises to see your progress here.</p>
-          <Link href="/study" className="inline-block mt-2 underline text-sm">Start studying →</Link>
+          <Link
+            href="/study"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors mt-2"
+          >
+            Start studying →
+          </Link>
         </div>
       ) : (
         <>
           {/* Summary stats */}
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="border rounded-xl p-4 space-y-1">
-              <p className="text-2xl font-bold text-green-600">{totalMastered}</p>
+            <div className="border rounded-xl p-4 space-y-2 shadow-sm">
+              <Trophy className="h-5 w-5 text-amber-500 mx-auto" />
+              <p className="text-2xl font-extrabold text-green-600">{totalMastered}</p>
               <p className="text-xs text-muted-foreground">Mastered</p>
             </div>
-            <div className="border rounded-xl p-4 space-y-1">
-              <p className="text-2xl font-bold text-blue-600">{totalLearning}</p>
+            <div className="border rounded-xl p-4 space-y-2 shadow-sm">
+              <BookOpen className="h-5 w-5 text-blue-500 mx-auto" />
+              <p className="text-2xl font-extrabold text-blue-600">{totalLearning}</p>
               <p className="text-xs text-muted-foreground">In progress</p>
             </div>
-            <div className="border rounded-xl p-4 space-y-1">
-              <p className="text-2xl font-bold">{overallAccuracy}%</p>
+            <div className="border rounded-xl p-4 space-y-2 shadow-sm">
+              <BarChart2 className="h-5 w-5 text-orange-500 mx-auto" />
+              <p className="text-2xl font-extrabold">{overallAccuracy}%</p>
               <p className="text-xs text-muted-foreground">Accuracy</p>
             </div>
           </div>
 
           {/* Module mastery */}
           <section className="space-y-3">
-            <h2 className="font-semibold">Module mastery</h2>
-            <MasteryChart data={moduleMastery} />
+            <h2 className="font-bold text-lg flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-amber-500" />
+              Module mastery
+            </h2>
+            <div className="border rounded-xl p-4 shadow-sm">
+              <MasteryChart data={moduleMastery} />
+            </div>
             <div className="flex gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-green-500 inline-block" /> Mastered (≥21 day interval)</span>
               <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-blue-500 inline-block" /> Learning</span>
@@ -159,20 +171,35 @@ export default async function ProgressPage() {
           {/* Accuracy by exercise type */}
           {exerciseAccuracy.length > 0 && (
             <section className="space-y-3">
-              <h2 className="font-semibold">Accuracy by exercise type</h2>
-              <AccuracyChart data={exerciseAccuracy} />
+              <h2 className="font-bold text-lg flex items-center gap-2">
+                <BarChart2 className="h-5 w-5 text-orange-500" />
+                Accuracy by exercise type
+              </h2>
+              <div className="border rounded-xl p-4 shadow-sm">
+                <AccuracyChart data={exerciseAccuracy} />
+              </div>
               <p className="text-xs text-muted-foreground">{totalAttempts} total attempts</p>
             </section>
           )}
 
           {/* Activity heatmap */}
           <section className="space-y-3">
-            <h2 className="font-semibold">Activity — last 12 weeks</h2>
-            <div className="overflow-x-auto">
+            <h2 className="font-bold text-lg flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-orange-500" />
+              Activity — last 12 weeks
+            </h2>
+            <div className="border rounded-xl p-4 shadow-sm overflow-x-auto">
               <ActivityHeatmap data={activityData} weeks={14} />
             </div>
           </section>
         </>
+      )}
+
+      {/* Total concepts context */}
+      {hasAnyData && (
+        <p className="text-xs text-muted-foreground text-center">
+          {totalMastered} of {totalConcepts} total concepts mastered
+        </p>
       )}
     </main>
   )

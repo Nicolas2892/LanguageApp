@@ -49,15 +49,15 @@ describe('AccountForm', () => {
 
   it('highlights current level from profile', () => {
     render(<AccountForm profile={baseProfile} />)
-    const b1Btn = screen.getByRole('button', { name: 'B1' })
-    expect(b1Btn.className).toContain('bg-foreground')
+    const b1Btn = screen.getByRole('button', { name: /^B1/ })
+    expect(b1Btn.className).toContain('bg-orange-50')
   })
 
   it('renders all three level options', () => {
     render(<AccountForm profile={baseProfile} />)
-    expect(screen.getByRole('button', { name: 'A2' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'B1' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'B2' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /^A2/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /^B1/ })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /^B2/ })).toBeTruthy()
   })
 
   it('shows "Save changes" as initial button text', () => {
@@ -69,9 +69,9 @@ describe('AccountForm', () => {
 
   it('updates the selected level when a different level is clicked', async () => {
     render(<AccountForm profile={baseProfile} />)
-    await userEvent.click(screen.getByRole('button', { name: 'B2' }))
-    expect(screen.getByRole('button', { name: 'B2' }).className).toContain('bg-foreground')
-    expect(screen.getByRole('button', { name: 'B1' }).className).not.toContain('bg-foreground')
+    await userEvent.click(screen.getByRole('button', { name: /^B2/ }))
+    expect(screen.getByRole('button', { name: /^B2/ }).className).toContain('bg-orange-50')
+    expect(screen.getByRole('button', { name: /^B1/ }).className).not.toContain('bg-orange-50')
   })
 
   // --- Validation (client-side) ---
@@ -136,7 +136,7 @@ describe('AccountForm', () => {
   it('sends updated level in payload when level is changed', async () => {
     mockFetchSuccess()
     render(<AccountForm profile={baseProfile} />)
-    await userEvent.click(screen.getByRole('button', { name: 'B2' }))
+    await userEvent.click(screen.getByRole('button', { name: /^B2/ }))
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     const body = JSON.parse(vi.mocked(global.fetch).mock.calls[0][1]?.body as string)
     expect(body.current_level).toBe('B2')
@@ -213,7 +213,7 @@ describe('AccountForm', () => {
     render(<AccountForm profile={baseProfile} />)
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await waitFor(() => expect(screen.getByText('Changes saved.')).toBeTruthy())
-    await userEvent.click(screen.getByRole('button', { name: 'A2' }))
+    await userEvent.click(screen.getByRole('button', { name: /^A2/ }))
     expect(screen.queryByText('Changes saved.')).toBeNull()
   })
 })

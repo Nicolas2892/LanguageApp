@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { Trophy } from 'lucide-react'
 
 const MASTERED_THRESHOLD = MASTERY_THRESHOLD
 
@@ -22,14 +23,23 @@ const MASTERY_BADGE: Record<MasteryState, { label: string; className: string }> 
   new:      { label: 'New',      className: 'bg-muted text-muted-foreground border-transparent' },
 }
 
-const DIFFICULTY_DOTS: Record<number, string> = {
-  1: '●○○○○', 2: '●●○○○', 3: '●●●○○', 4: '●●●●○', 5: '●●●●●',
+function DifficultyBars({ difficulty }: { difficulty: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div
+          key={i}
+          className={`h-1.5 w-3.5 rounded-full ${i <= difficulty ? 'bg-orange-500' : 'bg-gray-200'}`}
+        />
+      ))}
+    </div>
+  )
 }
 
 const EXERCISE_TYPES = [
-  { type: 'gap_fill',        label: 'Gap fill' },
-  { type: 'translation',     label: 'Translation' },
-  { type: 'transformation',  label: 'Transformation' },
+  { type: 'gap_fill',         label: 'Gap fill' },
+  { type: 'translation',      label: 'Translation' },
+  { type: 'transformation',   label: 'Transformation' },
   { type: 'sentence_builder', label: 'Sentence builder' },
   { type: 'error_correction', label: 'Error correction' },
 ] as const
@@ -72,10 +82,10 @@ export default async function CurriculumPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Curriculum</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">Curriculum</h1>
           <p className="text-sm text-muted-foreground mt-0.5">B1 → B2 Spanish</p>
         </div>
-        <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">← Dashboard</Link>
+        <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">← Back</Link>
       </div>
 
       {/* Legend */}
@@ -94,19 +104,34 @@ export default async function CurriculumPage() {
         const masteredCount = allConcepts.filter(
           (c) => (progressMap.get(c.id)?.interval_days ?? 0) >= MASTERED_THRESHOLD
         ).length
+        const masteredPct = allConcepts.length > 0 ? (masteredCount / allConcepts.length) * 100 : 0
 
         return (
           <section key={mod.id} className="space-y-5">
             {/* Module header */}
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div className="space-y-0.5">
-                <h2 className="text-lg font-semibold">{mod.title}</h2>
-                {mod.description && <p className="text-sm text-muted-foreground">{mod.description}</p>}
-                <p className="text-xs text-muted-foreground">{masteredCount}/{allConcepts.length} mastered</p>
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="space-y-0.5">
+                  <h2 className="text-xl font-bold">{mod.title}</h2>
+                  {mod.description && <p className="text-sm text-muted-foreground">{mod.description}</p>}
+                </div>
+                <Button asChild variant="outline" size="sm" className="shrink-0">
+                  <Link href={`/study?module=${mod.id}`}>Practice module</Link>
+                </Button>
               </div>
-              <Button asChild variant="outline" size="sm" className="shrink-0">
-                <Link href={`/study?module=${mod.id}`}>Practice module</Link>
-              </Button>
+              {/* Module progress bar */}
+              <div className="space-y-1">
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-orange-500 rounded-full transition-all duration-500"
+                    style={{ width: `${masteredPct}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Trophy className="h-3 w-3 text-amber-500" />
+                  {masteredCount}/{allConcepts.length} mastered
+                </p>
+              </div>
             </div>
 
             {/* Units */}
@@ -115,8 +140,8 @@ export default async function CurriculumPage() {
               return (
                 <div key={unit.id} className="space-y-2">
                   {/* Unit header */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                  <div className="flex items-center justify-between border-b pb-1.5">
+                    <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                       {unit.title}
                     </h3>
                     <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
@@ -132,14 +157,12 @@ export default async function CurriculumPage() {
                       const cfg = MASTERY_BADGE[state]
 
                       return (
-                        <div key={concept.id} className="border rounded-lg p-3.5 space-y-3">
+                        <div key={concept.id} className="border rounded-xl p-3.5 space-y-3 bg-card shadow-sm">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="space-y-0.5 min-w-0">
-                              <p className="font-medium text-sm">{concept.title}</p>
+                            <div className="space-y-1.5 min-w-0">
+                              <p className="font-semibold text-sm">{concept.title}</p>
                               <p className="text-xs text-muted-foreground line-clamp-2">{concept.explanation}</p>
-                              <p className="text-xs text-muted-foreground mt-1 font-mono tracking-tight">
-                                {DIFFICULTY_DOTS[concept.difficulty] ?? ''}
-                              </p>
+                              <DifficultyBars difficulty={concept.difficulty} />
                             </div>
                             <div className="flex flex-col items-end gap-1.5 shrink-0">
                               <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${cfg.className}`}>

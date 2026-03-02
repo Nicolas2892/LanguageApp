@@ -93,6 +93,6 @@ describe('FeedbackPanel', () => {
     render(
       <FeedbackPanel result={{ ...baseResult, next_review_in_days: 1 }} userAnswer="test" onNext={vi.fn()} isLast={false} />
     )
-    expect(screen.getByText('Next review in 1 day')).toBeTruthy()
+    expect(screen.getByText(/Back in 1 day/)).toBeTruthy()
   })
 })

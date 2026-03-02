@@ -33,19 +33,24 @@ export function FreeWritePrompt({
     }
   }
 
+  const barPct = Math.min((wordCount / 200) * 100, 100)
+  const barColor = overLimit ? 'bg-red-500' : wordCount >= 150 ? 'bg-amber-400' : 'bg-orange-500'
+
   return (
     <div className="space-y-4">
-      {/* Concept label */}
+      {/* Concept label as orange pill */}
       <div>
-        <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium mb-1">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1.5">
           Concept
         </p>
-        <p className="font-semibold text-sm">{conceptTitle}</p>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold">
+          {conceptTitle}
+        </span>
       </div>
 
       {/* AI prompt */}
       <div className="border rounded-lg p-4 bg-muted/40 min-h-[80px]">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium mb-2">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-2">
           Writing prompt
         </p>
         {loadingPrompt ? (
@@ -69,11 +74,19 @@ export function FreeWritePrompt({
         className="resize-none"
       />
 
-      {/* Word counter */}
-      <div className="flex justify-end">
-        <span className={`text-xs ${overLimit ? 'text-red-500' : wordCount >= 150 ? 'text-amber-500' : 'text-muted-foreground'}`}>
-          {wordCount} / 200 words
-        </span>
+      {/* Word count progress bar */}
+      <div className="space-y-1">
+        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-300 ${barColor}`}
+            style={{ width: `${barPct}%` }}
+          />
+        </div>
+        <div className="flex justify-end">
+          <span className={`text-xs ${overLimit ? 'text-red-500' : wordCount >= 150 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+            {wordCount} / 200 words
+          </span>
+        </div>
       </div>
 
       {/* Actions */}
@@ -89,7 +102,7 @@ export function FreeWritePrompt({
         <Button
           onClick={handleSubmit}
           disabled={wordCount === 0 || overLimit || underMinimum || disabled || loadingPrompt}
-          className="flex-1"
+          className="flex-1 active:scale-95 transition-transform"
         >
           Submit →
         </Button>

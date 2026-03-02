@@ -55,7 +55,7 @@ export default function SignupPage() {
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-sm">
+        <Card className="w-full max-w-sm shadow-lg">
           <CardHeader>
             <CardTitle>Check your email</CardTitle>
             <CardDescription>
@@ -74,8 +74,11 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="space-y-1">
+      <Card className="w-full max-w-sm shadow-lg">
+        <CardHeader className="space-y-3 items-center text-center">
+          <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center text-white font-black text-lg select-none">
+            ES
+          </div>
           <CardTitle className="text-2xl font-bold">Create account</CardTitle>
           <CardDescription>Start your Spanish B1→B2 journey today</CardDescription>
         </CardHeader>
@@ -136,7 +139,7 @@ export default function SignupPage() {
             </Button>
             <p className="text-sm text-muted-foreground text-center">
               Already have an account?{' '}
-              <Link href="/auth/login" className="underline hover:text-foreground">
+              <Link href="/auth/login" className="underline text-orange-600 hover:text-orange-700">
                 Sign in
               </Link>
             </p>

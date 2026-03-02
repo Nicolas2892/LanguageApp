@@ -6,7 +6,10 @@ import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
+import {
+  PartyPopper, CheckCircle2, XCircle,
+  Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight,
+} from 'lucide-react'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
 
@@ -24,6 +27,15 @@ type SessionState =
   | { phase: 'feedback'; result: GradeResult & { next_review_in_days: number }; userAnswer: string }
   | { phase: 'done'; correct: number; total: number }
 
+const EXERCISE_TYPE_META: Record<string, { label: string; Icon: React.ElementType }> = {
+  gap_fill:         { label: 'Gap fill',         Icon: Type          },
+  translation:      { label: 'Translation',      Icon: Languages     },
+  transformation:   { label: 'Transformation',   Icon: ArrowLeftRight },
+  sentence_builder: { label: 'Sentence builder', Icon: Shuffle       },
+  error_correction: { label: 'Error correction', Icon: AlertTriangle },
+  free_write:       { label: 'Free write',       Icon: PenLine       },
+}
+
 export function StudySession({ items }: Props) {
   const router = useRouter()
   const startedAt = useRef(new Date().toISOString())
@@ -32,13 +44,12 @@ export function StudySession({ items }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [scores, setScores] = useState<number[]>([])
 
-  // Hint state — resets on each new exercise
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [claudeHint, setClaudeHint] = useState<string | null>(null)
   const [loadingHint, setLoadingHint] = useState(false)
 
   const current = items[index]
-  const progress = (index / items.length) * 100
+  const progressPct = (index / items.length) * 100
 
   async function handleSubmit(answer: string) {
     setSubmitting(true)
@@ -54,11 +65,7 @@ export function StudySession({ items }: Props) {
       })
       const result = await res.json() as GradeResult & { next_review_in_days: number }
       setScores((s) => [...s, result.score])
-
-      if (!result.is_correct) {
-        setWrongAttempts((n) => n + 1)
-      }
-
+      if (!result.is_correct) setWrongAttempts((n) => n + 1)
       setState({ phase: 'feedback', result, userAnswer: answer })
     } catch {
       alert('Something went wrong. Please try again.')
@@ -81,7 +88,7 @@ export function StudySession({ items }: Props) {
       const { hint } = await res.json() as { hint: string }
       setClaudeHint(hint)
     } catch {
-      // silently fail — hint is optional
+      // silently fail
     } finally {
       setLoadingHint(false)
     }
@@ -95,7 +102,6 @@ export function StudySession({ items }: Props) {
     if (index + 1 >= items.length) {
       const correct = scores.filter((s) => s >= 2).length
       setState({ phase: 'done', correct, total: items.length })
-      // Best-effort — record the session
       fetch('/api/sessions/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -116,18 +122,32 @@ export function StudySession({ items }: Props) {
   // Done screen
   if (state.phase === 'done') {
     const pct = Math.round((state.correct / state.total) * 100)
+    const missed = state.total - state.correct
     return (
-      <div className="space-y-6 text-center">
-        <div className="text-5xl font-bold">{pct}%</div>
-        <p className="text-xl text-muted-foreground">
-          {state.correct} of {state.total} exercises correct
-        </p>
+      <div className="space-y-6 text-center py-8">
+        <PartyPopper className="h-14 w-14 text-orange-500 mx-auto" />
+        <div>
+          <p className="text-5xl font-extrabold">{pct}%</p>
+          <p className="text-muted-foreground mt-1 text-sm">Session complete</p>
+        </div>
+        <div className="flex justify-center gap-6">
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium text-green-600">{state.correct} correct</span>
+          </div>
+          {missed > 0 && (
+            <div className="flex items-center gap-1.5">
+              <XCircle className="h-4 w-4 text-orange-500" />
+              <span className="text-sm font-medium text-orange-500">{missed} to review</span>
+            </div>
+          )}
+        </div>
         <p className="text-muted-foreground text-sm">
           The SRS has scheduled your next reviews based on your performance.
         </p>
         <button
           onClick={() => router.push('/dashboard')}
-          className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-6 py-2 text-sm font-medium hover:bg-primary/90"
+          className="inline-flex items-center justify-center rounded-xl bg-primary text-primary-foreground px-6 py-2.5 text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
         >
           Back to dashboard
         </button>
@@ -135,29 +155,42 @@ export function StudySession({ items }: Props) {
     )
   }
 
+  const typeMeta = EXERCISE_TYPE_META[current.exercise.type] ?? { label: current.exercise.type, Icon: Type }
+  const TypeIcon = typeMeta.Icon
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>{index + 1} / {items.length}</span>
-          <Badge variant="outline" className="capitalize">{current.concept.type} practice</Badge>
+    <div className="space-y-5">
+      {/* Progress bar */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span className="font-medium">{index + 1} / {items.length}</span>
+          <Badge variant="outline" className="capitalize text-xs">{current.concept.type} practice</Badge>
         </div>
-        <Progress value={progress} className="h-1.5" />
+        <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary rounded-full transition-all duration-500"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
       </div>
 
-      {/* Concept context */}
-      <div className="bg-muted/50 rounded-lg p-4 text-sm space-y-1">
-        <p className="font-medium text-xs uppercase tracking-wide text-muted-foreground">Concept</p>
+      {/* Concept title + exercise type badge */}
+      <div className="space-y-2">
+        <p className="text-xl font-bold tracking-tight">{current.concept.title}</p>
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+          <TypeIcon className="h-3.5 w-3.5" />
+          {typeMeta.label}
+        </span>
+      </div>
+
+      {/* Concept explanation */}
+      <div className="bg-muted/50 rounded-lg p-4 text-sm">
+        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Concept</p>
         <p>{current.concept.explanation}</p>
       </div>
 
       {/* Exercise */}
       <div className="space-y-3">
-        <Badge variant="secondary" className="text-xs capitalize">
-          {current.exercise.type.replace('_', ' ')}
-        </Badge>
-
         {state.phase === 'answering' && (
           <>
             <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />

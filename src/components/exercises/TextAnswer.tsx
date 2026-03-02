@@ -22,7 +22,7 @@ export function TextAnswer({ exercise, onSubmit, disabled }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-lg leading-relaxed">{exercise.prompt}</p>
+      <p className="text-xl leading-relaxed font-medium">{exercise.prompt}</p>
       <Textarea
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}

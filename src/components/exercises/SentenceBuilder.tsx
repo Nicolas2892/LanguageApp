@@ -51,7 +51,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
     const [value, setValue] = useState('')
     return (
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(value.trim()) }} className="space-y-4">
-        <p className="text-lg leading-relaxed">{exercise.prompt}</p>
+        <p className="text-xl leading-relaxed font-medium">{exercise.prompt}</p>
         <input
           className="w-full border rounded-md px-3 py-2 text-base"
           value={value}
@@ -68,7 +68,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Instruction (strip the bracket part) */}
-      <p className="text-lg leading-relaxed">
+      <p className="text-xl leading-relaxed font-medium">
         {exercise.prompt.replace(/\s*\[[^\]]+\]/, '')}
       </p>
 
@@ -82,7 +82,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
             key={i}
             type="button"
             onClick={() => !disabled && removeWord(i)}
-            className="px-2.5 py-1 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/80 disabled:opacity-50"
+            className="px-3 py-1 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 disabled:opacity-50 active:scale-95 transition-transform"
             disabled={disabled}
           >
             {word}
@@ -97,7 +97,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
             key={i}
             type="button"
             onClick={() => !disabled && addWord(word, i)}
-            className="px-2.5 py-1 border rounded-md text-sm hover:bg-muted disabled:opacity-50"
+            className="px-3 py-1 bg-gray-100 rounded-full text-sm hover:bg-gray-200 disabled:opacity-50 active:scale-95 transition-transform"
             disabled={disabled}
           >
             {word}

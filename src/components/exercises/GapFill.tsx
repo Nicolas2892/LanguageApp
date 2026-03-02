@@ -22,7 +22,7 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-lg leading-relaxed">{exercise.prompt}</p>
+      <p className="text-xl leading-relaxed font-medium">{exercise.prompt}</p>
       <div className="flex gap-2">
         <Input
           value={answer}

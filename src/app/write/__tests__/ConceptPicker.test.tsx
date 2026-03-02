@@ -192,7 +192,7 @@ describe('ConceptPicker', () => {
       .mockReturnValueOnce(0)   // count = Math.floor(0*3)+1 = 1
       .mockReturnValue(0.4)     // for shuffle comparisons
     render(<ConceptPicker modules={modules} units={units} concepts={concepts} suggestedId={null} />)
-    await userEvent.click(screen.getByText('Surprise me 🎲'))
+    await userEvent.click(screen.getByRole('button', { name: /Surprise me/ }))
     expect(screen.getByText('1 concept selected')).toBeTruthy()
     expect(screen.getByText('Focused — single concept')).toBeTruthy()
   })
@@ -202,7 +202,7 @@ describe('ConceptPicker', () => {
       .mockReturnValueOnce(0.99)  // count = Math.floor(0.99*3)+1 = 3
       .mockReturnValue(0.4)
     render(<ConceptPicker modules={modules} units={units} concepts={concepts} suggestedId={null} />)
-    await userEvent.click(screen.getByText('Surprise me 🎲'))
+    await userEvent.click(screen.getByRole('button', { name: /Surprise me/ }))
     expect(screen.getByText('3 concepts selected')).toBeTruthy()
     expect(screen.getByText('Challenge — multi-concept')).toBeTruthy()
   })
@@ -210,7 +210,7 @@ describe('ConceptPicker', () => {
   it('Surprise me enables the Start button', async () => {
     vi.spyOn(Math, 'random').mockReturnValue(0)
     render(<ConceptPicker modules={modules} units={units} concepts={concepts} suggestedId={null} />)
-    await userEvent.click(screen.getByText('Surprise me 🎲'))
+    await userEvent.click(screen.getByRole('button', { name: /Surprise me/ }))
     expect(screen.getByText('Start writing →').closest('button')).not.toBeDisabled()
   })
 })

@@ -2,9 +2,12 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import type { Profile, Concept } from '@/lib/supabase/types'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import {
+  Flame, Trophy, BookOpen, Sparkles, PenLine,
+  MessageSquare, BarChart2, LayoutList, UserCircle,
+} from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -23,18 +26,15 @@ export default async function DashboardPage() {
     supabase
       .from('concepts')
       .select('id', { count: 'exact', head: true }),
-    // Any user_progress row = "ever studied"
     supabase
       .from('user_progress')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id),
-    // interval_days >= MASTERY_THRESHOLD = mastered
     supabase
       .from('user_progress')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .gte('interval_days', MASTERY_THRESHOLD),
-    // Weakest unmastered concept for free-write card
     supabase
       .from('user_progress')
       .select('concept_id, interval_days')
@@ -49,12 +49,10 @@ export default async function DashboardPage() {
   const totalConcepts = totalConceptsRes.count ?? 0
   const studiedCount = studiedRes.count ?? 0
   const masteredCount = masteredRes.count ?? 0
-  const masteryPct = totalConcepts > 0 ? Math.round((masteredCount / totalConcepts) * 100) : 0
   const newConceptsCount = totalConcepts - studiedCount
-
+  const learningCount = studiedCount - masteredCount
   const isNewUser = studiedCount === 0
 
-  // Fetch the concept title for the free-write card
   const weakestConceptId = (weakestProgressRes.data?.[0] as { concept_id: string } | undefined)?.concept_id ?? null
   let writeConcept: Pick<Concept, 'id' | 'title'> | null = null
   if (!isNewUser && weakestConceptId) {
@@ -66,125 +64,145 @@ export default async function DashboardPage() {
     writeConcept = conceptData as Pick<Concept, 'id' | 'title'> | null
   }
 
+  const masteredPct = totalConcepts > 0 ? (masteredCount / totalConcepts) * 100 : 0
+  const learningPct = totalConcepts > 0 ? (learningCount / totalConcepts) * 100 : 0
+
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-8">
-      {/* Greeting */}
-      <div>
-        <h1 className="text-2xl font-bold">
-          Hola, {profile?.display_name ?? 'learner'} 👋
-        </h1>
-        <p className="text-muted-foreground text-sm mt-1">
+    <main className="max-w-lg mx-auto p-6 md:p-8 space-y-6">
+      {/* Greeting + level badge */}
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            Hola, {profile?.display_name ?? 'learner'}
+          </h1>
+          {profile?.current_level && (
+            <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
+              {profile.current_level}
+            </span>
+          )}
+        </div>
+        <p className="text-muted-foreground text-sm">
           {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
       </div>
 
-      {/* Review card */}
-      <div className="border rounded-xl p-6 space-y-4">
-        <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Review</p>
-        {studiedCount === 0 ? (
-          <>
-            <p className="font-semibold text-lg">No reviews yet</p>
-            <p className="text-muted-foreground text-sm">
-              Complete your first session to begin spaced repetition.
+      {/* Stats row */}
+      <div className="flex items-center gap-8">
+        <div className="flex items-center gap-2.5">
+          <Flame className="h-7 w-7 text-orange-500 shrink-0" />
+          <div>
+            <p className="text-4xl font-extrabold text-orange-500 leading-none">{profile?.streak ?? 0}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">day streak</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <Trophy className="h-7 w-7 text-amber-500 shrink-0" />
+          <div>
+            <p className="text-4xl font-extrabold leading-none">{masteredCount}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">of {totalConcepts} mastered</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Segmented progress bar */}
+      {!isNewUser && (
+        <div className="space-y-1.5">
+          <div className="flex h-2 rounded-full overflow-hidden bg-muted gap-0.5">
+            <div
+              className="bg-orange-500 transition-all duration-500 rounded-l-full"
+              style={{ width: `${masteredPct}%` }}
+            />
+            <div
+              className="bg-amber-300 transition-all duration-500"
+              style={{ width: `${learningPct}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground text-right">
+            {masteredCount} mastered · {learningCount} learning · {newConceptsCount} new
+          </p>
+        </div>
+      )}
+
+      {/* Mode cards */}
+      <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
+        {/* Review card */}
+        <div className="border border-l-4 border-l-orange-500 rounded-xl p-5 space-y-3 bg-card">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Review</p>
+            <BookOpen className="h-5 w-5 text-muted-foreground" />
+          </div>
+          {studiedCount === 0 ? (
+            <>
+              <p className="text-xl font-bold">No reviews yet</p>
+              <p className="text-muted-foreground text-sm">Complete your first session to begin spaced repetition.</p>
+            </>
+          ) : dueCount > 0 ? (
+            <>
+              <p className="text-xl font-bold">
+                {dueCount} concept{dueCount !== 1 ? 's' : ''} due today
+              </p>
+              <Button asChild className="w-full active:scale-95 transition-transform">
+                <Link href="/study">Start review →</Link>
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-xl font-bold">All caught up!</p>
+              <p className="text-muted-foreground text-sm">No reviews due. Come back tomorrow.</p>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/study/configure">Practice anyway →</Link>
+              </Button>
+            </>
+          )}
+        </div>
+
+        {/* Learn new card */}
+        {newConceptsCount > 0 && (
+          <div className="border border-l-4 border-l-orange-500 rounded-xl p-5 space-y-3 bg-card">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Learn new</p>
+              <Sparkles className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-xl font-bold">
+              {newConceptsCount} concept{newConceptsCount !== 1 ? 's' : ''} waiting
             </p>
-          </>
-        ) : dueCount > 0 ? (
-          <>
-            <p className="font-semibold text-lg">
-              {dueCount} concept{dueCount !== 1 ? 's' : ''} due for review
-            </p>
-            <p className="text-muted-foreground text-sm">
-              The SRS has selected these based on your past performance.
-            </p>
-            <Button asChild className="w-full">
-              <Link href="/study">Start review →</Link>
+            <Button asChild className="w-full active:scale-95 transition-transform">
+              <Link href="/study?mode=new">Start learning →</Link>
             </Button>
-          </>
-        ) : (
-          <>
-            <p className="font-semibold text-lg">All caught up!</p>
-            <p className="text-muted-foreground text-sm">
-              No reviews due today. Come back tomorrow.
-            </p>
+          </div>
+        )}
+
+        {/* Free write card */}
+        {!isNewUser && writeConcept && (
+          <div className="border border-l-4 border-l-orange-500 rounded-xl p-5 space-y-3 bg-card">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Free write</p>
+              <PenLine className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-xl font-bold">{writeConcept.title}</p>
             <Button asChild variant="outline" className="w-full">
-              <Link href="/study/configure">Practice anyway →</Link>
+              <Link href={`/write?suggested=${writeConcept.id}`}>Write about this →</Link>
             </Button>
-          </>
+          </div>
         )}
       </div>
 
-      {/* Learn new card — hidden when all concepts studied */}
-      {newConceptsCount > 0 && (
-        <div className="border rounded-xl p-6 space-y-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Learn new</p>
-          <p className="font-semibold text-lg">
-            {newConceptsCount} new concept{newConceptsCount !== 1 ? 's' : ''} waiting
-          </p>
-          <p className="text-muted-foreground text-sm">
-            Start working through concepts you haven&apos;t studied yet.
-          </p>
-          <Button asChild className="w-full">
-            <Link href="/study?mode=new">Start learning →</Link>
-          </Button>
-        </div>
-      )}
-
-      {/* Free write card — hidden for new users */}
-      {!isNewUser && writeConcept && (
-        <div className="border rounded-xl p-6 space-y-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">Free write</p>
-          <p className="font-semibold text-lg">Practice: {writeConcept.title}</p>
-          <p className="text-muted-foreground text-sm">
-            Claude will generate a writing topic for this concept on-demand.
-          </p>
-          <Button asChild variant="outline" className="w-full">
-            <Link href={`/write?suggested=${writeConcept.id}`}>Write about this →</Link>
-          </Button>
-        </div>
-      )}
-
-      {/* Stats row */}
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="border rounded-lg p-4 space-y-1">
-          <p className="text-muted-foreground text-xs uppercase tracking-wide">Streak</p>
-          <p className="text-2xl font-bold">{profile?.streak ?? 0}</p>
-          <p className="text-muted-foreground text-xs">days</p>
-        </div>
-        <div className="border rounded-lg p-4 space-y-1">
-          <p className="text-muted-foreground text-xs uppercase tracking-wide">Mastered</p>
-          <p className="text-2xl font-bold">{masteredCount}</p>
-          <p className="text-muted-foreground text-xs">of {totalConcepts}</p>
-        </div>
-      </div>
-
-      {/* Curriculum progress */}
-      {!isNewUser && (
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Curriculum progress</span>
-            <span className="font-medium">{masteryPct}%</span>
-          </div>
-          <Progress value={masteryPct} className="h-2" />
-        </div>
-      )}
-
-      {/* Quick nav */}
-      <div className="grid grid-cols-1 gap-3">
+      {/* Quick nav 2×2 grid */}
+      <div className="grid grid-cols-2 gap-3">
         {[
-          { href: '/tutor', label: 'AI Tutor', desc: 'Ask questions, get examples, practice freely' },
-          { href: '/progress', label: 'Progress', desc: 'Charts, accuracy stats, activity heatmap' },
-          { href: '/curriculum', label: 'Curriculum', desc: 'Browse all concepts and your mastery status' },
-          { href: '/account', label: 'Account', desc: 'Edit your name, level, and daily goal' },
-        ].map(({ href, label, desc }) => (
-          <div key={href} className="border rounded-xl p-4 flex items-center justify-between">
-            <div>
-              <p className="font-medium text-sm">{label}</p>
-              <p className="text-xs text-muted-foreground">{desc}</p>
-            </div>
-            <Button asChild variant="outline" size="sm">
-              <Link href={href}>Open →</Link>
-            </Button>
-          </div>
+          { href: '/tutor',      label: 'AI Tutor',   Icon: MessageSquare },
+          { href: '/progress',   label: 'Progress',   Icon: BarChart2     },
+          { href: '/curriculum', label: 'Curriculum', Icon: LayoutList    },
+          { href: '/account',    label: 'Account',    Icon: UserCircle    },
+        ].map(({ href, label, Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex flex-col items-center justify-center gap-2 border rounded-xl p-4 hover:bg-muted/30 transition-colors min-h-[80px]"
+          >
+            <Icon className="h-6 w-6 text-muted-foreground" />
+            <span className="text-sm font-medium">{label}</span>
+          </Link>
         ))}
       </div>
     </main>

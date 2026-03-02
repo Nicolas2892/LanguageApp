@@ -43,8 +43,11 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="space-y-1">
+      <Card className="w-full max-w-sm shadow-lg">
+        <CardHeader className="space-y-3 items-center text-center">
+          <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center text-white font-black text-lg select-none">
+            ES
+          </div>
           <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
           <CardDescription>Continue your Spanish B1→B2 journey</CardDescription>
         </CardHeader>
@@ -83,7 +86,7 @@ export default function LoginPage() {
             </Button>
             <p className="text-sm text-muted-foreground text-center">
               No account?{' '}
-              <Link href="/auth/signup" className="underline hover:text-foreground">
+              <Link href="/auth/signup" className="underline text-orange-600 hover:text-orange-700">
                 Sign up
               </Link>
             </p>
