@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { GoogleButton } from '@/components/auth/GoogleButton'
 
 const schema = z.object({
   display_name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -82,8 +83,22 @@ export default function SignupPage() {
           <CardTitle className="text-2xl font-bold">Create account</CardTitle>
           <CardDescription>Start your Spanish B1→B2 journey today</CardDescription>
         </CardHeader>
+
+        {/* Google OAuth */}
+        <CardContent className="pb-0">
+          <GoogleButton />
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">or</span>
+            </div>
+          </div>
+        </CardContent>
+
         <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-0">
             {serverError && (
               <p className="text-sm text-destructive">{serverError}</p>
             )}

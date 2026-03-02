@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { GoogleButton } from '@/components/auth/GoogleButton'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -22,6 +23,14 @@ type FormValues = z.infer<typeof schema>
 export default function LoginPage() {
   const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
+
+  // Handle ?error=auth_callback_failed from /auth/callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('error') === 'auth_callback_failed') {
+      setServerError('Sign-in failed. Please try again or use email and password.')
+    }
+  }, [])
 
   const {
     register,
@@ -51,8 +60,22 @@ export default function LoginPage() {
           <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
           <CardDescription>Continue your Spanish B1→B2 journey</CardDescription>
         </CardHeader>
+
+        {/* Google OAuth */}
+        <CardContent className="pb-0">
+          <GoogleButton />
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">or</span>
+            </div>
+          </div>
+        </CardContent>
+
         <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-0">
             {serverError && (
               <p className="text-sm text-destructive">{serverError}</p>
             )}
