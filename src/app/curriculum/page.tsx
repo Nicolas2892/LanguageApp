@@ -89,7 +89,7 @@ export default async function CurriculumPage() {
         return (
           <section key={mod.id} className="space-y-5">
             {/* Module header */}
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="space-y-0.5">
                 <h2 className="text-lg font-semibold">{mod.title}</h2>
                 {mod.description && <p className="text-sm text-muted-foreground">{mod.description}</p>}

@@ -126,7 +126,7 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
       </div>
 
       {/* Input */}
-      <div className="border-t p-4 flex gap-2 items-end">
+      <div className="border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex gap-2 items-end">
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}

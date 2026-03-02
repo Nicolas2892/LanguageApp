@@ -18,6 +18,7 @@ export interface Database {
           streak: number
           last_studied_date: string | null
           created_at: string
+          onboarding_completed: boolean
         }
         Insert: {
           id: string
@@ -27,6 +28,7 @@ export interface Database {
           streak?: number
           last_studied_date?: string | null
           created_at?: string
+          onboarding_completed?: boolean
         }
         Update: {
           id?: string
@@ -36,6 +38,7 @@ export interface Database {
           streak?: number
           last_studied_date?: string | null
           created_at?: string
+          onboarding_completed?: boolean
         }
         Relationships: []
       }

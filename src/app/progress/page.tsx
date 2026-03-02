@@ -167,7 +167,9 @@ export default async function ProgressPage() {
           {/* Activity heatmap */}
           <section className="space-y-3">
             <h2 className="font-semibold">Activity — last 12 weeks</h2>
-            <ActivityHeatmap data={activityData} weeks={14} />
+            <div className="overflow-x-auto">
+              <ActivityHeatmap data={activityData} weeks={14} />
+            </div>
           </section>
         </>
       )}

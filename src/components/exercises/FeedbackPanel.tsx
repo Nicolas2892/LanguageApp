@@ -57,7 +57,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }
         </p>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         {onTryAgain && (
           <Button variant="outline" onClick={onTryAgain} className="flex-1">
             Try again
