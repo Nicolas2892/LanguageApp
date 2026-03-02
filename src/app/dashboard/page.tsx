@@ -73,16 +73,20 @@ export default async function DashboardPage() {
           <>
             <p className="font-semibold text-lg">All caught up!</p>
             <p className="text-muted-foreground text-sm">
-              No reviews due today. Come back tomorrow.
+              No reviews due today. Come back tomorrow — or practice freely now.
             </p>
           </>
         )}
 
-        {(isNewUser || dueCount > 0) && (
+        {(isNewUser || dueCount > 0) ? (
           <Button asChild className="w-full">
             <Link href={isNewUser ? '/study' : '/study/configure'}>
               {isNewUser ? 'Start learning →' : `Start review (${dueCount}) →`}
             </Link>
+          </Button>
+        ) : (
+          <Button asChild variant="outline" className="w-full">
+            <Link href="/study/configure">Practice anyway →</Link>
           </Button>
         )}
       </div>
