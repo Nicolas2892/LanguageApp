@@ -268,21 +268,14 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 
 #### Bugs & Fixes (implement first)
 
-**Fix-A: Desktop/iPad navigation — persistent left sidebar**
-- BottomNav is `lg:hidden`; desktop/iPad have zero navigation
-- Solution: **Option A — persistent left sidebar** (~220 px, always visible on `lg:`)
-  - Logo at top, vertical nav links (Home / Study / Tutor / Progress / Curriculum / Account)
-  - Mirrors BottomNav active-state logic and HIDDEN_ROUTES
-  - `layout.tsx`: on `lg:` wrap `{children}` in a flex row with the sidebar; main content gets `lg:ml-[220px]`
-  - Sidebar component lives alongside BottomNav in `src/components/`
+**Fix-A: Desktop/iPad navigation — persistent left sidebar** ✓ complete
+- `src/components/SideNav.tsx` — 220px fixed sidebar, `hidden lg:flex`; all nav items + Account at bottom; active-state logic; hidden on `/auth`,`/onboarding`,`/write`; wired into `layout.tsx`
 
 **Fix-B: Remove "Back to Dashboard" link on Account page**
 - One-line deletion in `src/app/account/page.tsx`
 
-**Fix-C: Rename app to "Español Avanzado"**
-- Replace all instances of "Spanish B1→B2" / "Spanish B1 -> B2" across: page titles, manifest name/short_name, auth card descriptions, dashboard greeting, `layout.tsx` metadata, `README`
-- Correct Spanish: **Español Avanzado** (nivel is masculine)
-2
+**Fix-C: Rename app to "Español Avanzado"** ✓ complete
+- All user-facing strings updated: `manifest.ts`, `layout.tsx`, `AppHeader.tsx`, `SideNav.tsx`, auth pages, `IOSInstallPrompt.tsx`
 **Fix-D: P8 RLS bug — exercises INSERT blocked by RLS**
 - `exercises` table only has `service_role` INSERT policy; authenticated user session cannot insert
 - Fix: create a service role Supabase client (using `SUPABASE_SERVICE_ROLE_KEY`) and use it only for the insert step in `POST /api/exercises/generate`
