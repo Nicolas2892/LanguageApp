@@ -185,7 +185,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-### Completed — Phases 1–6E
+### Completed — Phases 1–6E + BottomNav polish
 - Full auth flow (email/password, Supabase)
 - SM-2 SRS engine with Claude-only scoring
 - All 6 exercise types with dedicated UI components
@@ -208,6 +208,8 @@ Migrations (run once in Supabase SQL editor):
 - **P6-C complete**: `/account` page (display_name, current_level A2/B1/B2, daily_goal_minutes); `POST /api/account/update` Zod validated; Account added to dashboard quick-nav
 - **P6-D complete**: PWA — `src/app/manifest.ts` (standalone, theme #18181b, start_url /dashboard); `icon.tsx` 192×192 + `apple-icon.tsx` 180×180 via ImageResponse; layout.tsx `appleWebApp` metadata; `public/sw.js` cache-first for `/_next/static/` assets; `ServiceWorkerRegistration.tsx` client component
 - **P6-E complete**: Babbel-inspired UX redesign — orange primary token (`oklch(0.65 0.20 35)`), orange accent strips on mode cards, stat row with Flame/Trophy icons, segmented progress bar, exercise type icon badges, FeedbackPanel accent strips, orange SentenceBuilder chips, word-count bar, ConceptPicker card-style rows with DifficultyBars, curriculum module progress bars, auth ES logo mark, AccountForm level cards
+- **BottomNav polish complete**: `bg-background` (fully opaque, no content bleed); `/study` and `/tutor` removed from HIDDEN_ROUTES — tab bar now always visible; study page `pb-24 lg:pb-10`; tutor page outer container `pb-[calc(3.125rem+env(safe-area-inset-bottom))] lg:pb-0`
+- **Dashboard header polish complete**: stats row + progress bar merged into a single `bg-card rounded-xl border` status card for visual cohesion; stat numbers `text-4xl` → `text-2xl` so greeting h1 dominates; icons `h-7` → `h-5`; dashboard bottom padding changed from `pb-24` to `pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-8` (dynamic — mirrors nav height + one space-y-3 gap above BottomNav)
 
 ### Phase 6 — Remaining (ordered by priority)
 
