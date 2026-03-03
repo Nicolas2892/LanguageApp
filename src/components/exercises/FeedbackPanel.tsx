@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { SCORE_CONFIG } from '@/lib/scoring'
 import { CheckCircle2, XCircle, CalendarDays } from 'lucide-react'
+import { SpeakButton } from '@/components/SpeakButton'
 import type { GradeResult } from '@/lib/claude/grader'
 
 interface Props {
@@ -49,9 +50,10 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }
             <span className={isCorrect ? 'text-green-700' : 'text-red-700'}>{userAnswer}</span>
           </div>
           {!isCorrect && result.corrected_version && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <span className="text-muted-foreground w-28 shrink-0">Correct:</span>
-              <span className="text-green-700 font-medium">{result.corrected_version}</span>
+              <span className="text-green-700 font-medium flex-1">{result.corrected_version}</span>
+              <SpeakButton text={result.corrected_version} />
             </div>
           )}
         </div>

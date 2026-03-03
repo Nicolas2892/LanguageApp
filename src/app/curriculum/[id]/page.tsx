@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
+import { SpeakButton } from '@/components/SpeakButton'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { ChevronLeft, BookOpen, PenLine, MessageSquare } from 'lucide-react'
 import type { Concept } from '@/lib/supabase/types'
@@ -175,7 +176,12 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
               <tbody className="divide-y">
                 {examples.map((ex, i) => (
                   <tr key={i} className="bg-card">
-                    <td className="p-3 font-medium">{ex.es}</td>
+                    <td className="p-3 font-medium">
+                      <div className="flex items-center gap-2">
+                        <span>{ex.es}</span>
+                        <SpeakButton text={ex.es} />
+                      </div>
+                    </td>
                     <td className="p-3 text-muted-foreground">{ex.en}</td>
                   </tr>
                 ))}

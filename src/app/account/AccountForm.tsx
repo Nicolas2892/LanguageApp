@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Volume2, VolumeX } from 'lucide-react'
+import { useSpeech } from '@/lib/hooks/useSpeech'
 import type { Profile } from '@/lib/supabase/types'
 
 const LEVELS = ['A2', 'B1', 'B2'] as const
@@ -24,6 +26,7 @@ export function AccountForm({ profile }: Props) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { enabled: audioEnabled, toggle: toggleAudio } = useSpeech()
 
   async function handleSave() {
     setSaving(true)
@@ -106,6 +109,34 @@ export function AccountForm({ profile }: Props) {
           onChange={(e) => { setGoalMinutes(e.target.value); setSaved(false) }}
         />
         <p className="text-xs text-muted-foreground">Between 5 and 120 minutes.</p>
+      </div>
+
+      {/* Audio playback toggle */}
+      <div className="space-y-1.5">
+        <Label>Audio playback</Label>
+        <button
+          type="button"
+          onClick={toggleAudio}
+          className={`w-full rounded-xl border p-3 flex items-center gap-3 text-left transition-colors ${
+            audioEnabled === false
+              ? 'border-gray-200 hover:border-gray-300'
+              : 'border-orange-500 bg-orange-50'
+          }`}
+        >
+          {audioEnabled === false ? (
+            <VolumeX className="h-4 w-4 shrink-0 text-muted-foreground" />
+          ) : (
+            <Volume2 className="h-4 w-4 shrink-0 text-orange-600" />
+          )}
+          <div>
+            <p className={`text-sm font-medium ${audioEnabled === false ? '' : 'text-orange-700'}`}>
+              {audioEnabled === false ? 'Audio off' : 'Audio on'}
+            </p>
+            <p className="text-xs font-normal text-muted-foreground mt-0.5">
+              Speak Spanish sentences aloud in exercises and curriculum
+            </p>
+          </div>
+        </button>
       </div>
 
       {/* Feedback */}

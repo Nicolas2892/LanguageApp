@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SpeakButton } from '@/components/SpeakButton'
 import type { Exercise } from '@/lib/supabase/types'
 
 interface Props {
@@ -22,7 +23,10 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-xl leading-relaxed font-medium">{exercise.prompt}</p>
+      <div className="flex items-start gap-2">
+        <p className="text-xl leading-relaxed font-medium flex-1">{exercise.prompt}</p>
+        <SpeakButton text={exercise.prompt} />
+      </div>
       <div className="flex gap-2">
         <Input
           value={answer}

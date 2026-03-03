@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { SpeakButton } from '@/components/SpeakButton'
 import type { Exercise } from '@/lib/supabase/types'
 
 interface Props {
@@ -22,7 +23,10 @@ export function TextAnswer({ exercise, onSubmit, disabled }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-xl leading-relaxed font-medium">{exercise.prompt}</p>
+      <div className="flex items-start gap-2">
+        <p className="text-xl leading-relaxed font-medium flex-1">{exercise.prompt}</p>
+        <SpeakButton text={exercise.prompt} />
+      </div>
       <Textarea
         value={answer}
         onChange={(e) => setAnswer(e.target.value)}
