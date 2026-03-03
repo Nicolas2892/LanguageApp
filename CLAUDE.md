@@ -8,7 +8,7 @@ You are an Expert in Product Management work, Coding and UX Research, alongside 
 - If you have questions for clarification that woud help improve your work, always ask them to the user before starting your work or edits.
 - Always add Unit Tests for newly created features when writing them so we can test the application well. 
 - Keep a best in class code hygiene and syntax to make the code as easy to maintain as possible.
-
+- BEFORE you commit or do any edits or changes, always activate plan mode, irrespective if the user has triggered it already or not to create an step-by-step implementation. Present the plan back to the user and only if confirmed then move ahead.
 ## Commands
 
 Node/pnpm are installed via Homebrew and not in the default PATH. Always prefix shell commands with:
@@ -218,6 +218,7 @@ Migrations (run once in Supabase SQL editor):
 - **BottomNav polish complete**: `bg-background` (fully opaque, no content bleed); `/study` and `/tutor` removed from HIDDEN_ROUTES — tab bar now always visible; study page `pb-24 lg:pb-10`; tutor page outer container `pb-[calc(3.125rem+env(safe-area-inset-bottom))] lg:pb-0`
 - **Dashboard header polish complete**: stats row + progress bar merged into a single `bg-card rounded-xl border` status card for visual cohesion; stat numbers `text-4xl` → `text-2xl` so greeting h1 dominates; icons `h-7` → `h-5`; dashboard bottom padding changed from `pb-24` to `pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-8` (dynamic — mirrors nav height + one space-y-3 gap above BottomNav)
 - **P7 complete**: Curriculum overhaul — `/curriculum` redesigned with filter tabs (All|New|Learning|Mastered, `?filter=` URL param), collapsible module accordion (`<details>` server-side), compact concept rows (title + mastery badge + difficulty bars + "Practice →" shortcut); new `/curriculum/[id]` concept detail page (explanation, examples table, SRS status, all action buttons)
+- **Ped-A complete**: Multi-blank gap-fill — `src/lib/exercises/gapFill.ts` (pure utilities: BLANK_TOKEN=`___`, splitPromptOnBlanks, countBlanks, parseExpectedAnswers, encodeAnswers); `GapFill.tsx` rewritten with inline multi-blank rendering (≥2 blanks) and single-blank fallback; pipe-delimited submission (`"sin embargo | aunque"`); grader updated for per-blank scoring; generate route validates JSON array expected_answer; all 21 gap_fill exercises re-seeded with multi-blank paragraph format; 204 tests passing
 
 ### Phase 6 — Remaining (ordered by priority)
 
@@ -281,7 +282,7 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 **Fix-C: Rename app to "Español Avanzado"**
 - Replace all instances of "Spanish B1→B2" / "Spanish B1 -> B2" across: page titles, manifest name/short_name, auth card descriptions, dashboard greeting, `layout.tsx` metadata, `README`
 - Correct Spanish: **Español Avanzado** (nivel is masculine)
-
+2
 **Fix-D: P8 RLS bug — exercises INSERT blocked by RLS**
 - `exercises` table only has `service_role` INSERT policy; authenticated user session cannot insert
 - Fix: create a service role Supabase client (using `SUPABASE_SERVICE_ROLE_KEY`) and use it only for the insert step in `POST /api/exercises/generate`
@@ -316,11 +317,12 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 
 #### Pedagogical / Learning Quality
 
-**Ped-A: Harder gap-fill exercises — multi-sentence multi-blank format**
-- Current format is trivial: one sentence, one blank, obviously the connector being drilled
-- New format: 2–3 connected sentences in a paragraph; **multiple blanks**; learner must decide where the target connector belongs *and* fill remaining blanks with other appropriate connectors
-- Requires: new prompt format for seeded and AI-generated gap_fill exercises; `GapFill.tsx` needs to handle multiple `___` tokens and collect multiple answers; grading prompt updated to evaluate all blanks together
-- Seed script must be updated to produce this richer format; existing seeded gap_fill exercises should be re-seeded
+**Ped-A: Harder gap-fill exercises — multi-sentence multi-blank format** ✓ complete
+- `src/lib/exercises/gapFill.ts` — pure utilities (BLANK_TOKEN=`___`, splitPromptOnBlanks, countBlanks, parseExpectedAnswers, encodeAnswers)
+- `GapFill.tsx` — inline multi-blank rendering (≥2 `___` tokens); single-blank (1 token) and legacy fallback (0 tokens) preserved
+- expected_answer stored as JSON array string `'["sin embargo","aunque"]'` for multi-blank; grader detects and scores per-blank
+- Submission: pipe-delimited `answers.join(' | ')` — no API schema change
+- All 21 gap_fill exercises re-seeded in multi-blank paragraph format; DB re-seeded
 
 **Ped-B: AI-generated exercises enter the SRS review pool automatically**
 - P8 generate route already inserts into `exercises` table permanently (reusable)
