@@ -95,7 +95,7 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
   const selectedCount = selected.size
 
   return (
-    <div className="space-y-6 pb-48 lg:pb-32">
+    <div className="space-y-6 pb-36">
       {/* Concept list grouped by module → unit */}
       {modules.map((mod) => {
         const modUnits = unitsByModule.get(mod.id) ?? []
@@ -150,7 +150,7 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
       })}
 
       {/* Sticky footer */}
-      <div className="fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4" style={{ bottom: 'var(--bottom-nav-h)' }}>
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="max-w-xl mx-auto flex flex-col gap-3">
           {selectedCount > 0 && (
             <div className="flex items-center justify-between text-sm">
