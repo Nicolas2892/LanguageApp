@@ -149,7 +149,7 @@ export default function SignupPage() {
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
+            <Button type="submit" className="w-full rounded-full" disabled={isSubmitting}>
               {isSubmitting ? 'Creating account…' : 'Create account'}
             </Button>
             <p className="text-sm text-muted-foreground text-center">

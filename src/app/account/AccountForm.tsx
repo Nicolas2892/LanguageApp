@@ -116,7 +116,7 @@ export function AccountForm({ profile }: Props) {
         <p className="text-sm text-green-700 border border-green-200 rounded-lg p-3">Changes saved.</p>
       )}
 
-      <Button onClick={handleSave} disabled={saving} className="w-full active:scale-95 transition-transform">
+      <Button onClick={handleSave} disabled={saving} className="w-full rounded-full active:scale-95 transition-transform">
         {saving ? 'Saving…' : 'Save changes'}
       </Button>
     </div>

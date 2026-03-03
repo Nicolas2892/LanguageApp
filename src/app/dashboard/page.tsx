@@ -6,7 +6,7 @@ import type { Profile, Concept } from '@/lib/supabase/types'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import {
   Flame, Trophy, BookOpen, Sparkles, PenLine,
-  MessageSquare, BarChart2, LayoutList, UserCircle,
+  MessageSquare, BarChart2, LayoutList,
 } from 'lucide-react'
 
 export default async function DashboardPage() {
@@ -68,7 +68,7 @@ export default async function DashboardPage() {
   const learningPct = totalConcepts > 0 ? (learningCount / totalConcepts) * 100 : 0
 
   return (
-    <main className="max-w-lg mx-auto p-6 md:p-8 space-y-6">
+    <main className="max-w-lg mx-auto p-6 md:p-8 space-y-6 pb-24 lg:pb-8">
       {/* Greeting + level badge */}
       <div className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
@@ -126,7 +126,7 @@ export default async function DashboardPage() {
       {/* Mode cards */}
       <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
         {/* Review card */}
-        <div className="border border-l-4 border-l-orange-500 rounded-xl p-5 space-y-3 bg-card">
+        <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Review</p>
             <BookOpen className="h-5 w-5 text-muted-foreground" />
@@ -141,7 +141,7 @@ export default async function DashboardPage() {
               <p className="text-xl font-bold">
                 {dueCount} concept{dueCount !== 1 ? 's' : ''} due today
               </p>
-              <Button asChild className="w-full active:scale-95 transition-transform">
+              <Button asChild className="w-full rounded-full active:scale-95 transition-transform">
                 <Link href="/study">Start review →</Link>
               </Button>
             </>
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
 
         {/* Learn new card */}
         {newConceptsCount > 0 && (
-          <div className="border border-l-4 border-l-orange-500 rounded-xl p-5 space-y-3 bg-card">
+          <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Learn new</p>
               <Sparkles className="h-5 w-5 text-muted-foreground" />
@@ -166,7 +166,7 @@ export default async function DashboardPage() {
             <p className="text-xl font-bold">
               {newConceptsCount} concept{newConceptsCount !== 1 ? 's' : ''} waiting
             </p>
-            <Button asChild className="w-full active:scale-95 transition-transform">
+            <Button asChild className="w-full rounded-full active:scale-95 transition-transform">
               <Link href="/study?mode=new">Start learning →</Link>
             </Button>
           </div>
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
 
         {/* Free write card */}
         {!isNewUser && writeConcept && (
-          <div className="border border-l-4 border-l-orange-500 rounded-xl p-5 space-y-3 bg-card">
+          <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Free write</p>
               <PenLine className="h-5 w-5 text-muted-foreground" />
@@ -187,18 +187,17 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* Quick nav 2×2 grid */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Quick nav 3-col grid */}
+      <div className="grid grid-cols-3 gap-3">
         {[
           { href: '/tutor',      label: 'AI Tutor',   Icon: MessageSquare },
           { href: '/progress',   label: 'Progress',   Icon: BarChart2     },
           { href: '/curriculum', label: 'Curriculum', Icon: LayoutList    },
-          { href: '/account',    label: 'Account',    Icon: UserCircle    },
         ].map(({ href, label, Icon }) => (
           <Link
             key={href}
             href={href}
-            className="flex flex-col items-center justify-center gap-2 border rounded-xl p-4 hover:bg-muted/30 transition-colors min-h-[80px]"
+            className="flex flex-col items-center justify-center gap-2 border rounded-xl p-5 hover:bg-muted/30 transition-colors min-h-[80px]"
           >
             <Icon className="h-6 w-6 text-muted-foreground" />
             <span className="text-sm font-medium">{label}</span>

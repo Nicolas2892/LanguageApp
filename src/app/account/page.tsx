@@ -19,7 +19,7 @@ export default async function AccountPage() {
   const profile = profileData as Profile
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6">
+    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-24 lg:pb-10">
       <div className="flex items-center gap-3">
         <Link
           href="/dashboard"
