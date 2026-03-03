@@ -157,7 +157,7 @@ export default async function StudyPage({
   const backLabel = isFiltered ? '← Curriculum' : '← Dashboard'
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10">
+    <main className="max-w-xl mx-auto p-6 md:p-10 pb-24 lg:pb-10">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-xl font-semibold">Study session</h1>
         <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">

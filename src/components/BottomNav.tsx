@@ -10,7 +10,7 @@ const TABS = [
   { href: '/progress',   label: 'Progress',   Icon: BarChart2       },
   { href: '/curriculum', label: 'Curriculum', Icon: LayoutList      },
 ]
-const HIDDEN_ROUTES = ['/auth', '/study', '/tutor', '/onboarding', '/write']
+const HIDDEN_ROUTES = ['/auth', '/onboarding', '/write']
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -19,7 +19,7 @@ export function BottomNav() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-40
-                 bg-background/85 backdrop-blur-xl lg:hidden select-none
+                 bg-background backdrop-blur-xl lg:hidden select-none
                  border-t border-border/30"
       style={{
         // iOS tab bar: 49pt interactive area + safe-area-inset-bottom additive on top.

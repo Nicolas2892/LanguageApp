@@ -25,7 +25,7 @@ export default async function TutorPage({
   }
 
   return (
-    <div className="flex flex-col h-[100dvh]">
+    <div className="flex flex-col h-[100dvh] pb-[calc(3.125rem+env(safe-area-inset-bottom))] lg:pb-0">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b shrink-0">
         <div>
