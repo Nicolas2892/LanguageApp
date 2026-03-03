@@ -67,7 +67,7 @@ export default async function DashboardPage() {
   const learningPct = totalConcepts > 0 ? (learningCount / totalConcepts) * 100 : 0
 
   return (
-    <main className="max-w-lg mx-auto p-6 md:p-8 space-y-6 pb-28 lg:pb-8">
+    <main className="max-w-lg mx-auto p-6 md:p-8 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-8">
       {/* Greeting + level badge */}
       <div className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
