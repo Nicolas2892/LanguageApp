@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Spanish B1→B2',
-    short_name: 'SpanishApp',
+    name: 'Español Avanzado',
+    short_name: 'EA',
     description: 'Adaptive Spanish learning for B1 to B2 progression',
     start_url: '/dashboard',
     display: 'standalone',

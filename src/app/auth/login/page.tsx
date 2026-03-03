@@ -58,7 +58,7 @@ export default function LoginPage() {
             ES
           </div>
           <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-          <CardDescription>Continue your Spanish B1→B2 journey</CardDescription>
+          <CardDescription>Continue your journey with Español Avanzado</CardDescription>
         </CardHeader>
 
         {/* Google OAuth */}

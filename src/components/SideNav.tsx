@@ -31,7 +31,7 @@ export function SideNav() {
                          text-white font-black text-sm select-none">
           ES
         </span>
-        <span className="font-bold text-sm">SpanishB1→B2</span>
+        <span className="font-bold text-sm">Español Avanzado</span>
       </Link>
 
       {/* Nav items */}

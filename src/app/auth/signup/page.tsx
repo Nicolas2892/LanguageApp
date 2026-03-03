@@ -81,7 +81,7 @@ export default function SignupPage() {
             ES
           </div>
           <CardTitle className="text-2xl font-bold">Create account</CardTitle>
-          <CardDescription>Start your Spanish B1→B2 journey today</CardDescription>
+          <CardDescription>Start your journey with Español Avanzado</CardDescription>
         </CardHeader>
 
         {/* Google OAuth */}

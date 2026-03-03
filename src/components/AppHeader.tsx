@@ -18,7 +18,7 @@ export function AppHeader() {
                          text-white font-black text-sm select-none">
           ES
         </span>
-        <span className="font-bold text-sm hidden sm:block">SpanishB1→B2</span>
+        <span className="font-bold text-sm hidden sm:block">Español Avanzado</span>
       </Link>
 
       {/* Profile avatar → /account */}

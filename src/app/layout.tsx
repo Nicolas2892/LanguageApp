@@ -17,12 +17,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SpanishB1→B2",
+  title: "Español Avanzado",
   description: "Adaptive Spanish learning app for B1 to B2 progression",
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,
-    title: 'SpanishApp',
+    title: 'Español Avanzado',
     statusBarStyle: 'default',
   },
   formatDetection: {
