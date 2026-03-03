@@ -18,9 +18,15 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 h-16 border-t border-border/50
-                 bg-background/90 backdrop-blur-xl lg:hidden select-none"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="fixed bottom-0 left-0 right-0 z-40
+                 bg-background/85 backdrop-blur-xl lg:hidden select-none
+                 border-t border-border/30"
+      style={{
+        // iOS tab bar: 49pt interactive area + safe-area-inset-bottom additive on top.
+        // Do NOT use a fixed h-* class — that collapses content when safe area is non-zero.
+        height: 'calc(3.125rem + env(safe-area-inset-bottom))',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
     >
       <div className="flex h-full">
         {TABS.map(({ href, label, Icon }) => {
@@ -31,18 +37,20 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5
+              className={`flex-1 flex flex-col items-center justify-center gap-1
                           transition-colors touch-manipulation
                           ${active ? 'text-orange-500' : 'text-muted-foreground'}`}
             >
+              {/* Pill: wider than tall, matching iOS active indicator proportions */}
               <span
-                className={`rounded-full p-1.5 transition-colors
+                className={`rounded-full px-3 py-0.5 transition-colors
                   ${active ? 'bg-orange-100' : ''}`}
               >
                 <Icon className="h-6 w-6" />
               </span>
+              {/* 10px matches iOS 10pt label spec */}
               <span
-                className={`text-[11px] leading-none
+                className={`text-[10px] leading-none
                   ${active ? 'font-semibold' : 'font-medium'}`}
               >
                 {label}
