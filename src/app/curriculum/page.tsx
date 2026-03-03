@@ -85,7 +85,6 @@ export default async function CurriculumPage() {
           <h1 className="text-3xl font-extrabold tracking-tight">Curriculum</h1>
           <p className="text-sm text-muted-foreground mt-0.5">B1 → B2 Spanish</p>
         </div>
-        <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">← Back</Link>
       </div>
 
       {/* Legend */}

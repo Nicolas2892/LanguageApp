@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { SessionConfig } from './SessionConfig'
 
@@ -17,11 +16,8 @@ export default async function ConfigurePage() {
 
   return (
     <main className="max-w-md mx-auto p-6 md:p-10">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8">
         <h1 className="text-xl font-semibold">New session</h1>
-        <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-          ✕ Cancel
-        </Link>
       </div>
       <SessionConfig modules={typedModules} />
     </main>

@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { TutorChat } from './TutorChat'
 
@@ -27,14 +26,9 @@ export default async function TutorPage({
   return (
     <div className="flex flex-col h-[100dvh] pb-[calc(3.125rem+env(safe-area-inset-bottom))] lg:pb-0">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b shrink-0">
-        <div>
-          <h1 className="font-semibold">AI Tutor</h1>
-          <p className="text-xs text-muted-foreground">Powered by Claude</p>
-        </div>
-        <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-          ✕ Close
-        </Link>
+      <header className="px-4 py-3 border-b shrink-0">
+        <h1 className="font-semibold">AI Tutor</h1>
+        <p className="text-xs text-muted-foreground">Powered by Claude</p>
       </header>
 
       {/* Chat fills remaining height */}

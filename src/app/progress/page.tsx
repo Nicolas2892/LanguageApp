@@ -112,11 +112,8 @@ export default async function ProgressPage() {
   return (
     <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-10 pb-24 lg:pb-10">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div>
         <h1 className="text-3xl font-extrabold tracking-tight">Progress</h1>
-        <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Back
-        </Link>
       </div>
 
       {!hasAnyData ? (

@@ -24,7 +24,6 @@ export default async function StudyPage({
 
   const params = await searchParams
   const filterTypes = params.types ? params.types.split(',').filter(Boolean) : []
-  const isFiltered = !!(params.concept || params.unit || params.module || filterTypes.length)
   const today = new Date().toISOString().split('T')[0]
 
   let conceptIds: string[] = []
@@ -102,7 +101,6 @@ export default async function StudyPage({
         <p className="text-muted-foreground">No concepts are due for review today.</p>
         <div className="flex justify-center gap-4 text-sm">
           <Link href="/study/configure" className="underline">Practice anyway →</Link>
-          <Link href="/dashboard" className="underline">Dashboard</Link>
         </div>
       </main>
     )
@@ -152,17 +150,10 @@ export default async function StudyPage({
 
   if (items.length === 0) redirect('/dashboard')
 
-  // Build a back-link label
-  const backHref = isFiltered ? '/curriculum' : '/dashboard'
-  const backLabel = isFiltered ? '← Curriculum' : '← Dashboard'
-
   return (
     <main className="max-w-xl mx-auto p-6 md:p-10 pb-24 lg:pb-10">
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8">
         <h1 className="text-xl font-semibold">Study session</h1>
-        <Link href={backHref} className="text-sm text-muted-foreground hover:text-foreground">
-          {backLabel}
-        </Link>
       </div>
       <ErrorBoundary>
         <StudySession items={items} />
