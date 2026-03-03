@@ -8,7 +8,7 @@ import { HintPanel } from '@/components/exercises/HintPanel'
 import { Badge } from '@/components/ui/badge'
 import {
   PartyPopper, CheckCircle2, XCircle,
-  Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight,
+  Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles,
 } from 'lucide-react'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
@@ -18,8 +18,17 @@ export interface StudyItem {
   exercise: Exercise
 }
 
+interface GenerateConfig {
+  conceptId: string
+  concept: Concept
+  exerciseType: string
+}
+
 interface Props {
   items: StudyItem[]
+  practiceMode?: boolean
+  generateConfig?: GenerateConfig
+  returnHref?: string
 }
 
 type SessionState =
@@ -36,9 +45,10 @@ const EXERCISE_TYPE_META: Record<string, { label: string; Icon: React.ElementTyp
   free_write:       { label: 'Free write',       Icon: PenLine       },
 }
 
-export function StudySession({ items }: Props) {
+export function StudySession({ items: initialItems, practiceMode, generateConfig, returnHref }: Props) {
   const router = useRouter()
   const startedAt = useRef(new Date().toISOString())
+  const [dynamicItems, setDynamicItems] = useState<StudyItem[]>(initialItems)
   const [index, setIndex] = useState(0)
   const [state, setState] = useState<SessionState>({ phase: 'answering' })
   const [submitting, setSubmitting] = useState(false)
@@ -48,8 +58,11 @@ export function StudySession({ items }: Props) {
   const [claudeHint, setClaudeHint] = useState<string | null>(null)
   const [loadingHint, setLoadingHint] = useState(false)
 
-  const current = items[index]
-  const progressPct = (index / items.length) * 100
+  const [generatingMore, setGeneratingMore] = useState(false)
+  const [generateError, setGenerateError] = useState<string | null>(null)
+
+  const current = dynamicItems[index]
+  const progressPct = (index / dynamicItems.length) * 100
 
   async function handleSubmit(answer: string) {
     setSubmitting(true)
@@ -61,6 +74,7 @@ export function StudySession({ items }: Props) {
           exercise_id: current.exercise.id,
           concept_id: current.concept.id,
           user_answer: answer,
+          ...(practiceMode && { skip_srs: true }),
         }),
       })
       const result = await res.json() as GradeResult & { next_review_in_days: number }
@@ -99,16 +113,16 @@ export function StudySession({ items }: Props) {
   }
 
   function handleNext() {
-    if (index + 1 >= items.length) {
+    if (index + 1 >= dynamicItems.length) {
       const correct = scores.filter((s) => s >= 2).length
-      setState({ phase: 'done', correct, total: items.length })
+      setState({ phase: 'done', correct, total: dynamicItems.length })
       fetch('/api/sessions/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           started_at: startedAt.current,
-          concepts_reviewed: items.length,
-          accuracy: Math.round((correct / items.length) * 100),
+          concepts_reviewed: dynamicItems.length,
+          accuracy: Math.round((correct / dynamicItems.length) * 100),
         }),
       }).catch(() => {})
     } else {
@@ -119,10 +133,43 @@ export function StudySession({ items }: Props) {
     }
   }
 
+  async function handleGenerateMore() {
+    if (!generateConfig) return
+    setGeneratingMore(true)
+    setGenerateError(null)
+    try {
+      const body = JSON.stringify({
+        concept_id: generateConfig.conceptId,
+        type: generateConfig.exerciseType,
+      })
+      const headers = { 'Content-Type': 'application/json' }
+      const [r1, r2, r3] = await Promise.all([
+        fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
+        fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
+        fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
+      ])
+      const newItems: StudyItem[] = [r1, r2, r3].map((ex) => ({
+        concept: generateConfig.concept,
+        exercise: ex as Exercise,
+      }))
+      const startIndex = dynamicItems.length
+      setDynamicItems((prev) => [...prev, ...newItems])
+      setIndex(startIndex)
+      setState({ phase: 'answering' })
+      setWrongAttempts(0)
+      setClaudeHint(null)
+    } catch {
+      setGenerateError('Failed to generate exercises. Please try again.')
+    } finally {
+      setGeneratingMore(false)
+    }
+  }
+
   // Done screen
   if (state.phase === 'done') {
     const pct = Math.round((state.correct / state.total) * 100)
     const missed = state.total - state.correct
+    const backLabel = returnHref ? 'Back to concept' : 'Done'
     return (
       <div className="space-y-6 text-center py-8">
         <PartyPopper className="h-14 w-14 text-orange-500 mx-auto" />
@@ -142,15 +189,32 @@ export function StudySession({ items }: Props) {
             </div>
           )}
         </div>
-        <p className="text-muted-foreground text-sm">
-          The SRS has scheduled your next reviews based on your performance.
-        </p>
-        <button
-          onClick={() => router.push('/dashboard')}
-          className="inline-flex items-center justify-center rounded-xl bg-primary text-primary-foreground px-6 py-2.5 text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
-        >
-          Done
-        </button>
+        {!practiceMode && (
+          <p className="text-muted-foreground text-sm">
+            The SRS has scheduled your next reviews based on your performance.
+          </p>
+        )}
+        <div className="flex flex-col items-center gap-3">
+          {practiceMode && generateConfig && (
+            <button
+              onClick={handleGenerateMore}
+              disabled={generatingMore}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary text-primary px-6 py-2.5 text-sm font-semibold hover:bg-primary/5 active:scale-95 transition-transform disabled:opacity-60"
+            >
+              <Sparkles className="h-4 w-4" />
+              {generatingMore ? 'Generating…' : 'Generate 3 more'}
+            </button>
+          )}
+          <button
+            onClick={() => router.push(returnHref ?? '/dashboard')}
+            className="inline-flex items-center justify-center rounded-xl bg-primary text-primary-foreground px-6 py-2.5 text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
+          >
+            {backLabel}
+          </button>
+          {generateError && (
+            <p className="text-sm text-red-600">{generateError}</p>
+          )}
+        </div>
       </div>
     )
   }
@@ -163,7 +227,7 @@ export function StudySession({ items }: Props) {
       {/* Progress bar */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span className="font-medium">{index + 1} / {items.length}</span>
+          <span className="font-medium">{index + 1} / {dynamicItems.length}</span>
           <Badge variant="outline" className="capitalize text-xs">{current.concept.type} practice</Badge>
         </div>
         <div className="h-2.5 bg-muted rounded-full overflow-hidden">
@@ -214,7 +278,7 @@ export function StudySession({ items }: Props) {
             userAnswer={state.userAnswer}
             onNext={handleNext}
             onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
-            isLast={index + 1 >= items.length}
+            isLast={index + 1 >= dynamicItems.length}
           />
         )}
       </div>

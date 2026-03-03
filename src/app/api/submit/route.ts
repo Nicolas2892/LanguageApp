@@ -10,6 +10,7 @@ const SubmitSchema = z.object({
   exercise_id: z.string().uuid(),
   concept_id: z.string().uuid(),
   user_answer: z.string().min(1).max(2000),
+  skip_srs: z.boolean().optional(),
 })
 
 export async function POST(request: Request) {
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
     }
-    const { exercise_id, concept_id, user_answer } = parsed.data
+    const { exercise_id, concept_id, user_answer, skip_srs } = parsed.data
 
     // 1. Fetch exercise + concept
     const { data: exercise, error: exErr } = await supabase
@@ -57,35 +58,40 @@ export async function POST(request: Request) {
       userAnswer: user_answer,
     })
 
-    // 3. Fetch current user_progress (or use defaults if first time)
-    const { data: existingProgress } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('concept_id', concept_id)
-      .single()
+    let nextReviewInDays = 0
 
-    const currentProgress = existingProgress ?? {
-      ...DEFAULT_PROGRESS,
-      user_id: user.id,
-      concept_id,
-    }
+    if (!skip_srs) {
+      // 3. Fetch current user_progress (or use defaults if first time)
+      const { data: existingProgress } = await supabase
+        .from('user_progress')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('concept_id', concept_id)
+        .single()
 
-    // 4. Calculate new SRS values
-    const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore)
-
-    // 5. Upsert user_progress
-    await supabase
-      .from('user_progress')
-      .upsert({
+      const currentProgress = existingProgress ?? {
+        ...DEFAULT_PROGRESS,
         user_id: user.id,
         concept_id,
-        ease_factor: newSRS.ease_factor,
-        interval_days: newSRS.interval_days,
-        due_date: newSRS.due_date,
-        repetitions: newSRS.repetitions,
-        last_reviewed_at: new Date().toISOString(),
-      }, { onConflict: 'user_id,concept_id' })
+      }
+
+      // 4. Calculate new SRS values
+      const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore)
+      nextReviewInDays = newSRS.interval_days
+
+      // 5. Upsert user_progress
+      await supabase
+        .from('user_progress')
+        .upsert({
+          user_id: user.id,
+          concept_id,
+          ease_factor: newSRS.ease_factor,
+          interval_days: newSRS.interval_days,
+          due_date: newSRS.due_date,
+          repetitions: newSRS.repetitions,
+          last_reviewed_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,concept_id' })
+    }
 
     // 6. Record the attempt
     await supabase
@@ -121,7 +127,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       ...gradeResult,
-      next_review_in_days: newSRS.interval_days,
+      next_review_in_days: nextReviewInDays,
     })
   } catch (err) {
     console.error('[submit] error:', err)

@@ -16,6 +16,7 @@ export default async function StudyPage({
     module?: string
     types?: string        // comma-separated exercise types
     mode?: string         // 'new' = unlearned concepts queue
+    practice?: string     // 'true' = drill mode (all exercises, skip SRS)
   }>
 }) {
   const supabase = await createClient()
@@ -24,6 +25,7 @@ export default async function StudyPage({
 
   const params = await searchParams
   const filterTypes = params.types ? params.types.split(',').filter(Boolean) : []
+  const isPracticeMode = params.practice === 'true' && !!params.concept && filterTypes.length > 0
   const today = new Date().toISOString().split('T')[0]
 
   let conceptIds: string[] = []
@@ -144,8 +146,16 @@ export default async function StudyPage({
     const concept = conceptMap.get(conceptId)
     const exArr = exercisesByConceptId.get(conceptId)
     if (!concept || !exArr || exArr.length === 0) continue
-    const exercise = exArr[Math.floor(Math.random() * exArr.length)]
-    items.push({ concept, exercise })
+    if (isPracticeMode) {
+      // Drill mode: include all exercises of the requested type
+      for (const ex of exArr) {
+        items.push({ concept, exercise: ex })
+      }
+    } else {
+      // SRS mode: one random exercise per concept
+      const exercise = exArr[Math.floor(Math.random() * exArr.length)]
+      items.push({ concept, exercise })
+    }
   }
 
   if (items.length === 0) redirect('/dashboard')
@@ -156,7 +166,20 @@ export default async function StudyPage({
         <h1 className="text-xl font-semibold">Study session</h1>
       </div>
       <ErrorBoundary>
-        <StudySession items={items} />
+        <StudySession
+          items={items}
+          practiceMode={isPracticeMode}
+          generateConfig={
+            isPracticeMode && params.concept && filterTypes[0]
+              ? {
+                  conceptId: params.concept,
+                  concept: conceptMap.get(params.concept)!,
+                  exerciseType: filterTypes[0],
+                }
+              : undefined
+          }
+          returnHref={isPracticeMode && params.concept ? `/curriculum/${params.concept}` : undefined}
+        />
       </ErrorBoundary>
     </main>
   )

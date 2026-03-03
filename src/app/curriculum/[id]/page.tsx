@@ -216,7 +216,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
           <div className="grid grid-cols-2 gap-2">
             {availableTypes.map(({ type, label }) => (
               <Button key={type} asChild variant="outline" size="sm" className="justify-start">
-                <Link href={`/study?concept=${id}&types=${type}`}>{label}</Link>
+                <Link href={`/study?concept=${id}&types=${type}&practice=true`}>{label}</Link>
               </Button>
             ))}
           </div>
