@@ -281,11 +281,10 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - Fix: create a service role Supabase client (using `SUPABASE_SERVICE_ROLE_KEY`) and use it only for the insert step in `POST /api/exercises/generate`
 - Do NOT add a broad authenticated-user INSERT policy — keeps exercises write-protected outside the generate endpoint
 
-**Fix-E: Google OAuth — `handle_new_user` trigger uses wrong metadata field**
-- Google sends name as `raw_user_meta_data->>'full_name'` (sometimes `'name'`), not `'display_name'`
-- Current trigger falls back to email prefix for all Google sign-ups
-- Fix: SQL migration — update `coalesce()` to: `coalesce(raw_user_meta_data->>'display_name', raw_user_meta_data->>'full_name', raw_user_meta_data->>'name', split_part(new.email, '@', 1))`
-- Also requires: Google provider enabled in Supabase dashboard (Auth → Providers → Google) + Google Cloud Console OAuth client with correct redirect URI — this is an infrastructure/config step, not code
+**Fix-E: Google OAuth — `handle_new_user` trigger uses wrong metadata field** ✓ complete
+- Migration: `supabase/migrations/005_fix_google_oauth_trigger.sql` — `create or replace function` with updated `coalesce` chain: `display_name → full_name → name → email prefix`
+- Run in Supabase SQL editor (one statement, safe on live DB)
+- Infrastructure prerequisite (outside code): Google provider enabled in Supabase dashboard + Google Cloud Console OAuth client
 
 #### UX Improvements
 
