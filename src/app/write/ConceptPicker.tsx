@@ -150,7 +150,7 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
       })}
 
       {/* Sticky footer */}
-      <div className="fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4 bottom-[calc(3.125rem+env(safe-area-inset-bottom))] lg:bottom-0">
+      <div className="fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4" style={{ bottom: 'var(--bottom-nav-h)' }}>
         <div className="max-w-xl mx-auto flex flex-col gap-3">
           {selectedCount > 0 && (
             <div className="flex items-center justify-between text-sm">
