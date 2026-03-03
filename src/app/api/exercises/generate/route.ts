@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
+import { createClient as createBrowserClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
 import type { Concept, Exercise } from '@/lib/supabase/types'
+
+function createServiceRoleClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+}
 
 const GenerateSchema = z.object({
   concept_id: z.string().uuid(),
@@ -76,8 +84,9 @@ Rules for ${typeLabel}: ${rule}`
       return NextResponse.json({ error: 'Invalid AI response structure' }, { status: 500 })
     }
 
-    // Insert into exercises table
-    const { data: newExercise, error: insertErr } = await supabase
+    // Insert into exercises table using service role to bypass RLS
+    const serviceClient = createServiceRoleClient()
+    const { data: newExercise, error: insertErr } = await serviceClient
       .from('exercises')
       .insert({
         concept_id,
