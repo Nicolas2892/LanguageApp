@@ -6,7 +6,6 @@ import type { Profile, Concept } from '@/lib/supabase/types'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import {
   Flame, Trophy, BookOpen, Sparkles, PenLine,
-  MessageSquare, BarChart2, LayoutList,
 } from 'lucide-react'
 
 export default async function DashboardPage() {
@@ -187,23 +186,6 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* Quick nav 3-col grid */}
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { href: '/tutor',      label: 'AI Tutor',   Icon: MessageSquare },
-          { href: '/progress',   label: 'Progress',   Icon: BarChart2     },
-          { href: '/curriculum', label: 'Curriculum', Icon: LayoutList    },
-        ].map(({ href, label, Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex flex-col items-center justify-center gap-2 border rounded-xl p-5 hover:bg-muted/30 transition-colors min-h-[80px]"
-          >
-            <Icon className="h-6 w-6 text-muted-foreground" />
-            <span className="text-sm font-medium">{label}</span>
-          </Link>
-        ))}
-      </div>
     </main>
   )
 }
