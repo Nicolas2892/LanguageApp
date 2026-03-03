@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
+import { IOSInstallPrompt } from "@/components/IOSInstallPrompt";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { SideNav } from "@/components/SideNav";
@@ -53,6 +54,7 @@ export default function RootLayout({
         </div>
         <BottomNav />
         <ServiceWorkerRegistration />
+        <IOSInstallPrompt />
       </body>
     </html>
   );

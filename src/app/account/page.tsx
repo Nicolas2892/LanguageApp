@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AccountForm } from './AccountForm'
+import { IOSInstallCard } from './IOSInstallCard'
 import type { Profile } from '@/lib/supabase/types'
 
 export default async function AccountPage() {
@@ -25,6 +26,7 @@ export default async function AccountPage() {
       </div>
 
       <AccountForm profile={profile} />
+      <IOSInstallCard />
     </main>
   )
 }
