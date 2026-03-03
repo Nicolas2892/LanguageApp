@@ -67,7 +67,7 @@ export default async function DashboardPage() {
   const learningPct = totalConcepts > 0 ? (learningCount / totalConcepts) * 100 : 0
 
   return (
-    <main className="max-w-lg mx-auto p-6 md:p-8 space-y-6 pb-24 lg:pb-8">
+    <main className="max-w-lg mx-auto p-6 md:p-8 space-y-6 pb-28 lg:pb-8">
       {/* Greeting + level badge */}
       <div className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
@@ -85,42 +85,45 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats row */}
-      <div className="flex items-center gap-8">
-        <div className="flex items-center gap-2.5">
-          <Flame className="h-7 w-7 text-orange-500 shrink-0" />
-          <div>
-            <p className="text-4xl font-extrabold text-orange-500 leading-none">{profile?.streak ?? 0}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">day streak</p>
+      {/* Stats + progress — unified status card */}
+      <div className="bg-card rounded-xl border border-border/50 p-4 space-y-3">
+        {/* Stats row */}
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Flame className="h-5 w-5 text-orange-500 shrink-0" />
+            <div>
+              <p className="text-2xl font-extrabold text-orange-500 leading-none">{profile?.streak ?? 0}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">day streak</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-amber-500 shrink-0" />
+            <div>
+              <p className="text-2xl font-extrabold leading-none">{masteredCount}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">of {totalConcepts} mastered</p>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2.5">
-          <Trophy className="h-7 w-7 text-amber-500 shrink-0" />
-          <div>
-            <p className="text-4xl font-extrabold leading-none">{masteredCount}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">of {totalConcepts} mastered</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Segmented progress bar */}
-      {!isNewUser && (
-        <div className="space-y-1.5">
-          <div className="flex h-2 rounded-full overflow-hidden bg-muted gap-0.5">
-            <div
-              className="bg-orange-500 transition-all duration-500 rounded-l-full"
-              style={{ width: `${masteredPct}%` }}
-            />
-            <div
-              className="bg-amber-300 transition-all duration-500"
-              style={{ width: `${learningPct}%` }}
-            />
+        {/* Progress bar — only for non-new users */}
+        {!isNewUser && (
+          <div className="space-y-1.5">
+            <div className="flex h-2.5 rounded-full overflow-hidden bg-muted gap-0.5">
+              <div
+                className="bg-orange-500 transition-all duration-500 rounded-l-full"
+                style={{ width: `${masteredPct}%` }}
+              />
+              <div
+                className="bg-amber-300 transition-all duration-500"
+                style={{ width: `${learningPct}%` }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground text-right">
+              {masteredCount} mastered · {learningCount} learning · {newConceptsCount} new
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground text-right">
-            {masteredCount} mastered · {learningCount} learning · {newConceptsCount} new
-          </p>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Mode cards */}
       <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
