@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ShieldCheck, Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
@@ -26,10 +27,21 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
   const [pwdMessage, setPwdMessage] = useState<string | null>(null)
   const [pwdError, setPwdError] = useState<string | null>(null)
 
+  const [showCurrentPwd, setShowCurrentPwd] = useState(false)
+  const [showNewPwd, setShowNewPwd] = useState(false)
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false)
+
   async function handleEmailChange() {
-    setEmailSaving(true)
     setEmailMessage(null)
     setEmailError(null)
+
+    const emailRegex = /\S+@\S+\.\S+/
+    if (!emailRegex.test(newEmail)) {
+      setEmailError('Please enter a valid email address.')
+      return
+    }
+
+    setEmailSaving(true)
     try {
       const { error } = await supabase.auth.updateUser({ email: newEmail })
       if (error) throw error
@@ -79,11 +91,15 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Security</h2>
+      <h2 className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        <ShieldCheck className="h-3.5 w-3.5" />
+        Security
+      </h2>
 
       {/* Change Email */}
       <div className="space-y-4">
         <h3 className="text-sm font-medium">Change email</h3>
+        <p className="text-xs text-muted-foreground -mt-2">Current: {userEmail}</p>
         <div className="space-y-1.5">
           <Label htmlFor="new_email">New email address</Label>
           <Input
@@ -122,30 +138,75 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
           <>
             <div className="space-y-1.5">
               <Label htmlFor="current_password">Current password</Label>
-              <Input
-                id="current_password"
-                type="password"
-                value={currentPwd}
-                onChange={(e) => setCurrentPwd(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  id="current_password"
+                  type={showCurrentPwd ? 'text' : 'password'}
+                  value={currentPwd}
+                  onChange={(e) => setCurrentPwd(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowCurrentPwd(!showCurrentPwd)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showCurrentPwd ? 'Hide password' : 'Show password'}
+                >
+                  {showCurrentPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="new_password">New password</Label>
-              <Input
-                id="new_password"
-                type="password"
-                value={newPwd}
-                onChange={(e) => setNewPwd(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  id="new_password"
+                  type={showNewPwd ? 'text' : 'password'}
+                  value={newPwd}
+                  onChange={(e) => setNewPwd(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowNewPwd(!showNewPwd)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showNewPwd ? 'Hide password' : 'Show password'}
+                >
+                  {showNewPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {newPwd.length > 0 && (
+                <p className={`text-xs font-medium ${
+                  newPwd.length < 6 ? 'text-red-500' :
+                  newPwd.length < 12 ? 'text-amber-500' :
+                  'text-green-600'
+                }`}>
+                  {newPwd.length < 6 ? 'Too short' : newPwd.length < 12 ? 'OK' : 'Strong'}
+                </p>
+              )}
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="confirm_password">Confirm new password</Label>
-              <Input
-                id="confirm_password"
-                type="password"
-                value={confirmPwd}
-                onChange={(e) => setConfirmPwd(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  id="confirm_password"
+                  type={showConfirmPwd ? 'text' : 'password'}
+                  value={confirmPwd}
+                  onChange={(e) => setConfirmPwd(e.target.value)}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowConfirmPwd(!showConfirmPwd)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label={showConfirmPwd ? 'Hide password' : 'Show password'}
+                >
+                  {showConfirmPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             {pwdError && (
               <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{pwdError}</p>

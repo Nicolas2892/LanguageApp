@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { LogOut, Trash2, AlertTriangle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export function DangerZone() {
@@ -34,15 +35,27 @@ export function DangerZone() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xs font-semibold text-red-600 uppercase tracking-wide">Danger zone</h2>
-
+      {/* Sign Out — neutral section */}
+      <h2 className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        <LogOut className="h-3.5 w-3.5" />
+        Session
+      </h2>
       <Button
         variant="outline"
         className="w-full rounded-full"
         onClick={handleSignOut}
       >
+        <LogOut className="h-4 w-4 mr-2" />
         Sign out
       </Button>
+
+      <hr className="border-border" />
+
+      {/* Delete Account — danger only */}
+      <h2 className="flex items-center gap-1.5 text-xs font-semibold text-red-600 uppercase tracking-wide">
+        <AlertTriangle className="h-3.5 w-3.5" />
+        Danger zone
+      </h2>
 
       {!confirming ? (
         <Button
@@ -50,6 +63,7 @@ export function DangerZone() {
           className="w-full rounded-full border-red-300 text-red-600 hover:bg-red-50"
           onClick={() => setConfirming(true)}
         >
+          <Trash2 className="h-4 w-4 mr-2" />
           Delete account
         </Button>
       ) : (

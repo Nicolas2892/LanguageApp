@@ -197,6 +197,22 @@ describe('AccountForm', () => {
     })
   })
 
+  // --- Character count ---
+
+  it('does not show character count when display name is short', () => {
+    render(<AccountForm profile={baseProfile} />)
+    // "Nicolas" is 7 chars, well below threshold of 35
+    expect(screen.queryByText(/\/50/)).toBeNull()
+  })
+
+  it('shows character count when display name is 35 or more chars', async () => {
+    render(<AccountForm profile={baseProfile} />)
+    const input = screen.getByLabelText('Display name')
+    await userEvent.clear(input)
+    await userEvent.type(input, 'A'.repeat(35))
+    expect(screen.getByText('35/50')).toBeTruthy()
+  })
+
   // --- Saved state cleared on edit ---
 
   it('clears "Changes saved." when display name is edited', async () => {

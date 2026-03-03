@@ -116,4 +116,62 @@ describe('SecurityForm', () => {
     })
     expect(mockUpdateUser).not.toHaveBeenCalled()
   })
+
+  // --- Email format validation ---
+
+  it('invalid email format shows error and does not call updateUser', async () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    await userEvent.type(screen.getByLabelText('New email address'), 'notanemail')
+    await userEvent.click(screen.getByRole('button', { name: 'Update email' }))
+    expect(screen.getByText('Please enter a valid email address.')).toBeTruthy()
+    expect(mockUpdateUser).not.toHaveBeenCalled()
+  })
+
+  // --- Show/hide password toggles ---
+
+  it('show/hide toggle on current password changes input type', async () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    const input = screen.getByLabelText('Current password') as HTMLInputElement
+    expect(input.type).toBe('password')
+    // find the toggle button closest to current_password
+    const toggleBtns = screen.getAllByRole('button', { name: 'Show password' })
+    await userEvent.click(toggleBtns[0])
+    expect(input.type).toBe('text')
+  })
+
+  it('show/hide toggle on new password changes input type', async () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    const input = screen.getByLabelText('New password') as HTMLInputElement
+    expect(input.type).toBe('password')
+    const toggleBtns = screen.getAllByRole('button', { name: 'Show password' })
+    await userEvent.click(toggleBtns[1])
+    expect(input.type).toBe('text')
+  })
+
+  // --- Password strength indicator ---
+
+  it('password strength hidden when new password field is empty', () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    expect(screen.queryByText('Too short')).toBeNull()
+    expect(screen.queryByText('OK')).toBeNull()
+    expect(screen.queryByText('Strong')).toBeNull()
+  })
+
+  it('password strength shows "Too short" for fewer than 6 chars', async () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    await userEvent.type(screen.getByLabelText('New password'), 'abc')
+    expect(screen.getByText('Too short')).toBeTruthy()
+  })
+
+  it('password strength shows "OK" for 6–11 chars', async () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    await userEvent.type(screen.getByLabelText('New password'), 'abcdef')
+    expect(screen.getByText('OK')).toBeTruthy()
+  })
+
+  it('password strength shows "Strong" for 12+ chars', async () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    await userEvent.type(screen.getByLabelText('New password'), 'abcdefghijkl')
+    expect(screen.getByText('Strong')).toBeTruthy()
+  })
 })

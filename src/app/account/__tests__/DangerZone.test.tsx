@@ -24,27 +24,29 @@ describe('DangerZone', () => {
     global.fetch = vi.fn()
   })
 
-  it('renders "Sign out" button', () => {
+  it('renders "Session" heading and "Sign out" button', () => {
     render(<DangerZone />)
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy()
+    expect(screen.getByText('Session')).toBeTruthy()
+    expect(screen.getByRole('button', { name: /Sign out/ })).toBeTruthy()
   })
 
   it('sign out calls supabase.auth.signOut() and redirects to /auth/login', async () => {
     mockSignOut.mockResolvedValueOnce({})
     render(<DangerZone />)
-    await userEvent.click(screen.getByRole('button', { name: 'Sign out' }))
+    await userEvent.click(screen.getByRole('button', { name: /Sign out/ }))
     expect(mockSignOut).toHaveBeenCalled()
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/auth/login'))
   })
 
-  it('"Delete account" button visible in default state', () => {
+  it('"Delete account" button visible in default state under "Danger zone" heading', () => {
     render(<DangerZone />)
-    expect(screen.getByRole('button', { name: 'Delete account' })).toBeTruthy()
+    expect(screen.getByText('Danger zone')).toBeTruthy()
+    expect(screen.getByRole('button', { name: /Delete account/ })).toBeTruthy()
   })
 
   it('delete button click shows confirmation UI', async () => {
     render(<DangerZone />)
-    await userEvent.click(screen.getByRole('button', { name: 'Delete account' }))
+    await userEvent.click(screen.getByRole('button', { name: /Delete account/ }))
     expect(screen.getByText(/This will permanently delete your account/)).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Yes, delete my account' })).toBeTruthy()
@@ -52,9 +54,9 @@ describe('DangerZone', () => {
 
   it('cancel hides confirmation and shows original button', async () => {
     render(<DangerZone />)
-    await userEvent.click(screen.getByRole('button', { name: 'Delete account' }))
+    await userEvent.click(screen.getByRole('button', { name: /Delete account/ }))
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
-    expect(screen.getByRole('button', { name: 'Delete account' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /Delete account/ })).toBeTruthy()
     expect(screen.queryByText(/This will permanently delete your account/)).toBeNull()
   })
 
@@ -64,7 +66,7 @@ describe('DangerZone', () => {
       json: async () => ({ ok: true }),
     } as Response)
     render(<DangerZone />)
-    await userEvent.click(screen.getByRole('button', { name: 'Delete account' }))
+    await userEvent.click(screen.getByRole('button', { name: /Delete account/ }))
     await userEvent.click(screen.getByRole('button', { name: 'Yes, delete my account' }))
     expect(global.fetch).toHaveBeenCalledWith('/api/account/delete', { method: 'POST' })
     await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/auth/login'))
@@ -76,7 +78,7 @@ describe('DangerZone', () => {
       json: async () => ({ error: 'Server error' }),
     } as Response)
     render(<DangerZone />)
-    await userEvent.click(screen.getByRole('button', { name: 'Delete account' }))
+    await userEvent.click(screen.getByRole('button', { name: /Delete account/ }))
     await userEvent.click(screen.getByRole('button', { name: 'Yes, delete my account' }))
     await waitFor(() => {
       expect(screen.getByText('Server error')).toBeTruthy()
@@ -91,7 +93,7 @@ describe('DangerZone', () => {
       })
     )
     render(<DangerZone />)
-    await userEvent.click(screen.getByRole('button', { name: 'Delete account' }))
+    await userEvent.click(screen.getByRole('button', { name: /Delete account/ }))
     const clickPromise = userEvent.click(screen.getByRole('button', { name: 'Yes, delete my account' }))
     await waitFor(() => {
       const btn = screen.getByRole('button', { name: 'Deleting…' })

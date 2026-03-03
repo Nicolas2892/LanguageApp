@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Volume2, VolumeX } from 'lucide-react'
+import { Volume2, VolumeX, UserCircle, Settings2, CheckCircle2 } from 'lucide-react'
 import { useSpeech } from '@/lib/hooks/useSpeech'
 import type { Profile } from '@/lib/supabase/types'
 
@@ -64,7 +64,10 @@ export function AccountForm({ profile }: Props) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Profile</h2>
+      <h2 className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        <UserCircle className="h-3.5 w-3.5" />
+        Profile
+      </h2>
 
       {/* Display name */}
       <div className="space-y-1.5">
@@ -76,6 +79,9 @@ export function AccountForm({ profile }: Props) {
           maxLength={50}
           placeholder="Your name"
         />
+        {displayName.length >= 35 && (
+          <p className="text-xs text-muted-foreground text-right">{displayName.length}/50</p>
+        )}
       </div>
 
       {/* Level picker — card style */}
@@ -97,6 +103,9 @@ export function AccountForm({ profile }: Props) {
             </button>
           ))}
         </div>
+        <p className="text-xs text-muted-foreground">
+          Your level will be recalculated automatically as you master concepts.
+        </p>
       </div>
 
       {/* Daily goal */}
@@ -118,42 +127,45 @@ export function AccountForm({ profile }: Props) {
         <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{error}</p>
       )}
       {saved && (
-        <p className="text-sm text-green-700 border border-green-200 rounded-lg p-3">Changes saved.</p>
+        <div className="flex items-center gap-2 text-sm text-green-700 border border-green-200 rounded-lg p-3">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          <span>Changes saved.</span>
+        </div>
       )}
 
       <Button onClick={handleSave} disabled={saving} className="w-full rounded-full active:scale-95 transition-transform">
         {saving ? 'Saving…' : 'Save changes'}
       </Button>
 
-      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pt-2">Preferences</h2>
+      <h2 className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide pt-2">
+        <Settings2 className="h-3.5 w-3.5" />
+        Preferences
+      </h2>
 
       {/* Audio playback toggle */}
-      <div className="space-y-1.5">
-        <Label>Audio playback</Label>
-        <button
-          type="button"
-          onClick={toggleAudio}
-          className={`w-full rounded-xl border p-3 flex items-center gap-3 text-left transition-colors ${
-            audioEnabled === false
-              ? 'border-gray-200 hover:border-gray-300'
-              : 'border-orange-500 bg-orange-50'
-          }`}
-        >
-          {audioEnabled === false ? (
-            <VolumeX className="h-4 w-4 shrink-0 text-muted-foreground" />
-          ) : (
-            <Volume2 className="h-4 w-4 shrink-0 text-orange-600" />
-          )}
-          <div>
-            <p className={`text-sm font-medium ${audioEnabled === false ? '' : 'text-orange-700'}`}>
-              {audioEnabled === false ? 'Audio off' : 'Audio on'}
-            </p>
-            <p className="text-xs font-normal text-muted-foreground mt-0.5">
-              Speak Spanish sentences aloud in exercises and curriculum
-            </p>
-          </div>
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={toggleAudio}
+        className={`w-full rounded-xl border p-3 flex items-center gap-3 text-left transition-colors ${
+          audioEnabled === false
+            ? 'border-gray-200 hover:border-gray-300'
+            : 'border-orange-500 bg-orange-50'
+        }`}
+      >
+        {audioEnabled === false ? (
+          <VolumeX className="h-4 w-4 shrink-0 text-muted-foreground" />
+        ) : (
+          <Volume2 className="h-4 w-4 shrink-0 text-orange-600" />
+        )}
+        <div>
+          <p className={`text-sm font-medium ${audioEnabled === false ? '' : 'text-orange-700'}`}>
+            {audioEnabled === false ? 'Audio off' : 'Audio on'}
+          </p>
+          <p className="text-xs font-normal text-muted-foreground mt-0.5">
+            Speak Spanish sentences aloud in exercises and curriculum
+          </p>
+        </div>
+      </button>
     </div>
   )
 }

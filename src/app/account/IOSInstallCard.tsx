@@ -1,6 +1,28 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import { Share2, PlusSquare, Smartphone } from 'lucide-react'
 
 export function IOSInstallCard() {
+  const [show, setShow] = useState(false)
+
+  useEffect(() => {
+    const isIOS =
+      /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+      (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
+
+    const isSafari =
+      /safari/i.test(navigator.userAgent) &&
+      !/crios|fxios|opios|edgios/i.test(navigator.userAgent)
+
+    const isStandalone =
+      (navigator as Navigator & { standalone?: boolean }).standalone === true
+
+    if (isIOS && isSafari && !isStandalone) setShow(true)
+  }, [])
+
+  if (!show) return null
+
   return (
     <div className="rounded-xl border p-5 space-y-3">
       <div className="flex items-center gap-2">
