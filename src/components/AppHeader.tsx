@@ -1,11 +1,15 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { UserCircle } from 'lucide-react'
+import { UserAvatar } from '@/components/UserAvatar'
 
 const HIDDEN_ROUTES = ['/auth', '/study', '/tutor', '/onboarding']
 
-export function AppHeader() {
+interface Props {
+  userInitials: string
+}
+
+export function AppHeader({ userInitials }: Props) {
   const pathname = usePathname()
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
@@ -24,10 +28,11 @@ export function AppHeader() {
       {/* Profile avatar → /account */}
       <Link
         href="/account"
+        aria-label="Account"
         className="rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
                    min-h-[44px] flex items-center justify-center"
       >
-        <UserCircle className="h-6 w-6 text-muted-foreground" />
+        <UserAvatar initials={userInitials} size="md" />
       </Link>
     </header>
   )

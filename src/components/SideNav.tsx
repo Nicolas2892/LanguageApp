@@ -3,8 +3,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, BookOpen, MessageSquare,
-  BarChart2, LayoutList, UserCircle,
+  BarChart2, LayoutList,
 } from 'lucide-react'
+import { UserAvatar } from '@/components/UserAvatar'
 
 const NAV_ITEMS = [
   { href: '/dashboard',  label: 'Home',       Icon: LayoutDashboard },
@@ -16,7 +17,11 @@ const NAV_ITEMS = [
 
 const HIDDEN_ROUTES = ['/auth', '/onboarding', '/write']
 
-export function SideNav() {
+interface Props {
+  userInitials: string
+}
+
+export function SideNav({ userInitials }: Props) {
   const pathname = usePathname()
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
@@ -67,7 +72,7 @@ export function SideNav() {
               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
         >
-          <UserCircle className="h-5 w-5 shrink-0" />
+          <UserAvatar initials={userInitials} size="sm" />
           Account
         </Link>
       </div>
