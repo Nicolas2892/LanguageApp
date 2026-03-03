@@ -64,6 +64,8 @@ export function AccountForm({ profile }: Props) {
 
   return (
     <div className="space-y-6">
+      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Profile</h2>
+
       {/* Display name */}
       <div className="space-y-1.5">
         <Label htmlFor="display_name">Display name</Label>
@@ -111,6 +113,20 @@ export function AccountForm({ profile }: Props) {
         <p className="text-xs text-muted-foreground">Between 5 and 120 minutes.</p>
       </div>
 
+      {/* Feedback */}
+      {error && (
+        <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{error}</p>
+      )}
+      {saved && (
+        <p className="text-sm text-green-700 border border-green-200 rounded-lg p-3">Changes saved.</p>
+      )}
+
+      <Button onClick={handleSave} disabled={saving} className="w-full rounded-full active:scale-95 transition-transform">
+        {saving ? 'Saving…' : 'Save changes'}
+      </Button>
+
+      <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pt-2">Preferences</h2>
+
       {/* Audio playback toggle */}
       <div className="space-y-1.5">
         <Label>Audio playback</Label>
@@ -138,18 +154,6 @@ export function AccountForm({ profile }: Props) {
           </div>
         </button>
       </div>
-
-      {/* Feedback */}
-      {error && (
-        <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{error}</p>
-      )}
-      {saved && (
-        <p className="text-sm text-green-700 border border-green-200 rounded-lg p-3">Changes saved.</p>
-      )}
-
-      <Button onClick={handleSave} disabled={saving} className="w-full rounded-full active:scale-95 transition-transform">
-        {saving ? 'Saving…' : 'Save changes'}
-      </Button>
     </div>
   )
 }
