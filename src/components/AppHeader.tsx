@@ -11,7 +11,7 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 h-14 flex items-center justify-between px-5
-                       border-b bg-background/95 backdrop-blur-sm">
+                       border-b bg-background/95 backdrop-blur-sm lg:hidden">
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2">
         <span className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center

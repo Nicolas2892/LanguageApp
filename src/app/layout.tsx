@@ -4,6 +4,7 @@ import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
+import { SideNav } from "@/components/SideNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,8 +46,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AppHeader />
-        {children}
+        <SideNav />
+        <div className="lg:ml-[220px]">
+          <AppHeader />
+          {children}
+        </div>
         <BottomNav />
         <ServiceWorkerRegistration />
       </body>
