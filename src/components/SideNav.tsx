@@ -15,7 +15,7 @@ const NAV_ITEMS = [
   { href: '/curriculum', label: 'Curriculum', Icon: LayoutList      },
 ]
 
-const HIDDEN_ROUTES = ['/auth', '/onboarding', '/write']
+const HIDDEN_ROUTES = ['/auth', '/onboarding']
 
 interface Props {
   userInitials: string

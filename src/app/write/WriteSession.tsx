@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { FreeWritePrompt } from '@/components/exercises/FreeWritePrompt'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
@@ -24,7 +23,6 @@ interface Props {
 }
 
 export function WriteSession({ conceptIds, conceptInfos }: Props) {
-  const router = useRouter()
   const [state, setState] = useState<State>({ phase: 'loading_prompt' })
   const [error, setError] = useState<string | null>(null)
 
@@ -95,9 +93,6 @@ export function WriteSession({ conceptIds, conceptInfos }: Props) {
           <div className="flex flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={fetchPrompt} className="flex-1">
               Write another →
-            </Button>
-            <Button variant="ghost" onClick={() => router.push('/dashboard')} className="flex-1">
-              Back to dashboard
             </Button>
           </div>
         </div>

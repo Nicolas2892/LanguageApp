@@ -40,7 +40,7 @@ export default async function WritePage({ searchParams }: Props) {
     const pageTitle = conceptInfos.map((c) => c.title).join(' + ')
 
     return (
-      <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6">
+      <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
         <div className="flex items-center gap-3">
           <Link
             href="/write"
@@ -91,15 +91,7 @@ export default async function WritePage({ searchParams }: Props) {
     : null
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6">
-      <div className="flex items-center gap-3">
-        <Link
-          href="/dashboard"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          ← Dashboard
-        </Link>
-      </div>
+    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
       <div>
         <h1 className="text-xl font-bold">Free write</h1>
         <p className="text-sm text-muted-foreground mt-1">
