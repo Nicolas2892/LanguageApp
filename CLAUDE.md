@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+### General comments
+You are an Expert in Product Management work, Coding and UX Research, alongside being a world-class language teacher and learner who is really experienced in Spanish. Your job is to make a great app to help advanced Spanish learners go from B1 to B2 and eventually C1 through offering advanced exercises specifically targeted on active recall. We cover a market gap here as existing applications (DuoLingo, Babbel) offer too simplistic exercises not challenging enough and other solutions such as KwizIQ do not offer sufficient variation in exercises (most being multiple choice). Our Design has to be sleek and modern. The main usage point will be as an application on iOS and in the Browser (comparable to Babbel) - so we always need that cross-device functionality. No progress should ever be stored on the device, it should all live in the cloud.
+
+- If you have questions for clarification that woud help improve your work, always ask them to the user before starting your work or edits.
+- Always add Unit Tests for newly created features when writing them so we can test the application well. 
+- Keep a best in class code hygiene and syntax to make the code as easy to maintain as possible.
+
 ## Commands
 
 Node/pnpm are installed via Homebrew and not in the default PATH. Always prefix shell commands with:
@@ -243,3 +250,141 @@ Migrations (run once in Supabase SQL editor):
 - Server component; reads concept id from params + `?filter=` from searchParams
 - Renders: breadcrumb, title, explanation, examples table (es|en), SRS status (next review in N days), all exercise type buttons (filtered to types with DB rows), free write link, ask tutor link
 - Back link preserves `?filter=` param
+
+### Phase 8 — Drill Mode ✓ complete
+- `POST /api/exercises/generate` — auth-guarded; generates gap_fill / translation / transformation / error_correction via Claude; inserts into `exercises` table; returns full row
+- `POST /api/submit` — `skip_srs: boolean` optional flag; SM-2 upsert skipped in drill mode; streak kept
+- `study/page.tsx` — `?practice=true&concept=X&types=T` loads all exercises of that type (no random); passes `practiceMode`, `generateConfig`, `returnHref` to StudySession
+- `StudySession.tsx` — dynamic queue (`useState`); "Generate 3 more" (parallel x3 API calls, appends items, resumes); "Back to concept" button; SRS copy hidden in drill mode
+- `curriculum/[id]/page.tsx` — per-type buttons now add `&practice=true`; "Practice all" unchanged (SRS mode)
+- **Known bug (Fix-D below):** `exercises` RLS has no INSERT policy for authenticated users — generate route uses service role client fix needed
+
+---
+
+### Phase 9 — Backlog
+
+Items are grouped by type and roughly ordered by priority within each group. Implement bugs/fixes first, then UX, then pedagogical improvements, then new features.
+
+#### Bugs & Fixes (implement first)
+
+**Fix-A: Desktop/iPad navigation — persistent left sidebar**
+- BottomNav is `lg:hidden`; desktop/iPad have zero navigation
+- Solution: **Option A — persistent left sidebar** (~220 px, always visible on `lg:`)
+  - Logo at top, vertical nav links (Home / Study / Tutor / Progress / Curriculum / Account)
+  - Mirrors BottomNav active-state logic and HIDDEN_ROUTES
+  - `layout.tsx`: on `lg:` wrap `{children}` in a flex row with the sidebar; main content gets `lg:ml-[220px]`
+  - Sidebar component lives alongside BottomNav in `src/components/`
+
+**Fix-B: Remove "Back to Dashboard" link on Account page**
+- One-line deletion in `src/app/account/page.tsx`
+
+**Fix-C: Rename app to "Español Avanzado"**
+- Replace all instances of "Spanish B1→B2" / "Spanish B1 -> B2" across: page titles, manifest name/short_name, auth card descriptions, dashboard greeting, `layout.tsx` metadata, `README`
+- Correct Spanish: **Español Avanzado** (nivel is masculine)
+
+**Fix-D: P8 RLS bug — exercises INSERT blocked by RLS**
+- `exercises` table only has `service_role` INSERT policy; authenticated user session cannot insert
+- Fix: create a service role Supabase client (using `SUPABASE_SERVICE_ROLE_KEY`) and use it only for the insert step in `POST /api/exercises/generate`
+- Do NOT add a broad authenticated-user INSERT policy — keeps exercises write-protected outside the generate endpoint
+
+**Fix-E: Google OAuth — `handle_new_user` trigger uses wrong metadata field**
+- Google sends name as `raw_user_meta_data->>'full_name'` (sometimes `'name'`), not `'display_name'`
+- Current trigger falls back to email prefix for all Google sign-ups
+- Fix: SQL migration — update `coalesce()` to: `coalesce(raw_user_meta_data->>'display_name', raw_user_meta_data->>'full_name', raw_user_meta_data->>'name', split_part(new.email, '@', 1))`
+- Also requires: Google provider enabled in Supabase dashboard (Auth → Providers → Google) + Google Cloud Console OAuth client with correct redirect URI — this is an infrastructure/config step, not code
+
+#### UX Improvements
+
+**UX-A: Account page revamp**
+- Add **Change Email** section: input + confirm → calls `supabase.auth.updateUser({ email })` → shows "Check your inbox to confirm" message
+- Add **Change Password** section: current password + new password + confirm → calls `supabase.auth.updateUser({ password })` after re-authenticating
+- General UX polish: group into labelled sections (Profile, Security, Preferences), add section dividers, destructive actions (sign out, delete account) at bottom separated visually
+- Remove the manual level picker from this page (level becomes computed — see Ped-C)
+
+**UX-B: iOS "Add to Home Screen" install prompt**
+- PWA manifest + service worker already built (P6-D); iOS Safari doesn't fire `beforeinstallprompt`
+- Detect iOS Safari via `navigator.userAgent` in a client component
+- Show a dismissible bottom sheet on first post-login visit: "Install this app on your iPhone — tap Share → Add to Home Screen" with a simple diagram
+- Persist dismissal in `localStorage` (`pwa_prompt_dismissed = true`)
+- Also add a permanent "Install app" card in `/account` with same instructions
+
+**UX-C: Audio playback for Spanish sentences**
+- Use browser `SpeechSynthesis` API (`lang: 'es-ES'`) — zero cost, zero dependencies
+- Add speaker icon button next to: exercise prompts, Spanish column in examples table (`/curriculum/[id]`), correct answer in FeedbackPanel
+- Shared `useSpeech(text, lang)` hook in `src/lib/hooks/`
+- Audio on/off toggle in `/account` (stored in `localStorage`)
+
+#### Pedagogical / Learning Quality
+
+**Ped-A: Harder gap-fill exercises — multi-sentence multi-blank format**
+- Current format is trivial: one sentence, one blank, obviously the connector being drilled
+- New format: 2–3 connected sentences in a paragraph; **multiple blanks**; learner must decide where the target connector belongs *and* fill remaining blanks with other appropriate connectors
+- Requires: new prompt format for seeded and AI-generated gap_fill exercises; `GapFill.tsx` needs to handle multiple `___` tokens and collect multiple answers; grading prompt updated to evaluate all blanks together
+- Seed script must be updated to produce this richer format; existing seeded gap_fill exercises should be re-seeded
+
+**Ped-B: AI-generated exercises enter the SRS review pool automatically**
+- P8 generate route already inserts into `exercises` table permanently (reusable)
+- SRS queue already picks a random exercise per concept from all available — AI-generated ones are included automatically once inserted; no architecture change needed
+- Benefit: pool grows over time, reducing repetition and token waste; user cannot memorise specific phrasings
+- Action: confirm Fix-D is applied (so inserts succeed), then verify in testing that generated exercises appear in subsequent SRS sessions
+
+**Ped-C: User level computed from mastery, not self-selected**
+- Inspired by KwizIQ's tested-knowledge approach (not self-report)
+- Proposed calculation: weighted % of concepts mastered (`interval_days >= 21`) across modules, factoring in difficulty
+  - A2: < 25% mastered; B1: 25–55%; B2: 55–85%; C1: 85%+
+- Remove manual level picker from account settings (or keep as optional override with a "reset to computed" button)
+- Computed level shown on dashboard and account page; recalculated on each `POST /api/submit`
+- May require a `computed_level` column on `profiles` or a pure computation on read
+
+#### New Features
+
+**Feat-A: Daily email reminders (P6-G)**
+- Supabase Edge Function `send-daily-reminder`: cron at 18:00 local (or fixed UTC), queries profiles where `last_studied_date < today` AND `streak > 0`
+- Personalised content: "{name}, your {N}-day streak is at risk — {X} concepts due today"
+- Add `email_reminders boolean DEFAULT true` to `profiles`; expose toggle in `/account`
+- Migration: `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`
+
+**Feat-B: Sprint / timed mode (5-minute sessions)**
+- Add `?mode=sprint` to `/study`
+- 5-minute countdown timer shown in progress bar area; session ends at 0
+- Add "5-min sprint" as a 4th mode card on dashboard
+- No DB changes needed
+
+**Feat-C: Concept prerequisites / unlock progression**
+- Add `prerequisite_concept_id uuid NULLABLE` to `concepts` table
+- Concepts with unmet prerequisites show padlock icon in curriculum; practice buttons disabled
+- `/curriculum/[id]`: show "Unlock after mastering [prerequisite]" with a link
+- Update seed data with prerequisite relationships for harder concepts in each unit
+- Locking is UI-only (not server-enforced); users who navigate directly can still practice
+
+**Feat-D: Web push notifications (Android PWA)**
+- Complements email reminders for Android PWA users (iOS does not support Web Push)
+- Add `push_subscription jsonb` column to `profiles`
+- Client: prompt for notification permission after first completed study session (not on load)
+- Service worker: handle `push` event, display notification with due count + streak
+- Backend: Supabase Edge Function sends push via Web Push API (VAPID keys in env vars)
+- Detect and skip prompt on iOS
+
+**Feat-E: Content expansion via AI seeding script**
+- `pnpm seed:ai` script: uses Claude to draft 3–5 new concepts per unit with 3 exercises each
+- Output to a JSON review file first; human approval before DB insert
+- New module candidates: Verb Constructions (ser/estar in context, reflexive verbs, subjunctive triggers)
+- Target: 40+ total concepts across 3 modules
+
+#### Strategic / Long-term
+
+**Strat-A: Shareable progress card** *(deferred — implement after content depth is sufficient)*
+- `/progress/share` route: server-rendered OG image (via Next.js `ImageResponse`) showing streak, mastered count, level
+- "Share my progress" button on dashboard + `/progress`; triggers `navigator.share` or copies URL
+
+**Strat-B: Admin content panel** *(deferred — implement when content iteration becomes a bottleneck)*
+- `/admin` route gated by `is_admin boolean` on `profiles`
+- Read-only v1: list all concepts/exercises with attempt counts
+- Stretch: inline edit for concept explanation and exercise prompt text
+
+#### Design
+
+**Design-A: App logo**
+- Babbel-inspired mark: clean pill or rounded-square shape, "EA" monogram or stylised "Ñ", warm tones complementing the orange primary
+- Deliverables: updated `icon.tsx` (192×192 ImageResponse), `apple-icon.tsx` (180×180), and an SVG source file at `public/logo.svg` for use in `AppHeader` and auth pages
+- Current auth "ES" block and AppHeader text mark should both be replaced
