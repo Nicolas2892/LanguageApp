@@ -18,7 +18,7 @@ const GenerateSchema = z.object({
 })
 
 const TYPE_RULES: Record<string, string> = {
-  gap_fill:         'one sentence with a blank (___) where the target structure belongs',
+  gap_fill:         'Write 2–3 connected Spanish sentences forming a short coherent paragraph. Include exactly 2 or 3 blanks (___). One blank must require the specific target concept; the remaining blank(s) require related connectors or structures the learner must independently recall. "expected_answer" MUST be a JSON-encoded array string with one entry per blank in left-to-right order, e.g. "[\"sin embargo\",\"aunque\"]". Do NOT hint at the answer within the sentence.',
   translation:      'an English sentence to translate into Spanish',
   transformation:   'a Spanish sentence pair to combine using the target structure',
   error_correction: 'quote a Spanish sentence containing a deliberate error in "double quotes"',
@@ -82,6 +82,16 @@ Rules for ${typeLabel}: ${rule}`
 
     if (!generated.prompt || !generated.expected_answer) {
       return NextResponse.json({ error: 'Invalid AI response structure' }, { status: 500 })
+    }
+
+    // For gap_fill, validate expected_answer is a JSON array
+    if (type === 'gap_fill') {
+      try {
+        const parsed = JSON.parse(generated.expected_answer)
+        if (!Array.isArray(parsed)) throw new Error('not array')
+      } catch {
+        return NextResponse.json({ error: 'AI returned invalid gap_fill answer format' }, { status: 500 })
+      }
     }
 
     // Insert into exercises table using service role to bypass RLS

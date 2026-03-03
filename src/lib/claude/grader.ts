@@ -1,5 +1,6 @@
 import { anthropic, TUTOR_MODEL } from './client'
 import type { SRSScore } from '@/lib/srs'
+import { parseExpectedAnswers } from '@/lib/exercises/gapFill'
 
 export interface GradeResult {
   score: SRSScore
@@ -28,13 +29,25 @@ export async function gradeAnswer({
 You are strict but fair. You evaluate correctness, naturalness, and whether the target concept was applied.
 Always respond with valid JSON only — no markdown, no extra text.`
 
+  const multiBlankAnswers =
+    exerciseType === 'gap_fill' ? parseExpectedAnswers(expectedAnswer) : null
+
+  const expectedLine = multiBlankAnswers
+    ? `Expected answers per blank (in order): ${JSON.stringify(multiBlankAnswers)}
+Student's answer is pipe-delimited — each segment before " | " corresponds to a blank in left-to-right order.
+Evaluate each blank separately. Score 3 = all blanks perfect; 2 = all correct with minor errors; 1 = at least one blank correct; 0 = all wrong.
+In "corrected_version", write the FULL sentence(s) with every blank filled correctly.`
+    : expectedAnswer
+      ? `Expected answer (or an acceptable variant): ${expectedAnswer}`
+      : 'This is an open-ended exercise — evaluate based on correct use of the concept.'
+
   const userPrompt = `Grade this Spanish exercise response.
 
 Concept being tested: ${conceptTitle}
 Concept explanation: ${conceptExplanation}
 Exercise type: ${exerciseType}
 Exercise prompt: ${prompt}
-${expectedAnswer ? `Expected answer (or an acceptable variant): ${expectedAnswer}` : 'This is an open-ended exercise — evaluate based on correct use of the concept.'}
+${expectedLine}
 Student's answer: ${userAnswer}
 
 Score the response:

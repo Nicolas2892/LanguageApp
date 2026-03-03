@@ -54,6 +54,33 @@ describe('ExerciseRenderer', () => {
     expect(onSubmit).toHaveBeenCalledWith('soy')
   })
 
+  it('renders multiple inline inputs for multi-blank gap_fill', () => {
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'gap_fill', prompt: '___ hacía frío, salimos. ___, lo disfrutamos.' })}
+        onSubmit={vi.fn()}
+        disabled={false}
+      />
+    )
+    expect(screen.getByLabelText('Blank 1')).toBeTruthy()
+    expect(screen.getByLabelText('Blank 2')).toBeTruthy()
+  })
+
+  it('submits multi-blank gap_fill answers as pipe-delimited string', async () => {
+    const onSubmit = vi.fn()
+    render(
+      <ExerciseRenderer
+        exercise={makeExercise({ type: 'gap_fill', prompt: '___ hacía frío, salimos. ___, lo disfrutamos.' })}
+        onSubmit={onSubmit}
+        disabled={false}
+      />
+    )
+    await userEvent.type(screen.getByLabelText('Blank 1'), 'Aunque')
+    await userEvent.type(screen.getByLabelText('Blank 2'), 'Sin embargo')
+    await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    expect(onSubmit).toHaveBeenCalledWith('Aunque | Sin embargo')
+  })
+
   // --- transformation → TextAnswer (textarea) ---
 
   it('renders a textarea for transformation', () => {
