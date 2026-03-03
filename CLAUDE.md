@@ -258,7 +258,7 @@ Migrations (run once in Supabase SQL editor):
 - `study/page.tsx` — `?practice=true&concept=X&types=T` loads all exercises of that type (no random); passes `practiceMode`, `generateConfig`, `returnHref` to StudySession
 - `StudySession.tsx` — dynamic queue (`useState`); "Generate 3 more" (parallel x3 API calls, appends items, resumes); "Back to concept" button; SRS copy hidden in drill mode
 - `curriculum/[id]/page.tsx` — per-type buttons now add `&practice=true`; "Practice all" unchanged (SRS mode)
-- **Known bug (Fix-D below):** `exercises` RLS has no INSERT policy for authenticated users — generate route uses service role client fix needed
+- `exercises` insert uses service role client in generate route (bypasses RLS) — see Fix-D
 
 ---
 
@@ -271,15 +271,13 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 **Fix-A: Desktop/iPad navigation — persistent left sidebar** ✓ complete
 - `src/components/SideNav.tsx` — 220px fixed sidebar, `hidden lg:flex`; all nav items + Account at bottom; active-state logic; hidden on `/auth`,`/onboarding`,`/write`; wired into `layout.tsx`
 
-**Fix-B: Remove "Back to Dashboard" link on Account page**
-- One-line deletion in `src/app/account/page.tsx`
+**Fix-B: Remove "Back to Dashboard" link on Account page** ✓ complete
+- No link existed at implementation time — removed during UX-A account revamp
 
 **Fix-C: Rename app to "Español Avanzado"** ✓ complete
 - All user-facing strings updated: `manifest.ts`, `layout.tsx`, `AppHeader.tsx`, `SideNav.tsx`, auth pages, `IOSInstallPrompt.tsx`
-**Fix-D: P8 RLS bug — exercises INSERT blocked by RLS**
-- `exercises` table only has `service_role` INSERT policy; authenticated user session cannot insert
-- Fix: create a service role Supabase client (using `SUPABASE_SERVICE_ROLE_KEY`) and use it only for the insert step in `POST /api/exercises/generate`
-- Do NOT add a broad authenticated-user INSERT policy — keeps exercises write-protected outside the generate endpoint
+**Fix-D: P8 RLS bug — exercises INSERT blocked by RLS** ✓ complete
+- `src/app/api/exercises/generate/route.ts` — `createServiceRoleClient()` defined at top (lines 8–13) using `SUPABASE_SERVICE_ROLE_KEY`; used for the insert at lines 97–110
 
 **Fix-E: Google OAuth — `handle_new_user` trigger uses wrong metadata field** ✓ complete
 - Migration: `supabase/migrations/005_fix_google_oauth_trigger.sql` — `create or replace function` with updated `coalesce` chain: `display_name → full_name → name → email prefix`
@@ -320,7 +318,7 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - P8 generate route already inserts into `exercises` table permanently (reusable)
 - SRS queue already picks a random exercise per concept from all available — AI-generated ones are included automatically once inserted; no architecture change needed
 - Benefit: pool grows over time, reducing repetition and token waste; user cannot memorise specific phrasings
-- Action: confirm Fix-D is applied (so inserts succeed), then verify in testing that generated exercises appear in subsequent SRS sessions
+- Fix-D is applied (service role insert in generate route); verify in testing that generated exercises appear in subsequent SRS sessions
 
 **Ped-C: User level computed from mastery, not self-selected**
 - Inspired by KwizIQ's tested-knowledge approach (not self-report)
