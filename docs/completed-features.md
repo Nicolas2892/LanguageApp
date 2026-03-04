@@ -139,3 +139,64 @@ This file contains implementation details for all completed work. Reference it w
 - `/curriculum` — `level` added to concepts query; `LevelChip` rendered on every concept row (left of GrammarFocusChip); level filter chip row (`All levels | B1 | B2 | C1`) below mastery tabs; AND logic with mastery filter; `backFilter` preserves both `filter=` and `level=` params
 - `/curriculum/[id]` — `LevelChip` added to title header alongside GrammarFocusChip (data already available via `select('*')`)
 - Mastery badges (`New`/`Learning`/`Mastered`) restyled to match chip spec: `text-[10px]`, `px-1.5 py-0.5 rounded`, muted colours (`-50` bg, `-100` border) — consistent with LevelChip + GrammarFocusChip; applied to both curriculum pages
+
+### UX-G: Exercise session UX polish ✓ (hint dots, auto-grow textarea, exit dialog, missed-concept done screen)
+
+**Hint availability dots (HintPanel.tsx)**
+- Previous behaviour: component returned null when `wrongAttempts === 0`, so users couldn't tell hints existed
+- New behaviour: component returns null only when *neither* `hint1` nor `hint2` is provided; otherwise always renders a dots row
+- Dots row: `"Hints:" label + one dot per hint (h-2 w-2 rounded-full)`; dot colour transitions from `bg-border` (grey) to `bg-amber-400` as each hint is revealed (at wrongAttempts ≥ 1 and ≥ 2)
+- Claude-worked-example indicator (`✦ Example` in `text-blue-500`) appended to dots row when claudeHint is populated
+- Hint text boxes still only render after wrong attempts — only the dots are always visible
+
+**Auto-grow textarea (TextAnswer.tsx)**
+- Replaced fixed `rows={4} resize-none` with `min-h-[6rem] overflow-hidden` + inline `style={{ resize: 'none' }}`
+- `textareaRef` + `autoResize()` function: sets `el.style.height = 'auto'` then `el.style.height = el.scrollHeight + 'px'`
+- `autoResize()` called in `useEffect` on `answer` change and on mount
+
+**Exit confirmation dialog (StudySession.tsx)**
+- Added `showExitDialog` boolean state
+- X button (`lucide X` icon) in the progress bar row, right of the exercise type badge; calls `setShowExitDialog(true)`
+- shadcn `Dialog` (`src/components/ui/dialog.tsx` — added via `pnpm dlx shadcn@latest add dialog`) wraps `DialogContent` with title "Leave session?", body text, and two `DialogFooter` buttons: "Keep going" (outline, dismisses) and "Leave" (destructive, navigates to `returnHref ?? '/dashboard'`)
+- Dialog rendered at component root, outside the phase conditionals, so it works from both answering and feedback phases
+
+**Missed-concept done screen (StudySession.tsx)**
+- Added `missedConcepts: Array<{ id: string; title: string }>` state
+- In `handleSubmit`, when `result.score < 2`, pushes current concept to `missedConcepts` (deduplicates by id)
+- Done screen: after the correct/missed badge row, renders a `<details>` element (collapsed by default) when `missedConcepts.length > 0`
+- Summary: `"X concept(s) to revisit"`; body: `<ul>` of `<a href="/study?concept={id}">Practice: {title} →</a>` links
+
+### Ped-E: Grammatical structure highlighting ✓ (annotations jsonb, AnnotatedText, pnpm annotate)
+
+**DB migration**
+- `supabase/migrations/008_exercise_annotations.sql`: `ALTER TABLE exercises ADD COLUMN annotations jsonb NULL;`
+- Run manually in Supabase SQL editor; existing exercises get NULL (filled by `pnpm annotate`)
+
+**Types**
+- `src/lib/supabase/types.ts` — new `AnnotationSpan` interface: `{ text: string; form: 'subjunctive' | 'indicative' | null }`
+- `annotations: AnnotationSpan[] | null` added to Exercise Row, Insert, and Update types
+
+**AnnotatedText component**
+- `src/components/AnnotatedText.tsx` — props: `text: string`, `annotations: AnnotationSpan[] | null | undefined`
+- Falls back to `<span>{text}</span>` when annotations is null or empty
+- Subjunctive spans: `border-b-2 border-orange-400 text-orange-700 title="Subjunctive"` — soft orange underline, warm text
+- Indicative and null-form spans: plain `<span>` (no highlighting — pedagogically correct, salience on subjunctive only)
+
+**pnpm annotate CLI script**
+- `src/lib/curriculum/annotate-exercises.ts` — fetches all exercises where `annotations IS NULL`; processes in batches of 10; calls Claude (`claude-sonnet-4-20250514`) with a grammar-expert prompt; validates concatenated spans equal original prompt (skips + logs warning on mismatch); upserts `annotations` column
+- `src/lib/curriculum/run-annotate.ts` — CLI entry point; requires `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`
+- `package.json` — added `"annotate": "tsx src/lib/curriculum/run-annotate.ts"` script
+
+**Generate route update**
+- `src/app/api/exercises/generate/route.ts` — Claude prompt now requests an `annotations` array in the JSON response; validates concatenated spans equal prompt text (stores null + logs warning on mismatch); inserts `annotations: validatedAnnotations` in the DB row
+
+**Exercise component updates**
+- `GapFill.tsx` — `sliceAnnotationsForSegment()` helper: calculates character offsets of each text segment (interleaved with `___` tokens), extracts overlapping annotation spans; AnnotatedText rendered per text segment in multi-blank layout; single-blank layout uses AnnotatedText on full prompt
+- `TextAnswer.tsx` — prompt wrapped in AnnotatedText (translation, transformation, free_write)
+- `ErrorCorrection.tsx` — `sliceAnnotationsForSentence()` helper: finds the erroneous sentence substring in the full prompt via `indexOf`, extracts overlapping spans; AnnotatedText rendered inside the red erroneous-sentence box
+
+**Tests**
+- `src/components/__tests__/AnnotatedText.test.tsx` — 9 tests: null/empty/undefined fallback; subjunctive orange class + title; indicative + null no class; multiple subjunctive spans; concat reproduces original text
+- `src/components/exercises/__tests__/HintPanel.test.tsx` — 6 tests: no hints → null; dots rendered at 0 attempts; two dots for two hints; amber on wrongAttempts ≥ 1; amber dot2 on ≥ 2; hint text only after wrong attempts
+- `GapFill.test.tsx` + `ExerciseRenderer.test.tsx` — `makeExercise` helpers updated to include `annotations: null`
+- **Total: 270 tests across 21 files — all passing**

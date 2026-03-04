@@ -24,6 +24,7 @@ pnpm exec tsc --noEmit   # TypeScript check
 pnpm test                 # Vitest unit tests (one-shot)
 pnpm test:watch           # Vitest watch mode
 pnpm seed                 # Seed curriculum data into Supabase (requires env vars)
+pnpm annotate             # Annotate exercises with grammatical spans via Claude (requires env vars)
 ```
 
 Seed command requires env vars:
@@ -31,6 +32,12 @@ Seed command requires env vars:
 NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... pnpm seed
 ```
 Re-seeding duplicates rows — truncate `exercises`, `concepts`, `units`, `modules` first.
+
+Annotate command requires env vars:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm annotate
+```
+Annotates all exercises where `annotations IS NULL`; safe to re-run (skips already-annotated rows).
 
 ## Git / GitHub Workflow
 
@@ -160,6 +167,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/005_fix_google_oauth_trigger.sql` — fixed handle_new_user trigger for Google OAuth
 - `supabase/migrations/006_computed_level.sql` — `concepts.level`, `user_progress.production_mastered`, `profiles.computed_level`; seeds 21 concept CEFR tags; grandfathers existing production attempts
 - `supabase/migrations/007_grammar_focus.sql` — `concepts.grammar_focus text CHECK ('indicative'|'subjunctive'|'both')`; seeded for all 21 concepts
+- `supabase/migrations/008_exercise_annotations.sql` — `exercises.annotations jsonb NULL`; filled by `pnpm annotate` after running
 
 ### Dashboard Stats
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
@@ -195,9 +203,9 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 247 tests across 19 files — all passing.**
+**Test suite: 270 tests across 21 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-G, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -226,15 +234,23 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - **Likely implementation**: Introduce a `target_blank_index` field on `exercises` (or infer it from a convention in `expected_answer`) so the grader knows which blank is the primary assessment criterion; score based only on target blank; display other gaps differently.
 - **Scope**: Requires re-seeding exercise data (or a migration to mark target blank), updates to `GapFill.tsx`, grader logic, and possibly the AI generate route.
 
-**Ped-E: Grammatical structure highlighting in exercise texts**
-- **Goal**: In gap-fill prompts and other exercises where a full Spanish sentence or paragraph is displayed to the user (e.g. error_correction, transformation), visually highlight key grammatical structures — specifically **subjunctive vs. indicative verb forms** — to scaffold pattern recognition. Research in SLA (noticing hypothesis, Schmidt 1990) shows that salience of form accelerates acquisition.
-- **What to highlight**: Subjunctive verb forms (present + imperfect) in one colour; indicative forms in another (or no highlight, making subjunctive the only salient element). Optionally: connector/discourse marker being studied, for gap-fill prompts.
-- **Design constraint**: Highlighting must feel like a subtle learning aid, not a crutch — use muted colours (e.g. soft orange underline for subjunctive, no fill) rather than heavy backgrounds that draw attention away from the task.
-- **Research needed**:
-  - How to reliably detect subjunctive vs. indicative in a Spanish sentence — options: (a) Claude annotates at seed time and stores span offsets in the exercise row; (b) lightweight NLP library (e.g. `compromise` or `nlp.js` with Spanish model) runs client-side; (c) regex heuristics on known inflection endings (fragile).
-  - Option (a) is most accurate: when seeding/generating an exercise, ask Claude to return a list of `{ word, form: 'subjunctive' | 'indicative' | 'connector' }` annotations alongside the prompt text; store in `exercises.annotations jsonb`.
-- **Affected components**: `GapFill.tsx`, `TextAnswer.tsx` (for transformation/translation prompts), `ErrorCorrection.tsx`; all need to render annotated spans instead of plain text.
-- **Scope**: DB migration to add `exercises.annotations jsonb NULLABLE`; seed script update to generate annotations via Claude; new `AnnotatedText.tsx` component; exercise components consume it.
+**Ped-F: Shared AI-generated exercise pool + adaptive grading strategy** *(requires PM/UX research before implementation)*
+- **Problem statement**: Currently, drill mode generates exercises per-user on demand, wasting tokens and producing fragmented, non-reusable content. As the concept pool grows (Feat-E target: 40+ concepts), individual per-user generation is unsustainable.
+- **Core idea**: AI-generated exercises should be inserted into the shared `exercises` table (already done via service role in `/api/exercises/generate`) and served to ALL users — not regenerated per user. Before generating, the route should check whether sufficient exercises already exist for that concept (e.g. ≥ N exercises) and skip generation entirely if so.
+- **Token efficiency rule**: Define a per-concept exercise cap (e.g. 10–15 exercises). If `COUNT(exercises WHERE concept_id = X) >= cap`, return existing exercises randomly rather than generating new ones. This prevents unbounded growth and eliminates duplicate token spend.
+- **Grading strategy open question**: As the pool grows from 3 → 10–15 exercises per concept, the current implicit model of "pass all exercises = mastered" breaks down. Two candidate approaches:
+  1. **Relative mastery**: SM-2 SRS already operates per-concept, not per-exercise — grading is already relative (a score feeds into ease_factor and interval regardless of how many exercises exist). This may already be correct and no change needed.
+  2. **Stratified sampling**: Ensure each study session samples exercises proportionally across exercise types (gap_fill, translation, transformation, free_write, etc.) so a growing pool doesn't skew toward the most-common type.
+- **UX open question**: Should users see which exercises are "shared" vs. "seeded"? Or is the pool fully transparent? Does the user get any agency over generation (e.g. "Generate a new variation")?
+- **Research needed before implementation**:
+  - Define the per-concept exercise cap and the trigger condition for generation (e.g. always top-up to N)
+  - Decide whether exercise deduplication is needed (similar prompts from different generation runs)
+  - Confirm the grading model is truly concept-level (SRS) and not exercise-level — review `/api/submit` and SM-2 logic
+  - Consider admin tooling (Strat-B) to review and curate AI-generated exercises before they enter the shared pool
+- **Do not implement without a written PM decision on cap, dedup, and grading model.**
+
+**Ped-E: Grammatical structure highlighting** ✅ *Complete — see `docs/completed-features.md`*
+- `exercises.annotations jsonb` (migration 008), `AnnotatedText.tsx`, `pnpm annotate` CLI, generate route stores annotations, GapFill/TextAnswer/ErrorCorrection use AnnotatedText
 
 #### New Features
 
@@ -298,27 +314,19 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - **Page header is bare**: Just "Progress" with no date context or greeting. A subtitle like "Your learning since [join date]" adds warmth and context.
 - **Empty state needs a CTA**: When a user has no data, the empty state should link directly to `/study`, not just say "no data yet".
 
-**UX-F: ConceptPicker (free write concept selection) UX overhaul**
-- **No collapsible modules** *(critical — user-reported)*: The full hierarchy (Module → Unit → Concepts) is fully expanded, producing a very long list. Apply the same `<details>` accordion pattern as `/curriculum` — modules collapsed by default, opened on tap. This is the single most impactful change.
-- **No CEFR level tags on concept rows**: Concepts show difficulty bars but no B1/B2/C1 label. Now that Ped-C is live and `concepts.level` exists, add a small level chip (matching curriculum style) to each row so users can self-select difficulty.
-- **No mastery filter**: Unlike curriculum, there's no filter to limit concepts to "New" / "Learning" / "Mastered". Writing about a concept you haven't studied is a valid advanced challenge, but the option to filter to *known* concepts would help intermediate users.
-- **"Surprise me" is buried**: Currently appears as a text button in the header area. It should be a more prominent secondary CTA — e.g., a ghost button in the sticky footer alongside "Start writing", or as the top card before the module list.
-- **Difficulty label in footer is jargon**: "Focused / Synthesis / Challenge" is not intuitive without a legend. Add a one-line tooltip or subtitle explaining the label (e.g., "Challenge: writing across 3+ concepts tests your ability to blend structures").
-- **No back affordance**: There is no visible "Back to dashboard" or breadcrumb if the user changes their mind. The browser back button works, but it should be explicit.
-- **Data fetching**: ConceptPicker is client-side but receives all concepts as a prop — verify this scales as concept count grows (Feat-E target: 40+). May need paginated/lazy loading eventually.
-- **Implementation**: Needs access to `concepts.level` (already in types after Ped-C); ConceptPicker receives modules/units/concepts from `write/page.tsx` server component — extend the query to include `level` and pass it down.
+**UX-F: ConceptPicker (free write concept selection) UX overhaul** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-G: Exercise session UX audit (StudySession + exercise components)**
-- **No exercise type label during session**: Users see a prompt with no header indicating what kind of exercise it is (Gap Fill, Translation, etc.). A small `text-xs uppercase` type label above the prompt (like the dashboard mode card headers) would orient users immediately.
-- **Progress bar has no "X of Y" counter**: The linear progress bar shows position but not remaining count. Add an `e.g. "3 / 10"` label — low effort, high value for managing expectations.
-- **Hint system progression is invisible**: Users don't know a second hint or "worked example" exists until after their first wrong attempt. Add a subtle "Hints available" indicator (e.g., 2 small dots below the exercise) that fills in as hints are used.
-- **TextAnswer textarea is too short**: Fixed at 4 rows for all types including `free_write` (which targets 20–200 words). TextAnswer should auto-grow (`resize-y` is disabled) — replace with a `min-h` + `overflow-auto` approach so the textarea expands as the user types.
-- **FeedbackPanel score is raw (0–3)**: The score badge shows a number that means nothing to most users. Replace with labels: `0 = Incorrect`, `1 = Partial`, `2 = Good`, `3 = Perfect` (already in `SCORE_CONFIG` in `src/lib/scoring.ts` — use the label from there).
-- **No session exit confirmation**: The X/close button abandons the session with no confirmation dialog. One accidental tap loses all progress. Add a simple modal: "Leave session? Your progress this session won't be saved."
-- **Done screen shows no concept breakdown**: Accuracy % is shown, but not which concepts were missed. A collapsed list of missed concepts (with a "Practice →" link each) on the done screen would close the loop perfectly.
-- **Multi-blank GapFill keyboard UX on mobile**: After filling one blank, the mobile keyboard doesn't auto-advance to the next blank. Implement `onKeyDown Enter → focus next blank input` for a smoother flow.
-- **Audio button tap target**: `SpeakButton` can sit very close to other interactive elements on narrow screens. Ensure a minimum `min-w-[44px] min-h-[44px]` touch target (same standard applied to SprintCard chips).
-- **Error correction pre-fill is confusing**: ErrorCorrection pre-populates the textarea with the incorrect sentence and shows a warning banner. Users sometimes read this as the correct answer. Consider showing the erroneous sentence *above* the input (read-only, styled as a blockquote) and keeping the textarea empty — clearer separation between "what's wrong" and "write the fix".
+**UX-G: Exercise session UX audit** — Partially complete ✅ / Remaining items below
+- ✅ Exercise type label (EXERCISE_TYPE_META in StudySession)
+- ✅ "X / Y" progress counter
+- ✅ FeedbackPanel score labels (SCORE_CONFIG)
+- ✅ Hint dots (HintPanel — always visible when hints exist)
+- ✅ Auto-grow textarea (TextAnswer — scrollHeight ref)
+- ✅ Exit confirmation dialog (X button + shadcn Dialog)
+- ✅ Missed-concept done screen (collapsible list with practice links)
+- **Multi-blank GapFill keyboard UX on mobile** *(remaining)*: After filling one blank, mobile keyboard doesn't auto-advance. Implement `onKeyDown Enter → focus next blank input`.
+- **Audio button tap target** *(remaining)*: `SpeakButton` may sit too close to other elements on narrow screens. Ensure `min-w-[44px] min-h-[44px]` touch target.
+- **Error correction pre-fill** *(remaining)*: ErrorCorrection pre-populates textarea with the incorrect sentence — users sometimes read this as the correct answer. Consider showing erroneous sentence read-only above an empty textarea.
 
 #### Design
 
@@ -331,21 +339,23 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 ## Recommended Next Steps (priority order)
 
-### Immediate — High learning value
+### Immediate — DB + content
 
-1. **Feat-E: Content expansion via AI seeding** — Run `pnpm seed:ai` to draft 3–5 new concepts per unit (output to JSON for human approval before DB insert). Target 40+ concepts across 3 modules. Adds Module 3 (Verb Constructions: ser/estar, reflexive verbs). This is the single highest-leverage action for user retention.
+1. **Run migration 008** in Supabase SQL editor: `ALTER TABLE exercises ADD COLUMN annotations jsonb NULL;`
 
-2. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
+2. **Run `pnpm annotate`** to populate annotations on all 63 existing exercises: `NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm annotate`
 
-3. **Ped-D: Gap-fill exercise pedagogical rethink** — Current multi-blank format is unfair: non-target gaps have no hints yet count against the score. Research and decide between: (a) single-target gap (cleanest, DELE-aligned), (b) labelled non-target gaps, or (c) partial reveal on wrong answer. Likely requires a `target_blank_index` convention + GapFill.tsx + grader updates + re-seed.
+3. **Feat-E: Content expansion via AI seeding** — Run `pnpm seed:ai` to draft 3–5 new concepts per unit (output to JSON for human approval before DB insert). Target 40+ concepts across 3 modules. Adds Module 3 (Verb Constructions: ser/estar, reflexive verbs). This is the single highest-leverage action for user retention.
 
-4. **Ped-E: Grammatical structure highlighting** — Highlight subjunctive vs. indicative verb forms in exercise texts to scaffold pattern noticing (Schmidt 1990). Best approach: Claude annotates at seed time → `exercises.annotations jsonb`; new `AnnotatedText.tsx` component; affects GapFill, TextAnswer, ErrorCorrection. Requires research on annotation strategy before implementation.
+### Next — Learning quality
 
-### Next — Polish & UX quality
+4. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
 
-5. **UX-F: ConceptPicker overhaul** — Collapse modules by default (same `<details>` pattern as curriculum); add CEFR level chip per concept row; add mastery filter; make "Surprise me" more prominent; add back affordance; no DB change needed.
+5. **Ped-D: Gap-fill exercise pedagogical rethink** — Current multi-blank format is unfair: non-target gaps have no hints yet count against the score. Research and decide between: (a) single-target gap (cleanest, DELE-aligned), (b) labelled non-target gaps, or (c) partial reveal on wrong answer. Likely requires a `target_blank_index` convention + GapFill.tsx + grader updates + re-seed.
 
-6. **UX-G: Exercise session UX polish** — Add exercise type label + "X of Y" counter; hint-system visibility indicator; auto-growing textarea for free_write/TextAnswer; FeedbackPanel score labels (from SCORE_CONFIG); exit confirmation dialog; missed-concept breakdown on done screen.
+### Polish & UX quality
+
+6. **UX-G remaining items** — Multi-blank GapFill keyboard auto-advance on mobile; SpeakButton 44px tap target; ErrorCorrection empty-textarea redesign.
 
 7. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
 
