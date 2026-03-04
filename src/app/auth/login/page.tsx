@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { GoogleButton } from '@/components/auth/GoogleButton'
+import { LogoMark } from '@/components/LogoMark'
 
 const schema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -54,9 +55,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm shadow-lg">
         <CardHeader className="space-y-3 items-center text-center">
-          <div className="w-12 h-12 rounded-2xl bg-orange-500 flex items-center justify-center text-white font-black text-lg select-none">
-            ES
-          </div>
+          <LogoMark size={48} />
           <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
           <CardDescription>Continue your journey with Español Avanzado</CardDescription>
         </CardHeader>

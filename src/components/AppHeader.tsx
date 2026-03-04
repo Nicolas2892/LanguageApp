@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserAvatar } from '@/components/UserAvatar'
+import { LogoMark } from '@/components/LogoMark'
 
 const HIDDEN_ROUTES = ['/auth', '/study', '/tutor', '/onboarding']
 
@@ -18,10 +19,7 @@ export function AppHeader({ userInitials }: Props) {
                        border-b bg-background/95 backdrop-blur-sm lg:hidden">
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2">
-        <span className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center
-                         text-white font-black text-sm select-none">
-          ES
-        </span>
+        <LogoMark size={32} />
         <span className="font-bold text-sm hidden sm:block">Español Avanzado</span>
       </Link>
 

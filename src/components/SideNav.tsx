@@ -6,6 +6,7 @@ import {
   BarChart2, LayoutList,
 } from 'lucide-react'
 import { UserAvatar } from '@/components/UserAvatar'
+import { LogoMark } from '@/components/LogoMark'
 
 const NAV_ITEMS = [
   { href: '/dashboard',  label: 'Home',       Icon: LayoutDashboard },
@@ -32,10 +33,7 @@ export function SideNav({ userInitials }: Props) {
         href="/dashboard"
         className="flex items-center gap-2.5 px-5 h-14 border-b shrink-0"
       >
-        <span className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center
-                         text-white font-black text-sm select-none">
-          ES
-        </span>
+        <LogoMark size={32} />
         <span className="font-bold text-sm">Español Avanzado</span>
       </Link>
 

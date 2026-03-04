@@ -19,32 +19,49 @@ export async function GET(request: NextRequest) {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '32px',
+          gap: '40px',
         }}
       >
-        {/* EA monogram pill */}
-        <div
-          style={{
-            background: 'rgba(255,255,255,0.15)',
-            borderRadius: '48px',
-            width: '200px',
-            height: '200px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <span
+        {/* Speech bubble mark */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <div
             style={{
-              color: 'white',
-              fontSize: 96,
-              fontWeight: 700,
-              fontFamily: 'sans-serif',
-              letterSpacing: '-3px',
+              width: '160px',
+              height: '114px',
+              borderRadius: '26px',
+              background: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.28)',
             }}
           >
-            EA
-          </span>
+            <span
+              style={{
+                fontSize: '80px',
+                fontWeight: 900,
+                color: '#c2410c',
+                fontFamily: 'sans-serif',
+                lineHeight: 1,
+              }}
+            >
+              Ñ
+            </span>
+          </div>
+          {/* Tail: CSS border triangle pointing down-left */}
+          <div
+            style={{
+              width: 0,
+              height: 0,
+              borderTopWidth: '26px',
+              borderTopStyle: 'solid',
+              borderTopColor: 'white',
+              borderRightWidth: '26px',
+              borderRightStyle: 'solid',
+              borderRightColor: 'transparent',
+              marginLeft: '28px',
+            }}
+          />
         </div>
 
         {/* App name */}

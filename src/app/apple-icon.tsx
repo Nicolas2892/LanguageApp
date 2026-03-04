@@ -9,7 +9,7 @@ export default function AppleIcon() {
     (
       <div
         style={{
-          background: '#18181b',
+          background: 'linear-gradient(145deg, #f97316, #c2410c)',
           width: '100%',
           height: '100%',
           display: 'flex',
@@ -17,17 +17,47 @@ export default function AppleIcon() {
           justifyContent: 'center',
         }}
       >
-        <span
-          style={{
-            color: 'white',
-            fontSize: 76,
-            fontWeight: 700,
-            fontFamily: 'sans-serif',
-            letterSpacing: '-2px',
-          }}
-        >
-          ES
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          {/* Bubble body */}
+          <div
+            style={{
+              width: '136px',
+              height: '94px',
+              borderRadius: '20px',
+              background: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 6px 26px rgba(0,0,0,0.22)',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '66px',
+                fontWeight: 900,
+                color: '#c2410c',
+                fontFamily: 'sans-serif',
+                lineHeight: 1,
+              }}
+            >
+              Ñ
+            </span>
+          </div>
+          {/* Tail: CSS border triangle pointing down-left */}
+          <div
+            style={{
+              width: 0,
+              height: 0,
+              borderTopWidth: '20px',
+              borderTopStyle: 'solid',
+              borderTopColor: 'white',
+              borderRightWidth: '20px',
+              borderRightStyle: 'solid',
+              borderRightColor: 'transparent',
+              marginLeft: '22px',
+            }}
+          />
+        </div>
       </div>
     ),
     { ...size }
