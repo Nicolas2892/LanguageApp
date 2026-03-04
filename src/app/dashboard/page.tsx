@@ -16,7 +16,7 @@ export default async function DashboardPage() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes] = await Promise.all([
+  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes, dueByModuleRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase
       .from('user_progress')
@@ -43,11 +43,24 @@ export default async function DashboardPage() {
       .order('interval_days', { ascending: true })
       .limit(1),
     supabase.from('modules').select('id, title').order('order_index'),
+    supabase
+      .from('user_progress')
+      .select('concept_id, concepts(unit_id, units(module_id))')
+      .eq('user_id', user.id)
+      .lte('due_date', today),
   ])
 
   const profile = profileRes.data as Profile | null
   const dueCount = dueRes.count ?? 0
   const modules = (modulesRes.data ?? []) as Pick<Module, 'id' | 'title'>[]
+
+  type DueItem = { concept_id: string; concepts: { unit_id: string; units: { module_id: string } | null } | null }
+  const dueItems = (dueByModuleRes.data ?? []) as DueItem[]
+  const dueCountByModule: Record<string, number> = {}
+  for (const item of dueItems) {
+    const moduleId = item.concepts?.units?.module_id
+    if (moduleId) dueCountByModule[moduleId] = (dueCountByModule[moduleId] ?? 0) + 1
+  }
   const totalConcepts = totalConceptsRes.count ?? 0
   const studiedCount = studiedRes.count ?? 0
   const masteredCount = masteredRes.count ?? 0
@@ -191,8 +204,8 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Sprint card */}
-        <SprintCard dueCount={dueCount} modules={modules} />
+        {/* Sprint card — hidden for brand-new users */}
+        {!isNewUser && <SprintCard dueCount={dueCount} modules={modules} dueCountByModule={dueCountByModule} />}
       </div>
 
     </main>

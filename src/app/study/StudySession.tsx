@@ -117,7 +117,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     ? totalSeconds > 0 ? (secondsLeft / totalSeconds) * 100 : 0
     : (index / effectiveLength) * 100
 
-  const isTimeLow = sprintConfig?.limitType === 'time' && secondsLeft / totalSeconds < 0.2 && secondsLeft > 0
+  const isTimeLow = sprintConfig?.limitType === 'time' && secondsLeft / totalSeconds < 0.1 && secondsLeft > 0
 
   async function handleSubmit(answer: string) {
     setSubmitting(true)
@@ -225,7 +225,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   if (state.phase === 'done') {
     const pct = state.total > 0 ? Math.round((state.correct / state.total) * 100) : 0
     const missed = state.total - state.correct
-    const backLabel = returnHref ? 'Back to concept' : 'Done'
+    const backLabel = returnHref ? 'Back to concept' : sprintConfig ? 'Back to Home' : 'Done'
     return (
       <div className="space-y-6 text-center py-8">
         <PartyPopper className="h-14 w-14 text-orange-500 mx-auto" />
