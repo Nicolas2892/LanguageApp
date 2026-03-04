@@ -15,8 +15,10 @@ export default async function StudyPage({
     unit?: string
     module?: string
     types?: string        // comma-separated exercise types
-    mode?: string         // 'new' = unlearned concepts queue
+    mode?: string         // 'new' = unlearned concepts queue | 'sprint' = time/count-capped SRS
     practice?: string     // 'true' = drill mode (all exercises, skip SRS)
+    limitType?: string    // 'time' | 'count' (sprint mode)
+    limit?: string        // minutes or exercise count (sprint mode)
   }>
 }) {
   const supabase = await createClient()
@@ -26,6 +28,9 @@ export default async function StudyPage({
   const params = await searchParams
   const filterTypes = params.types ? params.types.split(',').filter(Boolean) : []
   const isPracticeMode = params.practice === 'true' && !!params.concept && filterTypes.length > 0
+  const isSprint = params.mode === 'sprint'
+  const sprintLimitType = params.limitType === 'count' ? 'count' : 'time'
+  const sprintLimit = Math.min(Math.max(parseInt(params.limit ?? '10', 10) || 10, 1), 60)
   const today = new Date().toISOString().split('T')[0]
 
   let conceptIds: string[] = []
@@ -47,6 +52,50 @@ export default async function StudyPage({
       const { data } = await supabase
         .from('concepts').select('id').in('unit_id', unitIds)
       conceptIds = (data ?? []).map((c) => (c as { id: string }).id)
+    }
+  } else if (isSprint) {
+    // Sprint: SRS due queue, optionally filtered by module
+    if (params.module) {
+      const { data: units } = await supabase
+        .from('units').select('id').eq('module_id', params.module)
+      const unitIds = (units ?? []).map((u) => (u as { id: string }).id)
+      if (unitIds.length > 0) {
+        const { data: moduleConceptsData } = await supabase
+          .from('concepts').select('id').in('unit_id', unitIds)
+        const moduleConceptIds = (moduleConceptsData ?? []).map((c) => (c as { id: string }).id)
+        if (moduleConceptIds.length > 0) {
+          const { data: dueProgress } = await supabase
+            .from('user_progress')
+            .select('concept_id')
+            .eq('user_id', user.id)
+            .lte('due_date', today)
+            .in('concept_id', moduleConceptIds)
+          conceptIds = (dueProgress ?? []).map((p) => (p as { concept_id: string }).concept_id)
+        }
+      }
+    } else {
+      // All due SRS concepts — no SESSION_SIZE cap; StudySession enforces the limit
+      const { data: dueProgress } = await supabase
+        .from('user_progress')
+        .select('concept_id')
+        .eq('user_id', user.id)
+        .lte('due_date', today)
+      conceptIds = (dueProgress ?? []).map((p) => (p as { concept_id: string }).concept_id)
+    }
+    // Bootstrap new users (same as default SRS path)
+    if (conceptIds.length === 0) {
+      const { count } = await supabase
+        .from('user_progress')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+      if ((count ?? 0) === 0) {
+        const { data: bootstrapConcepts } = await supabase
+          .from('concepts')
+          .select('id')
+          .order('difficulty', { ascending: true })
+          .limit(BOOTSTRAP_SIZE)
+        conceptIds = (bootstrapConcepts ?? []).map((c) => (c as { id: string }).id)
+      }
     }
   } else if (params.mode === 'new') {
     // Learn new: concepts not yet studied (not in user_progress)
@@ -179,6 +228,7 @@ export default async function StudyPage({
               : undefined
           }
           returnHref={isPracticeMode && params.concept ? `/curriculum/${params.concept}` : undefined}
+          sprintConfig={isSprint ? { limitType: sprintLimitType, limit: sprintLimit } : undefined}
         />
       </ErrorBoundary>
     </main>

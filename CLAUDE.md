@@ -336,10 +336,11 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - Add `email_reminders boolean DEFAULT true` to `profiles`; expose toggle in `/account`
 - Migration: `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`
 
-**Feat-B: Sprint / timed mode (5-minute sessions)**
-- Add `?mode=sprint` to `/study`
-- 5-minute countdown timer shown in progress bar area; session ends at 0
-- Add "5-min sprint" as a 4th mode card on dashboard
+**Feat-B: Configurable Sprint Mode** ✓ complete
+- `src/components/SprintCard.tsx` — `'use client'` dashboard card; inline expand UI; Time (5/10/15 min) or Count (5/10/15/20) limit; optional module filter; navigates to `/study?mode=sprint&limitType=…&limit=…[&module=…]`
+- `dashboard/page.tsx` — fetches modules in Promise.all; renders `<SprintCard>`
+- `study/page.tsx` — parses `mode=sprint`, `limitType`, `limit`; sprint branch: SRS due queue (no SESSION_SIZE cap) with optional module filter; passes `sprintConfig` to StudySession
+- `StudySession.tsx` — `sprintConfig?` prop; countdown timer with `useEffect`; shrinking progress bar with amber pulse at <20%; count-cap via `effectiveLength`; done screen shows "Reviewed X exercises in MM:SS" for time mode
 - No DB changes needed
 
 **Feat-C: Concept prerequisites / unlock progression**

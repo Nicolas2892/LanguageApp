@@ -2,7 +2,8 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import type { Profile, Concept } from '@/lib/supabase/types'
+import { SprintCard } from '@/components/SprintCard'
+import type { Profile, Concept, Module } from '@/lib/supabase/types'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import {
   Flame, Trophy, BookOpen, Sparkles, PenLine,
@@ -15,7 +16,7 @@ export default async function DashboardPage() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes] = await Promise.all([
+  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase
       .from('user_progress')
@@ -41,10 +42,12 @@ export default async function DashboardPage() {
       .lt('interval_days', MASTERY_THRESHOLD)
       .order('interval_days', { ascending: true })
       .limit(1),
+    supabase.from('modules').select('id, title').order('order_index'),
   ])
 
   const profile = profileRes.data as Profile | null
   const dueCount = dueRes.count ?? 0
+  const modules = (modulesRes.data ?? []) as Pick<Module, 'id' | 'title'>[]
   const totalConcepts = totalConceptsRes.count ?? 0
   const studiedCount = studiedRes.count ?? 0
   const masteredCount = masteredRes.count ?? 0
@@ -187,6 +190,9 @@ export default async function DashboardPage() {
             </Button>
           </div>
         )}
+
+        {/* Sprint card */}
+        <SprintCard dueCount={dueCount} modules={modules} />
       </div>
 
     </main>
