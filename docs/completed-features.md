@@ -272,3 +272,40 @@ Card with computed_level badge top-right. One row per CEFR level (B1/B2/C1):
 - Erroneous sentence is now only visible in the read-only red callout — no pre-fill ambiguity
 - `ExerciseRenderer.test.tsx` — pre-fill test updated to `toBe('')`; Reset test removed; Reset disabled assertion removed
 - **Total: 272 tests across 21 files — all passing**
+
+---
+
+### UX-D: Dashboard page redesign ✓
+
+**Overview**
+Eight targeted improvements to `src/app/dashboard/page.tsx` and `SprintCard.tsx` addressing layout, visual hierarchy, daily goal tracking, and copy clarity.
+
+**Files changed**
+- `src/app/dashboard/page.tsx` — all 7 UI/data changes
+- `src/components/SprintCard.tsx` — sprint copy fix
+- `src/components/__tests__/SprintCard.test.tsx` — updated test to match new copy
+
+**Changes**
+
+1. **Single-column layout** — Removed `lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0`; all mode cards always stack vertically. Eliminates orphaned Sprint card on desktop.
+
+2. **Level badge uses LEVEL_CHIP** — Replaced hardcoded `bg-orange-100 text-orange-700` pill with `LEVEL_CHIP[computed_level]` from constants (green B1 / amber B2 / purple C1). Consistent with progress page and curriculum.
+
+3. **Daily goal progress bar** — New query added to `Promise.all`: `study_sessions` for today (`started_at >= todayStart`). Computes `todayMinutes` from `ended_at - started_at`. Renders below the progress bar inside the stats card when `daily_goal_minutes > 0`: label ("Daily goal" / "✓ Daily goal met!"), `X / Y min` counter, 1.5px progress bar (orange → green when met). Hidden entirely when `daily_goal_minutes = 0`.
+
+4. **Review card primary emphasis** — When `dueCount > 0 && studiedCount > 0`, card gets `bg-orange-50/60 border-orange-200` warm tint. All other states keep plain `bg-card`. Secondary cards (Learn new, Free write, Sprint) unchanged.
+
+5. **Free write "weakest concept" sub-label** — Added `<p className="text-xs text-muted-foreground -mt-1">Your weakest concept right now</p>` below the concept title.
+
+6. **Free write fallback card** — When `!isNewUser && !writeConcept` (all concepts mastered or no data), renders a "Practice your writing / Browse concepts →" card instead of silently hiding the section.
+
+7. **Sprint copy** — Changed collapsed heading from `"N concepts due — sprint through them"` (duplicates Review card number) to `"Timed review · push through your queue"`. No-due-reviews copy unchanged ("Focus in a fixed time slot").
+
+8. **Progress bar legend** — `"learning"` → `"in progress"`, `"new"` → `"to start"`. More user-friendly language.
+
+**New data**
+- Today's study sessions query: `study_sessions` filtered `>= todayStart` (midnight UTC); `started_at, ended_at` columns only.
+- No DB migrations required. `daily_goal_minutes` column already existed in `profiles`.
+
+**Tests — 282 total (1 test description updated)**
+- `SprintCard.test.tsx` — "shows dueCount in collapsed heading" updated to "shows timed review heading"; now matches `getByText(/timed review/i)`

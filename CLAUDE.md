@@ -205,7 +205,7 @@ Migrations (run once in Supabase SQL editor):
 
 **Test suite: 282 tests across 22 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-E, UX-G, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -287,14 +287,8 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### UX Audits & Polish
 
-**UX-D: Dashboard page UX audit**
-- **Daily goal progress missing**: `profiles.daily_goal_minutes` exists but no indicator of whether the user has hit their goal today. A subtle ring or progress bar on the streak card would close this loop and reinforce habit formation.
-- **No visual hierarchy across mode cards**: All 4 cards (Review, Learn new, Free write, Sprint) share the same `border-l-4 border-l-orange-500` style — the primary action (Review) should feel visually dominant (e.g., filled background vs. outline cards for secondaries).
-- **Free write card lacks context**: Shows the weakest concept title with no explanation of why. Add a "weakest concept" micro-label below the title ("Your weakest concept right now") to help users understand the recommendation logic.
-- **Level badge is too subtle**: `text-xs` orange pill next to the greeting is easy to miss. As Ped-C makes this meaningful, consider a slightly larger treatment or a separate "Your level" line under the greeting.
-- **Sprint card discoverability**: On desktop 2-col grid, SprintCard can end up alone in the last row (after an odd number of other cards), looking orphaned. Consider always pairing it or using a different grid strategy for desktop.
-- **No empty-state for Free write card (non-new users without a weakest concept)**: If `writeConcept` is null for a non-new user, the card silently disappears. Add a fallback "Pick a concept to write about" card instead.
-- **No skip-to-action affordance**: First-time visit with due reviews buries the CTA below the greeting block + stats card. On small phones this requires scrolling.
+**UX-D: Dashboard page UX audit** ✅ *Complete — see `docs/completed-features.md`*
+- Single-column layout (removed lg:grid-cols-2); LEVEL_CHIP badge; daily goal progress bar; Review card warm tint when due; Free write sub-label + fallback card; Sprint copy fix; legend "in progress" / "to start".
 
 **UX-E: Progress page UX audit** ✅ *Complete — see `docs/completed-features.md`*
 - 4-card coloured stat row (Streak/Mastered/Active skills/Accuracy); CEFR Level Journey replaces MasteryChart; horizontal colour-coded AccuracyChart; study consistency section (session count + hrs); header with subtitle + level badge; MasteryChart deleted.
@@ -324,9 +318,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 ### Polish & UX quality
 
-3. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
-
-4. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+3. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
 
 5. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
 
