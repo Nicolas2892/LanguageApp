@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "seed": "tsx src/lib/curriculum/run-seed.ts",
-    "truncate": "tsx src/lib/curriculum/run-truncate.ts"
+    "truncate": "tsx src/lib/curriculum/run-truncate.ts",
+    "annotate": "tsx src/lib/curriculum/run-annotate.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

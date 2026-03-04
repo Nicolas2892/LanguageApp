@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { createClient as createBrowserClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
-import type { Concept, Exercise } from '@/lib/supabase/types'
+import type { Concept, Exercise, AnnotationSpan } from '@/lib/supabase/types'
 
 function createServiceRoleClient() {
   return createBrowserClient(
@@ -59,8 +59,11 @@ Return ONLY valid JSON (no markdown) in this exact shape:
   "prompt": "...",
   "expected_answer": "...",
   "hint_1": "...",
-  "hint_2": "..."
+  "hint_2": "...",
+  "annotations": [{ "text": "...", "form": null }]
 }
+
+For "annotations", split the prompt text into spans covering every character. Use form: "subjunctive" for conjugated present/imperfect subjunctive verb forms, form: "indicative" for indicative forms (sparingly), form: null for everything else (nouns, conjunctions, blanks, punctuation). The concatenation of all span texts must equal the prompt exactly.
 
 Rules for ${typeLabel}: ${rule}`
 
@@ -72,7 +75,7 @@ Rules for ${typeLabel}: ${rule}`
 
     const raw = message.content[0]?.type === 'text' ? message.content[0].text.trim() : ''
 
-    let generated: { prompt: string; expected_answer: string; hint_1: string; hint_2: string }
+    let generated: { prompt: string; expected_answer: string; hint_1: string; hint_2: string; annotations?: AnnotationSpan[] }
     try {
       generated = JSON.parse(raw)
     } catch {
@@ -94,6 +97,17 @@ Rules for ${typeLabel}: ${rule}`
       }
     }
 
+    // Validate annotations: concatenated spans must equal prompt
+    let validatedAnnotations: AnnotationSpan[] | null = null
+    if (Array.isArray(generated.annotations) && generated.annotations.length > 0) {
+      const concatenated = generated.annotations.map((s) => s.text).join('')
+      if (concatenated === generated.prompt) {
+        validatedAnnotations = generated.annotations
+      } else {
+        console.warn('[generate] annotations span mismatch — storing null')
+      }
+    }
+
     // Insert into exercises table using service role to bypass RLS
     const serviceClient = createServiceRoleClient()
     const { data: newExercise, error: insertErr } = await serviceClient
@@ -105,6 +119,7 @@ Rules for ${typeLabel}: ${rule}`
         expected_answer: generated.expected_answer,
         hint_1: generated.hint_1 ?? null,
         hint_2: generated.hint_2 ?? null,
+        annotations: validatedAnnotations,
       })
       .select('*')
       .single()

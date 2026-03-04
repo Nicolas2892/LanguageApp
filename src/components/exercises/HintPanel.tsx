@@ -10,21 +10,45 @@ interface Props {
 }
 
 export function HintPanel({ hint1, hint2, claudeHint, wrongAttempts, loadingHint, onRequestHint }: Props) {
-  if (wrongAttempts === 0) return null
+  const hasAnyHint = !!(hint1 || hint2)
+  if (!hasAnyHint) return null
+
+  const hint1Revealed = wrongAttempts >= 1
+  const hint2Revealed = wrongAttempts >= 2
 
   return (
     <div className="space-y-2 text-sm">
-      {wrongAttempts >= 1 && hint1 && (
+      {/* Dots indicator — always visible when hints exist */}
+      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-3">
+        <span>Hints:</span>
+        {hint1 && (
+          <span
+            className={`h-2 w-2 rounded-full transition-colors ${
+              hint1Revealed ? 'bg-amber-400' : 'bg-border'
+            }`}
+          />
+        )}
+        {hint2 && (
+          <span
+            className={`h-2 w-2 rounded-full transition-colors ${
+              hint2Revealed ? 'bg-amber-400' : 'bg-border'
+            }`}
+          />
+        )}
+        {claudeHint && <span className="text-blue-500 ml-1">✦ Example</span>}
+      </div>
+
+      {hint1Revealed && hint1 && (
         <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-900">
           <span className="font-semibold">Hint: </span>{hint1}
         </div>
       )}
-      {wrongAttempts >= 2 && hint2 && (
+      {hint2Revealed && hint2 && (
         <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-900">
           <span className="font-semibold">Extra hint: </span>{hint2}
         </div>
       )}
-      {wrongAttempts >= 2 && !claudeHint && !loadingHint && (
+      {hint2Revealed && !claudeHint && !loadingHint && (
         <button
           onClick={onRequestHint}
           className="text-xs text-muted-foreground underline hover:text-foreground"

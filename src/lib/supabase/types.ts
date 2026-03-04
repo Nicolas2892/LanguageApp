@@ -6,6 +6,11 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export interface AnnotationSpan {
+  text: string
+  form: 'subjunctive' | 'indicative' | null
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -156,6 +161,7 @@ export interface Database {
           answer_variants: Json | null
           hint_1: string | null
           hint_2: string | null
+          annotations: AnnotationSpan[] | null
           created_at: string
         }
         Insert: {
@@ -167,6 +173,7 @@ export interface Database {
           answer_variants?: Json | null
           hint_1?: string | null
           hint_2?: string | null
+          annotations?: AnnotationSpan[] | null
           created_at?: string
         }
         Update: {
@@ -178,6 +185,7 @@ export interface Database {
           answer_variants?: Json | null
           hint_1?: string | null
           hint_2?: string | null
+          annotations?: AnnotationSpan[] | null
           created_at?: string
         }
         Relationships: [

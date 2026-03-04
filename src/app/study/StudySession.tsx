@@ -6,9 +6,17 @@ import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import {
   PartyPopper, CheckCircle2, XCircle,
-  Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles, Timer,
+  Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles, Timer, X,
 } from 'lucide-react'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
@@ -65,6 +73,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const [state, setState] = useState<SessionState>({ phase: 'answering' })
   const [submitting, setSubmitting] = useState(false)
   const [scores, setScores] = useState<number[]>([])
+  const [missedConcepts, setMissedConcepts] = useState<Array<{ id: string; title: string }>>([])
+  const [showExitDialog, setShowExitDialog] = useState(false)
 
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [claudeHint, setClaudeHint] = useState<string | null>(null)
@@ -134,6 +144,15 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       })
       const result = await res.json() as GradeResult & { next_review_in_days: number }
       setScores((s) => [...s, result.score])
+
+      // Track missed concepts (score < 2)
+      if (result.score < 2) {
+        setMissedConcepts((prev) => {
+          if (prev.some((c) => c.id === current.concept.id)) return prev
+          return [...prev, { id: current.concept.id, title: current.concept.title }]
+        })
+      }
+
       if (!result.is_correct) setWrongAttempts((n) => n + 1)
       setState({ phase: 'feedback', result, userAnswer: answer })
     } catch {
@@ -255,6 +274,28 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             The SRS has scheduled your next reviews based on your performance.
           </p>
         )}
+
+        {/* Missed concepts breakdown */}
+        {missedConcepts.length > 0 && (
+          <details className="w-full text-left border rounded-xl p-3 mt-2">
+            <summary className="text-sm font-semibold cursor-pointer">
+              {missedConcepts.length} concept{missedConcepts.length !== 1 ? 's' : ''} to revisit
+            </summary>
+            <ul className="mt-2 space-y-1.5">
+              {missedConcepts.map((c) => (
+                <li key={c.id}>
+                  <a
+                    href={`/study?concept=${c.id}`}
+                    className="text-sm text-orange-600 hover:underline"
+                  >
+                    Practice: {c.title} →
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
+
         <div className="flex flex-col items-center gap-3">
           {practiceMode && generateConfig && (
             <button
@@ -285,74 +326,105 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const isLast = index + 1 >= effectiveLength
 
   return (
-    <div className="space-y-5">
-      {/* Progress bar */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          {sprintConfig?.limitType === 'time' ? (
-            <span className={`font-mono font-semibold flex items-center gap-1 ${isTimeLow ? 'text-amber-500' : ''}`}>
-              <Timer className="h-3.5 w-3.5" />
-              {formatTime(secondsLeft)}
-            </span>
-          ) : (
-            <span className="font-medium">{index + 1} / {effectiveLength}</span>
-          )}
-          <Badge variant="outline" className="capitalize text-xs">{current.concept.type} practice</Badge>
-        </div>
-        <div className="h-2.5 bg-muted rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-1000 ${
-              isTimeLow ? 'bg-amber-500 animate-pulse' : 'bg-primary'
-            }`}
-            style={{ width: `${progressPct}%` }}
-          />
-        </div>
-      </div>
+    <>
+      {/* Exit confirmation dialog */}
+      <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Leave session?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Your progress this session won&apos;t be saved.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExitDialog(false)}>
+              Keep going
+            </Button>
+            <Button variant="destructive" onClick={() => router.push(returnHref ?? '/dashboard')}>
+              Leave
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-      {/* Concept title + exercise type badge */}
-      <div className="space-y-2">
-        <p className="text-xl font-bold tracking-tight">{current.concept.title}</p>
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-          <TypeIcon className="h-3.5 w-3.5" />
-          {typeMeta.label}
-        </span>
-      </div>
-
-      {/* Concept explanation */}
-      <div className="bg-muted/50 rounded-lg p-4 text-sm">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Concept</p>
-        <p>{current.concept.explanation}</p>
-      </div>
-
-      {/* Exercise */}
-      <div className="space-y-3">
-        {state.phase === 'answering' && (
-          <>
-            <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
-            {submitting && (
-              <p className="text-sm text-muted-foreground animate-pulse">Grading with AI…</p>
+      <div className="space-y-5">
+        {/* Progress bar */}
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            {sprintConfig?.limitType === 'time' ? (
+              <span className={`font-mono font-semibold flex items-center gap-1 ${isTimeLow ? 'text-amber-500' : ''}`}>
+                <Timer className="h-3.5 w-3.5" />
+                {formatTime(secondsLeft)}
+              </span>
+            ) : (
+              <span className="font-medium">{index + 1} / {effectiveLength}</span>
             )}
-            <HintPanel
-              hint1={current.exercise.hint_1}
-              hint2={current.exercise.hint_2}
-              claudeHint={claudeHint}
-              wrongAttempts={wrongAttempts}
-              loadingHint={loadingHint}
-              onRequestHint={handleRequestClaudeHint}
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="capitalize text-xs">{current.concept.type} practice</Badge>
+              <button
+                onClick={() => setShowExitDialog(true)}
+                aria-label="Exit session"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-1000 ${
+                isTimeLow ? 'bg-amber-500 animate-pulse' : 'bg-primary'
+              }`}
+              style={{ width: `${progressPct}%` }}
             />
-          </>
-        )}
+          </div>
+        </div>
 
-        {state.phase === 'feedback' && (
-          <FeedbackPanel
-            result={state.result}
-            userAnswer={state.userAnswer}
-            onNext={handleNext}
-            onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
-            isLast={isLast}
-          />
-        )}
+        {/* Concept title + exercise type badge */}
+        <div className="space-y-2">
+          <p className="text-xl font-bold tracking-tight">{current.concept.title}</p>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
+            <TypeIcon className="h-3.5 w-3.5" />
+            {typeMeta.label}
+          </span>
+        </div>
+
+        {/* Concept explanation */}
+        <div className="bg-muted/50 rounded-lg p-4 text-sm">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Concept</p>
+          <p>{current.concept.explanation}</p>
+        </div>
+
+        {/* Exercise */}
+        <div className="space-y-3">
+          {state.phase === 'answering' && (
+            <>
+              <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
+              {submitting && (
+                <p className="text-sm text-muted-foreground animate-pulse">Grading with AI…</p>
+              )}
+              <HintPanel
+                hint1={current.exercise.hint_1}
+                hint2={current.exercise.hint_2}
+                claudeHint={claudeHint}
+                wrongAttempts={wrongAttempts}
+                loadingHint={loadingHint}
+                onRequestHint={handleRequestClaudeHint}
+              />
+            </>
+          )}
+
+          {state.phase === 'feedback' && (
+            <FeedbackPanel
+              result={state.result}
+              userAnswer={state.userAnswer}
+              onNext={handleNext}
+              onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
+              isLast={isLast}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -13,6 +13,7 @@ function makeExercise(overrides: Partial<Exercise> & { type: string }): Exercise
     answer_variants: null,
     hint_1: null,
     hint_2: null,
+    annotations: null,
     created_at: '2026-01-01',
     ...overrides,
   }
