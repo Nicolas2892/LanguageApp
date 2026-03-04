@@ -1,62 +1,95 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { MasteryChart } from './MasteryChart'
 import { AccuracyChart } from './AccuracyChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
-import { MASTERY_THRESHOLD } from '@/lib/constants'
-import { Trophy, BookOpen, BarChart2, CalendarDays } from 'lucide-react'
-import type { ModuleMastery } from './MasteryChart'
+import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
+import { Flame, CheckCircle, Zap, Target, BarChart2 } from 'lucide-react'
 import type { ExerciseAccuracy } from './AccuracyChart'
 import type { DayActivity } from './ActivityHeatmap'
 
-const MASTERED_THRESHOLD = MASTERY_THRESHOLD
+const TYPE_LABELS: Record<string, string> = {
+  gap_fill: 'Gap fill',
+  translation: 'Translation',
+  transformation: 'Transformation',
+  error_correction: 'Error correction',
+  free_write: 'Free write',
+  sentence_builder: 'Sentence builder',
+}
+
+const CEFR_COLORS: Record<string, { bar: string; text: string }> = {
+  B1: { bar: 'bg-green-500',  text: 'text-green-700'  },
+  B2: { bar: 'bg-amber-500',  text: 'text-amber-700'  },
+  C1: { bar: 'bg-violet-500', text: 'text-violet-700' },
+}
 
 export default async function ProgressPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  // ── 1. Module mastery ─────────────────────────────────────────────────────
-  const { data: conceptRows } = await supabase
-    .from('concepts')
-    .select('id, unit_id, units(module_id, modules(title))')
+  // ── 1. Profile (streak + computed level) ──────────────────────────────────
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('streak, computed_level')
+    .eq('id', user.id)
+    .single()
 
-  const { data: progressRows } = await supabase
-    .from('user_progress')
-    .select('concept_id, interval_days')
-    .eq('user_id', user.id)
+  const profile = profileData as { streak: number; computed_level: string } | null
+  const currentStreak = profile?.streak ?? 0
+  const computedLevel = profile?.computed_level ?? 'B1'
 
-  const progressMap = new Map(
-    ((progressRows ?? []) as Array<{ concept_id: string; interval_days: number }>)
-      .map((p) => [p.concept_id, p.interval_days])
+  // ── 2. CEFR Journey ───────────────────────────────────────────────────────
+  const [{ data: conceptRows }, { data: progressRows }] = await Promise.all([
+    supabase.from('concepts').select('id, level'),
+    supabase.from('user_progress')
+      .select('concept_id, interval_days, production_mastered')
+      .eq('user_id', user.id),
+  ])
+
+  type ConceptRow = { id: string; level: string }
+  type ProgressRow = { concept_id: string; interval_days: number; production_mastered: boolean }
+
+  const conceptLevelMap = new Map(
+    (conceptRows as ConceptRow[] ?? []).map((c) => [c.id, c.level])
   )
 
-  type ModuleAgg = { mastered: number; learning: number; total: number }
-  const moduleAgg = new Map<string, ModuleAgg>()
-
-  for (const row of (conceptRows ?? []) as Array<{
-    id: string
-    units: { modules: { title: string } } | null
-  }>) {
-    const moduleTitle = row.units?.modules?.title ?? 'Unknown'
-    const agg = moduleAgg.get(moduleTitle) ?? { mastered: 0, learning: 0, total: 0 }
-    agg.total += 1
-    const interval = progressMap.get(row.id) ?? 0
-    if (interval >= MASTERED_THRESHOLD) agg.mastered += 1
-    else if (interval > 0) agg.learning += 1
-    moduleAgg.set(moduleTitle, agg)
+  const totalByLevel = new Map<string, number>()
+  for (const c of (conceptRows as ConceptRow[] ?? [])) {
+    totalByLevel.set(c.level, (totalByLevel.get(c.level) ?? 0) + 1)
   }
 
-  const moduleMastery: ModuleMastery[] = Array.from(moduleAgg.entries()).map(
-    ([module, agg]) => ({ module, ...agg })
+  const masteredByLevel = new Map<string, number>()
+  const productionByLevel = new Map<string, number>()
+  let totalMastered = 0
+
+  for (const row of (progressRows as ProgressRow[] ?? [])) {
+    const level = conceptLevelMap.get(row.concept_id)
+    if (!level) continue
+    if (row.interval_days >= MASTERY_THRESHOLD) {
+      masteredByLevel.set(level, (masteredByLevel.get(level) ?? 0) + 1)
+      totalMastered++
+    }
+    if (row.production_mastered) {
+      productionByLevel.set(level, (productionByLevel.get(level) ?? 0) + 1)
+    }
+  }
+
+  const totalConcepts = (conceptRows ?? []).length
+  const totalProductionCertified = Array.from(productionByLevel.values()).reduce(
+    (s, v) => s + v,
+    0
   )
 
-  const totalConcepts = moduleMastery.reduce((s, m) => s + m.total, 0)
-  const totalMastered = moduleMastery.reduce((s, m) => s + m.mastered, 0)
-  const totalLearning = moduleMastery.reduce((s, m) => s + m.learning, 0)
+  const CEFR_LEVELS = ['B1', 'B2', 'C1'] as const
+  const cefrData = CEFR_LEVELS.map((level) => ({
+    level,
+    mastered: masteredByLevel.get(level) ?? 0,
+    production: productionByLevel.get(level) ?? 0,
+    total: totalByLevel.get(level) ?? 0,
+  }))
 
-  // ── 2. Accuracy by exercise type ──────────────────────────────────────────
+  // ── 3. Accuracy by exercise type ──────────────────────────────────────────
   const { data: attemptRows } = await supabase
     .from('exercise_attempts')
     .select('ai_score, exercises(type)')
@@ -83,11 +116,22 @@ export default async function ProgressPage() {
     .sort((a, b) => b.attempts - a.attempts)
 
   const totalAttempts = exerciseAccuracy.reduce((s, e) => s + e.attempts, 0)
-  const overallAccuracy = totalAttempts > 0
-    ? Math.round(exerciseAccuracy.reduce((s, e) => s + e.accuracy * e.attempts, 0) / totalAttempts)
-    : 0
+  const overallAccuracy =
+    totalAttempts > 0
+      ? Math.round(
+          exerciseAccuracy.reduce((s, e) => s + e.accuracy * e.attempts, 0) / totalAttempts
+        )
+      : 0
 
-  // ── 3. Activity heatmap (last 12 weeks) ───────────────────────────────────
+  // Best + worst exercise type insight
+  const sortedByAccuracy = exerciseAccuracy.length >= 2
+    ? [...exerciseAccuracy].sort((a, b) => b.accuracy - a.accuracy)
+    : null
+  const bestType = sortedByAccuracy?.[0] ?? null
+  const worstType = sortedByAccuracy?.[sortedByAccuracy.length - 1] ?? null
+  const showInsight = bestType && worstType && bestType.type !== worstType.type
+
+  // ── 4. Activity heatmap (last 12 weeks) ───────────────────────────────────
   const twelveWeeksAgo = new Date()
   twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 84)
 
@@ -106,21 +150,68 @@ export default async function ProgressPage() {
   const activityData: DayActivity[] = Array.from(activityByDate.entries()).map(
     ([date, count]) => ({ date, count })
   )
+  const uniqueDaysStudied = activityByDate.size
+
+  // ── 5. Study sessions this month ──────────────────────────────────────────
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
+
+  const { data: sessionRows } = await supabase
+    .from('study_sessions')
+    .select('started_at, ended_at')
+    .eq('user_id', user.id)
+    .gte('started_at', monthStart.toISOString())
+
+  type SessionRow = { started_at: string; ended_at: string | null }
+  const sessionCount = (sessionRows ?? []).length
+  const totalMinutes = (sessionRows ?? [] as SessionRow[]).reduce((sum, s) => {
+    if (!s.ended_at) return sum
+    const ms = new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()
+    return sum + Math.round(ms / 60000)
+  }, 0)
 
   const hasAnyData = totalAttempts > 0
 
+  // Page meta
+  const now = new Date()
+  const monthLabel = now.toLocaleString('default', { month: 'long' })
+  const year = now.getFullYear()
+  const levelChip = LEVEL_CHIP[computedLevel]
+
+  // Motivating B1→B2 hint
+  const b1 = cefrData.find((d) => d.level === 'B1')
+  const b1Pct = b1 && b1.total > 0 ? b1.mastered / b1.total : 0
+  const b1Remaining = b1 ? b1.total - b1.mastered : 0
+  const showB2Hint = b1Pct >= 0.6 && b1Remaining > 0
+
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-10 pb-24 lg:pb-10">
+    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-24 lg:pb-10">
+
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-extrabold tracking-tight">Progress</h1>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Progress</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Your learning journey · {monthLabel} {year}
+          </p>
+        </div>
+        {levelChip && (
+          <span
+            className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${levelChip.className}`}
+          >
+            {levelChip.label}
+          </span>
+        )}
       </div>
 
       {!hasAnyData ? (
         <div className="text-center py-16 space-y-4">
           <BarChart2 className="h-14 w-14 text-orange-300 mx-auto" />
           <p className="text-xl font-bold">No data yet</p>
-          <p className="text-muted-foreground text-sm">Complete some exercises to see your progress here.</p>
+          <p className="text-muted-foreground text-sm">
+            Complete some exercises to see your progress here.
+          </p>
           <Link
             href="/study"
             className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors mt-2"
@@ -130,73 +221,164 @@ export default async function ProgressPage() {
         </div>
       ) : (
         <>
-          {/* Summary stats */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="border rounded-xl p-4 space-y-2 shadow-sm">
-              <Trophy className="h-5 w-5 text-amber-500 mx-auto" />
+          {/* Stats row — 2×2 mobile / 4-col desktop */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+            {/* Streak */}
+            <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                <Flame className="h-4 w-4 text-orange-600" />
+              </div>
+              <p className="text-2xl font-extrabold">{currentStreak}</p>
+              <div>
+                <p className="text-xs font-medium">Day streak</p>
+                <p className="text-xs text-muted-foreground">Keep it up!</p>
+              </div>
+            </div>
+
+            {/* Mastered */}
+            <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+              </div>
               <p className="text-2xl font-extrabold text-green-600">{totalMastered}</p>
-              <p className="text-xs text-muted-foreground">Mastered</p>
+              <div>
+                <p className="text-xs font-medium">Mastered</p>
+                <p className="text-xs text-muted-foreground">of {totalConcepts} total</p>
+              </div>
             </div>
-            <div className="border rounded-xl p-4 space-y-2 shadow-sm">
-              <BookOpen className="h-5 w-5 text-blue-500 mx-auto" />
-              <p className="text-2xl font-extrabold text-blue-600">{totalLearning}</p>
-              <p className="text-xs text-muted-foreground">In progress</p>
+
+            {/* Production certified */}
+            <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-amber-600" />
+              </div>
+              <p className="text-2xl font-extrabold text-amber-600">{totalProductionCertified}</p>
+              <div>
+                <p className="text-xs font-medium">Production certified</p>
+                <p className="text-xs text-muted-foreground">B1→B2 bottleneck</p>
+              </div>
             </div>
-            <div className="border rounded-xl p-4 space-y-2 shadow-sm">
-              <BarChart2 className="h-5 w-5 text-orange-500 mx-auto" />
-              <p className="text-2xl font-extrabold">{overallAccuracy}%</p>
-              <p className="text-xs text-muted-foreground">Accuracy</p>
+
+            {/* Accuracy */}
+            <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+              <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center">
+                <Target className="h-4 w-4 text-sky-600" />
+              </div>
+              <p className="text-2xl font-extrabold text-sky-600">{overallAccuracy}%</p>
+              <div>
+                <p className="text-xs font-medium">Accuracy</p>
+                <p className="text-xs text-muted-foreground">across all exercises</p>
+              </div>
             </div>
           </div>
 
-          {/* Module mastery */}
-          <section className="space-y-3">
-            <h2 className="font-bold text-lg flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-amber-500" />
-              Module mastery
-            </h2>
-            <div className="border rounded-xl p-4 shadow-sm">
-              <MasteryChart data={moduleMastery} />
+          {/* CEFR Level Journey */}
+          <section className="bg-card rounded-xl border p-5 shadow-sm space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-bold text-base">Your CEFR Journey</h2>
+              {levelChip && (
+                <span
+                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelChip.className}`}
+                >
+                  {levelChip.label}
+                </span>
+              )}
             </div>
-            <div className="flex gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-green-500 inline-block" /> Mastered (≥21 day interval)</span>
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-blue-500 inline-block" /> Learning</span>
-              <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-gray-200 inline-block" /> Not started</span>
+
+            <div className="space-y-5">
+              {cefrData.map(({ level, mastered, production, total }) => {
+                const pct = total > 0 ? Math.round((mastered / total) * 100) : 0
+                const color = CEFR_COLORS[level]
+                return (
+                  <div key={level} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-semibold">{level}</span>
+                      <span className="text-muted-foreground">
+                        {mastered} / {total} concepts
+                      </span>
+                    </div>
+                    <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
+                      <div
+                        className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${color?.bar ?? 'bg-gray-400'}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] text-muted-foreground">
+                        {production} production certified
+                      </p>
+                      <p className={`text-[11px] font-medium ${color?.text ?? ''}`}>{pct}%</p>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
+
+            {showB2Hint && (
+              <p className="text-xs text-amber-600 font-medium pt-1 border-t">
+                {b1Remaining} more concept{b1Remaining !== 1 ? 's' : ''} to reach B2 eligibility
+              </p>
+            )}
           </section>
 
-          {/* Accuracy by exercise type */}
+          {/* Where you're strongest */}
           {exerciseAccuracy.length > 0 && (
             <section className="space-y-3">
-              <h2 className="font-bold text-lg flex items-center gap-2">
-                <BarChart2 className="h-5 w-5 text-orange-500" />
-                Accuracy by exercise type
-              </h2>
-              <div className="border rounded-xl p-4 shadow-sm">
+              <h2 className="font-bold text-base">Where you&apos;re strongest</h2>
+              {showInsight && (
+                <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+                  Best:{' '}
+                  <span className="font-medium text-foreground">
+                    {TYPE_LABELS[bestType!.type] ?? bestType!.type}
+                  </span>{' '}
+                  ({bestType!.accuracy}%)&nbsp;·&nbsp;Needs work:{' '}
+                  <span className="font-medium text-foreground">
+                    {TYPE_LABELS[worstType!.type] ?? worstType!.type}
+                  </span>{' '}
+                  ({worstType!.accuracy}%)
+                </p>
+              )}
+              <div className="bg-card rounded-xl border p-5 shadow-sm">
                 <AccuracyChart data={exerciseAccuracy} />
               </div>
-              <p className="text-xs text-muted-foreground">{totalAttempts} total attempts</p>
             </section>
           )}
 
-          {/* Activity heatmap */}
+          {/* Study consistency */}
           <section className="space-y-3">
-            <h2 className="font-bold text-lg flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-orange-500" />
-              Activity — last 12 weeks
-            </h2>
-            <div className="border rounded-xl p-4 shadow-sm overflow-x-auto">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="font-bold text-base">Study consistency</h2>
+                {sessionCount > 0 && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    <span className="font-medium text-foreground">
+                      {sessionCount} session{sessionCount !== 1 ? 's' : ''}
+                    </span>{' '}
+                    this month
+                    {totalMinutes > 0 && (
+                      <>
+                        {' '}·{' '}
+                        <span className="font-medium text-foreground">
+                          {(totalMinutes / 60).toFixed(1)} hrs
+                        </span>{' '}
+                        total
+                      </>
+                    )}
+                  </p>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground text-right shrink-0">
+                {uniqueDaysStudied} day{uniqueDaysStudied !== 1 ? 's' : ''} studied
+                <br />
+                <span className="text-[10px]">in the last 3 months</span>
+              </p>
+            </div>
+            <div className="bg-card rounded-xl border p-5 shadow-sm overflow-x-auto">
               <ActivityHeatmap data={activityData} weeks={14} />
             </div>
           </section>
         </>
-      )}
-
-      {/* Total concepts context */}
-      {hasAnyData && (
-        <p className="text-xs text-muted-foreground text-center">
-          {totalMastered} of {totalConcepts} total concepts mastered
-        </p>
       )}
     </main>
   )

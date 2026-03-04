@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList, Cell } from 'recharts'
 
 export interface ExerciseAccuracy {
   type: string
@@ -8,38 +8,88 @@ export interface ExerciseAccuracy {
   attempts: number
 }
 
+export const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
+  gap_fill:         { label: 'Gap fill',         color: '#fb923c' }, // orange-400
+  translation:      { label: 'Translation',       color: '#0ea5e9' }, // sky-500
+  transformation:   { label: 'Transformation',    color: '#8b5cf6' }, // violet-500
+  error_correction: { label: 'Error correction',  color: '#fb7185' }, // rose-400
+  free_write:       { label: 'Free write',        color: '#10b981' }, // emerald-500
+  sentence_builder: { label: 'Sentence builder',  color: '#f59e0b' }, // amber-400
+}
+
+const DEFAULT_COLOR = '#94a3b8' // slate-400
+
+interface TooltipProps {
+  active?: boolean
+  payload?: Array<{ value: number; payload: { name: string; attempts: number } }>
+}
+
+function CustomTooltip({ active, payload }: TooltipProps) {
+  if (!active || !payload?.length) return null
+  const { name, attempts } = payload[0].payload
+  const accuracy = payload[0].value
+  return (
+    <div className="rounded-lg bg-card border shadow-sm px-3 py-2 text-sm">
+      <p className="font-medium">{name}</p>
+      <p className="text-muted-foreground">
+        {accuracy}% · {attempts} attempt{attempts !== 1 ? 's' : ''}
+      </p>
+    </div>
+  )
+}
+
 interface Props {
   data: ExerciseAccuracy[]
 }
 
-const TYPE_LABELS: Record<string, string> = {
-  gap_fill: 'Gap fill',
-  transformation: 'Transform',
-  translation: 'Translation',
-  error_correction: 'Error fix',
-  free_write: 'Free write',
-  sentence_builder: 'Sentence',
-}
-
 export function AccuracyChart({ data }: Props) {
-  const chartData = data.map((d) => ({
-    name: TYPE_LABELS[d.type] ?? d.type,
-    Accuracy: d.accuracy,
-    attempts: d.attempts,
-  }))
+  const chartData = data.map((d) => {
+    const cfg = TYPE_CONFIG[d.type]
+    return {
+      name: cfg?.label ?? d.type,
+      accuracy: d.accuracy,
+      attempts: d.attempts,
+      color: cfg?.color ?? DEFAULT_COLOR,
+      label: `${d.accuracy}% (${d.attempts})`,
+    }
+  })
+
+  const height = Math.max(160, chartData.length * 52)
 
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={chartData} margin={{ top: 4, right: 8, left: -16, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-        <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-        <YAxis tick={{ fontSize: 11 }} domain={[0, 100]} unit="%" />
-        <Tooltip
-          formatter={(val, _name, props) =>
-            [`${val ?? 0}% (${props.payload.attempts} attempts)`, 'Accuracy']
-          }
+    <ResponsiveContainer width="100%" height={height}>
+      <BarChart
+        layout="vertical"
+        data={chartData}
+        margin={{ top: 4, right: 100, left: 4, bottom: 4 }}
+      >
+        <XAxis
+          type="number"
+          domain={[0, 100]}
+          unit="%"
+          tick={{ fontSize: 11 }}
+          axisLine={false}
+          tickLine={false}
         />
-        <Bar dataKey="Accuracy" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+        <YAxis
+          type="category"
+          dataKey="name"
+          tick={{ fontSize: 12 }}
+          axisLine={false}
+          tickLine={false}
+          width={120}
+        />
+        <Tooltip content={<CustomTooltip />} />
+        <Bar dataKey="accuracy" radius={[4, 4, 4, 4]} maxBarSize={28}>
+          {chartData.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={entry.color} />
+          ))}
+          <LabelList
+            dataKey="label"
+            position="right"
+            style={{ fontSize: 11, fill: '#6b7280' }}
+          />
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   )
