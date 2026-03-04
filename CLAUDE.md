@@ -269,6 +269,10 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - Read-only v1: list all concepts/exercises with attempt counts
 - Stretch: inline edit for concept explanation and exercise prompt text
 
+#### Bugs / Layout Fixes
+
+> **Pattern — sidebar-aware fixed footers**: Tailwind v4 (CSS-first, no `tailwind.config.js`) does not reliably compile arbitrary responsive classes like `lg:left-[220px]`. Always use `style={{ left: 'var(--sidebar-width)' }}` for any `fixed` element that must clear the sidebar. `--sidebar-width` is defined in `globals.css` (0px default, 220px at `@media (min-width: 1024px)`).
+
 #### UX Audits & Polish
 
 **UX-D: Dashboard page UX audit**
