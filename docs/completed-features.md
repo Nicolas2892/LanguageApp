@@ -149,7 +149,7 @@ This file contains implementation details for all completed work. Reference it w
 - `/curriculum/[id]` — `LevelChip` added to title header alongside GrammarFocusChip (data already available via `select('*')`)
 - Mastery badges (`New`/`Learning`/`Mastered`) restyled to match chip spec: `text-[10px]`, `px-1.5 py-0.5 rounded`, muted colours (`-50` bg, `-100` border) — consistent with LevelChip + GrammarFocusChip; applied to both curriculum pages
 
-### UX-G: Exercise session UX polish ✓ (hint dots, auto-grow textarea, exit dialog, missed-concept done screen)
+### UX-G: Exercise session UX polish ✓ (fully complete)
 
 **Hint availability dots (HintPanel.tsx)**
 - Previous behaviour: component returned null when `wrongAttempts === 0`, so users couldn't tell hints existed
@@ -209,3 +209,12 @@ This file contains implementation details for all completed work. Reference it w
 - `src/components/exercises/__tests__/HintPanel.test.tsx` — 6 tests: no hints → null; dots rendered at 0 attempts; two dots for two hints; amber on wrongAttempts ≥ 1; amber dot2 on ≥ 2; hint text only after wrong attempts
 - `GapFill.test.tsx` + `ExerciseRenderer.test.tsx` — `makeExercise` helpers updated to include `annotations: null`
 - **Total: 273 tests across 21 files — all passing** *(3 added by Ped-D)*
+
+**SpeakButton 44px mobile tap target**
+- `src/components/SpeakButton.tsx` — `min-w-[44px] min-h-[44px]` on mobile; `sm:w-7 sm:h-7 sm:min-w-0 sm:min-h-0` on desktop; icon size and colours unchanged
+
+**ErrorCorrection empty textarea**
+- `src/components/exercises/ErrorCorrection.tsx` — `useState('')` (was `useState(erroneous)`); added `placeholder="Type the corrected sentence…"`; label updated to "Type the corrected sentence below:"; Reset button removed entirely
+- Erroneous sentence is now only visible in the read-only red callout — no pre-fill ambiguity
+- `ExerciseRenderer.test.tsx` — pre-fill test updated to `toBe('')`; Reset test removed; Reset disabled assertion removed
+- **Total: 272 tests across 21 files — all passing**

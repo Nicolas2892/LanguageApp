@@ -203,7 +203,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 273 tests across 21 files — all passing.**
+**Test suite: 272 tests across 21 files — all passing.**
 
 Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-G, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
 
@@ -308,17 +308,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 **UX-F: ConceptPicker (free write concept selection) UX overhaul** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-G: Exercise session UX audit** — Partially complete ✅ / Remaining items below
-- ✅ Exercise type label (EXERCISE_TYPE_META in StudySession)
-- ✅ "X / Y" progress counter
-- ✅ FeedbackPanel score labels (SCORE_CONFIG)
-- ✅ Hint dots (HintPanel — always visible when hints exist)
-- ✅ Auto-grow textarea (TextAnswer — scrollHeight ref)
-- ✅ Exit confirmation dialog (X button + shadcn Dialog)
-- ✅ Missed-concept done screen (collapsible list with practice links)
-- **Multi-blank GapFill keyboard UX on mobile** *(remaining)*: After filling one blank, mobile keyboard doesn't auto-advance. Implement `onKeyDown Enter → focus next blank input`.
-- **Audio button tap target** *(remaining)*: `SpeakButton` may sit too close to other elements on narrow screens. Ensure `min-w-[44px] min-h-[44px]` touch target.
-- **Error correction pre-fill** *(remaining)*: ErrorCorrection pre-populates textarea with the incorrect sentence — users sometimes read this as the correct answer. Consider showing erroneous sentence read-only above an empty textarea.
+**UX-G: Exercise session UX audit** ✅ *Complete — see `docs/completed-features.md`*
 
 #### Design
 
@@ -341,22 +331,20 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 ### Polish & UX quality
 
-3. **UX-G remaining items** — SpeakButton 44px tap target; ErrorCorrection empty-textarea redesign. (GapFill keyboard auto-advance is now done as part of Ped-D.)
+3. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
 
-4. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
+4. **UX-E: Progress page UX audit** — Coloured stat cards; friendly exercise type labels in accuracy chart; heatmap legend; accessible chart colours; "total time studied" stat; streak history; improved empty state with CTA.
 
-5. **UX-E: Progress page UX audit** — Coloured stat cards; friendly exercise type labels in accuracy chart; heatmap legend; accessible chart colours; "total time studied" stat; streak history; improved empty state with CTA.
+5. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
 
-6. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+6. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
 
-7. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
-
-8. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
+7. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
 
 ### Later — Growth features
 
-9. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
+8. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
 
-10. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+9. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
 
-11. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
+10. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
