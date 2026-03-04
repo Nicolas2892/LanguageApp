@@ -25,9 +25,9 @@ describe('ExerciseRenderer', () => {
     vi.spyOn(Math, 'random').mockReturnValue(0.5)
   })
 
-  // --- gap_fill → GapFill (single-line input) ---
+  // --- gap_fill → GapFill (inline input) ---
 
-  it('renders a single-line input for gap_fill', () => {
+  it('renders an inline input for single-blank gap_fill', () => {
     const onSubmit = vi.fn()
     render(
       <ExerciseRenderer
@@ -36,9 +36,9 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    expect(screen.getByPlaceholderText('Type your answer…')).toBeTruthy()
-    // Input, not textarea
-    expect(screen.getByPlaceholderText('Type your answer…').tagName).toBe('INPUT')
+    expect(screen.getByLabelText('Your answer')).toBeTruthy()
+    // Inline input, not textarea
+    expect(screen.getByLabelText('Your answer').tagName).toBe('INPUT')
   })
 
   it('submits gap_fill answer on form submit', async () => {
@@ -50,7 +50,7 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    await userEvent.type(screen.getByPlaceholderText('Type your answer…'), 'soy')
+    await userEvent.type(screen.getByLabelText('Your answer'), 'soy')
     await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
     expect(onSubmit).toHaveBeenCalledWith('soy')
   })

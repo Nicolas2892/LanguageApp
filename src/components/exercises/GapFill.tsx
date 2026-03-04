@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, Fragment } from 'react'
+import { useState, useRef, Fragment } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SpeakButton } from '@/components/SpeakButton'
 import { AnnotatedText } from '@/components/AnnotatedText'
 import type { Exercise, AnnotationSpan } from '@/lib/supabase/types'
-import { splitPromptOnBlanks, countBlanks, encodeAnswers } from '@/lib/exercises/gapFill'
+import { splitPromptOnBlanks, countBlanks, encodeAnswers, parseExpectedAnswers } from '@/lib/exercises/gapFill'
 
 interface Props {
   exercise: Exercise
@@ -67,30 +67,57 @@ function sliceAnnotationsForSegment(
 export function GapFill({ exercise, onSubmit, disabled }: Props) {
   const segments = splitPromptOnBlanks(exercise.prompt)
   const blankCount = countBlanks(exercise.prompt)
-  const isMultiBlank = blankCount >= 2
+  const hasInlineBlanks = blankCount >= 1
 
   const [answers, setAnswers] = useState<string[]>(() => Array(Math.max(blankCount, 1)).fill(''))
   const [singleAnswer, setSingleAnswer] = useState('')
 
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
+  const submitRef = useRef<HTMLButtonElement>(null)
+
+  const expectedAnswers = parseExpectedAnswers(exercise.expected_answer)
+
+  function getHintWidth(blankIndex: number): number {
+    const len = expectedAnswers
+      ? (expectedAnswers[blankIndex]?.length ?? 6)
+      : (exercise.expected_answer?.length ?? 6)
+    return Math.max(5, len + 2)
+  }
+
+  function handleKeyDown(i: number) {
+    return (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        const next = inputRefs.current[i + 1]
+        if (next) next.focus()
+        else submitRef.current?.focus()
+      }
+    }
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (isMultiBlank) {
+    if (hasInlineBlanks) {
       if (!answers.every((a) => a.trim())) return
-      onSubmit(encodeAnswers(answers.map((a) => a.trim())))
+      if (blankCount === 1) {
+        onSubmit(answers[0].trim())
+      } else {
+        onSubmit(encodeAnswers(answers.map((a) => a.trim())))
+      }
     } else {
       if (!singleAnswer.trim()) return
       onSubmit(singleAnswer.trim())
     }
   }
 
-  const allFilled = isMultiBlank
+  const allFilled = hasInlineBlanks
     ? answers.every((a) => a.trim())
     : !!singleAnswer.trim()
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-start gap-2">
-        {isMultiBlank ? (
+        {hasInlineBlanks ? (
           <div className="text-xl leading-relaxed font-medium flex-1 flex flex-wrap items-baseline gap-x-1 gap-y-2">
             {segments.map((segment, i) => (
               <Fragment key={i}>
@@ -108,17 +135,20 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
                   />
                 </span>
                 {i < blankCount && (
-                  <Input
+                  <input
+                    ref={(el) => { inputRefs.current[i] = el }}
                     value={answers[i]}
                     onChange={(e) => {
                       const next = [...answers]
                       next[i] = e.target.value
                       setAnswers(next)
                     }}
+                    onKeyDown={handleKeyDown(i)}
+                    aria-label={blankCount > 1 ? `Blank ${i + 1}` : 'Your answer'}
                     disabled={disabled}
                     autoFocus={i === 0}
-                    aria-label={`Blank ${i + 1}`}
-                    className="inline-block w-28 text-base h-8 px-2"
+                    className="inline-block border-0 border-b-2 border-muted-foreground/60 focus:border-violet-600 focus:outline-none bg-transparent text-xl font-medium text-center transition-colors duration-150 py-0.5 align-text-bottom"
+                    style={{ width: `${getHintWidth(i)}ch` }}
                   />
                 )}
               </Fragment>
@@ -132,7 +162,7 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
         <SpeakButton text={exercise.prompt} />
       </div>
 
-      {!isMultiBlank && (
+      {!hasInlineBlanks && (
         <div className="flex gap-2">
           <Input
             value={singleAnswer}
@@ -145,7 +175,7 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
         </div>
       )}
 
-      <Button type="submit" disabled={disabled || !allFilled} className="w-full">
+      <Button ref={submitRef} type="submit" disabled={disabled || !allFilled} className="w-full">
         Submit
       </Button>
     </form>

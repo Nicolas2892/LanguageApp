@@ -109,15 +109,14 @@ function makeExercise(overrides: Partial<Exercise> & { type?: string } = {}): Ex
   }
 }
 
-// --- Single-blank mode ---
+// --- Single-blank inline mode ---
 
-describe('GapFill — single-blank mode (legacy compat)', () => {
-  it('renders prompt as <p> and a single input below', () => {
+describe('GapFill — single-blank inline mode', () => {
+  it('renders a single inline input with aria-label "Your answer"', () => {
     const exercise = makeExercise({ prompt: 'La película es larga; ___, me gustó.' })
     render(<GapFill exercise={exercise} onSubmit={vi.fn()} />)
-    expect(screen.getByText(exercise.prompt)).toBeTruthy()
-    expect(screen.getByPlaceholderText('Type your answer…')).toBeTruthy()
-    expect(screen.getByPlaceholderText('Type your answer…').tagName).toBe('INPUT')
+    expect(screen.getByLabelText('Your answer')).toBeTruthy()
+    expect(screen.queryByPlaceholderText('Type your answer…')).toBeNull()
   })
 
   it('calls onSubmit with trimmed plain string', async () => {
@@ -128,7 +127,7 @@ describe('GapFill — single-blank mode (legacy compat)', () => {
         onSubmit={onSubmit}
       />
     )
-    await userEvent.type(screen.getByPlaceholderText('Type your answer…'), '  soy  ')
+    await userEvent.type(screen.getByLabelText('Your answer'), '  soy  ')
     await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
     expect(onSubmit).toHaveBeenCalledWith('soy')
   })
@@ -151,12 +150,28 @@ describe('GapFill — single-blank mode (legacy compat)', () => {
         disabled={true}
       />
     )
-    expect(screen.getByPlaceholderText('Type your answer…')).toBeDisabled()
+    expect(screen.getByLabelText('Your answer')).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
   })
 
-  it('prompt with no blank tokens renders as single-blank fallback', () => {
-    // A prompt with zero ___ tokens — countBlanks = 0 → single-blank fallback
+  it('Enter key in single blank moves focus to Submit button', async () => {
+    render(
+      <GapFill
+        exercise={makeExercise({ prompt: 'Aunque ___ frío, salimos.' })}
+        onSubmit={vi.fn()}
+      />
+    )
+    const blank = screen.getByLabelText('Your answer')
+    await userEvent.type(blank, 'hacía')
+    await userEvent.keyboard('{Enter}')
+    expect(screen.getByRole('button', { name: 'Submit' })).toHaveFocus()
+  })
+})
+
+// --- Zero-blank fallback mode ---
+
+describe('GapFill — zero-blank fallback', () => {
+  it('renders prompt as <p> and a separate input below when no blanks present', () => {
     const exercise = makeExercise({ prompt: 'La película es muy larga. Me ha gustado mucho.' })
     render(<GapFill exercise={exercise} onSubmit={vi.fn()} />)
     expect(screen.getByPlaceholderText('Type your answer…')).toBeTruthy()
@@ -237,5 +252,32 @@ describe('GapFill — multi-blank mode', () => {
     expect(screen.getByLabelText('Blank 1')).toBeDisabled()
     expect(screen.getByLabelText('Blank 2')).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+  })
+
+  it('Enter in first blank moves focus to second blank', async () => {
+    render(
+      <GapFill
+        exercise={makeExercise({ prompt: multiPrompt })}
+        onSubmit={vi.fn()}
+      />
+    )
+    const blank1 = screen.getByLabelText('Blank 1')
+    await userEvent.type(blank1, 'Aunque')
+    await userEvent.keyboard('{Enter}')
+    expect(screen.getByLabelText('Blank 2')).toHaveFocus()
+  })
+
+  it('Enter in last blank moves focus to Submit button', async () => {
+    render(
+      <GapFill
+        exercise={makeExercise({ prompt: multiPrompt })}
+        onSubmit={vi.fn()}
+      />
+    )
+    // Fill both blanks so Submit is enabled and can receive focus
+    await userEvent.type(screen.getByLabelText('Blank 1'), 'Aunque')
+    await userEvent.type(screen.getByLabelText('Blank 2'), 'Sin embargo')
+    await userEvent.keyboard('{Enter}')
+    expect(screen.getByRole('button', { name: 'Submit' })).toHaveFocus()
   })
 })

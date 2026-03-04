@@ -18,7 +18,7 @@ const GenerateSchema = z.object({
 })
 
 const TYPE_RULES: Record<string, string> = {
-  gap_fill:         'Write 2–3 connected Spanish sentences forming a short coherent paragraph. Include exactly 2 or 3 blanks (___). One blank must require the specific target concept; the remaining blank(s) require related connectors or structures the learner must independently recall. "expected_answer" MUST be a JSON-encoded array string with one entry per blank in left-to-right order, e.g. "[\"sin embargo\",\"aunque\"]". Do NOT hint at the answer within the sentence.',
+  gap_fill:         'Write 1–2 Spanish sentences with exactly 1 or 2 blanks (___). IMPORTANT: ALL blanks must test the same target concept — never place a blank for a different concept or connector. Use 1 blank by default (cleanest signal). Use 2 blanks only when the same concept usefully appears in two positions (e.g. two subjunctive conjugations after different triggers, or two positions of the same connector). For 1 blank: "expected_answer" is a plain string, e.g. "sin embargo". For 2 blanks: "expected_answer" MUST be a JSON-encoded array string with one entry per blank in left-to-right order, e.g. "[\"vengas\",\"lleguen\"]". The surrounding context should be rich enough that the learner must disambiguate the target answer from plausible alternatives. Do NOT hint at the answer within the sentence.',
   translation:      'an English sentence to translate into Spanish',
   transformation:   'a Spanish sentence pair to combine using the target structure',
   error_correction: 'quote a Spanish sentence containing a deliberate error in "double quotes"',
@@ -87,14 +87,19 @@ Rules for ${typeLabel}: ${rule}`
       return NextResponse.json({ error: 'Invalid AI response structure' }, { status: 500 })
     }
 
-    // For gap_fill, validate expected_answer is a JSON array
+    // For gap_fill, validate expected_answer is either a plain string (1-blank)
+    // or a JSON array of strings (2-blank). Both are valid per the same-concept design.
     if (type === 'gap_fill') {
-      try {
-        const parsed = JSON.parse(generated.expected_answer)
-        if (!Array.isArray(parsed)) throw new Error('not array')
-      } catch {
-        return NextResponse.json({ error: 'AI returned invalid gap_fill answer format' }, { status: 500 })
+      const blankCount = (generated.prompt.match(/___/g) || []).length
+      if (blankCount >= 2) {
+        try {
+          const parsedAnswer = JSON.parse(generated.expected_answer)
+          if (!Array.isArray(parsedAnswer)) throw new Error('not array')
+        } catch {
+          return NextResponse.json({ error: 'AI returned invalid gap_fill answer format (multi-blank requires JSON array)' }, { status: 500 })
+        }
       }
+      // 1-blank or 0-blank: plain string is fine — no further validation needed
     }
 
     // Validate annotations: concatenated spans must equal prompt
