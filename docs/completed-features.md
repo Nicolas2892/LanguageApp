@@ -132,3 +132,10 @@ This file contains implementation details for all completed work. Reference it w
 - `src/components/GrammarFocusChip.tsx` — shared chip; sky = Indicative, violet = Subjunctive, amber = Both moods; null-safe (returns null for unknown/null/undefined)
 - Shown on `/curriculum` concept rows, `/curriculum/[id]` title header, `ConceptPicker` free-write chooser
 - Padlock/prerequisite system deferred: too few concepts (21) for locking to add value; revisit after Feat-E; will need `concept_prerequisites` join table for multiple prerequisites per concept
+
+### UX-H: Curriculum CEFR level tags ✓
+- `src/lib/constants.ts` — `LEVEL_CHIP` map: B1=green-100/700, B2=amber-100/700, C1=purple-100/700
+- `src/components/LevelChip.tsx` — null-safe chip (mirrors GrammarFocusChip); returns null for unknown/null/undefined; 6 unit tests added (247 total)
+- `/curriculum` — `level` added to concepts query; `LevelChip` rendered on every concept row (left of GrammarFocusChip); level filter chip row (`All levels | B1 | B2 | C1`) below mastery tabs; AND logic with mastery filter; `backFilter` preserves both `filter=` and `level=` params
+- `/curriculum/[id]` — `LevelChip` added to title header alongside GrammarFocusChip (data already available via `select('*')`)
+- Mastery badges (`New`/`Learning`/`Mastered`) restyled to match chip spec: `text-[10px]`, `px-1.5 py-0.5 rounded`, muted colours (`-50` bg, `-100` border) — consistent with LevelChip + GrammarFocusChip; applied to both curriculum pages

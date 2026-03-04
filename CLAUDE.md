@@ -195,9 +195,9 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 241 tests across 18 files — all passing.**
+**Test suite: 247 tests across 19 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C), Ped-A (multi-blank gap-fill), Ped-C (computed level), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -312,12 +312,6 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - **Audio button tap target**: `SpeakButton` can sit very close to other interactive elements on narrow screens. Ensure a minimum `min-w-[44px] min-h-[44px]` touch target (same standard applied to SprintCard chips).
 - **Error correction pre-fill is confusing**: ErrorCorrection pre-populates the textarea with the incorrect sentence and shows a warning banner. Users sometimes read this as the correct answer. Consider showing the erroneous sentence *above* the input (read-only, styled as a blockquote) and keeping the textarea empty — clearer separation between "what's wrong" and "write the fix".
 
-**UX-H: Curriculum page CEFR level tags** *(targeted fix, not a full audit)*
-- Add a small `B1` / `B2` / `C1` chip to each concept row in `/curriculum` and `/curriculum/[id]` — the `concepts.level` column already exists (Ped-C).
-- Style: same chip style as the dashboard level badge (`px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700`) but use distinct colours per level (e.g., green for B1, orange for B2, red/purple for C1) to create a quick visual difficulty spectrum across the full concept list.
-- Also add level filtering as a secondary axis in the filter tabs (or as a separate row of chips below the existing All|New|Learning|Mastered tabs): e.g., `All levels | B1 | B2 | C1`.
-- Update `/curriculum/[id]` detail page header to prominently show the level chip alongside the concept title.
-
 #### Design
 
 **Design-A: App logo**
@@ -341,26 +335,24 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 ### Next — Polish & UX quality
 
-5. **UX-H: Curriculum CEFR level tags** *(targeted, low-effort, high-impact)* — Add B1/B2/C1 chip to every concept row in `/curriculum` and `/curriculum/[id]`; distinct colours per level; optional level filter row below existing tabs.
+5. **UX-F: ConceptPicker overhaul** — Collapse modules by default (same `<details>` pattern as curriculum); add CEFR level chip per concept row; add mastery filter; make "Surprise me" more prominent; add back affordance; no DB change needed.
 
-6. **UX-F: ConceptPicker overhaul** — Collapse modules by default (same `<details>` pattern as curriculum); add CEFR level chip per concept row; add mastery filter; make "Surprise me" more prominent; add back affordance; no DB change needed.
+6. **UX-G: Exercise session UX polish** — Add exercise type label + "X of Y" counter; hint-system visibility indicator; auto-growing textarea for free_write/TextAnswer; FeedbackPanel score labels (from SCORE_CONFIG); exit confirmation dialog; missed-concept breakdown on done screen.
 
-7. **UX-G: Exercise session UX polish** — Add exercise type label + "X of Y" counter; hint-system visibility indicator; auto-growing textarea for free_write/TextAnswer; FeedbackPanel score labels (from SCORE_CONFIG); exit confirmation dialog; missed-concept breakdown on done screen.
+7. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
 
-8. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
+8. **UX-E: Progress page UX audit** — Coloured stat cards; friendly exercise type labels in accuracy chart; heatmap legend; accessible chart colours; "total time studied" stat; streak history; improved empty state with CTA.
 
-9. **UX-E: Progress page UX audit** — Coloured stat cards; friendly exercise type labels in accuracy chart; heatmap legend; accessible chart colours; "total time studied" stat; streak history; improved empty state with CTA.
+9. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
 
-10. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+10. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
 
-11. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
-
-12. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
+11. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
 
 ### Later — Growth features
 
-13. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
+12. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
 
-14. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+13. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
 
-15. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
+14. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
