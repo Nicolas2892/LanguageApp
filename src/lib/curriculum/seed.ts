@@ -44,6 +44,7 @@ type ConceptSeed = {
   explanation: string
   examples: Array<{ es: string; en: string }>
   difficulty: number       // 1–5
+  level: 'B1' | 'B2' | 'C1'
 }
 
 export const SEED_CONCEPTS: ConceptSeed[] = [
@@ -61,6 +62,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Lo hizo aunque no quería.', en: 'She did it even though she did not want to.' },
     ],
     difficulty: 2,
+    level: 'B1',
   },
   {
     unit_index: 0,
@@ -74,6 +76,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Aunque sea difícil, lo intentaremos.', en: 'Even if it is difficult, we will try.' },
     ],
     difficulty: 3,
+    level: 'B2',
   },
   {
     unit_index: 0,
@@ -87,6 +90,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'A pesar de haberlo estudiado, no aprobó.', en: 'Despite having studied it, she did not pass.' },
     ],
     difficulty: 3,
+    level: 'B2',
   },
   {
     unit_index: 0,
@@ -100,6 +104,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Me gusta el proyecto; sin embargo, tiene algunos fallos.', en: 'I like the project; however, it has some flaws.' },
     ],
     difficulty: 2,
+    level: 'B1',
   },
   {
     unit_index: 0,
@@ -113,6 +118,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Por más que coma, nunca engorda.', en: 'No matter how much she eats, she never gains weight.' },
     ],
     difficulty: 4,
+    level: 'B2',
   },
 
   // ─── Unit 1: Causal & Consecutive Connectors ─────────────────────────────
@@ -129,6 +135,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Ya que insistes, te lo explicaré.', en: 'Since you insist, I will explain it to you.' },
     ],
     difficulty: 3,
+    level: 'B2',
   },
   {
     unit_index: 1,
@@ -142,6 +149,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Dado que no hay más preguntas, cerramos la reunión.', en: 'Given that there are no more questions, we close the meeting.' },
     ],
     difficulty: 4,
+    level: 'B2',
   },
   {
     unit_index: 1,
@@ -155,6 +163,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Llegó tarde. Por lo tanto, perdió la reunión.', en: 'He arrived late. Therefore, he missed the meeting.' },
     ],
     difficulty: 2,
+    level: 'B1',
   },
   {
     unit_index: 1,
@@ -168,6 +177,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Llueve mucho, de ahí que el río esté crecido.', en: 'It rains a lot, hence why the river is swollen.' },
     ],
     difficulty: 5,
+    level: 'C1',
   },
 
   // ─── Unit 2: Adversative & Contrast Connectors ───────────────────────────
@@ -184,6 +194,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'No obstante las dificultades, lograron el objetivo.', en: 'Despite the difficulties, they achieved the goal.' },
     ],
     difficulty: 3,
+    level: 'B2',
   },
   {
     unit_index: 2,
@@ -197,6 +208,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Ella es muy ordenada; él, en cambio, es un desastre.', en: 'She is very tidy; he, on the other hand, is a disaster.' },
     ],
     difficulty: 2,
+    level: 'B1',
   },
   {
     unit_index: 2,
@@ -210,6 +222,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Él trabaja de noche, mientras que ella trabaja de día.', en: 'He works at night, while she works during the day.' },
     ],
     difficulty: 2,
+    level: 'B1',
   },
 
   // ─── Unit 3: Present Subjunctive Triggers ────────────────────────────────
@@ -226,6 +239,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Desean que sus hijos sean felices.', en: 'They want their children to be happy.' },
     ],
     difficulty: 2,
+    level: 'B1',
   },
   {
     unit_index: 3,
@@ -239,6 +253,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Me sorprende que no lo sepa.', en: 'I am surprised that she does not know it.' },
     ],
     difficulty: 3,
+    level: 'B2',
   },
   {
     unit_index: 3,
@@ -252,6 +267,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Niega que haya mentido.', en: 'She denies having lied.' },
     ],
     difficulty: 3,
+    level: 'B2',
   },
   {
     unit_index: 3,
@@ -265,6 +281,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Espera hasta que pare de llover.', en: 'Wait until it stops raining.' },
     ],
     difficulty: 4,
+    level: 'B2',
   },
   {
     unit_index: 3,
@@ -278,6 +295,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'A fin de que no haya dudas, lo repetiré.', en: 'In order that there are no doubts, I will repeat it.' },
     ],
     difficulty: 3,
+    level: 'B2',
   },
 
   // ─── Unit 4: Imperfect Subjunctive & Hypotheticals ───────────────────────
@@ -294,6 +312,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Si pudieras elegir, ¿qué harías?', en: 'If you could choose, what would you do?' },
     ],
     difficulty: 4,
+    level: 'B2',
   },
   {
     unit_index: 4,
@@ -307,6 +326,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Si no hubiera llovido, habríamos salido.', en: 'If it had not rained, we would have gone out.' },
     ],
     difficulty: 5,
+    level: 'C1',
   },
   {
     unit_index: 4,
@@ -320,6 +340,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: 'Ojalá hubiera ido a la fiesta.', en: 'I wish I had gone to the party.' },
     ],
     difficulty: 4,
+    level: 'B2',
   },
   {
     unit_index: 4,
@@ -333,6 +354,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
       { es: '"No creo que sepa" → No creía que supiera.', en: '"I do not think he knows" → She did not think he knew.' },
     ],
     difficulty: 5,
+    level: 'C1',
   },
 ]
 

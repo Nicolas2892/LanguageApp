@@ -90,9 +90,9 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-extrabold tracking-tight">
             Hola, {profile?.display_name ?? 'learner'}
           </h1>
-          {profile?.current_level && (
+          {profile?.computed_level && (
             <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
-              {profile.current_level}
+              {profile.computed_level}
             </span>
           )}
         </div>

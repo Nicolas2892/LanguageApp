@@ -5,6 +5,7 @@ import { gradeAnswer } from '@/lib/claude/grader'
 import { sm2, DEFAULT_PROGRESS } from '@/lib/srs'
 import type { SRSScore } from '@/lib/srs'
 import type { Concept, UserProgress } from '@/lib/supabase/types'
+import { computeLevel } from '@/lib/mastery/computeLevel'
 
 const GradeSchema = z.object({
   concept_ids: z.array(z.string().uuid()).min(1).max(5),
@@ -76,7 +77,38 @@ export async function POST(request: Request) {
           repetitions: newSRS.repetitions,
           last_reviewed_at: new Date().toISOString(),
         }, { onConflict: 'user_id,concept_id' })
+
+      // free_write is Tier 3 — always counts as production evidence
+      if (gradeResult.score >= 2) {
+        await supabase
+          .from('user_progress')
+          .update({ production_mastered: true })
+          .eq('user_id', user.id)
+          .eq('concept_id', concept_id)
+      }
     }
+
+    // Recompute and persist the user's CEFR level after all upserts
+    const { data: levelRows } = await supabase
+      .from('concepts')
+      .select('level, user_progress!inner(production_mastered, interval_days)')
+      .eq('user_progress.user_id', user.id)
+
+    type LevelRow = { level: string; user_progress: { production_mastered: boolean; interval_days: number }[] }
+    const totalByLevel: Record<string, number> = {}
+    const masteredByLevel: Record<string, number> = {}
+    for (const row of ((levelRows ?? []) as LevelRow[])) {
+      totalByLevel[row.level] = (totalByLevel[row.level] ?? 0) + 1
+      const progress = row.user_progress[0]
+      if (progress?.interval_days >= 21 && progress?.production_mastered) {
+        masteredByLevel[row.level] = (masteredByLevel[row.level] ?? 0) + 1
+      }
+    }
+    const newComputedLevel = computeLevel(masteredByLevel, totalByLevel)
+    await supabase
+      .from('profiles')
+      .update({ computed_level: newComputedLevel })
+      .eq('id', user.id)
 
     // Use the first concept's SRS for the response (for next_review_in_days display)
     const { data: firstProgress } = await supabase

@@ -43,36 +43,24 @@ describe('POST /api/account/update', () => {
     expect(body.error).toBe('Unauthorized')
   })
 
-  // --- Validation: current_level ---
+  // --- Validation: current_level is no longer accepted ---
 
-  it('returns 400 for invalid current_level (C1 is not accepted)', async () => {
+  it('ignores current_level field (stripped by Zod) — only display_name counts as update', async () => {
     setupSupabaseMock()
-    const res = await POST(makeRequest({ current_level: 'C1' }))
-    expect(res.status).toBe(400)
-  })
-
-  it('returns 400 for invalid current_level (lowercase b1)', async () => {
-    setupSupabaseMock()
-    const res = await POST(makeRequest({ current_level: 'b1' }))
-    expect(res.status).toBe(400)
-  })
-
-  it('accepts A2 as valid current_level', async () => {
-    setupSupabaseMock()
-    const res = await POST(makeRequest({ current_level: 'A2' }))
+    // current_level is unknown to schema, but display_name is valid → 200
+    const res = await POST(makeRequest({ display_name: 'Test', current_level: 'B2' }))
     expect(res.status).toBe(200)
+    // Only display_name reaches the DB; current_level is stripped
+    expect(mockUpdate).toHaveBeenCalledWith({ display_name: 'Test' })
   })
 
-  it('accepts B1 as valid current_level', async () => {
+  it('returns 400 when only current_level is provided (no recognized fields)', async () => {
     setupSupabaseMock()
+    // current_level is stripped → empty update object → 400
     const res = await POST(makeRequest({ current_level: 'B1' }))
-    expect(res.status).toBe(200)
-  })
-
-  it('accepts B2 as valid current_level', async () => {
-    setupSupabaseMock()
-    const res = await POST(makeRequest({ current_level: 'B2' }))
-    expect(res.status).toBe(200)
+    expect(res.status).toBe(400)
+    const body = await res.json()
+    expect(body.error).toBe('No fields to update')
   })
 
   // --- Validation: daily_goal_minutes ---
@@ -146,31 +134,29 @@ describe('POST /api/account/update', () => {
     expect(mockUpdate).toHaveBeenCalledWith({ display_name: 'Carlos' })
   })
 
-  it('accepts partial update with only current_level', async () => {
+  it('accepts partial update with only daily_goal_minutes', async () => {
     setupSupabaseMock()
-    const res = await POST(makeRequest({ current_level: 'B2' }))
+    const res = await POST(makeRequest({ daily_goal_minutes: 30 }))
     expect(res.status).toBe(200)
-    expect(mockUpdate).toHaveBeenCalledWith({ current_level: 'B2' })
+    expect(mockUpdate).toHaveBeenCalledWith({ daily_goal_minutes: 30 })
   })
 
-  it('accepts full update with all three fields', async () => {
+  it('accepts full update with display_name and daily_goal_minutes', async () => {
     setupSupabaseMock()
     const res = await POST(makeRequest({
       display_name: 'Ana',
-      current_level: 'A2',
       daily_goal_minutes: 30,
     }))
     expect(res.status).toBe(200)
     expect(mockUpdate).toHaveBeenCalledWith({
       display_name: 'Ana',
-      current_level: 'A2',
       daily_goal_minutes: 30,
     })
   })
 
   it('calls update on the profiles table for the authenticated user', async () => {
     setupSupabaseMock({ userId: 'user-42' })
-    await POST(makeRequest({ current_level: 'B1' }))
+    await POST(makeRequest({ daily_goal_minutes: 20 }))
     expect(mockFrom).toHaveBeenCalledWith('profiles')
     expect(mockEq).toHaveBeenCalledWith('id', 'user-42')
   })

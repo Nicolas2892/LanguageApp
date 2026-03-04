@@ -59,6 +59,7 @@ async function seed() {
     explanation: c.explanation,
     examples: c.examples,
     difficulty: c.difficulty,
+    level: c.level,
   }))
 
   const { data: concepts, error: conceptErr } = await supabase

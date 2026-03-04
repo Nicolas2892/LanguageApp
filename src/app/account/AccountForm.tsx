@@ -4,29 +4,35 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Volume2, VolumeX, UserCircle, Settings2, CheckCircle2 } from 'lucide-react'
+import { Volume2, VolumeX, UserCircle, Settings2, CheckCircle2, GraduationCap } from 'lucide-react'
 import { useSpeech } from '@/lib/hooks/useSpeech'
 import type { Profile } from '@/lib/supabase/types'
 
-const LEVELS = ['A2', 'B1', 'B2'] as const
-const LEVEL_DESCRIPTIONS: Record<string, string> = {
-  A2: 'Foundation',
+const LEVEL_LABELS: Record<string, string> = {
   B1: 'Intermediate',
   B2: 'Advanced',
+  C1: 'Proficient',
+}
+
+interface MasteryBreakdown {
+  masteredByLevel: Record<string, number>
+  totalByLevel: Record<string, number>
 }
 
 interface Props {
   profile: Profile
+  mastery: MasteryBreakdown
 }
 
-export function AccountForm({ profile }: Props) {
+export function AccountForm({ profile, mastery }: Props) {
   const [displayName, setDisplayName] = useState(profile.display_name ?? '')
-  const [level, setLevel] = useState(profile.current_level)
   const [goalMinutes, setGoalMinutes] = useState(String(profile.daily_goal_minutes))
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { enabled: audioEnabled, toggle: toggleAudio } = useSpeech()
+
+  const computedLevel = profile.computed_level ?? 'B1'
 
   async function handleSave() {
     setSaving(true)
@@ -46,7 +52,6 @@ export function AccountForm({ profile }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           display_name: displayName.trim() || undefined,
-          current_level: level,
           daily_goal_minutes: goalNum,
         }),
       })
@@ -84,27 +89,32 @@ export function AccountForm({ profile }: Props) {
         )}
       </div>
 
-      {/* Level picker — card style */}
+      {/* Computed level — read-only */}
       <div className="space-y-1.5">
-        <Label>Current level</Label>
-        <div className="grid grid-cols-3 gap-2">
-          {LEVELS.map((l) => (
-            <button
-              key={l}
-              onClick={() => { setLevel(l); setSaved(false) }}
-              className={`rounded-xl border p-3 text-left transition-colors ${
-                level === l
-                  ? 'border-orange-500 bg-orange-50 text-orange-700'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-muted/30'
-              }`}
-            >
-              <p className="font-bold text-base">{l}</p>
-              <p className="text-xs mt-0.5 font-normal text-current opacity-70">{LEVEL_DESCRIPTIONS[l]}</p>
-            </button>
-          ))}
+        <Label className="flex items-center gap-1.5">
+          <GraduationCap className="h-3.5 w-3.5" />
+          Your level
+        </Label>
+        <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-extrabold text-orange-700">{computedLevel}</span>
+            <span className="text-sm text-orange-600 font-medium">{LEVEL_LABELS[computedLevel] ?? computedLevel}</span>
+          </div>
+          <div className="text-xs text-muted-foreground space-y-0.5">
+            {(['B1', 'B2', 'C1'] as const).map((lvl) => {
+              const total = mastery.totalByLevel[lvl] ?? 0
+              const mastered = mastery.masteredByLevel[lvl] ?? 0
+              if (total === 0) return null
+              return (
+                <p key={lvl}>
+                  <span className="font-medium text-foreground">{lvl}</span>: {mastered} of {total} mastered
+                </p>
+              )
+            })}
+          </div>
         </div>
         <p className="text-xs text-muted-foreground">
-          Your level will be recalculated automatically as you master concepts.
+          Computed from SRS progress + production exercises. Updates after each session.
         </p>
       </div>
 

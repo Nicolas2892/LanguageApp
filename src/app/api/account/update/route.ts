@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 
 const AccountUpdateSchema = z.object({
   display_name: z.string().min(1).max(50).optional(),
-  current_level: z.enum(['A2', 'B1', 'B2']).optional(),
   daily_goal_minutes: z.number().int().min(5).max(120).optional(),
 })
 

@@ -14,6 +14,7 @@ export interface Database {
           id: string
           display_name: string | null
           current_level: string
+          computed_level: string
           daily_goal_minutes: number
           streak: number
           last_studied_date: string | null
@@ -24,6 +25,7 @@ export interface Database {
           id: string
           display_name?: string | null
           current_level?: string
+          computed_level?: string
           daily_goal_minutes?: number
           streak?: number
           last_studied_date?: string | null
@@ -34,6 +36,7 @@ export interface Database {
           id?: string
           display_name?: string | null
           current_level?: string
+          computed_level?: string
           daily_goal_minutes?: number
           streak?: number
           last_studied_date?: string | null
@@ -106,6 +109,7 @@ export interface Database {
           explanation: string
           examples: Json
           difficulty: number
+          level: string
           created_at: string
         }
         Insert: {
@@ -116,6 +120,7 @@ export interface Database {
           explanation: string
           examples?: Json
           difficulty?: number
+          level?: string
           created_at?: string
         }
         Update: {
@@ -126,6 +131,7 @@ export interface Database {
           explanation?: string
           examples?: Json
           difficulty?: number
+          level?: string
           created_at?: string
         }
         Relationships: [
@@ -190,6 +196,7 @@ export interface Database {
           due_date: string
           repetitions: number
           last_reviewed_at: string | null
+          production_mastered: boolean
         }
         Insert: {
           id?: string
@@ -200,6 +207,7 @@ export interface Database {
           due_date?: string
           repetitions?: number
           last_reviewed_at?: string | null
+          production_mastered?: boolean
         }
         Update: {
           id?: string
@@ -210,6 +218,7 @@ export interface Database {
           due_date?: string
           repetitions?: number
           last_reviewed_at?: string | null
+          production_mastered?: boolean
         }
         Relationships: [
           {
