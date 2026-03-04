@@ -53,7 +53,7 @@ interface Props {
 
 export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
   const erroneous = extractSentence(exercise.prompt)
-  const [value, setValue] = useState(erroneous)
+  const [value, setValue] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -78,10 +78,11 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
       )}
 
       <div className="space-y-1">
-        <p className="text-xs text-muted-foreground">Edit the sentence below to correct it:</p>
+        <p className="text-xs text-muted-foreground">Type the corrected sentence below:</p>
         <Textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
+          placeholder="Type the corrected sentence…"
           disabled={disabled}
           autoFocus
           rows={3}
@@ -90,14 +91,6 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
       </div>
 
       <div className="flex gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setValue(erroneous)}
-          disabled={disabled}
-        >
-          Reset
-        </Button>
         <Button type="submit" disabled={disabled || !value.trim()} className="flex-1">
           Submit
         </Button>

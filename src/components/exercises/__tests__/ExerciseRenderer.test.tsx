@@ -123,7 +123,7 @@ describe('ExerciseRenderer', () => {
 
   // --- error_correction → ErrorCorrection ---
 
-  it('renders ErrorCorrection and pre-populates textarea with quoted sentence', () => {
+  it('renders ErrorCorrection with empty textarea and erroneous sentence in read-only callout', () => {
     const prompt = 'Find and correct the error: "El alumno estudia mucho pero no aprueba."'
     render(
       <ExerciseRenderer
@@ -132,29 +132,11 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    // Pre-populated textarea value
+    // Textarea starts empty
     const textarea = screen.getByRole('textbox') as HTMLTextAreaElement
-    expect(textarea.value).toBe('El alumno estudia mucho pero no aprueba.')
-    // Erroneous sentence callout
+    expect(textarea.value).toBe('')
+    // Erroneous sentence shown in read-only callout only
     expect(screen.getByText('Erroneous sentence:')).toBeTruthy()
-    // Reset button specific to ErrorCorrection
-    expect(screen.getByRole('button', { name: 'Reset' })).toBeTruthy()
-  })
-
-  it('resets ErrorCorrection textarea to original sentence on Reset click', async () => {
-    const prompt = 'Correct this: "Ella va a la mercado."'
-    render(
-      <ExerciseRenderer
-        exercise={makeExercise({ type: 'error_correction', prompt })}
-        onSubmit={vi.fn()}
-        disabled={false}
-      />
-    )
-    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement
-    await userEvent.clear(textarea)
-    await userEvent.type(textarea, 'changed text')
-    await userEvent.click(screen.getByRole('button', { name: 'Reset' }))
-    expect(textarea.value).toBe('Ella va a la mercado.')
   })
 
   // --- sentence_builder → SentenceBuilder ---
@@ -224,7 +206,6 @@ describe('ExerciseRenderer', () => {
       />
     )
     expect(screen.getByRole('textbox')).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Reset' })).toBeDisabled()
   })
 
   // --- unknown type falls back to TextAnswer ---
