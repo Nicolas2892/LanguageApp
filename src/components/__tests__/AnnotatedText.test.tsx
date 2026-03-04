@@ -28,8 +28,8 @@ describe('AnnotatedText', () => {
     render(<AnnotatedText text="Espero que vengas mañana." annotations={annotations} />)
     const subjSpan = screen.getByTitle('Subjunctive')
     expect(subjSpan.textContent).toBe('vengas')
-    expect(subjSpan.className).toContain('border-orange-400')
-    expect(subjSpan.className).toContain('text-orange-700')
+    expect(subjSpan.className).toContain('border-violet-400')
+    expect(subjSpan.className).toContain('text-violet-700')
   })
 
   it('applies no special class to null-form spans', () => {

@@ -15,7 +15,7 @@ export function AnnotatedText({ text, annotations }: Props) {
         span.form === 'subjunctive' ? (
           <span
             key={i}
-            className="border-b-2 border-orange-400 text-orange-700"
+            className="border-b-2 border-violet-400 text-violet-700"
             title="Subjunctive"
           >
             {span.text}
