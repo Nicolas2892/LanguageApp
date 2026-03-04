@@ -275,8 +275,8 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
       })}
 
       {/* Sticky footer */}
-      <div className="fixed bottom-0 right-0 bg-background/95 backdrop-blur-sm border-t" style={{ left: 'var(--sidebar-width)' }}>
-        <div className="max-w-xl mx-auto px-6 md:px-10 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex flex-col gap-2">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="max-w-xl mx-auto flex flex-col gap-2">
           {selectedCount > 0 && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">

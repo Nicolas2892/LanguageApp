@@ -271,7 +271,11 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### Bugs / Layout Fixes
 
-> **Pattern — sidebar-aware fixed footers**: Tailwind v4 (CSS-first, no `tailwind.config.js`) does not reliably compile arbitrary responsive classes like `lg:left-[220px]`. Always use `style={{ left: 'var(--sidebar-width)' }}` for any `fixed` element that must clear the sidebar. `--sidebar-width` is defined in `globals.css` (0px default, 220px at `@media (min-width: 1024px)`).
+**Fix-F: Write page sticky footer misaligned on desktop (deferred)**
+- **Problem**: On desktop, the sticky footer ("Start writing →" button) in `ConceptPicker.tsx` is centered against the full viewport width, while the module cards above are centered within the content area to the right of the 220px sidebar. This makes the button appear shifted left compared to the content.
+- **Cause**: The footer uses `position: fixed; left: 0; right: 0`, so it spans the full viewport and ignores the `lg:ml-[220px]` wrapper in `layout.tsx`. Attempts to fix via `lg:left-[220px]` (Tailwind arbitrary responsive class — not reliably generated in Tailwind v4 without tailwind.config.js) and a `--sidebar-width` CSS variable both introduced new regressions.
+- **Do not attempt again without a clear plan.** Proper fix likely requires either: (a) restructuring the footer to render outside `ConceptPicker` as a page-level element that is naturally inside the `lg:ml-[220px]` layout wrapper but uses `sticky`/`fixed` positioning, or (b) a JavaScript-based approach that reads the sidebar width at runtime.
+- **Current state**: Footer is `left-0 right-0` (full width) — misaligned on desktop but functional. Mobile is unaffected.
 
 #### UX Audits & Polish
 
