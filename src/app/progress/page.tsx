@@ -255,8 +255,8 @@ export default async function ProgressPage() {
               </div>
               <p className="text-2xl font-extrabold text-amber-600">{totalProductionCertified}</p>
               <div>
-                <p className="text-xs font-medium">Production certified</p>
-                <p className="text-xs text-muted-foreground">B1→B2 bottleneck</p>
+                <p className="text-xs font-medium">Active skills</p>
+                <p className="text-xs text-muted-foreground">key skill for B2</p>
               </div>
             </div>
 
@@ -276,7 +276,7 @@ export default async function ProgressPage() {
           {/* CEFR Level Journey */}
           <section className="bg-card rounded-xl border p-5 shadow-sm space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-base">Your CEFR Journey</h2>
+              <h2 className="font-bold text-base">Level progress</h2>
               {levelChip && (
                 <span
                   className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelChip.className}`}
@@ -304,10 +304,7 @@ export default async function ProgressPage() {
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <p className="text-[11px] text-muted-foreground">
-                        {production} production certified
-                      </p>
+                    <div className="flex justify-end">
                       <p className={`text-[11px] font-medium ${color?.text ?? ''}`}>{pct}%</p>
                     </div>
                   </div>
@@ -317,7 +314,7 @@ export default async function ProgressPage() {
 
             {showB2Hint && (
               <p className="text-xs text-amber-600 font-medium pt-1 border-t">
-                {b1Remaining} more concept{b1Remaining !== 1 ? 's' : ''} to reach B2 eligibility
+                {b1Remaining} more concept{b1Remaining !== 1 ? 's' : ''} until you unlock B2
               </p>
             )}
           </section>
