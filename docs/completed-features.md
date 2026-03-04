@@ -101,12 +101,21 @@ This file contains implementation details for all completed work. Reference it w
 - Speaker icon in exercise prompts, FeedbackPanel correct answer, curriculum examples table
 - Audio on/off toggle in `/account` (AccountForm Preferences section)
 
-### Ped-A: Harder gap-fill exercises — multi-sentence multi-blank format ✓
+### Ped-A: Multi-blank gap-fill infrastructure ✓
 - `src/lib/exercises/gapFill.ts` — pure utilities (BLANK_TOKEN=`___`, splitPromptOnBlanks, countBlanks, parseExpectedAnswers, encodeAnswers)
-- `GapFill.tsx` — inline multi-blank rendering (≥2 `___` tokens); single-blank (1 token) and legacy fallback (0 tokens) preserved
 - expected_answer stored as JSON array string `'["sin embargo","aunque"]'` for multi-blank; grader detects and scores per-blank
 - Submission: pipe-delimited `"answer1 | answer2"` — no API schema change
-- All 21 gap_fill exercises re-seeded in multi-blank paragraph format
+
+### Ped-D: Gap-fill same-concept redesign ✓
+- **Problem solved**: 13 of 21 gap_fill exercises previously tested an unrelated concept in blank 2, penalising learners for content they hadn't studied.
+- **Design rule**: Max 2 blanks per exercise; ALL blanks test the same target concept. 1 blank is the default.
+  - *Group A1 (verb-form blank)*: Concept 0 ("aunque + indicativo") — "aunque" visible, blank = indicative verb (e.g. `hacía`). Tests mood selection, not connector recall.
+  - *Group A2 (connector blank)*: 11 connector exercises reduced to 1 blank; context disambiguates from plausible alternatives.
+  - *Group B (keep 2 blanks)*: 8 exercises already correctly tested the same concept — hints cleaned up.
+- **GapFill.tsx** — `hasInlineBlanks = blankCount >= 1` (was `isMultiBlank >= 2`); all ≥1-blank exercises now render inline. Underline-style `<input>` (border-b-2, no border box) with ch-width from expected_answer (+2ch buffer). Auto-advance on Enter via `useRef` array: blank N → blank N+1 → Submit. 0-blank fallback unchanged.
+- **generate/route.ts** — TYPE_RULES: prefer 1 blank, allow 2 only same-concept. Validation accepts plain string (1-blank) or JSON array (2-blank).
+- **DB**: `pnpm truncate && pnpm seed && pnpm annotate` — 63 exercises re-seeded; 61/63 annotated (2 free_write exercises remain at null annotations, plain-text fallback applied).
+- **Tests**: 273 passing (3 new auto-advance tests; updated for `aria-label="Your answer"` on single-blank inline mode).
 
 ### Ped-C: User level computed from mastery, not self-selected ✓
 - `src/lib/mastery/computeLevel.ts` — `PRODUCTION_TYPES` constant; `computeLevel()` pure fn
@@ -199,4 +208,4 @@ This file contains implementation details for all completed work. Reference it w
 - `src/components/__tests__/AnnotatedText.test.tsx` — 9 tests: null/empty/undefined fallback; subjunctive orange class + title; indicative + null no class; multiple subjunctive spans; concat reproduces original text
 - `src/components/exercises/__tests__/HintPanel.test.tsx` — 6 tests: no hints → null; dots rendered at 0 attempts; two dots for two hints; amber on wrongAttempts ≥ 1; amber dot2 on ≥ 2; hint text only after wrong attempts
 - `GapFill.test.tsx` + `ExerciseRenderer.test.tsx` — `makeExercise` helpers updated to include `annotations: null`
-- **Total: 270 tests across 21 files — all passing**
+- **Total: 273 tests across 21 files — all passing** *(3 added by Ped-D)*

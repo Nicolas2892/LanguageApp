@@ -203,9 +203,9 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 270 tests across 21 files — all passing.**
+**Test suite: 273 tests across 21 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-G, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-G, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -223,16 +223,8 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - Benefit: pool grows over time, reducing repetition and token waste; user cannot memorise specific phrasings
 - Fix-D is applied (service role insert in generate route); verify in testing that generated exercises appear in subsequent SRS sessions
 
-**Ped-D: Gap-fill exercise pedagogical rethink**
-- **Problem**: Current multi-blank format (typically 2 gaps) requires the user to fill ALL blanks correctly to pass, but only one blank tests the target concept. The other gaps (surrounding context words, auxiliary verbs, etc.) are essentially trivia — there are no hints for them, making the exercise feel unfair and frustrating even when the learner correctly places the connector/structure being studied.
-- **Pedagogical goal**: The gap-fill should test *acquisition of the target concept*, not ability to reconstruct the full sentence from memory.
-- **Options to research and decide between**:
-  1. **Single-target gap**: Always keep exactly 1 blank (the target connector/structure); all other blanks become visible text or are pre-filled as read-only. Cleanest; mirrors standard DELE/SIELE cloze format.
-  2. **Labelled gaps**: Multiple blanks, but non-target gaps have a visible label/placeholder (e.g. `[verb]`, `[preposition]`) so the user knows what type of word is expected — reduces guessing.
-  3. **Partial reveal on wrong answer**: On first wrong attempt, reveal the non-target gap answers and let the user retry focusing only on the target blank.
-- **UX considerations**: Touch-friendly blank navigation, clear visual distinction between target gap and context gaps (if multiple kept), inline error highlighting per blank.
-- **Likely implementation**: Introduce a `target_blank_index` field on `exercises` (or infer it from a convention in `expected_answer`) so the grader knows which blank is the primary assessment criterion; score based only on target blank; display other gaps differently.
-- **Scope**: Requires re-seeding exercise data (or a migration to mark target blank), updates to `GapFill.tsx`, grader logic, and possibly the AI generate route.
+**Ped-D: Gap-fill same-concept redesign** ✅ *Complete — see `docs/completed-features.md`*
+- All 21 gap_fill exercises redesigned: 13 reduced to 1 blank (same-concept only); 8 already-correct 2-blank exercises cleaned up. Inline underline inputs with ch-width sizing + Enter auto-advance. DB re-seeded and re-annotated.
 
 **Ped-F: Shared AI-generated exercise pool + adaptive grading strategy** *(requires PM/UX research before implementation)*
 - **Problem statement**: Currently, drill mode generates exercises per-user on demand, wasting tokens and producing fragmented, non-reusable content. As the concept pool grows (Feat-E target: 40+ concepts), individual per-user generation is unsustainable.
@@ -341,36 +333,30 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 ### Immediate — DB + content
 
-1. **Run migration 008** in Supabase SQL editor: `ALTER TABLE exercises ADD COLUMN annotations jsonb NULL;`
-
-2. **Run `pnpm annotate`** to populate annotations on all 63 existing exercises: `NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm annotate`
-
-3. **Feat-E: Content expansion via AI seeding** — Run `pnpm seed:ai` to draft 3–5 new concepts per unit (output to JSON for human approval before DB insert). Target 40+ concepts across 3 modules. Adds Module 3 (Verb Constructions: ser/estar, reflexive verbs). This is the single highest-leverage action for user retention.
+1. **Feat-E: Content expansion via AI seeding** — Run `pnpm seed:ai` to draft 3–5 new concepts per unit (output to JSON for human approval before DB insert). Target 40+ concepts across 3 modules. Adds Module 3 (Verb Constructions: ser/estar, reflexive verbs). This is the single highest-leverage action for user retention.
 
 ### Next — Learning quality
 
-4. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
-
-5. **Ped-D: Gap-fill exercise pedagogical rethink** — Current multi-blank format is unfair: non-target gaps have no hints yet count against the score. Research and decide between: (a) single-target gap (cleanest, DELE-aligned), (b) labelled non-target gaps, or (c) partial reveal on wrong answer. Likely requires a `target_blank_index` convention + GapFill.tsx + grader updates + re-seed.
+2. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
 
 ### Polish & UX quality
 
-6. **UX-G remaining items** — Multi-blank GapFill keyboard auto-advance on mobile; SpeakButton 44px tap target; ErrorCorrection empty-textarea redesign.
+3. **UX-G remaining items** — SpeakButton 44px tap target; ErrorCorrection empty-textarea redesign. (GapFill keyboard auto-advance is now done as part of Ped-D.)
 
-7. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
+4. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
 
-8. **UX-E: Progress page UX audit** — Coloured stat cards; friendly exercise type labels in accuracy chart; heatmap legend; accessible chart colours; "total time studied" stat; streak history; improved empty state with CTA.
+5. **UX-E: Progress page UX audit** — Coloured stat cards; friendly exercise type labels in accuracy chart; heatmap legend; accessible chart colours; "total time studied" stat; streak history; improved empty state with CTA.
 
-9. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+6. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
 
-10. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
+7. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
 
-11. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
+8. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
 
 ### Later — Growth features
 
-12. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
+9. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
 
-13. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+10. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
 
-14. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
+11. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
