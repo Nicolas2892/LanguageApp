@@ -218,7 +218,8 @@ Migrations (run once in Supabase SQL editor):
 - **BottomNav polish complete**: `bg-background` (fully opaque, no content bleed); `/study` and `/tutor` removed from HIDDEN_ROUTES — tab bar now always visible; study page `pb-24 lg:pb-10`; tutor page outer container `pb-[calc(3.125rem+env(safe-area-inset-bottom))] lg:pb-0`
 - **Dashboard header polish complete**: stats row + progress bar merged into a single `bg-card rounded-xl border` status card for visual cohesion; stat numbers `text-4xl` → `text-2xl` so greeting h1 dominates; icons `h-7` → `h-5`; dashboard bottom padding changed from `pb-24` to `pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-8` (dynamic — mirrors nav height + one space-y-3 gap above BottomNav)
 - **P7 complete**: Curriculum overhaul — `/curriculum` redesigned with filter tabs (All|New|Learning|Mastered, `?filter=` URL param), collapsible module accordion (`<details>` server-side), compact concept rows (title + mastery badge + difficulty bars + "Practice →" shortcut); new `/curriculum/[id]` concept detail page (explanation, examples table, SRS status, all action buttons)
-- **Ped-A complete**: Multi-blank gap-fill — `src/lib/exercises/gapFill.ts` (pure utilities: BLANK_TOKEN=`___`, splitPromptOnBlanks, countBlanks, parseExpectedAnswers, encodeAnswers); `GapFill.tsx` rewritten with inline multi-blank rendering (≥2 blanks) and single-blank fallback; pipe-delimited submission (`"sin embargo | aunque"`); grader updated for per-blank scoring; generate route validates JSON array expected_answer; all 21 gap_fill exercises re-seeded with multi-blank paragraph format; 204 tests passing
+- **Ped-A complete**: Multi-blank gap-fill — `src/lib/exercises/gapFill.ts` (pure utilities: BLANK_TOKEN=`___`, splitPromptOnBlanks, countBlanks, parseExpectedAnswers, encodeAnswers); `GapFill.tsx` rewritten with inline multi-blank rendering (≥2 blanks) and single-blank fallback; pipe-delimited submission (`"sin embargo | aunque"`); grader updated for per-blank scoring; generate route validates JSON array expected_answer; all 21 gap_fill exercises re-seeded with multi-blank paragraph format
+- **SprintCard UX audit complete** (12 issues): X close button (critical bug); two-button collapsed CTA (solid "Sprint 10 min →" + ghost "Customise ↓"); all active chips standardised to `bg-orange-500`; touch targets `py-2.5 min-h-[44px]`; "Recommended" label on 10 min chip; `dueCountByModule` badges + disabled chips for 0-due modules; `duration-200` transitions + `shadow-sm` on active segment; orange Zap icon; smooth `max-h`/`opacity` collapse animation with `aria-hidden`; SprintCard hidden for new users; amber pulse threshold lowered `<20%` → `<10%`; done button "Back to Home" for sprint sessions; 221 tests passing across 16 files
 
 ### Phase 6 — Remaining (ordered by priority)
 
@@ -286,24 +287,18 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 
 #### UX Improvements
 
-**UX-A: Account page revamp**
-- Add **Change Email** section: input + confirm → calls `supabase.auth.updateUser({ email })` → shows "Check your inbox to confirm" message
-- Add **Change Password** section: current password + new password + confirm → calls `supabase.auth.updateUser({ password })` after re-authenticating
-- General UX polish: group into labelled sections (Profile, Security, Preferences), add section dividers, destructive actions (sign out, delete account) at bottom separated visually
-- Remove the manual level picker from this page (level becomes computed — see Ped-C)
+**UX-A: Account page revamp** ✓ complete
+- Sections: Profile (AccountForm), Security (SecurityForm), Session+Danger (DangerZone), IOSInstallCard
+- Change Email + Change Password with strength indicator and Eye/EyeOff toggles; grouped section layout
 
-**UX-B: iOS "Add to Home Screen" install prompt**
-- PWA manifest + service worker already built (P6-D); iOS Safari doesn't fire `beforeinstallprompt`
-- Detect iOS Safari via `navigator.userAgent` in a client component
-- Show a dismissible bottom sheet on first post-login visit: "Install this app on your iPhone — tap Share → Add to Home Screen" with a simple diagram
-- Persist dismissal in `localStorage` (`pwa_prompt_dismissed = true`)
-- Also add a permanent "Install app" card in `/account` with same instructions
+**UX-B: iOS "Add to Home Screen" install prompt** ✓ complete
+- `src/components/IOSInstallPrompt.tsx` — dismissible bottom sheet; `localStorage pwa_prompt_dismissed`
+- IOSInstallCard in `/account` — permanent settings card (no dismissed check)
 
-**UX-C: Audio playback for Spanish sentences**
-- Use browser `SpeechSynthesis` API (`lang: 'es-ES'`) — zero cost, zero dependencies
-- Add speaker icon button next to: exercise prompts, Spanish column in examples table (`/curriculum/[id]`), correct answer in FeedbackPanel
-- Shared `useSpeech(text, lang)` hook in `src/lib/hooks/`
-- Audio on/off toggle in `/account` (stored in `localStorage`)
+**UX-C: Audio playback for Spanish sentences** ✓ complete
+- `src/lib/hooks/useSpeech.ts` — `useSpeech(text?, lang?)` hook; `localStorage audio_enabled`
+- Speaker icon in exercise prompts, FeedbackPanel correct answer, curriculum examples table
+- Audio on/off toggle in `/account` (AccountForm Preferences section)
 
 #### Pedagogical / Learning Quality
 
@@ -336,11 +331,11 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - Add `email_reminders boolean DEFAULT true` to `profiles`; expose toggle in `/account`
 - Migration: `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`
 
-**Feat-B: Configurable Sprint Mode** ✓ complete
-- `src/components/SprintCard.tsx` — `'use client'` dashboard card; inline expand UI; Time (5/10/15 min) or Count (5/10/15/20) limit; optional module filter; navigates to `/study?mode=sprint&limitType=…&limit=…[&module=…]`
-- `dashboard/page.tsx` — fetches modules in Promise.all; renders `<SprintCard>`
+**Feat-B: Configurable Sprint Mode** ✓ complete (+ UX audit polished)
+- `src/components/SprintCard.tsx` — `'use client'` dashboard card; collapsed state has two-button CTA (solid "Sprint 10 min →" + ghost "Customise ↓"); X button closes expanded panel; animated expand/collapse (`max-h`/`opacity`/`aria-hidden`); all active chips `bg-orange-500`; 44px touch targets; "Recommended" label on 10 min; `dueCountByModule` badge on module chips; hidden for new users; Time (5/10/15 min) or Count (5/10/15/20) limit; optional module filter; navigates to `/study?mode=sprint&limitType=…&limit=…[&module=…]`
+- `dashboard/page.tsx` — fetches modules + `dueCountByModule` (nested join: `user_progress → concepts → units`) in Promise.all; renders `<SprintCard>` only when `studiedCount > 0`
 - `study/page.tsx` — parses `mode=sprint`, `limitType`, `limit`; sprint branch: SRS due queue (no SESSION_SIZE cap) with optional module filter; passes `sprintConfig` to StudySession
-- `StudySession.tsx` — `sprintConfig?` prop; countdown timer with `useEffect`; shrinking progress bar with amber pulse at <20%; count-cap via `effectiveLength`; done screen shows "Reviewed X exercises in MM:SS" for time mode
+- `StudySession.tsx` — `sprintConfig?` prop; countdown timer with `useEffect`; shrinking progress bar with amber pulse at <10% remaining; count-cap via `effectiveLength`; done screen shows "Reviewed X exercises in MM:SS" for time mode; done button label "Back to Home" for sprint sessions
 - No DB changes needed
 
 **Feat-C: Concept prerequisites / unlock progression**
@@ -381,3 +376,31 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - Babbel-inspired mark: clean pill or rounded-square shape, "EA" monogram or stylised "Ñ", warm tones complementing the orange primary
 - Deliverables: updated `icon.tsx` (192×192 ImageResponse), `apple-icon.tsx` (180×180), and an SVG source file at `public/logo.svg` for use in `AppHeader` and auth pages
 - Current auth "ES" block and AppHeader text mark should both be replaced
+
+---
+
+## Recommended Next Steps (priority order)
+
+### Immediate — High learning value
+
+1. **Ped-C: Computed user level** — Replace self-selected level with mastery-based computation. Removes the last manual input from account; level shown on dashboard + account page; recalculated on each `/api/submit`. A2 <25% · B1 25–55% · B2 55–85% · C1 85%+. May need `computed_level` column on `profiles`.
+
+2. **Feat-E: Content expansion via AI seeding** — Run `pnpm seed:ai` to draft 3–5 new concepts per unit (output to JSON for human approval before DB insert). Target 40+ concepts across 3 modules. Adds Module 3 (Verb Constructions: ser/estar, reflexive verbs). This is the single highest-leverage action for user retention.
+
+3. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
+
+### Next — Polish & engagement
+
+4. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+
+5. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
+
+6. **Feat-C: Concept prerequisites / unlock progression** — Add `prerequisite_concept_id uuid NULLABLE` to `concepts`; padlock icon in curriculum for locked concepts; UI-only enforcement.
+
+### Later — Growth features
+
+7. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
+
+8. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+
+9. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
