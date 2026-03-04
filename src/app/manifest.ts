@@ -24,5 +24,28 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
+    shortcuts: [
+      {
+        name: 'Study Now',
+        short_name: 'Study',
+        description: 'Start your SRS review session',
+        url: '/study',
+        icons: [{ src: '/icon', sizes: '192x192' }],
+      },
+      {
+        name: 'Quick Sprint',
+        short_name: 'Sprint',
+        description: '10-minute sprint session',
+        url: '/study?mode=sprint',
+        icons: [{ src: '/icon', sizes: '192x192' }],
+      },
+      {
+        name: 'View Progress',
+        short_name: 'Progress',
+        description: 'See your learning progress',
+        url: '/progress',
+        icons: [{ src: '/icon', sizes: '192x192' }],
+      },
+    ],
   }
 }

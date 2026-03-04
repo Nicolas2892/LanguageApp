@@ -266,6 +266,16 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - New module candidates: Verb Constructions (ser/estar in context, reflexive verbs, subjunctive triggers)
 - Target: 40+ total concepts across 3 modules
 
+**Feat-F: Offline exercise packs (module download)**
+- User downloads a full module's exercises to IndexedDB for offline use
+- `gap_fill` + `sentence_builder` graded locally (deterministic string match, accent-normalised)
+- `translation` / `transformation` / `error_correction` answers queued locally; batch-submitted + AI-graded on reconnect
+- `free_write` always excluded — always requires AI grading; not available offline
+- SRS updates queued locally, flushed when `navigator.onLine` is true; conflict resolution needed for multi-device offline scenarios (last-write-wins or merge by most-recent timestamp)
+- "One right answer" assumption holds well for gap_fill/sentence_builder; breaks for open-ended types — those must stay online-only for AI grading
+- Migration: no schema change needed; offline queue lives entirely in IndexedDB on the client
+- **Do not implement without a written PM decision on conflict resolution strategy and UI for queued/pending sync state.**
+
 #### Strategic / Long-term
 
 **Strat-A: Shareable progress card** *(deferred — implement after content depth is sufficient)*
