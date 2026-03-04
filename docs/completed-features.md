@@ -210,6 +210,60 @@ This file contains implementation details for all completed work. Reference it w
 - `GapFill.test.tsx` + `ExerciseRenderer.test.tsx` — `makeExercise` helpers updated to include `annotations: null`
 - **Total: 273 tests across 21 files — all passing** *(3 added by Ped-D)*
 
+### UX-E: Progress page redesign ✓
+
+**Overview**
+Full rewrite of `/progress` replacing the 3-grey-card layout and dated recharts charts with a structured 5-section page: coloured stat row, CEFR level journey, exercise type accuracy, study consistency, activity heatmap.
+
+**Files changed**
+- `src/app/progress/page.tsx` — full rewrite
+- `src/app/progress/AccuracyChart.tsx` — full rewrite (horizontal bars + TYPE_CONFIG export)
+- `src/app/progress/MasteryChart.tsx` — **deleted** (replaced by inline CEFR bars)
+- `src/app/progress/__tests__/AccuracyChart.test.tsx` — new (10 tests)
+
+**Section 1 — Stats row (2×2 mobile / 4-col desktop)**
+Four coloured cards, each with a rounded icon circle:
+- **Day streak** (orange Flame) — `profiles.streak`; sub-text "Keep it up!"
+- **Mastered** (green CheckCircle) — `user_progress` rows where `interval_days >= 21`; sub-text "of N total"
+- **Active skills** (amber Zap) — `production_mastered = true` count across all levels; sub-text "key skill for B2"
+- **Accuracy** (sky Target) — weighted correct rate across all attempts; sub-text "across all exercises"
+
+**Section 2 — Level progress (replaces MasteryChart)**
+Card with computed_level badge top-right. One row per CEFR level (B1/B2/C1):
+- Label + mastered/total count (right-aligned)
+- Custom div-based progress bar (green-500/amber-500/violet-500)
+- Percentage right-aligned below bar
+- Motivating hint at bottom when B1 ≥ 60% mastered: "N more concepts until you unlock B2"
+
+**Section 3 — Where you're strongest (AccuracyChart rewrite)**
+- Layout: `layout="vertical"` horizontal BarChart
+- Per-type colour coding via `TYPE_CONFIG` (orange gap_fill / sky translation / violet transformation / rose error_correction / emerald free_write / amber sentence_builder)
+- Y-axis: friendly labels ("Gap fill", "Translation", etc.) — no raw type strings
+- Right-edge label: "74% (23 attempts)" via `LabelList dataKey="label"`
+- Custom tooltip: card-style (`bg-card border shadow-sm`)
+- Insight callout above chart (only when ≥ 2 types): "Best: Translation (89%) · Needs work: Free write (42%)"
+- `TYPE_CONFIG` exported for use in server components
+
+**Section 4 — Study consistency**
+- Sub-stat header: "N sessions this month · X.X hrs total" (from `study_sessions` this month)
+- Right-aligned: "N days studied in the last 3 months" (unique dates in activity map)
+- Heatmap unchanged (ActivityHeatmap with legend)
+
+**Section 5 — Page header**
+- Title "Progress" + subtitle "Your learning journey · Month Year"
+- computed_level badge top-right
+
+**New queries**
+- `profiles.streak, computed_level` — added `.single()` profile fetch
+- `concepts.id, level` — replaces the old unit/module join; used for CEFR totals + levelMap
+- `user_progress.concept_id, interval_days, production_mastered` — extended from old query
+- `study_sessions.started_at, ended_at` filtered to current month
+
+**Tests — 282 total (10 new)**
+- `AccuracyChart.test.tsx`: renders without crash (empty + valid data + single item); TYPE_CONFIG has correct labels for all 6 types; TYPE_CONFIG has distinct colors
+
+---
+
 **SpeakButton 44px mobile tap target**
 - `src/components/SpeakButton.tsx` — `min-w-[44px] min-h-[44px]` on mobile; `sm:w-7 sm:h-7 sm:min-w-0 sm:min-h-0` on desktop; icon size and colours unchanged
 

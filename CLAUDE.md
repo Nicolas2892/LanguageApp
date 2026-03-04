@@ -82,7 +82,7 @@ ANTHROPIC_API_KEY
 | `/study` | Server + Client | Study session — queue fetched server-side, state machine client-side |
 | `/study/configure` | Server + Client | Session config — pick module + exercise types before starting |
 | `/curriculum` | Server | Full concept tree with mastery badges; all concepts/units/modules are clickable |
-| `/progress` | Server + Client | MasteryChart, AccuracyChart, ActivityHeatmap |
+| `/progress` | Server | 4-card stats, CEFR level progress bars, horizontal AccuracyChart, ActivityHeatmap |
 | `/tutor` | Server + Client | Streaming AI chat; accepts `?concept=<id>` for context |
 | `POST /api/submit` | Route handler | Grade answer → SM-2 → upsert `user_progress` → insert `exercise_attempts` → update streak |
 | `POST /api/hint` | Route handler | Claude-generated worked example for stuck users |
@@ -203,9 +203,9 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 272 tests across 21 files — all passing.**
+**Test suite: 282 tests across 22 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-G, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-E, UX-G, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -296,15 +296,8 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - **No empty-state for Free write card (non-new users without a weakest concept)**: If `writeConcept` is null for a non-new user, the card silently disappears. Add a fallback "Pick a concept to write about" card instead.
 - **No skip-to-action affordance**: First-time visit with due reviews buries the CTA below the greeting block + stats card. On small phones this requires scrolling.
 
-**UX-E: Progress page UX audit**
-- **Stat cards lack color differentiation**: "Mastered", "In progress", "Accuracy" are three grey cards — no visual distinction despite representing very different data types. Consider: orange for Mastered (goal), amber for In Progress, neutral for Accuracy.
-- **Exercise type labels are developer strings**: The accuracy chart uses raw type names (`gap_fill`, `sentence_builder`, `free_write`). Replace with friendly labels: "Gap fill", "Sentence builder", "Free write", "Translation", etc.
-- **Activity heatmap has no legend**: Color intensity scale is unexplained. Add a `0 ←→ X sessions` legend below the heatmap, same pattern as GitHub's contribution graph.
-- **Module mastery chart legend**: Color-only legend; inaccessible to colorblind users. Add pattern fills or text labels directly on bars.
-- **No time-invested stat**: Users are motivated by total time spent; `study_sessions` table has timing data — surface a "Total time studied" or "Avg session length" stat.
-- **No streak history**: Only current streak appears on the dashboard. A sparkline or "longest streak" badge on the Progress page adds longitudinal motivation.
-- **Page header is bare**: Just "Progress" with no date context or greeting. A subtitle like "Your learning since [join date]" adds warmth and context.
-- **Empty state needs a CTA**: When a user has no data, the empty state should link directly to `/study`, not just say "no data yet".
+**UX-E: Progress page UX audit** ✅ *Complete — see `docs/completed-features.md`*
+- 4-card coloured stat row (Streak/Mastered/Active skills/Accuracy); CEFR Level Journey replaces MasteryChart; horizontal colour-coded AccuracyChart; study consistency section (session count + hrs); header with subtitle + level badge; MasteryChart deleted.
 
 **UX-F: ConceptPicker (free write concept selection) UX overhaul** ✅ *Complete — see `docs/completed-features.md`*
 
@@ -333,18 +326,16 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 3. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
 
-4. **UX-E: Progress page UX audit** — Coloured stat cards; friendly exercise type labels in accuracy chart; heatmap legend; accessible chart colours; "total time studied" stat; streak history; improved empty state with CTA.
+4. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
 
-5. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+5. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
 
-6. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
-
-7. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
+6. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
 
 ### Later — Growth features
 
-8. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
+7. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
 
-9. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+8. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
 
-10. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
+9. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
