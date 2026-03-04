@@ -159,6 +159,7 @@ Migrations (run once in Supabase SQL editor):
 - inline (applied) — `ALTER TABLE exercise_attempts ALTER COLUMN exercise_id DROP NOT NULL;`
 - `supabase/migrations/005_fix_google_oauth_trigger.sql` — fixed handle_new_user trigger for Google OAuth
 - `supabase/migrations/006_computed_level.sql` — `concepts.level`, `user_progress.production_mastered`, `profiles.computed_level`; seeds 21 concept CEFR tags; grandfathers existing production attempts
+- `supabase/migrations/007_grammar_focus.sql` — `concepts.grammar_focus text CHECK ('indicative'|'subjunctive'|'both')`; seeded for all 21 concepts
 
 ### Dashboard Stats
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
@@ -194,139 +195,25 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-### Completed — Phases 1–6E + BottomNav polish
-- Full auth flow (email/password, Supabase)
-- SM-2 SRS engine with Claude-only scoring
-- All 6 exercise types with dedicated UI components
-- Study session with hint progression and try-again
-- Session configure screen (module + exercise type picker)
-- Streaming AI tutor chat with context injection
-- Progress analytics (mastery chart, accuracy chart, activity heatmap)
-- Curriculum browser with mastery badges and direct practice links
-- Onboarding diagnostic (6 questions, SRS pre-seeded from scores)
-- Streak tracking (profiles.streak updated on first daily submit)
-- study_sessions table fully wired (written on session completion)
-- Vitest test suite: 122 tests across 8 files — sm2, scoreToInterval, FeedbackPanel, FreeWritePrompt, ExerciseRenderer, ConceptPicker, AccountForm, account/update route
-- Mobile polish: h-[100dvh], safe-area-inset-bottom, flex-wrap, overflow-x-auto
-- **Pre-Phase 6 audit complete**: Zod validation, security headers, shared components, ErrorBoundary, constants, scoring module
-- **63 exercises seeded** (3 per concept; 3rd is free_write or error_correction)
-- **P6-A complete**: /api/topic, /api/grade, FreeWritePrompt.tsx, WriteSession.tsx, /write page; exercise_id nullable
-- **P6-B complete**: Curriculum per-concept type buttons; `/study?types=` discoverability
-- **Dashboard redesign complete**: Three mode cards — Review, Learn new, Free write; type pills removed; `/study?mode=new` queue for unlearned concepts
-- **Free-write concept picker complete**: ConceptPicker.tsx (checkbox grouped by module/unit, Surprise me, sticky footer with difficulty label); /write branches on ?concepts= vs picker; WriteSession accepts conceptIds[]; /api/topic and /api/grade accept concept_ids[]; FreeWritePrompt has 200-word live counter (Submit disabled <20 or >200 words)
-- **P6-C complete**: `/account` page (display_name, current_level A2/B1/B2, daily_goal_minutes); `POST /api/account/update` Zod validated; Account added to dashboard quick-nav
-- **P6-D complete**: PWA — `src/app/manifest.ts` (standalone, theme #18181b, start_url /dashboard); `icon.tsx` 192×192 + `apple-icon.tsx` 180×180 via ImageResponse; layout.tsx `appleWebApp` metadata; `public/sw.js` cache-first for `/_next/static/` assets; `ServiceWorkerRegistration.tsx` client component
-- **P6-E complete**: Babbel-inspired UX redesign — orange primary token (`oklch(0.65 0.20 35)`), orange accent strips on mode cards, stat row with Flame/Trophy icons, segmented progress bar, exercise type icon badges, FeedbackPanel accent strips, orange SentenceBuilder chips, word-count bar, ConceptPicker card-style rows with DifficultyBars, curriculum module progress bars, auth ES logo mark, AccountForm level cards
-- **BottomNav polish complete**: `bg-background` (fully opaque, no content bleed); `/study` and `/tutor` removed from HIDDEN_ROUTES — tab bar now always visible; study page `pb-24 lg:pb-10`; tutor page outer container `pb-[calc(3.125rem+env(safe-area-inset-bottom))] lg:pb-0`
-- **Dashboard header polish complete**: stats row + progress bar merged into a single `bg-card rounded-xl border` status card for visual cohesion; stat numbers `text-4xl` → `text-2xl` so greeting h1 dominates; icons `h-7` → `h-5`; dashboard bottom padding changed from `pb-24` to `pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-8` (dynamic — mirrors nav height + one space-y-3 gap above BottomNav)
-- **P7 complete**: Curriculum overhaul — `/curriculum` redesigned with filter tabs (All|New|Learning|Mastered, `?filter=` URL param), collapsible module accordion (`<details>` server-side), compact concept rows (title + mastery badge + difficulty bars + "Practice →" shortcut); new `/curriculum/[id]` concept detail page (explanation, examples table, SRS status, all action buttons)
-- **Ped-A complete**: Multi-blank gap-fill — `src/lib/exercises/gapFill.ts` (pure utilities: BLANK_TOKEN=`___`, splitPromptOnBlanks, countBlanks, parseExpectedAnswers, encodeAnswers); `GapFill.tsx` rewritten with inline multi-blank rendering (≥2 blanks) and single-blank fallback; pipe-delimited submission (`"sin embargo | aunque"`); grader updated for per-blank scoring; generate route validates JSON array expected_answer; all 21 gap_fill exercises re-seeded with multi-blank paragraph format
-- **SprintCard UX audit complete** (12 issues): X close button (critical bug); two-button collapsed CTA (solid "Sprint 10 min →" + ghost "Customise ↓"); all active chips standardised to `bg-orange-500`; touch targets `py-2.5 min-h-[44px]`; "Recommended" label on 10 min chip; `dueCountByModule` badges + disabled chips for 0-due modules; `duration-200` transitions + `shadow-sm` on active segment; orange Zap icon; smooth `max-h`/`opacity` collapse animation with `aria-hidden`; SprintCard hidden for new users; amber pulse threshold lowered `<20%` → `<10%`; done button "Back to Home" for sprint sessions; 221 tests passing across 16 files
-- **Ped-C complete**: Computed user level — `concepts.level` (B1/B2/C1 CEFR tag), `user_progress.production_mastered` (Tier 2/3 correct answer flag), `profiles.computed_level`; `src/lib/mastery/computeLevel.ts` pure fn (B2 ≥70% B1 mastered; C1 ≥70% B1 + ≥60% B2); `/api/submit` + `/api/grade` set production_mastered and recompute level on each submission; AccountForm shows read-only level badge + per-CEFR breakdown; `account/update` route drops `current_level` from Zod; dashboard badge reads `computed_level`; 235 tests passing across 17 files
-- **Feat-C (revised) complete**: Grammar focus chips — `concepts.grammar_focus` column (`indicative` / `subjunctive` / `both`); migration 007 applied; seeded for all 21 concepts in `seed.ts` (single source of truth for Feat-E); `src/components/GrammarFocusChip.tsx` shared component (sky/violet/amber colours); shown on `/curriculum` concept rows, `/curriculum/[id]` title header, and `ConceptPicker` free-write chooser; 241 tests passing across 18 files
+**Test suite: 241 tests across 18 files — all passing.**
 
-### Phase 6 — Remaining (ordered by priority)
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C), Ped-A (multi-blank gap-fill), Ped-C (computed level), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
 
-**P6-F: Google OAuth** ✓ complete
-- `src/components/auth/GoogleButton.tsx` — calls `signInWithOAuth({ provider: 'google' })`, redirects to `/auth/callback`
-- Both `/auth/login` and `/auth/signup` have Google button + "or" divider above email/password form
-- Login page handles `?error=auth_callback_failed` from callback route
-- **Requires**: Google provider enabled in Supabase dashboard (Auth → Providers → Google) with a Google Cloud OAuth client ID + secret
-
-**P6-G: Email notifications** (lowest priority)
-- Supabase Edge Functions for daily reminder emails
-
-### P7: Curriculum overhaul ✓ complete
-
-**Content structure**
-- Cluster concepts by communicative function (not grammatical form) per SLA research
-- Module taxonomy: Discourse & Text Organisation · Subjunctive Mastery
-- Unit names must reflect function (e.g. "Contrast & Concession", not "Concessive Connectors")
-- Subjunctive units ordered by acquisition sequence: Desire/Volition → Impersonal Necessity → Doubt/Uncertainty → Concessive/Conditional
-
-**Navigation architecture**
-- `/curriculum` = browse page (compact rows + filter tabs + collapsible module accordion)
-- `/curriculum/[id]` = NEW concept detail page (all action buttons live here)
-- Filter tabs: All | New | Learning | Mastered — stored in `?filter=` URL param (server-side)
-- Concept rows: title + mastery badge + difficulty bars + "Practice →" shortcut only
-- Module header: mastery progress bar + `<details>` accordion (open when filter matches)
-- Bottom padding: `pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10`
-
-**`src/app/curriculum/[id]/page.tsx`** (new file)
-- Server component; reads concept id from params + `?filter=` from searchParams
-- Renders: breadcrumb, title, explanation, examples table (es|en), SRS status (next review in N days), all exercise type buttons (filtered to types with DB rows), free write link, ask tutor link
-- Back link preserves `?filter=` param
-
-### Phase 8 — Drill Mode ✓ complete
-- `POST /api/exercises/generate` — auth-guarded; generates gap_fill / translation / transformation / error_correction via Claude; inserts into `exercises` table; returns full row
-- `POST /api/submit` — `skip_srs: boolean` optional flag; SM-2 upsert skipped in drill mode; streak kept
-- `study/page.tsx` — `?practice=true&concept=X&types=T` loads all exercises of that type (no random); passes `practiceMode`, `generateConfig`, `returnHref` to StudySession
-- `StudySession.tsx` — dynamic queue (`useState`); "Generate 3 more" (parallel x3 API calls, appends items, resumes); "Back to concept" button; SRS copy hidden in drill mode
-- `curriculum/[id]/page.tsx` — per-type buttons now add `&practice=true`; "Practice all" unchanged (SRS mode)
-- `exercises` insert uses service role client in generate route (bypasses RLS) — see Fix-D
+→ Full implementation details of all completed work: `docs/completed-features.md`
 
 ---
 
 ### Phase 9 — Backlog
 
-Items are grouped by type and roughly ordered by priority within each group. Implement bugs/fixes first, then UX, then pedagogical improvements, then new features.
-
-#### Bugs & Fixes (implement first)
-
-**Fix-A: Desktop/iPad navigation — persistent left sidebar** ✓ complete
-- `src/components/SideNav.tsx` — 220px fixed sidebar, `hidden lg:flex`; all nav items + Account at bottom; active-state logic; hidden on `/auth`,`/onboarding`,`/write`; wired into `layout.tsx`
-
-**Fix-B: Remove "Back to Dashboard" link on Account page** ✓ complete
-- No link existed at implementation time — removed during UX-A account revamp
-
-**Fix-C: Rename app to "Español Avanzado"** ✓ complete
-- All user-facing strings updated: `manifest.ts`, `layout.tsx`, `AppHeader.tsx`, `SideNav.tsx`, auth pages, `IOSInstallPrompt.tsx`
-**Fix-D: P8 RLS bug — exercises INSERT blocked by RLS** ✓ complete
-- `src/app/api/exercises/generate/route.ts` — `createServiceRoleClient()` defined at top (lines 8–13) using `SUPABASE_SERVICE_ROLE_KEY`; used for the insert at lines 97–110
-
-**Fix-E: Google OAuth — `handle_new_user` trigger uses wrong metadata field** ✓ complete
-- Migration: `supabase/migrations/005_fix_google_oauth_trigger.sql` — `create or replace function` with updated `coalesce` chain: `display_name → full_name → name → email prefix`
-- Run in Supabase SQL editor (one statement, safe on live DB)
-- Infrastructure prerequisite (outside code): Google provider enabled in Supabase dashboard + Google Cloud Console OAuth client
-
-#### UX Improvements
-
-**UX-A: Account page revamp** ✓ complete
-- Sections: Profile (AccountForm), Security (SecurityForm), Session+Danger (DangerZone), IOSInstallCard
-- Change Email + Change Password with strength indicator and Eye/EyeOff toggles; grouped section layout
-
-**UX-B: iOS "Add to Home Screen" install prompt** ✓ complete
-- `src/components/IOSInstallPrompt.tsx` — dismissible bottom sheet; `localStorage pwa_prompt_dismissed`
-- IOSInstallCard in `/account` — permanent settings card (no dismissed check)
-
-**UX-C: Audio playback for Spanish sentences** ✓ complete
-- `src/lib/hooks/useSpeech.ts` — `useSpeech(text?, lang?)` hook; `localStorage audio_enabled`
-- Speaker icon in exercise prompts, FeedbackPanel correct answer, curriculum examples table
-- Audio on/off toggle in `/account` (AccountForm Preferences section)
+Items are grouped by type and roughly ordered by priority within each group. Completed items moved to `docs/completed-features.md`.
 
 #### Pedagogical / Learning Quality
-
-**Ped-A: Harder gap-fill exercises — multi-sentence multi-blank format** ✓ complete
-- `src/lib/exercises/gapFill.ts` — pure utilities (BLANK_TOKEN=`___`, splitPromptOnBlanks, countBlanks, parseExpectedAnswers, encodeAnswers)
-- `GapFill.tsx` — inline multi-blank rendering (≥2 `___` tokens); single-blank (1 token) and legacy fallback (0 tokens) preserved
-- expected_answer stored as JSON array string `'["sin embargo","aunque"]'` for multi-blank; grader detects and scores per-blank
-- Submission: pipe-delimited `answers.join(' | ')` — no API schema change
-- All 21 gap_fill exercises re-seeded in multi-blank paragraph format; DB re-seeded
 
 **Ped-B: AI-generated exercises enter the SRS review pool automatically**
 - P8 generate route already inserts into `exercises` table permanently (reusable)
 - SRS queue already picks a random exercise per concept from all available — AI-generated ones are included automatically once inserted; no architecture change needed
 - Benefit: pool grows over time, reducing repetition and token waste; user cannot memorise specific phrasings
 - Fix-D is applied (service role insert in generate route); verify in testing that generated exercises appear in subsequent SRS sessions
-
-**Ped-C: User level computed from mastery, not self-selected** ✓ complete
-- `src/lib/mastery/computeLevel.ts` — `PRODUCTION_TYPES` constant; `computeLevel()` pure fn
-- Dual mastery criterion: SRS `interval_days >= 21` AND `production_mastered = true` (Tier 2/3 score ≥ 2)
-- Thresholds: B1 default; B2 at ≥70% B1 dually mastered; C1 at ≥70% B1 + ≥60% B2
-- `concepts.level` column tags all 21 concepts B1/B2/C1; migration 006 applied
-- `user_progress.production_mastered` flag updated by `/api/submit` + `/api/grade` on every Tier 2/3 correct answer
-- `profiles.computed_level` persisted after each submission; dashboard + account badge read it
-- AccountForm: level picker removed; read-only badge + per-CEFR mastery breakdown shown
 
 **Ped-D: Gap-fill exercise pedagogical rethink**
 - **Problem**: Current multi-blank format (typically 2 gaps) requires the user to fill ALL blanks correctly to pass, but only one blank tests the target concept. The other gaps (surrounding context words, auxiliary verbs, etc.) are essentially trivia — there are no hints for them, making the exercise feel unfair and frustrating even when the learner correctly places the connector/structure being studied.
@@ -356,22 +243,6 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - Personalised content: "{name}, your {N}-day streak is at risk — {X} concepts due today"
 - Add `email_reminders boolean DEFAULT true` to `profiles`; expose toggle in `/account`
 - Migration: `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`
-
-**Feat-B: Configurable Sprint Mode** ✓ complete (+ UX audit polished)
-- `src/components/SprintCard.tsx` — `'use client'` dashboard card; collapsed state has two-button CTA (solid "Sprint 10 min →" + ghost "Customise ↓"); X button closes expanded panel; animated expand/collapse (`max-h`/`opacity`/`aria-hidden`); all active chips `bg-orange-500`; 44px touch targets; "Recommended" label on 10 min; `dueCountByModule` badge on module chips; hidden for new users; Time (5/10/15 min) or Count (5/10/15/20) limit; optional module filter; navigates to `/study?mode=sprint&limitType=…&limit=…[&module=…]`
-- `dashboard/page.tsx` — fetches modules + `dueCountByModule` (nested join: `user_progress → concepts → units`) in Promise.all; renders `<SprintCard>` only when `studiedCount > 0`
-- `study/page.tsx` — parses `mode=sprint`, `limitType`, `limit`; sprint branch: SRS due queue (no SESSION_SIZE cap) with optional module filter; passes `sprintConfig` to StudySession
-- `StudySession.tsx` — `sprintConfig?` prop; countdown timer with `useEffect`; shrinking progress bar with amber pulse at <10% remaining; count-cap via `effectiveLength`; done screen shows "Reviewed X exercises in MM:SS" for time mode; done button label "Back to Home" for sprint sessions
-- No DB changes needed
-
-**Feat-C: Grammar focus chips** ✓ complete (revised scope — padlock system deferred to post-Feat-E)
-- `supabase/migrations/007_grammar_focus.sql` — `ALTER TABLE concepts ADD COLUMN grammar_focus text CHECK (...)` + 21 UPDATE statements
-- `src/lib/supabase/types.ts` — `grammar_focus: string | null` on Concept Row/Insert/Update
-- `src/lib/curriculum/seed.ts` — `grammar_focus` field on `ConceptSeed` type + all 21 entries (single source of truth)
-- `src/lib/curriculum/run-seed.ts` — `grammar_focus` included in `conceptsToInsert`
-- `src/components/GrammarFocusChip.tsx` — shared chip; sky = Indicative, violet = Subjunctive, amber = Both moods; null-safe
-- `/curriculum` browse, `/curriculum/[id]`, `ConceptPicker` — all show the chip
-- Padlock/prerequisite system deferred: too few concepts (21) for locking to add value; revisit after Feat-E when catalogue reaches 40+
 
 **Feat-D: Web push notifications (Android PWA)**
 - Complements email reminders for Android PWA users (iOS does not support Web Push)
