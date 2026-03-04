@@ -146,9 +146,9 @@ All routes except `/auth/*` redirect unauthenticated users to `/auth/login`. Pro
 ### Database Schema
 | Table | Purpose |
 |---|---|
-| `profiles` | One row per user; `streak`, `last_studied_date`, `onboarding_completed` |
-| `modules / units / concepts / exercises` | Curriculum hierarchy (publicly readable) |
-| `user_progress` | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`) |
+| `profiles` | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level` |
+| `modules / units / concepts / exercises` | Curriculum hierarchy (publicly readable); `concepts.level` = B1/B2/C1 |
+| `user_progress` | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`, `production_mastered`) |
 | `exercise_attempts` | Full attempt history with AI score + feedback |
 | `study_sessions` | Session analytics — written by `/api/sessions/complete` |
 
@@ -157,6 +157,8 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/002_onboarding_flag.sql`
 - `supabase/migrations/003_indexes.sql` — study_sessions index (already applied)
 - inline (applied) — `ALTER TABLE exercise_attempts ALTER COLUMN exercise_id DROP NOT NULL;`
+- `supabase/migrations/005_fix_google_oauth_trigger.sql` — fixed handle_new_user trigger for Google OAuth
+- `supabase/migrations/006_computed_level.sql` — `concepts.level`, `user_progress.production_mastered`, `profiles.computed_level`; seeds 21 concept CEFR tags; grandfathers existing production attempts
 
 ### Dashboard Stats
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
@@ -220,6 +222,7 @@ Migrations (run once in Supabase SQL editor):
 - **P7 complete**: Curriculum overhaul — `/curriculum` redesigned with filter tabs (All|New|Learning|Mastered, `?filter=` URL param), collapsible module accordion (`<details>` server-side), compact concept rows (title + mastery badge + difficulty bars + "Practice →" shortcut); new `/curriculum/[id]` concept detail page (explanation, examples table, SRS status, all action buttons)
 - **Ped-A complete**: Multi-blank gap-fill — `src/lib/exercises/gapFill.ts` (pure utilities: BLANK_TOKEN=`___`, splitPromptOnBlanks, countBlanks, parseExpectedAnswers, encodeAnswers); `GapFill.tsx` rewritten with inline multi-blank rendering (≥2 blanks) and single-blank fallback; pipe-delimited submission (`"sin embargo | aunque"`); grader updated for per-blank scoring; generate route validates JSON array expected_answer; all 21 gap_fill exercises re-seeded with multi-blank paragraph format
 - **SprintCard UX audit complete** (12 issues): X close button (critical bug); two-button collapsed CTA (solid "Sprint 10 min →" + ghost "Customise ↓"); all active chips standardised to `bg-orange-500`; touch targets `py-2.5 min-h-[44px]`; "Recommended" label on 10 min chip; `dueCountByModule` badges + disabled chips for 0-due modules; `duration-200` transitions + `shadow-sm` on active segment; orange Zap icon; smooth `max-h`/`opacity` collapse animation with `aria-hidden`; SprintCard hidden for new users; amber pulse threshold lowered `<20%` → `<10%`; done button "Back to Home" for sprint sessions; 221 tests passing across 16 files
+- **Ped-C complete**: Computed user level — `concepts.level` (B1/B2/C1 CEFR tag), `user_progress.production_mastered` (Tier 2/3 correct answer flag), `profiles.computed_level`; `src/lib/mastery/computeLevel.ts` pure fn (B2 ≥70% B1 mastered; C1 ≥70% B1 + ≥60% B2); `/api/submit` + `/api/grade` set production_mastered and recompute level on each submission; AccountForm shows read-only level badge + per-CEFR breakdown; `account/update` route drops `current_level` from Zod; dashboard badge reads `computed_level`; 235 tests passing across 17 files
 
 ### Phase 6 — Remaining (ordered by priority)
 
@@ -315,13 +318,14 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - Benefit: pool grows over time, reducing repetition and token waste; user cannot memorise specific phrasings
 - Fix-D is applied (service role insert in generate route); verify in testing that generated exercises appear in subsequent SRS sessions
 
-**Ped-C: User level computed from mastery, not self-selected**
-- Inspired by KwizIQ's tested-knowledge approach (not self-report)
-- Proposed calculation: weighted % of concepts mastered (`interval_days >= 21`) across modules, factoring in difficulty
-  - A2: < 25% mastered; B1: 25–55%; B2: 55–85%; C1: 85%+
-- Remove manual level picker from account settings (or keep as optional override with a "reset to computed" button)
-- Computed level shown on dashboard and account page; recalculated on each `POST /api/submit`
-- May require a `computed_level` column on `profiles` or a pure computation on read
+**Ped-C: User level computed from mastery, not self-selected** ✓ complete
+- `src/lib/mastery/computeLevel.ts` — `PRODUCTION_TYPES` constant; `computeLevel()` pure fn
+- Dual mastery criterion: SRS `interval_days >= 21` AND `production_mastered = true` (Tier 2/3 score ≥ 2)
+- Thresholds: B1 default; B2 at ≥70% B1 dually mastered; C1 at ≥70% B1 + ≥60% B2
+- `concepts.level` column tags all 21 concepts B1/B2/C1; migration 006 applied
+- `user_progress.production_mastered` flag updated by `/api/submit` + `/api/grade` on every Tier 2/3 correct answer
+- `profiles.computed_level` persisted after each submission; dashboard + account badge read it
+- AccountForm: level picker removed; read-only badge + per-CEFR mastery breakdown shown
 
 #### New Features
 
@@ -383,24 +387,22 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 
 ### Immediate — High learning value
 
-1. **Ped-C: Computed user level** — Replace self-selected level with mastery-based computation. Removes the last manual input from account; level shown on dashboard + account page; recalculated on each `/api/submit`. A2 <25% · B1 25–55% · B2 55–85% · C1 85%+. May need `computed_level` column on `profiles`.
+1. **Feat-E: Content expansion via AI seeding** — Run `pnpm seed:ai` to draft 3–5 new concepts per unit (output to JSON for human approval before DB insert). Target 40+ concepts across 3 modules. Adds Module 3 (Verb Constructions: ser/estar, reflexive verbs). This is the single highest-leverage action for user retention.
 
-2. **Feat-E: Content expansion via AI seeding** — Run `pnpm seed:ai` to draft 3–5 new concepts per unit (output to JSON for human approval before DB insert). Target 40+ concepts across 3 modules. Adds Module 3 (Verb Constructions: ser/estar, reflexive verbs). This is the single highest-leverage action for user retention.
-
-3. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
+2. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
 
 ### Next — Polish & engagement
 
-4. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+3. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
 
-5. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
+4. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
 
-6. **Feat-C: Concept prerequisites / unlock progression** — Add `prerequisite_concept_id uuid NULLABLE` to `concepts`; padlock icon in curriculum for locked concepts; UI-only enforcement.
+5. **Feat-C: Concept prerequisites / unlock progression** — Add `prerequisite_concept_id uuid NULLABLE` to `concepts`; padlock icon in curriculum for locked concepts; UI-only enforcement.
 
 ### Later — Growth features
 
-7. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
+6. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
 
-8. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+7. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
 
-9. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
+8. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
