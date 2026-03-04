@@ -18,6 +18,7 @@ import {
   PartyPopper, CheckCircle2, XCircle,
   Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles, Timer, X,
 } from 'lucide-react'
+import { PushPermissionPrompt } from '@/components/PushPermissionPrompt'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
 
@@ -295,6 +296,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             </ul>
           </details>
         )}
+
+        <PushPermissionPrompt />
 
         <div className="flex flex-col items-center gap-3">
           {practiceMode && generateConfig && (

@@ -7,6 +7,7 @@ import { AccountForm } from './AccountForm'
 import { SecurityForm } from './SecurityForm'
 import { DangerZone } from './DangerZone'
 import { IOSInstallCard } from './IOSInstallCard'
+import { NotificationSettings } from '@/components/NotificationSettings'
 import type { Profile } from '@/lib/supabase/types'
 
 export default async function AccountPage() {
@@ -56,6 +57,10 @@ export default async function AccountPage() {
 
       <div className="bg-card rounded-xl border p-5">
         <SecurityForm userEmail={user.email!} isOAuthUser={isOAuthUser} />
+      </div>
+
+      <div className="bg-card rounded-xl border p-5">
+        <NotificationSettings />
       </div>
 
       <div className="bg-card rounded-xl border p-5">

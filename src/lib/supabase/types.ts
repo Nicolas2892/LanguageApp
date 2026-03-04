@@ -25,6 +25,7 @@ export interface Database {
           last_studied_date: string | null
           created_at: string
           onboarding_completed: boolean
+          push_subscription: Json | null
         }
         Insert: {
           id: string
@@ -36,6 +37,7 @@ export interface Database {
           last_studied_date?: string | null
           created_at?: string
           onboarding_completed?: boolean
+          push_subscription?: Json | null
         }
         Update: {
           id?: string
@@ -47,6 +49,7 @@ export interface Database {
           last_studied_date?: string | null
           created_at?: string
           onboarding_completed?: boolean
+          push_subscription?: Json | null
         }
         Relationships: []
       }

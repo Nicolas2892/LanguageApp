@@ -14,6 +14,7 @@ const baseProfile: Profile = {
   last_studied_date: '2026-03-01',
   created_at: '2026-01-01T00:00:00Z',
   onboarding_completed: true,
+  push_subscription: null,
 }
 
 const baseMastery = {

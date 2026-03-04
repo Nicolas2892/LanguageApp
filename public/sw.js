@@ -45,3 +45,29 @@ self.addEventListener('fetch', (e) => {
   // All other requests (navigation, API calls) go straight to the network.
   // This keeps auth-gated pages working correctly.
 })
+
+// Push notification received
+self.addEventListener('push', (event) => {
+  const data = event.data?.json() ?? {}
+  const title = data.title ?? 'Español Avanzado'
+  const options = {
+    body: data.body ?? 'You have reviews due today.',
+    icon: '/icon',
+    badge: '/icon',
+    data: { url: data.url ?? '/dashboard' },
+  }
+  event.waitUntil(self.registration.showNotification(title, options))
+})
+
+// Notification clicked — open/focus the app
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  const url = event.notification.data?.url ?? '/dashboard'
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+      const existing = list.find((c) => c.url.includes(url) && 'focus' in c)
+      if (existing) return existing.focus()
+      return clients.openWindow(url)
+    })
+  )
+})
