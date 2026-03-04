@@ -6,6 +6,7 @@ import { SpeakButton } from '@/components/SpeakButton'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { ChevronLeft, BookOpen, PenLine, MessageSquare } from 'lucide-react'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
+import { LevelChip } from '@/components/LevelChip'
 import type { Concept } from '@/lib/supabase/types'
 
 type Example = { es: string; en: string }
@@ -151,6 +152,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         <div className="flex items-start gap-3 flex-wrap">
           <h1 className="text-2xl font-extrabold tracking-tight flex-1 min-w-0">{concept.title}</h1>
           <div className="flex items-center gap-2 shrink-0">
+            <LevelChip level={concept.level} />
             <GrammarFocusChip focus={concept.grammar_focus} />
             <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs border font-medium ${badge.className}`}>
               {badge.label}

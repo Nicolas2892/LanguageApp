@@ -3,11 +3,13 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
-import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { LevelChip } from '@/components/LevelChip'
+import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import { Trophy, ChevronRight } from 'lucide-react'
 
 type MasteryState = 'mastered' | 'learning' | 'new'
 type FilterTab = 'all' | 'new' | 'learning' | 'mastered'
+type LevelFilter = 'all' | 'B1' | 'B2' | 'C1'
 
 function getMasteryState(intervalDays: number | undefined): MasteryState {
   if (intervalDays === undefined) return 'new'
@@ -48,7 +50,7 @@ const EMPTY_STATE: Record<Exclude<FilterTab, 'all'>, string> = {
 }
 
 interface Props {
-  searchParams: Promise<{ filter?: string }>
+  searchParams: Promise<{ filter?: string; level?: string }>
 }
 
 export default async function CurriculumPage({ searchParams }: Props) {
@@ -56,21 +58,24 @@ export default async function CurriculumPage({ searchParams }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const { filter: rawFilter } = await searchParams
+  const { filter: rawFilter, level: rawLevel } = await searchParams
   const filter: FilterTab = (['all', 'new', 'learning', 'mastered'].includes(rawFilter ?? '')
     ? rawFilter
     : 'all') as FilterTab
+  const levelFilter: LevelFilter = (['all', 'B1', 'B2', 'C1'].includes(rawLevel ?? '')
+    ? rawLevel
+    : 'all') as LevelFilter
 
   const [modulesRes, unitsRes, conceptsRes, progressRes] = await Promise.all([
     supabase.from('modules').select('id, title, order_index').order('order_index'),
     supabase.from('units').select('id, module_id, title, order_index').order('order_index'),
-    supabase.from('concepts').select('id, unit_id, title, difficulty, grammar_focus').order('difficulty'),
+    supabase.from('concepts').select('id, unit_id, title, difficulty, level, grammar_focus').order('difficulty'),
     supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', user.id),
   ])
 
   type ModuleRow  = { id: string; title: string; order_index: number }
   type UnitRow    = { id: string; module_id: string; title: string; order_index: number }
-  type ConceptRow = { id: string; unit_id: string; title: string; difficulty: number; grammar_focus: string | null }
+  type ConceptRow = { id: string; unit_id: string; title: string; difficulty: number; level: string | null; grammar_focus: string | null }
   type ProgressRow = { concept_id: string; interval_days: number }
 
   const typedModules  = (modulesRes.data  ?? []) as ModuleRow[]
@@ -96,8 +101,17 @@ export default async function CurriculumPage({ searchParams }: Props) {
     return true
   }
 
-  const anyMatch = typedConcepts.some((c) => matchesFilter(c.id))
-  const backFilter = filter !== 'all' ? `?filter=${filter}` : ''
+  function matchesLevel(concept: ConceptRow): boolean {
+    if (levelFilter === 'all') return true
+    return concept.level === levelFilter
+  }
+
+  const anyMatch = typedConcepts.some((c) => matchesFilter(c.id) && matchesLevel(c))
+
+  const backParts: string[] = []
+  if (filter !== 'all') backParts.push(`filter=${filter}`)
+  if (levelFilter !== 'all') backParts.push(`level=${levelFilter}`)
+  const backFilter = backParts.length > 0 ? `?${backParts.join('&')}` : ''
 
   return (
     <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
@@ -124,10 +138,42 @@ export default async function CurriculumPage({ searchParams }: Props) {
         ))}
       </div>
 
+      {/* Level filter chips */}
+      <div className="flex gap-2 flex-wrap">
+        {(['all', 'B1', 'B2', 'C1'] as LevelFilter[]).map((lvl) => {
+          const isActive = levelFilter === lvl
+          const href = (() => {
+            const parts: string[] = []
+            if (filter !== 'all') parts.push(`filter=${filter}`)
+            if (lvl !== 'all') parts.push(`level=${lvl}`)
+            return `/curriculum${parts.length > 0 ? `?${parts.join('&')}` : ''}`
+          })()
+          const chip = lvl !== 'all' ? LEVEL_CHIP[lvl] : null
+          return (
+            <Link
+              key={lvl}
+              href={href}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+                isActive
+                  ? chip
+                    ? chip.className
+                    : 'bg-foreground text-background border-foreground'
+                  : 'bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground'
+              }`}
+            >
+              {lvl === 'all' ? 'All levels' : lvl}
+            </Link>
+          )
+        })}
+      </div>
+
       {/* Global empty state */}
-      {!anyMatch && filter !== 'all' && (
+      {!anyMatch && (filter !== 'all' || levelFilter !== 'all') && (
         <div className="text-center py-12 text-muted-foreground">
-          <p className="text-base">{EMPTY_STATE[filter as Exclude<FilterTab, 'all'>]}</p>
+          {filter !== 'all'
+            ? <p className="text-base">{EMPTY_STATE[filter as Exclude<FilterTab, 'all'>]}</p>
+            : <p className="text-base">No {levelFilter} concepts match the current filters.</p>
+          }
         </div>
       )}
 
@@ -137,7 +183,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
           {typedModules.map((mod) => {
             const modUnits       = unitsByModule.get(mod.id) ?? []
             const allModConcepts = modUnits.flatMap((u) => conceptsByUnit.get(u.id) ?? [])
-            const matchingCount  = allModConcepts.filter((c) => matchesFilter(c.id)).length
+            const matchingCount  = allModConcepts.filter((c) => matchesFilter(c.id) && matchesLevel(c)).length
             const masteredCount  = allModConcepts.filter(
               (c) => (progressMap.get(c.id) ?? -1) >= MASTERY_THRESHOLD
             ).length
@@ -181,7 +227,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                 <div className="px-4 pb-4 pt-2 space-y-4 border-t">
                   {modUnits.map((unit) => {
                     const allUnitConcepts = conceptsByUnit.get(unit.id) ?? []
-                    const unitConcepts    = allUnitConcepts.filter((c) => matchesFilter(c.id))
+                    const unitConcepts    = allUnitConcepts.filter((c) => matchesFilter(c.id) && matchesLevel(c))
                     const unitMastered    = allUnitConcepts.filter(
                       (c) => (progressMap.get(c.id) ?? -1) >= MASTERY_THRESHOLD
                     ).length
@@ -231,6 +277,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                   </div>
                                   {/* Right: badges + practice shortcut */}
                                   <div className="flex items-center gap-2 shrink-0">
+                                    <LevelChip level={concept.level} />
                                     <GrammarFocusChip focus={concept.grammar_focus} />
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${cfg.className}`}>
                                       {cfg.label}
