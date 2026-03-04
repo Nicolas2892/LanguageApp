@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { SprintCard } from '@/components/SprintCard'
 import type { Profile, Concept, Module } from '@/lib/supabase/types'
-import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import {
   Flame, Trophy, BookOpen, Sparkles, PenLine,
 } from 'lucide-react'
@@ -15,8 +15,10 @@ export default async function DashboardPage() {
   if (!user) redirect('/auth/login')
 
   const today = new Date().toISOString().split('T')[0]
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
 
-  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes, dueByModuleRes] = await Promise.all([
+  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes, dueByModuleRes, todaySessionsRes] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase
       .from('user_progress')
@@ -48,6 +50,11 @@ export default async function DashboardPage() {
       .select('concept_id, concepts(unit_id, units(module_id))')
       .eq('user_id', user.id)
       .lte('due_date', today),
+    supabase
+      .from('study_sessions')
+      .select('started_at, ended_at')
+      .eq('user_id', user.id)
+      .gte('started_at', todayStart.toISOString()),
   ])
 
   const profile = profileRes.data as Profile | null
@@ -79,6 +86,15 @@ export default async function DashboardPage() {
     writeConcept = conceptData as Pick<Concept, 'id' | 'title'> | null
   }
 
+  type SessionRow = { started_at: string; ended_at: string | null }
+  const todayMinutes = (todaySessionsRes.data ?? [] as SessionRow[]).reduce((sum, s) => {
+    if (!s.ended_at) return sum
+    return sum + Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)
+  }, 0)
+  const dailyGoalMinutes = profile?.daily_goal_minutes ?? 0
+  const goalPct = dailyGoalMinutes > 0 ? Math.min(100, Math.round((todayMinutes / dailyGoalMinutes) * 100)) : 0
+  const goalMet = dailyGoalMinutes > 0 && todayMinutes >= dailyGoalMinutes
+
   const masteredPct = totalConcepts > 0 ? (masteredCount / totalConcepts) * 100 : 0
   const learningPct = totalConcepts > 0 ? (learningCount / totalConcepts) * 100 : 0
 
@@ -90,11 +106,14 @@ export default async function DashboardPage() {
           <h1 className="text-3xl font-extrabold tracking-tight">
             Hola, {profile?.display_name ?? 'learner'}
           </h1>
-          {profile?.computed_level && (
-            <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
-              {profile.computed_level}
-            </span>
-          )}
+          {profile?.computed_level && (() => {
+            const chip = LEVEL_CHIP[profile.computed_level]
+            return chip ? (
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${chip.className}`}>
+                {chip.label}
+              </span>
+            ) : null
+          })()}
         </div>
         <p className="text-muted-foreground text-sm">
           {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -135,16 +154,40 @@ export default async function DashboardPage() {
               />
             </div>
             <p className="text-xs text-muted-foreground text-right">
-              {masteredCount} mastered · {learningCount} learning · {newConceptsCount} new
+              {masteredCount} mastered · {learningCount} in progress · {newConceptsCount} to start
             </p>
+          </div>
+        )}
+
+        {/* Daily goal progress */}
+        {dailyGoalMinutes > 0 && (
+          <div className="space-y-1 pt-1 border-t border-border/40">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-muted-foreground">
+                {goalMet ? '✓ Daily goal met!' : 'Daily goal'}
+              </span>
+              <span className={`font-medium ${goalMet ? 'text-green-600' : 'text-foreground'}`}>
+                {todayMinutes} / {dailyGoalMinutes} min
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${goalMet ? 'bg-green-500' : 'bg-orange-500'}`}
+                style={{ width: `${goalPct}%` }}
+              />
+            </div>
           </div>
         )}
       </div>
 
       {/* Mode cards */}
-      <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
-        {/* Review card */}
-        <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
+      <div className="space-y-3">
+        {/* Review card — primary emphasis when action is needed */}
+        <div className={`rounded-xl p-6 space-y-3 border ${
+          dueCount > 0 && studiedCount > 0
+            ? 'bg-orange-50/60 border-orange-200 border-l-4 border-l-orange-500'
+            : 'border-l-4 border-l-orange-500 bg-card'
+        }`}>
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Review</p>
             <BookOpen className="h-5 w-5 text-muted-foreground" />
@@ -198,8 +241,22 @@ export default async function DashboardPage() {
               <PenLine className="h-5 w-5 text-muted-foreground" />
             </div>
             <p className="text-xl font-bold">{writeConcept.title}</p>
+            <p className="text-xs text-muted-foreground -mt-1">Your weakest concept right now</p>
             <Button asChild variant="outline" className="w-full">
               <Link href={`/write?suggested=${writeConcept.id}`}>Write about this →</Link>
+            </Button>
+          </div>
+        )}
+        {!isNewUser && !writeConcept && (
+          <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Free write</p>
+              <PenLine className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <p className="text-xl font-bold">Practice your writing</p>
+            <p className="text-muted-foreground text-sm">Pick any concept to write about freely.</p>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/write">Browse concepts →</Link>
             </Button>
           </div>
         )}

@@ -25,9 +25,9 @@ describe('SprintCard', () => {
     expect(screen.queryByRole('button', { name: 'Start Sprint →' })).toBeNull()
   })
 
-  it('shows dueCount in collapsed heading when dueCount > 0', () => {
+  it('shows timed review heading when dueCount > 0', () => {
     render(<SprintCard dueCount={8} modules={mockModules} />)
-    expect(screen.getByText(/8 concepts due/i)).toBeTruthy()
+    expect(screen.getByText(/timed review/i)).toBeTruthy()
   })
 
   it('shows fallback text when dueCount is 0', () => {

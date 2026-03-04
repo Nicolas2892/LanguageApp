@@ -68,7 +68,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
         >
           <p className="text-xl font-bold mb-3">
             {dueCount > 0
-              ? `${dueCount} concept${dueCount !== 1 ? 's' : ''} due — sprint through them`
+              ? 'Timed review · push through your queue'
               : 'Focus in a fixed time slot'}
           </p>
           <div className="flex gap-2">
