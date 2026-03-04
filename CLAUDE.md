@@ -246,19 +246,13 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### New Features
 
-**Feat-A: Daily email reminders (P6-G)**
-- Supabase Edge Function `send-daily-reminder`: cron at 18:00 local (or fixed UTC), queries profiles where `last_studied_date < today` AND `streak > 0`
-- Personalised content: "{name}, your {N}-day streak is at risk — {X} concepts due today"
-- Add `email_reminders boolean DEFAULT true` to `profiles`; expose toggle in `/account`
-- Migration: `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`
+**Feat-A: Daily email reminders** *(deferred — not wanted)*
 
-**Feat-D: Web push notifications (Android PWA)**
-- Complements email reminders for Android PWA users (iOS does not support Web Push)
-- Add `push_subscription jsonb` column to `profiles`
-- Client: prompt for notification permission after first completed study session (not on load)
-- Service worker: handle `push` event, display notification with due count + streak
-- Backend: Supabase Edge Function sends push via Web Push API (VAPID keys in env vars)
-- Detect and skip prompt on iOS
+**Feat-D: Web push notifications** ✅ *Complete — see `docs/completed-features.md`*
+- VAPID-based push via `web-push`; `profiles.push_subscription jsonb` (migration 009)
+- SW push + notificationclick handlers; `PushPermissionPrompt` in study done screen
+- `NotificationSettings` on account page; `/api/push/subscribe` (POST/DELETE) + `/api/push/send` cron route
+- `vercel.json` daily cron 18:00 UTC; `CRON_SECRET` auth on send route
 
 **Feat-E: Content expansion via AI seeding script**
 - `pnpm seed:ai` script: uses Claude to draft 3–5 new concepts per unit with 3 exercises each
@@ -309,10 +303,8 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### Design
 
-**Design-A: App logo**
-- Babbel-inspired mark: clean pill or rounded-square shape, "EA" monogram or stylised "Ñ", warm tones complementing the orange primary
-- Deliverables: updated `icon.tsx` (192×192 ImageResponse), `apple-icon.tsx` (180×180), and an SVG source file at `public/logo.svg` for use in `AppHeader` and auth pages
-- Current auth "ES" block and AppHeader text mark should both be replaced
+**Design-A: App logo** ✅ *Complete*
+- Speech bubble + Ñ mark; updated `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`; replaces "ES" auth block and AppHeader text mark
 
 ---
 
@@ -328,16 +320,12 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 ### Polish & UX quality
 
-3. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+3. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
 
-5. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
+### Later — Growth features (deferred)
 
-6. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
+4. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
 
-### Later — Growth features
+5. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
 
-7. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
-
-8. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
-
-9. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
+6. **Feat-A: Daily email reminders** *(not wanted — deferred indefinitely)*
