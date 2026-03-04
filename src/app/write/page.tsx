@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { WriteSession } from './WriteSession'
@@ -64,13 +65,13 @@ export default async function WritePage({ searchParams }: Props) {
   const [modulesRes, unitsRes, conceptsRes, progressRes] = await Promise.all([
     supabase.from('modules').select('id, title').order('order_index'),
     supabase.from('units').select('id, module_id, title').order('order_index'),
-    supabase.from('concepts').select('id, unit_id, title, difficulty, grammar_focus').order('difficulty'),
+    supabase.from('concepts').select('id, unit_id, title, difficulty, grammar_focus, level').order('difficulty'),
     supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', user.id),
   ])
 
   type ModuleRow = Pick<Module, 'id' | 'title'>
   type UnitRow = Pick<Unit, 'id' | 'module_id' | 'title'>
-  type ConceptRow = Pick<Concept, 'id' | 'unit_id' | 'title' | 'difficulty' | 'grammar_focus'>
+  type ConceptRow = Pick<Concept, 'id' | 'unit_id' | 'title' | 'difficulty' | 'grammar_focus' | 'level'>
   type ProgressRow = { concept_id: string; interval_days: number }
 
   const modules = (modulesRes.data ?? []) as ModuleRow[]
@@ -92,6 +93,13 @@ export default async function WritePage({ searchParams }: Props) {
 
   return (
     <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Dashboard
+      </Link>
       <div>
         <h1 className="text-xl font-bold">Free write</h1>
         <p className="text-sm text-muted-foreground mt-1">
