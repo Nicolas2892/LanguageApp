@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
+import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { Trophy, ChevronRight } from 'lucide-react'
 
@@ -63,13 +64,13 @@ export default async function CurriculumPage({ searchParams }: Props) {
   const [modulesRes, unitsRes, conceptsRes, progressRes] = await Promise.all([
     supabase.from('modules').select('id, title, order_index').order('order_index'),
     supabase.from('units').select('id, module_id, title, order_index').order('order_index'),
-    supabase.from('concepts').select('id, unit_id, title, difficulty').order('difficulty'),
+    supabase.from('concepts').select('id, unit_id, title, difficulty, grammar_focus').order('difficulty'),
     supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', user.id),
   ])
 
   type ModuleRow  = { id: string; title: string; order_index: number }
   type UnitRow    = { id: string; module_id: string; title: string; order_index: number }
-  type ConceptRow = { id: string; unit_id: string; title: string; difficulty: number }
+  type ConceptRow = { id: string; unit_id: string; title: string; difficulty: number; grammar_focus: string | null }
   type ProgressRow = { concept_id: string; interval_days: number }
 
   const typedModules  = (modulesRes.data  ?? []) as ModuleRow[]
@@ -228,8 +229,9 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                     <p className="font-medium text-sm leading-snug truncate">{concept.title}</p>
                                     <DifficultyBars difficulty={concept.difficulty} />
                                   </div>
-                                  {/* Right: badge + practice shortcut */}
+                                  {/* Right: badges + practice shortcut */}
                                   <div className="flex items-center gap-2 shrink-0">
+                                    <GrammarFocusChip focus={concept.grammar_focus} />
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs border ${cfg.className}`}>
                                       {cfg.label}
                                     </span>

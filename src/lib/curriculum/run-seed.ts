@@ -60,6 +60,7 @@ async function seed() {
     examples: c.examples,
     difficulty: c.difficulty,
     level: c.level,
+    grammar_focus: c.grammar_focus,
   }))
 
   const { data: concepts, error: conceptErr } = await supabase

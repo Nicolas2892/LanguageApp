@@ -64,13 +64,13 @@ export default async function WritePage({ searchParams }: Props) {
   const [modulesRes, unitsRes, conceptsRes, progressRes] = await Promise.all([
     supabase.from('modules').select('id, title').order('order_index'),
     supabase.from('units').select('id, module_id, title').order('order_index'),
-    supabase.from('concepts').select('id, unit_id, title, difficulty').order('difficulty'),
+    supabase.from('concepts').select('id, unit_id, title, difficulty, grammar_focus').order('difficulty'),
     supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', user.id),
   ])
 
   type ModuleRow = Pick<Module, 'id' | 'title'>
   type UnitRow = Pick<Unit, 'id' | 'module_id' | 'title'>
-  type ConceptRow = Pick<Concept, 'id' | 'unit_id' | 'title' | 'difficulty'>
+  type ConceptRow = Pick<Concept, 'id' | 'unit_id' | 'title' | 'difficulty' | 'grammar_focus'>
   type ProgressRow = { concept_id: string; interval_days: number }
 
   const modules = (modulesRes.data ?? []) as ModuleRow[]

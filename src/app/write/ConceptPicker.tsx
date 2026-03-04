@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { Dices, Trophy } from 'lucide-react'
 
 interface ConceptRow {
@@ -10,6 +11,7 @@ interface ConceptRow {
   unit_id: string
   title: string
   difficulty: number
+  grammar_focus?: string | null
   interval_days?: number
 }
 
@@ -132,12 +134,15 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
                             <p className="text-sm font-medium leading-snug">{concept.title}</p>
                             <DifficultyBars difficulty={concept.difficulty} />
                           </div>
-                          {isMastered && (
-                            <span className="inline-flex items-center gap-1 text-xs shrink-0 px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200">
-                              <Trophy className="h-3 w-3" />
-                              Mastered
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <GrammarFocusChip focus={concept.grammar_focus} />
+                            {isMastered && (
+                              <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded-full bg-green-100 text-green-700 border border-green-200">
+                                <Trophy className="h-3 w-3" />
+                                Mastered
+                              </span>
+                            )}
+                          </div>
                         </label>
                       )
                     })}

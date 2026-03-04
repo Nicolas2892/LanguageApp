@@ -110,6 +110,7 @@ export interface Database {
           examples: Json
           difficulty: number
           level: string
+          grammar_focus: string | null
           created_at: string
         }
         Insert: {
@@ -121,6 +122,7 @@ export interface Database {
           examples?: Json
           difficulty?: number
           level?: string
+          grammar_focus?: string | null
           created_at?: string
         }
         Update: {
@@ -132,6 +134,7 @@ export interface Database {
           examples?: Json
           difficulty?: number
           level?: string
+          grammar_focus?: string | null
           created_at?: string
         }
         Relationships: [

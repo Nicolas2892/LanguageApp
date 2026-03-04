@@ -45,6 +45,7 @@ type ConceptSeed = {
   examples: Array<{ es: string; en: string }>
   difficulty: number       // 1–5
   level: 'B1' | 'B2' | 'C1'
+  grammar_focus: 'indicative' | 'subjunctive' | 'both'
 }
 
 export const SEED_CONCEPTS: ConceptSeed[] = [
@@ -63,6 +64,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 2,
     level: 'B1',
+    grammar_focus: 'indicative',
   },
   {
     unit_index: 0,
@@ -77,6 +79,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 3,
     level: 'B2',
+    grammar_focus: 'subjunctive',
   },
   {
     unit_index: 0,
@@ -91,6 +94,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 3,
     level: 'B2',
+    grammar_focus: 'both',
   },
   {
     unit_index: 0,
@@ -105,6 +109,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 2,
     level: 'B1',
+    grammar_focus: 'indicative',
   },
   {
     unit_index: 0,
@@ -119,6 +124,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 4,
     level: 'B2',
+    grammar_focus: 'subjunctive',
   },
 
   // ─── Unit 1: Causal & Consecutive Connectors ─────────────────────────────
@@ -136,6 +142,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 3,
     level: 'B2',
+    grammar_focus: 'indicative',
   },
   {
     unit_index: 1,
@@ -150,6 +157,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 4,
     level: 'B2',
+    grammar_focus: 'indicative',
   },
   {
     unit_index: 1,
@@ -164,6 +172,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 2,
     level: 'B1',
+    grammar_focus: 'indicative',
   },
   {
     unit_index: 1,
@@ -178,6 +187,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 5,
     level: 'C1',
+    grammar_focus: 'subjunctive',
   },
 
   // ─── Unit 2: Adversative & Contrast Connectors ───────────────────────────
@@ -195,6 +205,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 3,
     level: 'B2',
+    grammar_focus: 'indicative',
   },
   {
     unit_index: 2,
@@ -209,6 +220,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 2,
     level: 'B1',
+    grammar_focus: 'indicative',
   },
   {
     unit_index: 2,
@@ -223,6 +235,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 2,
     level: 'B1',
+    grammar_focus: 'indicative',
   },
 
   // ─── Unit 3: Present Subjunctive Triggers ────────────────────────────────
@@ -240,6 +253,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 2,
     level: 'B1',
+    grammar_focus: 'subjunctive',
   },
   {
     unit_index: 3,
@@ -254,6 +268,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 3,
     level: 'B2',
+    grammar_focus: 'subjunctive',
   },
   {
     unit_index: 3,
@@ -268,6 +283,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 3,
     level: 'B2',
+    grammar_focus: 'subjunctive',
   },
   {
     unit_index: 3,
@@ -282,6 +298,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 4,
     level: 'B2',
+    grammar_focus: 'subjunctive',
   },
   {
     unit_index: 3,
@@ -296,6 +313,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 3,
     level: 'B2',
+    grammar_focus: 'subjunctive',
   },
 
   // ─── Unit 4: Imperfect Subjunctive & Hypotheticals ───────────────────────
@@ -313,6 +331,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 4,
     level: 'B2',
+    grammar_focus: 'subjunctive',
   },
   {
     unit_index: 4,
@@ -327,6 +346,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 5,
     level: 'C1',
+    grammar_focus: 'subjunctive',
   },
   {
     unit_index: 4,
@@ -341,6 +361,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 4,
     level: 'B2',
+    grammar_focus: 'subjunctive',
   },
   {
     unit_index: 4,
@@ -355,6 +376,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     ],
     difficulty: 5,
     level: 'C1',
+    grammar_focus: 'subjunctive',
   },
 ]
 
