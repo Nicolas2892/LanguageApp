@@ -223,6 +223,7 @@ Migrations (run once in Supabase SQL editor):
 - **Ped-A complete**: Multi-blank gap-fill — `src/lib/exercises/gapFill.ts` (pure utilities: BLANK_TOKEN=`___`, splitPromptOnBlanks, countBlanks, parseExpectedAnswers, encodeAnswers); `GapFill.tsx` rewritten with inline multi-blank rendering (≥2 blanks) and single-blank fallback; pipe-delimited submission (`"sin embargo | aunque"`); grader updated for per-blank scoring; generate route validates JSON array expected_answer; all 21 gap_fill exercises re-seeded with multi-blank paragraph format
 - **SprintCard UX audit complete** (12 issues): X close button (critical bug); two-button collapsed CTA (solid "Sprint 10 min →" + ghost "Customise ↓"); all active chips standardised to `bg-orange-500`; touch targets `py-2.5 min-h-[44px]`; "Recommended" label on 10 min chip; `dueCountByModule` badges + disabled chips for 0-due modules; `duration-200` transitions + `shadow-sm` on active segment; orange Zap icon; smooth `max-h`/`opacity` collapse animation with `aria-hidden`; SprintCard hidden for new users; amber pulse threshold lowered `<20%` → `<10%`; done button "Back to Home" for sprint sessions; 221 tests passing across 16 files
 - **Ped-C complete**: Computed user level — `concepts.level` (B1/B2/C1 CEFR tag), `user_progress.production_mastered` (Tier 2/3 correct answer flag), `profiles.computed_level`; `src/lib/mastery/computeLevel.ts` pure fn (B2 ≥70% B1 mastered; C1 ≥70% B1 + ≥60% B2); `/api/submit` + `/api/grade` set production_mastered and recompute level on each submission; AccountForm shows read-only level badge + per-CEFR breakdown; `account/update` route drops `current_level` from Zod; dashboard badge reads `computed_level`; 235 tests passing across 17 files
+- **Feat-C (revised) complete**: Grammar focus chips — `concepts.grammar_focus` column (`indicative` / `subjunctive` / `both`); migration 007 applied; seeded for all 21 concepts in `seed.ts` (single source of truth for Feat-E); `src/components/GrammarFocusChip.tsx` shared component (sky/violet/amber colours); shown on `/curriculum` concept rows, `/curriculum/[id]` title header, and `ConceptPicker` free-write chooser; 241 tests passing across 18 files
 
 ### Phase 6 — Remaining (ordered by priority)
 
@@ -327,6 +328,27 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - `profiles.computed_level` persisted after each submission; dashboard + account badge read it
 - AccountForm: level picker removed; read-only badge + per-CEFR mastery breakdown shown
 
+**Ped-D: Gap-fill exercise pedagogical rethink**
+- **Problem**: Current multi-blank format (typically 2 gaps) requires the user to fill ALL blanks correctly to pass, but only one blank tests the target concept. The other gaps (surrounding context words, auxiliary verbs, etc.) are essentially trivia — there are no hints for them, making the exercise feel unfair and frustrating even when the learner correctly places the connector/structure being studied.
+- **Pedagogical goal**: The gap-fill should test *acquisition of the target concept*, not ability to reconstruct the full sentence from memory.
+- **Options to research and decide between**:
+  1. **Single-target gap**: Always keep exactly 1 blank (the target connector/structure); all other blanks become visible text or are pre-filled as read-only. Cleanest; mirrors standard DELE/SIELE cloze format.
+  2. **Labelled gaps**: Multiple blanks, but non-target gaps have a visible label/placeholder (e.g. `[verb]`, `[preposition]`) so the user knows what type of word is expected — reduces guessing.
+  3. **Partial reveal on wrong answer**: On first wrong attempt, reveal the non-target gap answers and let the user retry focusing only on the target blank.
+- **UX considerations**: Touch-friendly blank navigation, clear visual distinction between target gap and context gaps (if multiple kept), inline error highlighting per blank.
+- **Likely implementation**: Introduce a `target_blank_index` field on `exercises` (or infer it from a convention in `expected_answer`) so the grader knows which blank is the primary assessment criterion; score based only on target blank; display other gaps differently.
+- **Scope**: Requires re-seeding exercise data (or a migration to mark target blank), updates to `GapFill.tsx`, grader logic, and possibly the AI generate route.
+
+**Ped-E: Grammatical structure highlighting in exercise texts**
+- **Goal**: In gap-fill prompts and other exercises where a full Spanish sentence or paragraph is displayed to the user (e.g. error_correction, transformation), visually highlight key grammatical structures — specifically **subjunctive vs. indicative verb forms** — to scaffold pattern recognition. Research in SLA (noticing hypothesis, Schmidt 1990) shows that salience of form accelerates acquisition.
+- **What to highlight**: Subjunctive verb forms (present + imperfect) in one colour; indicative forms in another (or no highlight, making subjunctive the only salient element). Optionally: connector/discourse marker being studied, for gap-fill prompts.
+- **Design constraint**: Highlighting must feel like a subtle learning aid, not a crutch — use muted colours (e.g. soft orange underline for subjunctive, no fill) rather than heavy backgrounds that draw attention away from the task.
+- **Research needed**:
+  - How to reliably detect subjunctive vs. indicative in a Spanish sentence — options: (a) Claude annotates at seed time and stores span offsets in the exercise row; (b) lightweight NLP library (e.g. `compromise` or `nlp.js` with Spanish model) runs client-side; (c) regex heuristics on known inflection endings (fragile).
+  - Option (a) is most accurate: when seeding/generating an exercise, ask Claude to return a list of `{ word, form: 'subjunctive' | 'indicative' | 'connector' }` annotations alongside the prompt text; store in `exercises.annotations jsonb`.
+- **Affected components**: `GapFill.tsx`, `TextAnswer.tsx` (for transformation/translation prompts), `ErrorCorrection.tsx`; all need to render annotated spans instead of plain text.
+- **Scope**: DB migration to add `exercises.annotations jsonb NULLABLE`; seed script update to generate annotations via Claude; new `AnnotatedText.tsx` component; exercise components consume it.
+
 #### New Features
 
 **Feat-A: Daily email reminders (P6-G)**
@@ -342,12 +364,14 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - `StudySession.tsx` — `sprintConfig?` prop; countdown timer with `useEffect`; shrinking progress bar with amber pulse at <10% remaining; count-cap via `effectiveLength`; done screen shows "Reviewed X exercises in MM:SS" for time mode; done button label "Back to Home" for sprint sessions
 - No DB changes needed
 
-**Feat-C: Concept prerequisites / unlock progression**
-- Add `prerequisite_concept_id uuid NULLABLE` to `concepts` table
-- Concepts with unmet prerequisites show padlock icon in curriculum; practice buttons disabled
-- `/curriculum/[id]`: show "Unlock after mastering [prerequisite]" with a link
-- Update seed data with prerequisite relationships for harder concepts in each unit
-- Locking is UI-only (not server-enforced); users who navigate directly can still practice
+**Feat-C: Grammar focus chips** ✓ complete (revised scope — padlock system deferred to post-Feat-E)
+- `supabase/migrations/007_grammar_focus.sql` — `ALTER TABLE concepts ADD COLUMN grammar_focus text CHECK (...)` + 21 UPDATE statements
+- `src/lib/supabase/types.ts` — `grammar_focus: string | null` on Concept Row/Insert/Update
+- `src/lib/curriculum/seed.ts` — `grammar_focus` field on `ConceptSeed` type + all 21 entries (single source of truth)
+- `src/lib/curriculum/run-seed.ts` — `grammar_focus` included in `conceptsToInsert`
+- `src/components/GrammarFocusChip.tsx` — shared chip; sky = Indicative, violet = Subjunctive, amber = Both moods; null-safe
+- `/curriculum` browse, `/curriculum/[id]`, `ConceptPicker` — all show the chip
+- Padlock/prerequisite system deferred: too few concepts (21) for locking to add value; revisit after Feat-E when catalogue reaches 40+
 
 **Feat-D: Web push notifications (Android PWA)**
 - Complements email reminders for Android PWA users (iOS does not support Web Push)
@@ -374,6 +398,55 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 - Read-only v1: list all concepts/exercises with attempt counts
 - Stretch: inline edit for concept explanation and exercise prompt text
 
+#### UX Audits & Polish
+
+**UX-D: Dashboard page UX audit**
+- **Daily goal progress missing**: `profiles.daily_goal_minutes` exists but no indicator of whether the user has hit their goal today. A subtle ring or progress bar on the streak card would close this loop and reinforce habit formation.
+- **No visual hierarchy across mode cards**: All 4 cards (Review, Learn new, Free write, Sprint) share the same `border-l-4 border-l-orange-500` style — the primary action (Review) should feel visually dominant (e.g., filled background vs. outline cards for secondaries).
+- **Free write card lacks context**: Shows the weakest concept title with no explanation of why. Add a "weakest concept" micro-label below the title ("Your weakest concept right now") to help users understand the recommendation logic.
+- **Level badge is too subtle**: `text-xs` orange pill next to the greeting is easy to miss. As Ped-C makes this meaningful, consider a slightly larger treatment or a separate "Your level" line under the greeting.
+- **Sprint card discoverability**: On desktop 2-col grid, SprintCard can end up alone in the last row (after an odd number of other cards), looking orphaned. Consider always pairing it or using a different grid strategy for desktop.
+- **No empty-state for Free write card (non-new users without a weakest concept)**: If `writeConcept` is null for a non-new user, the card silently disappears. Add a fallback "Pick a concept to write about" card instead.
+- **No skip-to-action affordance**: First-time visit with due reviews buries the CTA below the greeting block + stats card. On small phones this requires scrolling.
+
+**UX-E: Progress page UX audit**
+- **Stat cards lack color differentiation**: "Mastered", "In progress", "Accuracy" are three grey cards — no visual distinction despite representing very different data types. Consider: orange for Mastered (goal), amber for In Progress, neutral for Accuracy.
+- **Exercise type labels are developer strings**: The accuracy chart uses raw type names (`gap_fill`, `sentence_builder`, `free_write`). Replace with friendly labels: "Gap fill", "Sentence builder", "Free write", "Translation", etc.
+- **Activity heatmap has no legend**: Color intensity scale is unexplained. Add a `0 ←→ X sessions` legend below the heatmap, same pattern as GitHub's contribution graph.
+- **Module mastery chart legend**: Color-only legend; inaccessible to colorblind users. Add pattern fills or text labels directly on bars.
+- **No time-invested stat**: Users are motivated by total time spent; `study_sessions` table has timing data — surface a "Total time studied" or "Avg session length" stat.
+- **No streak history**: Only current streak appears on the dashboard. A sparkline or "longest streak" badge on the Progress page adds longitudinal motivation.
+- **Page header is bare**: Just "Progress" with no date context or greeting. A subtitle like "Your learning since [join date]" adds warmth and context.
+- **Empty state needs a CTA**: When a user has no data, the empty state should link directly to `/study`, not just say "no data yet".
+
+**UX-F: ConceptPicker (free write concept selection) UX overhaul**
+- **No collapsible modules** *(critical — user-reported)*: The full hierarchy (Module → Unit → Concepts) is fully expanded, producing a very long list. Apply the same `<details>` accordion pattern as `/curriculum` — modules collapsed by default, opened on tap. This is the single most impactful change.
+- **No CEFR level tags on concept rows**: Concepts show difficulty bars but no B1/B2/C1 label. Now that Ped-C is live and `concepts.level` exists, add a small level chip (matching curriculum style) to each row so users can self-select difficulty.
+- **No mastery filter**: Unlike curriculum, there's no filter to limit concepts to "New" / "Learning" / "Mastered". Writing about a concept you haven't studied is a valid advanced challenge, but the option to filter to *known* concepts would help intermediate users.
+- **"Surprise me" is buried**: Currently appears as a text button in the header area. It should be a more prominent secondary CTA — e.g., a ghost button in the sticky footer alongside "Start writing", or as the top card before the module list.
+- **Difficulty label in footer is jargon**: "Focused / Synthesis / Challenge" is not intuitive without a legend. Add a one-line tooltip or subtitle explaining the label (e.g., "Challenge: writing across 3+ concepts tests your ability to blend structures").
+- **No back affordance**: There is no visible "Back to dashboard" or breadcrumb if the user changes their mind. The browser back button works, but it should be explicit.
+- **Data fetching**: ConceptPicker is client-side but receives all concepts as a prop — verify this scales as concept count grows (Feat-E target: 40+). May need paginated/lazy loading eventually.
+- **Implementation**: Needs access to `concepts.level` (already in types after Ped-C); ConceptPicker receives modules/units/concepts from `write/page.tsx` server component — extend the query to include `level` and pass it down.
+
+**UX-G: Exercise session UX audit (StudySession + exercise components)**
+- **No exercise type label during session**: Users see a prompt with no header indicating what kind of exercise it is (Gap Fill, Translation, etc.). A small `text-xs uppercase` type label above the prompt (like the dashboard mode card headers) would orient users immediately.
+- **Progress bar has no "X of Y" counter**: The linear progress bar shows position but not remaining count. Add an `e.g. "3 / 10"` label — low effort, high value for managing expectations.
+- **Hint system progression is invisible**: Users don't know a second hint or "worked example" exists until after their first wrong attempt. Add a subtle "Hints available" indicator (e.g., 2 small dots below the exercise) that fills in as hints are used.
+- **TextAnswer textarea is too short**: Fixed at 4 rows for all types including `free_write` (which targets 20–200 words). TextAnswer should auto-grow (`resize-y` is disabled) — replace with a `min-h` + `overflow-auto` approach so the textarea expands as the user types.
+- **FeedbackPanel score is raw (0–3)**: The score badge shows a number that means nothing to most users. Replace with labels: `0 = Incorrect`, `1 = Partial`, `2 = Good`, `3 = Perfect` (already in `SCORE_CONFIG` in `src/lib/scoring.ts` — use the label from there).
+- **No session exit confirmation**: The X/close button abandons the session with no confirmation dialog. One accidental tap loses all progress. Add a simple modal: "Leave session? Your progress this session won't be saved."
+- **Done screen shows no concept breakdown**: Accuracy % is shown, but not which concepts were missed. A collapsed list of missed concepts (with a "Practice →" link each) on the done screen would close the loop perfectly.
+- **Multi-blank GapFill keyboard UX on mobile**: After filling one blank, the mobile keyboard doesn't auto-advance to the next blank. Implement `onKeyDown Enter → focus next blank input` for a smoother flow.
+- **Audio button tap target**: `SpeakButton` can sit very close to other interactive elements on narrow screens. Ensure a minimum `min-w-[44px] min-h-[44px]` touch target (same standard applied to SprintCard chips).
+- **Error correction pre-fill is confusing**: ErrorCorrection pre-populates the textarea with the incorrect sentence and shows a warning banner. Users sometimes read this as the correct answer. Consider showing the erroneous sentence *above* the input (read-only, styled as a blockquote) and keeping the textarea empty — clearer separation between "what's wrong" and "write the fix".
+
+**UX-H: Curriculum page CEFR level tags** *(targeted fix, not a full audit)*
+- Add a small `B1` / `B2` / `C1` chip to each concept row in `/curriculum` and `/curriculum/[id]` — the `concepts.level` column already exists (Ped-C).
+- Style: same chip style as the dashboard level badge (`px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700`) but use distinct colours per level (e.g., green for B1, orange for B2, red/purple for C1) to create a quick visual difficulty spectrum across the full concept list.
+- Also add level filtering as a secondary axis in the filter tabs (or as a separate row of chips below the existing All|New|Learning|Mastered tabs): e.g., `All levels | B1 | B2 | C1`.
+- Update `/curriculum/[id]` detail page header to prominently show the level chip alongside the concept title.
+
 #### Design
 
 **Design-A: App logo**
@@ -391,18 +464,32 @@ Items are grouped by type and roughly ordered by priority within each group. Imp
 
 2. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
 
-### Next — Polish & engagement
+3. **Ped-D: Gap-fill exercise pedagogical rethink** — Current multi-blank format is unfair: non-target gaps have no hints yet count against the score. Research and decide between: (a) single-target gap (cleanest, DELE-aligned), (b) labelled non-target gaps, or (c) partial reveal on wrong answer. Likely requires a `target_blank_index` convention + GapFill.tsx + grader updates + re-seed.
 
-3. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+4. **Ped-E: Grammatical structure highlighting** — Highlight subjunctive vs. indicative verb forms in exercise texts to scaffold pattern noticing (Schmidt 1990). Best approach: Claude annotates at seed time → `exercises.annotations jsonb`; new `AnnotatedText.tsx` component; affects GapFill, TextAnswer, ErrorCorrection. Requires research on annotation strategy before implementation.
 
-4. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
+### Next — Polish & UX quality
 
-5. **Feat-C: Concept prerequisites / unlock progression** — Add `prerequisite_concept_id uuid NULLABLE` to `concepts`; padlock icon in curriculum for locked concepts; UI-only enforcement.
+5. **UX-H: Curriculum CEFR level tags** *(targeted, low-effort, high-impact)* — Add B1/B2/C1 chip to every concept row in `/curriculum` and `/curriculum/[id]`; distinct colours per level; optional level filter row below existing tabs.
+
+6. **UX-F: ConceptPicker overhaul** — Collapse modules by default (same `<details>` pattern as curriculum); add CEFR level chip per concept row; add mastery filter; make "Surprise me" more prominent; add back affordance; no DB change needed.
+
+7. **UX-G: Exercise session UX polish** — Add exercise type label + "X of Y" counter; hint-system visibility indicator; auto-growing textarea for free_write/TextAnswer; FeedbackPanel score labels (from SCORE_CONFIG); exit confirmation dialog; missed-concept breakdown on done screen.
+
+8. **UX-D: Dashboard UX audit** — Daily goal progress indicator; primary/secondary visual hierarchy across mode cards; level badge treatment; fallback card when `writeConcept` is null; sprint card desktop layout fix.
+
+9. **UX-E: Progress page UX audit** — Coloured stat cards; friendly exercise type labels in accuracy chart; heatmap legend; accessible chart colours; "total time studied" stat; streak history; improved empty state with CTA.
+
+10. **Design-A: App logo** — Replace "ES" auth block and AppHeader text mark with a proper "EA" / "Ñ" SVG mark. Deliverables: `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`.
+
+11. **Feat-A: Daily email reminders** — Supabase Edge Function `send-daily-reminder`; cron 18:00 UTC; personalised streak-at-risk message; `email_reminders boolean` toggle in `/account`. Requires `ALTER TABLE profiles ADD COLUMN email_reminders boolean DEFAULT true`.
+
+12. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
 
 ### Later — Growth features
 
-6. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
+13. **Feat-D: Web push notifications (Android PWA)** — Push subscription stored in `profiles.push_subscription jsonb`; Edge Function via VAPID; skip on iOS.
 
-7. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+14. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
 
-8. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
+15. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
