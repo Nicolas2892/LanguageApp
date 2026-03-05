@@ -49,7 +49,7 @@ export function OnboardingTour() {
             aria-label="Dismiss tour"
             className="text-muted-foreground hover:text-foreground transition-colors ml-auto"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
         <div>

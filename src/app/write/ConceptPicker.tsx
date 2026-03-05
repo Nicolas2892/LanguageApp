@@ -38,19 +38,6 @@ interface Props {
 
 type MasteryFilter = 'all' | 'new' | 'learning' | 'mastered'
 
-function DifficultyBars({ difficulty }: { difficulty: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div
-          key={i}
-          className={`h-1.5 w-4 rounded-full ${i <= difficulty ? 'bg-orange-500' : 'bg-gray-200 dark:bg-gray-700'}`}
-        />
-      ))}
-    </div>
-  )
-}
-
 function getDifficultyLabel(count: number): string {
   if (count === 1) return 'Focused — one concept'
   if (count === 2) return 'Synthesis — two structures'
@@ -247,9 +234,8 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
                               checked={isChecked}
                               onChange={() => toggle(concept.id)}
                             />
-                            <div className="flex-1 min-w-0 space-y-1.5">
+                            <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium leading-snug">{concept.title}</p>
-                              <DifficultyBars difficulty={concept.difficulty} />
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
                               <LevelChip level={concept.level} />

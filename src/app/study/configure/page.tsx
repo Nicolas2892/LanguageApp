@@ -1,25 +1,63 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SessionConfig } from './SessionConfig'
+import { MASTERY_THRESHOLD } from '@/lib/constants'
 
 export default async function ConfigurePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const { data: modules } = await supabase
-    .from('modules')
-    .select('id, title')
-    .order('order_index')
+  const [{ data: modules }, { data: concepts }, { data: progress }] = await Promise.all([
+    supabase.from('modules').select('id, title').order('order_index'),
+    supabase.from('concepts').select('id, unit_id, units(module_id)'),
+    supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', user.id),
+  ])
+
+  type ConceptRow = { id: string; unit_id: string; units: { module_id: string } | null }
+  type ProgressRow = { concept_id: string; interval_days: number }
 
   const typedModules = (modules ?? []) as Array<{ id: string; title: string }>
+  const typedConcepts = (concepts ?? []) as ConceptRow[]
+  const typedProgress = (progress ?? []) as ProgressRow[]
+
+  // Map concept_id → module_id
+  const conceptToModule = new Map<string, string>()
+  for (const c of typedConcepts) {
+    const moduleId = c.units?.module_id
+    if (moduleId) conceptToModule.set(c.id, moduleId)
+  }
+
+  // Build mastery counts per module
+  const totalByModule = new Map<string, number>()
+  const masteredByModule = new Map<string, number>()
+
+  for (const c of typedConcepts) {
+    const moduleId = c.units?.module_id
+    if (!moduleId) continue
+    totalByModule.set(moduleId, (totalByModule.get(moduleId) ?? 0) + 1)
+  }
+
+  for (const p of typedProgress) {
+    if (p.interval_days < MASTERY_THRESHOLD) continue
+    const moduleId = conceptToModule.get(p.concept_id)
+    if (!moduleId) continue
+    masteredByModule.set(moduleId, (masteredByModule.get(moduleId) ?? 0) + 1)
+  }
+
+  const modulesWithMastery = typedModules.map((mod) => ({
+    ...mod,
+    mastered: masteredByModule.get(mod.id) ?? 0,
+    total: totalByModule.get(mod.id) ?? 0,
+  }))
 
   return (
     <main className="max-w-md mx-auto p-6 md:p-10">
       <div className="mb-8">
-        <h1 className="text-xl font-semibold">New session</h1>
+        <h1 className="text-2xl font-bold tracking-tight">New session</h1>
+        <p className="text-sm text-muted-foreground mt-1">Customise what you study</p>
       </div>
-      <SessionConfig modules={typedModules} />
+      <SessionConfig modules={modulesWithMastery} />
     </main>
   )
 }

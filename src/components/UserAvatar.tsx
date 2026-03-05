@@ -14,7 +14,7 @@ export function UserAvatar({ initials, size = 'md' }: Props) {
   return (
     <span
       aria-hidden="true"
-      className={`${SIZE_CLASSES[size]} rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-700 dark:text-orange-200 font-bold select-none shrink-0`}
+      className={`${SIZE_CLASSES[size]} rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold select-none shrink-0`}
     >
       {initials || '?'}
     </span>

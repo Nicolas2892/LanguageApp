@@ -105,7 +105,7 @@ export default async function DashboardPage() {
       {/* Greeting + level badge */}
       <div className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="text-3xl font-extrabold tracking-tight">
+          <h1 className="text-2xl font-bold tracking-tight">
             Hola, {profile?.display_name ?? 'learner'}
           </h1>
           {profile?.computed_level && (() => {
@@ -117,6 +117,7 @@ export default async function DashboardPage() {
             ) : null
           })()}
         </div>
+        <div className="h-px w-16 bg-gradient-to-r from-orange-500 to-transparent mt-1" />
         <p className="text-muted-foreground text-sm">
           {(() => {
             const streak = profile?.streak ?? 0
@@ -135,14 +136,14 @@ export default async function DashboardPage() {
         {/* Stats row */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <Flame className={`h-5 w-5 shrink-0 ${(profile?.streak ?? 0) >= 7 ? 'text-orange-500 animate-pulse' : 'text-orange-400'}`} />
+            <Flame className={`h-5 w-5 shrink-0 ${(profile?.streak ?? 0) >= 7 ? 'text-orange-500 animate-pulse' : 'text-orange-400'}`} strokeWidth={1.5} />
             <div>
               <p className="text-2xl font-extrabold text-orange-500 leading-none">{profile?.streak ?? 0}</p>
               <p className="text-xs text-muted-foreground mt-0.5">day streak</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-amber-500 shrink-0" />
+            <Trophy className="h-5 w-5 text-amber-500 shrink-0" strokeWidth={1.5} />
             <div>
               <p className="text-2xl font-extrabold leading-none">{masteredCount}</p>
               <p className="text-xs text-muted-foreground mt-0.5">of {totalConcepts} mastered</p>
@@ -194,9 +195,9 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Review</p>
             {studiedCount > 0 && dueCount === 0 ? (
-              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <CheckCircle2 className="h-5 w-5 text-green-500" strokeWidth={1.5} />
             ) : (
-              <BookOpen className="h-5 w-5 text-muted-foreground" />
+              <BookOpen className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
             )}
           </div>
           {studiedCount === 0 ? (
@@ -232,7 +233,7 @@ export default async function DashboardPage() {
           <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Learn new</p>
-              <Sparkles className="h-5 w-5 text-muted-foreground" />
+              <Sparkles className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <p className="text-xl font-bold">
               {newConceptsCount} concept{newConceptsCount !== 1 ? 's' : ''} waiting
@@ -248,7 +249,7 @@ export default async function DashboardPage() {
           <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Free write</p>
-              <PenLine className="h-5 w-5 text-muted-foreground" />
+              <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <p className="text-xl font-bold">{writeConcept.title}</p>
             <p className="text-xs text-muted-foreground -mt-1">Your weakest concept right now</p>
@@ -261,7 +262,7 @@ export default async function DashboardPage() {
           <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Free write</p>
-              <PenLine className="h-5 w-5 text-muted-foreground" />
+              <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <p className="text-xl font-bold">Practice your writing</p>
             <p className="text-muted-foreground text-sm">Pick any concept to write about freely.</p>

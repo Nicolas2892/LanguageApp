@@ -25,19 +25,6 @@ const MASTERY_BADGE: Record<MasteryState, { label: string; className: string }> 
   new:      { label: 'New',      className: 'bg-transparent text-muted-foreground border-border' },
 }
 
-function DifficultyBars({ difficulty }: { difficulty: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div
-          key={i}
-          className={`h-1.5 w-3 rounded-full ${i <= difficulty ? 'bg-orange-500' : 'bg-gray-200 dark:bg-gray-700'}`}
-        />
-      ))}
-    </div>
-  )
-}
-
 const FILTER_TABS: { value: FilterTab; label: string }[] = [
   { value: 'all',      label: 'All' },
   { value: 'new',      label: 'New' },
@@ -126,7 +113,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
     <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold tracking-tight">Curriculum</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Curriculum</h1>
         <p className="text-sm text-muted-foreground mt-0.5">B1 → B2 Spanish</p>
       </div>
 
@@ -179,7 +166,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
       {/* Unlock progress banner */}
       {unlockProgress.nextLevel && (
         <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm flex items-center gap-3">
-          <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+          <Lock className="h-4 w-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
           <span>
             <span className="font-medium">{unlockProgress.nextLevel} content</span> is queued for when you&apos;re ready —{' '}
             study <span className="font-medium">{unlockProgress.threshold - unlockProgress.attempted} more {unlockProgress.nextLevel === 'C1' ? 'B2' : 'B1'} concepts</span> to
@@ -221,11 +208,11 @@ export default async function CurriculumPage({ searchParams }: Props) {
                 <summary className="list-none [&::-webkit-details-marker]:hidden cursor-pointer p-4 space-y-2">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2 min-w-0">
-                      <ChevronRight className="h-4 w-4 shrink-0 mt-0.5 transition-transform duration-200 group-open:rotate-90 text-muted-foreground" />
+                      <ChevronRight className="h-4 w-4 shrink-0 mt-0.5 transition-transform duration-200 group-open:rotate-90 text-muted-foreground" strokeWidth={1.5} />
                       <div className="space-y-0.5">
                         <h2 className="text-base font-bold leading-snug">{mod.title}</h2>
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Trophy className="h-3 w-3 text-amber-500" />
+                          <Trophy className="h-3 w-3 text-amber-500" strokeWidth={1.5} />
                           {masteredCount}/{allModConcepts.length} mastered
                         </p>
                       </div>
@@ -292,10 +279,9 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                   aria-label={`View ${concept.title}`}
                                 />
                                 <div className="flex items-center justify-between px-3 py-2.5 gap-2">
-                                  {/* Left: title + difficulty */}
-                                  <div className={`min-w-0 flex-1 space-y-1 ${isLocked(concept) ? 'opacity-70' : ''}`}>
+                                  {/* Left: title */}
+                                  <div className={`min-w-0 flex-1 ${isLocked(concept) ? 'opacity-70' : ''}`}>
                                     <p className="font-medium text-sm leading-snug truncate">{concept.title}</p>
-                                    <DifficultyBars difficulty={concept.difficulty} />
                                   </div>
                                   {/* Right: badges + practice shortcut */}
                                   <div className="flex items-center gap-2 shrink-0">
@@ -303,7 +289,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                     <GrammarFocusChip focus={concept.grammar_focus} />
                                     {isLocked(concept) && (
                                       <Lock
-                                        className="h-3.5 w-3.5 text-muted-foreground shrink-0"
+                                        className="h-3.5 w-3.5 text-muted-foreground shrink-0" strokeWidth={1.5}
                                         aria-label="Not yet in your automatic queue"
                                       />
                                     )}

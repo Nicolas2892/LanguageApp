@@ -4,10 +4,12 @@ import { createClient } from '@/lib/supabase/server'
 import { AccuracyChart } from './AccuracyChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AnimatedBar } from '@/components/AnimatedBar'
+import { ExerciseTypeChart } from '@/components/ExerciseTypeChart'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
-import { Flame, CheckCircle, Zap, Target, BarChart2 } from 'lucide-react'
+import { Flame, CheckCircle, Zap, Target, BarChart2, ListChecks, Clock } from 'lucide-react'
 import type { ExerciseAccuracy } from './AccuracyChart'
 import type { DayActivity } from './ActivityHeatmap'
+import type { ExerciseTypeCount } from '@/components/ExerciseTypeChart'
 
 const TYPE_LABELS: Record<string, string> = {
   gap_fill: 'Gap fill',
@@ -172,6 +174,36 @@ export default async function ProgressPage() {
     return sum + Math.round(ms / 60000)
   }, 0)
 
+  // ── 6. All-time stats ──────────────────────────────────────────────────────
+  const [{ count: allTimeAttemptCount }, { data: allTimeSessions }] = await Promise.all([
+    supabase
+      .from('exercise_attempts')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id),
+    supabase
+      .from('study_sessions')
+      .select('started_at, ended_at')
+      .eq('user_id', user.id),
+  ])
+
+  const totalAllTimeAttempts = allTimeAttemptCount ?? 0
+  const totalAllTimeMinutes = (allTimeSessions ?? [] as SessionRow[]).reduce((sum, s) => {
+    if (!s.ended_at) return sum
+    const ms = new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()
+    return sum + Math.round(ms / 60000)
+  }, 0)
+
+  // Exercise type breakdown (all-time)
+  const exerciseTypeCounts = new Map<string, number>()
+  for (const row of (attemptRows ?? []) as Array<{ ai_score: number | null; exercises: { type: string } | null }>) {
+    const type = row.exercises?.type
+    if (!type) continue
+    exerciseTypeCounts.set(type, (exerciseTypeCounts.get(type) ?? 0) + 1)
+  }
+  const exerciseTypeData: ExerciseTypeCount[] = Array.from(exerciseTypeCounts.entries())
+    .map(([type, count]) => ({ type, count }))
+    .sort((a, b) => b.count - a.count)
+
   const hasAnyData = totalAttempts > 0
 
   // Page meta
@@ -192,7 +224,7 @@ export default async function ProgressPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Progress</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Progress</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Your learning journey · {monthLabel} {year}
           </p>
@@ -208,7 +240,7 @@ export default async function ProgressPage() {
 
       {!hasAnyData ? (
         <div className="text-center py-16 space-y-4">
-          <BarChart2 className="h-14 w-14 text-orange-300 mx-auto" />
+          <BarChart2 className="h-14 w-14 text-orange-300 mx-auto" strokeWidth={1.5} />
           <p className="text-xl font-bold">No data yet</p>
           <p className="text-muted-foreground text-sm">
             Complete some exercises to see your progress here.
@@ -228,7 +260,7 @@ export default async function ProgressPage() {
             {/* Streak */}
             <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
               <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center">
-                <Flame className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                <Flame className="h-4 w-4 text-orange-600 dark:text-orange-400" strokeWidth={1.5} />
               </div>
               <p className="text-2xl font-extrabold">{currentStreak}</p>
               <div>
@@ -240,7 +272,7 @@ export default async function ProgressPage() {
             {/* Mastered */}
             <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
               <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
-                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" strokeWidth={1.5} />
               </div>
               <p className="text-2xl font-extrabold text-green-600 dark:text-green-400">{totalMastered}</p>
               <div>
@@ -252,7 +284,7 @@ export default async function ProgressPage() {
             {/* Production certified */}
             <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
               <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" strokeWidth={1.5} />
               </div>
               <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{totalProductionCertified}</p>
               <div>
@@ -264,12 +296,43 @@ export default async function ProgressPage() {
             {/* Accuracy */}
             <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
               <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center">
-                <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" strokeWidth={1.5} />
               </div>
               <p className="text-2xl font-extrabold text-sky-600 dark:text-sky-400">{overallAccuracy}%</p>
               <div>
                 <p className="text-xs font-medium">Accuracy</p>
                 <p className="text-xs text-muted-foreground">across all exercises</p>
+              </div>
+            </div>
+          </div>
+
+          {/* All-time stats */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">All-time</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
+                  <ListChecks className="h-4 w-4 text-violet-600 dark:text-violet-400" strokeWidth={1.5} />
+                </div>
+                <p className="text-2xl font-extrabold">{totalAllTimeAttempts.toLocaleString()}</p>
+                <div>
+                  <p className="text-xs font-medium">Exercises done</p>
+                  <p className="text-xs text-muted-foreground">total all time</p>
+                </div>
+              </div>
+              <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-teal-600 dark:text-teal-400" strokeWidth={1.5} />
+                </div>
+                <p className="text-2xl font-extrabold">
+                  {totalAllTimeMinutes >= 60
+                    ? `${Math.floor(totalAllTimeMinutes / 60)}h ${totalAllTimeMinutes % 60}m`
+                    : `${totalAllTimeMinutes}m`}
+                </p>
+                <div>
+                  <p className="text-xs font-medium">Learning time</p>
+                  <p className="text-xs text-muted-foreground">total all time</p>
+                </div>
               </div>
             </div>
           </div>
@@ -287,23 +350,29 @@ export default async function ProgressPage() {
               )}
             </div>
 
-            <div className="space-y-5">
-              {cefrData.map(({ level, mastered, production, total }) => {
+            <div className="space-y-0">
+              {cefrData.map(({ level, mastered, production, total }, idx) => {
                 const pct = total > 0 ? Math.round((mastered / total) * 100) : 0
                 const color = CEFR_COLORS[level]
                 return (
-                  <div key={level} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="font-semibold">{level}</span>
-                      <span className="text-muted-foreground">
-                        {mastered} / {total} concepts
-                      </span>
-                    </div>
-                    <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
-                      <AnimatedBar pct={pct} className={color?.bar ?? 'bg-gray-400'} />
-                    </div>
-                    <div className="flex justify-end">
-                      <p className={`text-[11px] font-medium ${color?.text ?? ''}`}>{pct}%</p>
+                  <div key={level} className="relative">
+                    {/* Dashed connector between levels */}
+                    {idx > 0 && (
+                      <div className="absolute left-2 -top-3 h-3 border-l-2 border-dashed border-border" />
+                    )}
+                    <div className="space-y-1.5 pt-5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-semibold">{level}</span>
+                        <span className="text-muted-foreground">
+                          {mastered} / {total} concepts
+                        </span>
+                      </div>
+                      <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <AnimatedBar pct={pct} className={color?.bar ?? 'bg-gray-400'} />
+                      </div>
+                      <div className="flex justify-end">
+                        <p className={`text-[11px] font-medium ${color?.text ?? ''}`}>{pct}%</p>
+                      </div>
                     </div>
                   </div>
                 )
@@ -316,6 +385,16 @@ export default async function ProgressPage() {
               </p>
             )}
           </section>
+
+          {/* Exercises by type */}
+          {exerciseTypeData.length > 0 && (
+            <section className="space-y-3">
+              <h2 className="font-bold text-base">Exercises by type</h2>
+              <div className="bg-card rounded-xl border p-5 shadow-sm">
+                <ExerciseTypeChart data={exerciseTypeData} />
+              </div>
+            </section>
+          )}
 
           {/* Where you're strongest */}
           {exerciseAccuracy.length > 0 && (

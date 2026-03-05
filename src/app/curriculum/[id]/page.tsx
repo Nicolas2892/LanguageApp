@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { SpeakButton } from '@/components/SpeakButton'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
-import { ChevronLeft, BookOpen, PenLine, MessageSquare } from 'lucide-react'
+import { ChevronLeft, BookOpen, PenLine, MessageSquare, CheckCircle2 } from 'lucide-react'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { LevelChip } from '@/components/LevelChip'
 import type { Concept } from '@/lib/supabase/types'
@@ -22,19 +22,6 @@ const MASTERY_BADGE: Record<MasteryState, { label: string; className: string }> 
   mastered: { label: 'Mastered', className: 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border-green-100 dark:border-green-800' },
   learning: { label: 'Learning', className: 'bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 border-blue-100 dark:border-blue-800' },
   new:      { label: 'New',      className: 'bg-transparent text-muted-foreground border-border' },
-}
-
-function DifficultyBars({ difficulty }: { difficulty: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <div
-          key={i}
-          className={`h-1.5 w-3 rounded-full ${i <= difficulty ? 'bg-orange-500' : 'bg-gray-200 dark:bg-gray-700'}`}
-        />
-      ))}
-    </div>
-  )
 }
 
 const EXERCISE_TYPES = [
@@ -71,7 +58,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
   // Fetch unit + module in parallel
   const [unitRes, exercisesRes, progressRes] = await Promise.all([
     supabase.from('units').select('id, title, module_id').eq('id', concept.unit_id).single(),
-    supabase.from('exercises').select('type').eq('concept_id', id),
+    supabase.from('exercises').select('id, type').eq('concept_id', id),
     supabase
       .from('user_progress')
       .select('interval_days, due_date, repetitions')
@@ -82,11 +69,24 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
 
   type UnitRow     = { id: string; title: string; module_id: string }
   type ProgressRow = { interval_days: number; due_date: string; repetitions: number }
-  type ExerciseRow = { type: string }
+  type ExerciseRow = { id: string; type: string }
 
   const unit     = unitRes.data     as UnitRow     | null
   const progress = progressRes.data as ProgressRow | null
-  const exerciseTypes = new Set(((exercisesRes.data ?? []) as ExerciseRow[]).map((e) => e.type))
+  const typedExercises = (exercisesRes.data ?? []) as ExerciseRow[]
+  const exerciseIds = typedExercises.map((e) => e.id)
+  const exerciseTypes = new Set(typedExercises.map((e) => e.type))
+
+  // Count exercise attempts for this concept
+  let attemptCount = 0
+  if (exerciseIds.length > 0) {
+    const { count } = await supabase
+      .from('exercise_attempts')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .in('exercise_id', exerciseIds)
+    attemptCount = count ?? 0
+  }
 
   // Fetch module name
   let moduleName: string | null = null
@@ -138,7 +138,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         href={backHref}
         className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
-        <ChevronLeft className="h-4 w-4" />
+        <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
         Curriculum
       </Link>
 
@@ -159,7 +159,12 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
             </span>
           </div>
         </div>
-        <DifficultyBars difficulty={concept.difficulty} />
+        {attemptCount > 0 && (
+          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+            <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" strokeWidth={1.5} />
+            {attemptCount} exercise{attemptCount !== 1 ? 's' : ''} completed
+          </p>
+        )}
       </div>
 
       {/* Explanation */}
@@ -219,7 +224,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
 
         <Button asChild className="w-full rounded-full active:scale-95 transition-transform">
           <Link href={`/study?concept=${id}`}>
-            <BookOpen className="h-4 w-4 mr-2" />
+            <BookOpen className="h-4 w-4 mr-2" strokeWidth={1.5} />
             Practice all
           </Link>
         </Button>
@@ -237,13 +242,13 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         <div className="grid grid-cols-2 gap-2">
           <Button asChild variant="outline">
             <Link href={`/write?suggested=${id}`}>
-              <PenLine className="h-4 w-4 mr-2" />
+              <PenLine className="h-4 w-4 mr-2" strokeWidth={1.5} />
               Free write
             </Link>
           </Button>
           <Button asChild variant="outline">
             <Link href={`/tutor?concept=${id}`}>
-              <MessageSquare className="h-4 w-4 mr-2" />
+              <MessageSquare className="h-4 w-4 mr-2" strokeWidth={1.5} />
               Ask tutor
             </Link>
           </Button>

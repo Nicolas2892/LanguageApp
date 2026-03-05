@@ -13,7 +13,15 @@ const EXERCISE_TYPES = [
   { value: 'free_write',        label: 'Free write',         desc: 'Write freely using a target structure' },
 ]
 
-interface Module { id: string; title: string }
+const SESSION_SIZES = [5, 10, 15, 20, 25] as const
+const DEFAULT_SIZE = 10
+
+interface Module {
+  id: string
+  title: string
+  mastered: number
+  total: number
+}
 
 interface Props {
   modules: Module[]
@@ -23,6 +31,7 @@ export function SessionConfig({ modules }: Props) {
   const router = useRouter()
   const [selectedModule, setSelectedModule] = useState<string>('all')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
+  const [sessionSize, setSessionSize] = useState(DEFAULT_SIZE)
 
   function toggleType(value: string) {
     setSelectedTypes((prev) =>
@@ -34,6 +43,7 @@ export function SessionConfig({ modules }: Props) {
     const params = new URLSearchParams()
     if (selectedModule !== 'all') params.set('module', selectedModule)
     if (selectedTypes.length > 0) params.set('types', selectedTypes.join(','))
+    if (sessionSize !== DEFAULT_SIZE) params.set('size', String(sessionSize))
     router.push(`/study?${params.toString()}`)
   }
 
@@ -41,11 +51,11 @@ export function SessionConfig({ modules }: Props) {
     <div className="space-y-8">
       {/* Module picker */}
       <section className="space-y-3">
-        <h2 className="font-semibold">Module</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Module</h2>
         <div className="grid grid-cols-1 gap-2">
           <button
             onClick={() => setSelectedModule('all')}
-            className={`text-left border rounded-lg px-4 py-3 text-sm transition-colors ${
+            className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
               selectedModule === 'all'
                 ? 'border-primary bg-primary/5 font-medium'
                 : 'hover:bg-muted'
@@ -58,13 +68,40 @@ export function SessionConfig({ modules }: Props) {
             <button
               key={mod.id}
               onClick={() => setSelectedModule(mod.id)}
-              className={`text-left border rounded-lg px-4 py-3 text-sm transition-colors ${
+              className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
                 selectedModule === mod.id
                   ? 'border-primary bg-primary/5 font-medium'
                   : 'hover:bg-muted'
               }`}
             >
-              {mod.title}
+              <div className="flex items-center justify-between gap-2">
+                <span className={selectedModule === mod.id ? 'font-medium' : ''}>{mod.title}</span>
+                {mod.total > 0 && (
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    {mod.mastered}/{mod.total} mastered
+                  </span>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Session size picker */}
+      <section className="space-y-3">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">How many exercises?</h2>
+        <div className="flex gap-2 flex-wrap">
+          {SESSION_SIZES.map((size) => (
+            <button
+              key={size}
+              onClick={() => setSessionSize(size)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
+                sessionSize === size
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'border-border text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              {size}
             </button>
           ))}
         </div>
@@ -73,7 +110,7 @@ export function SessionConfig({ modules }: Props) {
       {/* Exercise type picker */}
       <section className="space-y-3">
         <div className="flex items-baseline justify-between">
-          <h2 className="font-semibold">Exercise types</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Exercise types</h2>
           <span className="text-xs text-muted-foreground">
             {selectedTypes.length === 0 ? 'All types' : `${selectedTypes.length} selected`}
           </span>
@@ -85,11 +122,11 @@ export function SessionConfig({ modules }: Props) {
               <button
                 key={type.value}
                 onClick={() => toggleType(type.value)}
-                className={`text-left border rounded-lg px-4 py-3 transition-colors ${
+                className={`text-left border rounded-xl px-4 py-3 transition-colors ${
                   active ? 'border-primary bg-primary/5' : 'hover:bg-muted'
                 }`}
               >
-                <span className={`text-sm font-medium ${active ? '' : ''}`}>{type.label}</span>
+                <span className="text-sm font-medium">{type.label}</span>
                 <p className="text-xs text-muted-foreground mt-0.5">{type.desc}</p>
               </button>
             )
@@ -105,7 +142,7 @@ export function SessionConfig({ modules }: Props) {
         )}
       </section>
 
-      <Button onClick={handleStart} className="w-full" size="lg">
+      <Button onClick={handleStart} className="w-full rounded-full" size="lg">
         Start session →
       </Button>
     </div>

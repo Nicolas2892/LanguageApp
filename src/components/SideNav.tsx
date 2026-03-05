@@ -2,18 +2,18 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LayoutDashboard, BookOpen, MessageSquare,
+  LayoutDashboard, BookOpen, Bot,
   BarChart2, LayoutList,
 } from 'lucide-react'
 import { UserAvatar } from '@/components/UserAvatar'
 import { LogoMark } from '@/components/LogoMark'
 
 const NAV_ITEMS = [
-  { href: '/dashboard',  label: 'Home',       Icon: LayoutDashboard },
-  { href: '/study',      label: 'Study',      Icon: BookOpen        },
-  { href: '/tutor',      label: 'Tutor',      Icon: MessageSquare   },
-  { href: '/progress',   label: 'Progress',   Icon: BarChart2       },
-  { href: '/curriculum', label: 'Curriculum', Icon: LayoutList      },
+  { href: '/dashboard',       label: 'Home',       Icon: LayoutDashboard },
+  { href: '/study/configure', label: 'Study',      Icon: BookOpen        },
+  { href: '/curriculum',      label: 'Curriculum', Icon: LayoutList      },
+  { href: '/progress',        label: 'Progress',   Icon: BarChart2       },
+  { href: '/tutor',           label: 'Tutor',      Icon: Bot             },
 ]
 
 const HIDDEN_ROUTES = ['/auth', '/onboarding']
@@ -44,7 +44,8 @@ export function SideNav({ userInitials }: Props) {
         {NAV_ITEMS.map(({ href, label, Icon }) => {
           const active =
             pathname === href ||
-            (href !== '/dashboard' && pathname.startsWith(href))
+            (href === '/study/configure' && pathname.startsWith('/study')) ||
+            (href !== '/dashboard' && href !== '/study/configure' && pathname.startsWith(href))
           return (
             <Link
               key={href}

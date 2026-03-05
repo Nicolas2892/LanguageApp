@@ -29,17 +29,17 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }
           <p className="text-2xl font-black">
             {config.label}
             {result.score === 3 && (
-              <Sparkles className="inline h-5 w-5 text-amber-400 ml-2 animate-in zoom-in-50 duration-300" />
+              <Sparkles className="inline h-5 w-5 text-amber-400 ml-2 animate-in zoom-in-50 duration-300" strokeWidth={1.5} />
             )}
           </p>
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
             {isCorrect ? (
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <CheckCircle2 className="h-4 w-4 text-green-600" strokeWidth={1.5} />
             ) : (
-              <XCircle className="h-4 w-4 text-red-600" />
+              <XCircle className="h-4 w-4 text-red-600" strokeWidth={1.5} />
             )}
             <span className="flex items-center gap-1">
-              <CalendarDays className="h-3.5 w-3.5" />
+              <CalendarDays className="h-3.5 w-3.5" strokeWidth={1.5} />
               Back in {result.next_review_in_days} {result.next_review_in_days === 1 ? 'day' : 'days'}
             </span>
           </div>

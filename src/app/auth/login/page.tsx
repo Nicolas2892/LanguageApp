@@ -52,69 +52,93 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm shadow-lg">
-        <CardHeader className="space-y-3 items-center text-center">
-          <LogoMark size={48} />
-          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-          <CardDescription>Continue your journey with Español Avanzado</CardDescription>
-        </CardHeader>
+    <div className="min-h-screen flex">
+      {/* Left panel — desktop only */}
+      <div className="hidden md:flex md:w-1/2 bg-foreground text-background flex-col items-center justify-center p-12 relative overflow-hidden">
+        {/* Faint Ñ letterform background */}
+        <span
+          aria-hidden="true"
+          className="absolute inset-0 flex items-center justify-center text-[32rem] font-extrabold leading-none select-none pointer-events-none"
+          style={{ color: 'rgba(255,255,255,0.04)' }}
+        >
+          Ñ
+        </span>
+        <div className="relative z-10 space-y-4 text-center">
+          <LogoMark size={56} />
+          <h1 className="text-3xl font-bold">Español Avanzado</h1>
+          <p className="text-base opacity-70 max-w-xs leading-relaxed">
+            Advanced Spanish. Beautifully structured.
+          </p>
+        </div>
+      </div>
 
-        {/* Google OAuth */}
-        <CardContent className="pb-0">
-          <GoogleButton />
-          <div className="relative my-5">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+      {/* Right panel — form */}
+      <div className="flex-1 flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-sm shadow-lg">
+          <CardHeader className="space-y-3 items-center text-center">
+            <div className="md:hidden">
+              <LogoMark size={48} />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">or</span>
-            </div>
-          </div>
-        </CardContent>
+            <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
+            <CardDescription>Continue your journey with Español Avanzado</CardDescription>
+          </CardHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4 pt-0">
-            {serverError && (
-              <p className="text-sm text-destructive">{serverError}</p>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                {...register('email')}
-              />
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                {...register('password')}
-              />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
+          {/* Google OAuth */}
+          <CardContent className="pb-0">
+            <GoogleButton />
+            <div className="relative my-5">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">or</span>
+              </div>
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3">
-            <Button type="submit" className="w-full rounded-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Signing in…' : 'Sign in'}
-            </Button>
-            <p className="text-sm text-muted-foreground text-center">
-              No account?{' '}
-              <Link href="/auth/signup" className="underline text-orange-600 hover:text-orange-700">
-                Sign up
-              </Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <CardContent className="space-y-4 pt-0">
+              {serverError && (
+                <p className="text-sm text-destructive">{serverError}</p>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...register('password')}
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password.message}</p>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-3">
+              <Button type="submit" className="w-full rounded-full" disabled={isSubmitting}>
+                {isSubmitting ? 'Signing in…' : 'Sign in'}
+              </Button>
+              <p className="text-sm text-muted-foreground text-center">
+                No account?{' '}
+                <Link href="/auth/signup" className="underline text-orange-600 hover:text-orange-700">
+                  Sign up
+                </Link>
+              </p>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </div>
   )
 }

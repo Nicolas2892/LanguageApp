@@ -21,6 +21,7 @@ export default async function StudyPage({
     practice?: string     // 'true' = drill mode (all exercises, skip SRS)
     limitType?: string    // 'time' | 'count' (sprint mode)
     limit?: string        // minutes or exercise count (sprint mode)
+    size?: string         // session size override (default: SESSION_SIZE)
   }>
 }) {
   const supabase = await createClient()
@@ -28,6 +29,7 @@ export default async function StudyPage({
   if (!user) redirect('/auth/login')
 
   const params = await searchParams
+  const sessionSize = params.size ? Math.min(Math.max(parseInt(params.size, 10) || SESSION_SIZE, 1), 50) : SESSION_SIZE
   const filterTypes = params.types ? params.types.split(',').filter(Boolean) : []
   const GENERATABLE_TYPES = new Set(['gap_fill', 'translation', 'transformation', 'error_correction'])
   const isPracticeMode = params.practice === 'true' && !!params.concept && filterTypes.length > 0
@@ -130,7 +132,7 @@ export default async function StudyPage({
       .select('concept_id')
       .eq('user_id', user.id)
       .lte('due_date', today)
-      .limit(SESSION_SIZE)
+      .limit(sessionSize)
 
     conceptIds = (dueProgress ?? []).map((p) => (p as { concept_id: string }).concept_id)
 
@@ -155,12 +157,21 @@ export default async function StudyPage({
 
   if (conceptIds.length === 0) {
     return (
-      <main className="max-w-xl mx-auto p-8 text-center space-y-4">
-        <h1 className="text-2xl font-bold">All caught up!</h1>
-        <p className="text-muted-foreground">No concepts are due for review today.</p>
-        <div className="flex justify-center gap-4 text-sm">
-          <Link href="/study/configure" className="underline">Practice anyway →</Link>
+      <main className="max-w-xl mx-auto p-8 text-center space-y-5">
+        <svg className="mx-auto h-14 w-14 text-muted-foreground/40" fill="none" viewBox="0 0 48 48" stroke="currentColor" strokeWidth="1.5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h30M9 18h30M9 24h18m9 0l4.5 4.5m0 0L36 24m4.5 4.5L36 33m4.5-4.5H30" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 8a2 2 0 012-2h32a2 2 0 012 2v32a2 2 0 01-2 2H8a2 2 0 01-2-2V8z" />
+        </svg>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">All caught up!</h1>
+          <p className="text-muted-foreground mt-1.5 text-sm">No concepts are due for review today. Great work!</p>
         </div>
+        <Link
+          href="/study/configure"
+          className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
+        >
+          Practice anyway →
+        </Link>
       </main>
     )
   }
@@ -180,12 +191,23 @@ export default async function StudyPage({
   const { data: exercises } = await exerciseQuery
   if (!exercises || exercises.length === 0) {
     return (
-      <main className="max-w-xl mx-auto p-8 text-center space-y-4">
-        <h1 className="text-2xl font-bold">No exercises found</h1>
-        <p className="text-muted-foreground">
-          No {filterTypes.length > 0 ? filterTypes.join(', ').replace(/_/g, ' ') : ''} exercises exist for this selection.
-        </p>
-        <Link href="/study/configure" className="underline text-sm">Change filters →</Link>
+      <main className="max-w-xl mx-auto p-8 text-center space-y-5">
+        <svg className="mx-auto h-14 w-14 text-muted-foreground/40" fill="none" viewBox="0 0 48 48" stroke="currentColor" strokeWidth="1.5">
+          <circle cx="24" cy="24" r="18" />
+          <path strokeLinecap="round" d="M24 16v8m0 8h.01" />
+        </svg>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">No exercises found</h1>
+          <p className="text-muted-foreground mt-1.5 text-sm">
+            No {filterTypes.length > 0 ? filterTypes.join(', ').replace(/_/g, ' ') : ''} exercises exist for this selection.
+          </p>
+        </div>
+        <Link
+          href="/study/configure"
+          className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
+        >
+          Change filters →
+        </Link>
       </main>
     )
   }
@@ -215,16 +237,19 @@ export default async function StudyPage({
     }
   }
 
-  if (items.length === 0) redirect('/dashboard')
+  // Cap items to sessionSize (only in non-sprint, non-drill modes)
+  const cappedItems = (!isSprint && !isPracticeMode) ? items.slice(0, sessionSize) : items
+
+  if (cappedItems.length === 0) redirect('/dashboard')
 
   return (
     <main className="max-w-xl mx-auto p-6 md:p-10 pb-24 lg:pb-10">
       <div className="mb-8">
-        <h1 className="text-xl font-semibold">Study session</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Study session</h1>
       </div>
       <ErrorBoundary>
         <StudySession
-          items={items}
+          items={cappedItems}
           practiceMode={isPracticeMode}
           generateConfig={
             isPracticeMode && params.concept && filterTypes[0] && GENERATABLE_TYPES.has(filterTypes[0])
@@ -237,6 +262,7 @@ export default async function StudyPage({
           }
           returnHref={isPracticeMode && params.concept ? `/curriculum/${params.concept}` : undefined}
           sprintConfig={isSprint ? { limitType: sprintLimitType, limit: sprintLimit } : undefined}
+          freeWriteConceptId={params.concept && !isSprint ? params.concept : undefined}
         />
       </ErrorBoundary>
     </main>

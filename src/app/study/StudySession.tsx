@@ -44,6 +44,7 @@ interface Props {
   generateConfig?: GenerateConfig
   returnHref?: string
   sprintConfig?: SprintConfig
+  freeWriteConceptId?: string
 }
 
 type SessionState =
@@ -66,7 +67,7 @@ function formatTime(totalSeconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-export function StudySession({ items: initialItems, practiceMode, generateConfig, returnHref, sprintConfig }: Props) {
+export function StudySession({ items: initialItems, practiceMode, generateConfig, returnHref, sprintConfig, freeWriteConceptId }: Props) {
   const router = useRouter()
   const startedAt = useRef(new Date().toISOString())
   const [dynamicItems, setDynamicItems] = useState<StudyItem[]>(initialItems)
@@ -286,19 +287,19 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     const backLabel = returnHref ? 'Back to concept' : sprintConfig ? 'Back to Home' : 'Done'
     return (
       <div className="space-y-6 text-center py-8">
-        <PartyPopper className="h-14 w-14 text-orange-500 mx-auto" />
+        <PartyPopper className="h-14 w-14 text-orange-500 mx-auto" strokeWidth={1.5} />
         <div>
           <p className="text-5xl font-extrabold">{pct}%</p>
           <p className="text-muted-foreground mt-1 text-sm">Session complete</p>
         </div>
         <div className="flex justify-center gap-6">
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" strokeWidth={1.5} />
             <span className="text-sm font-medium text-green-600 dark:text-green-400">{state.correct} correct</span>
           </div>
           {missed > 0 && (
             <div className="flex items-center gap-1.5">
-              <XCircle className="h-4 w-4 text-orange-500" />
+              <XCircle className="h-4 w-4 text-orange-500" strokeWidth={1.5} />
               <span className="text-sm font-medium text-orange-500">{missed} to review</span>
             </div>
           )}
@@ -338,13 +339,22 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         <PushPermissionPrompt />
 
         <div className="flex flex-col items-center gap-3">
+          {freeWriteConceptId && (
+            <button
+              onClick={() => router.push(`/write?suggested=${freeWriteConceptId}`)}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-border text-muted-foreground px-6 py-2.5 text-sm font-medium hover:bg-muted/50 active:scale-95 transition-transform"
+            >
+              <PenLine className="h-4 w-4" strokeWidth={1.5} />
+              Free write about this topic
+            </button>
+          )}
           {practiceMode && generateConfig && (
             <button
               onClick={handleGenerateMore}
               disabled={generatingMore}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary text-primary px-6 py-2.5 text-sm font-semibold hover:bg-primary/5 active:scale-95 transition-transform disabled:opacity-60"
             >
-              <Sparkles className="h-4 w-4" />
+              <Sparkles className="h-4 w-4" strokeWidth={1.5} />
               {generatingMore ? 'Generating…' : 'Generate 3 more'}
             </button>
           )}
@@ -407,7 +417,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                 aria-label="Exit session"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" strokeWidth={1.5} />
               </button>
             </div>
           </div>
