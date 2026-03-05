@@ -7,6 +7,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { SideNav } from "@/components/SideNav";
 import { PageWrapper } from "@/components/PageWrapper";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import { createClient } from "@/lib/supabase/server";
 import { getInitials } from "@/lib/utils";
 
@@ -62,43 +63,69 @@ export const viewport = {
   viewportFit: 'cover',
 };
 
+// Injected before paint for 'system' theme to prevent FOUC
+const SYSTEM_THEME_SCRIPT = `
+(function(){
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  if (mq.matches) document.documentElement.classList.add('dark');
+  mq.addEventListener('change', function(e){
+    document.documentElement.classList[e.matches?'add':'remove']('dark');
+  });
+})();
+`
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch initials for the nav avatar — lightweight PK lookup, gracefully skipped
+  // Fetch initials + theme for the nav avatar — lightweight PK lookup, gracefully skipped
   // when unauthenticated (auth pages). Middleware already handles redirects.
   let userInitials = ''
+  let themePreference: 'light' | 'dark' | 'system' = 'system'
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name')
+        .select('display_name, theme_preference')
         .eq('id', user.id)
         .single()
-      const displayName = (profile as { display_name: string | null } | null)?.display_name ?? null
-      userInitials = getInitials(displayName, user.email!)
+      const p = profile as { display_name: string | null; theme_preference: string | null } | null
+      userInitials = getInitials(p?.display_name ?? null, user.email!)
+      if (p?.theme_preference === 'light' || p?.theme_preference === 'dark' || p?.theme_preference === 'system') {
+        themePreference = p.theme_preference
+      }
     }
   } catch {
-    // unauthenticated or unexpected error — nav falls back to "?" avatar
+    // unauthenticated or unexpected error — nav falls back to "?" avatar, system theme
   }
 
+  // For dark/light: SSR applies class immediately (no FOUC).
+  // For system: inline script handles it client-side before paint.
+  const htmlClass = themePreference === 'dark' ? 'dark' : ''
+
   return (
-    <html lang="en">
+    <html lang="en" className={htmlClass}>
+      <head>
+        {themePreference === 'system' && (
+          <script dangerouslySetInnerHTML={{ __html: SYSTEM_THEME_SCRIPT }} />
+        )}
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SideNav userInitials={userInitials} />
-        <div className="lg:ml-[220px]">
-          <AppHeader userInitials={userInitials} />
-          <PageWrapper>{children}</PageWrapper>
-        </div>
-        <BottomNav />
-        <ServiceWorkerRegistration />
-        <IOSInstallPrompt />
+        <ThemeProvider initialTheme={themePreference}>
+          <SideNav userInitials={userInitials} />
+          <div className="lg:ml-[220px]">
+            <AppHeader userInitials={userInitials} />
+            <PageWrapper>{children}</PageWrapper>
+          </div>
+          <BottomNav />
+          <ServiceWorkerRegistration />
+          <IOSInstallPrompt />
+        </ThemeProvider>
       </body>
     </html>
   );

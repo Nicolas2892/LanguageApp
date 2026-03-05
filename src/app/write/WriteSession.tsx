@@ -79,7 +79,7 @@ export function WriteSession({ conceptIds, conceptInfos }: Props) {
   return (
     <div className="space-y-6">
       {error && (
-        <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg p-3">{error}</p>
       )}
 
       {state.phase === 'feedback' ? (

@@ -178,6 +178,35 @@ describe('POST /api/account/update', () => {
     expect(body.error).toBe('Failed to update account')
   })
 
+  // --- Validation: theme_preference ---
+
+  it('accepts theme_preference "light"', async () => {
+    setupSupabaseMock()
+    const res = await POST(makeRequest({ theme_preference: 'light' }))
+    expect(res.status).toBe(200)
+    expect(mockUpdate).toHaveBeenCalledWith({ theme_preference: 'light' })
+  })
+
+  it('accepts theme_preference "dark"', async () => {
+    setupSupabaseMock()
+    const res = await POST(makeRequest({ theme_preference: 'dark' }))
+    expect(res.status).toBe(200)
+    expect(mockUpdate).toHaveBeenCalledWith({ theme_preference: 'dark' })
+  })
+
+  it('accepts theme_preference "system"', async () => {
+    setupSupabaseMock()
+    const res = await POST(makeRequest({ theme_preference: 'system' }))
+    expect(res.status).toBe(200)
+    expect(mockUpdate).toHaveBeenCalledWith({ theme_preference: 'system' })
+  })
+
+  it('rejects invalid theme_preference value', async () => {
+    setupSupabaseMock()
+    const res = await POST(makeRequest({ theme_preference: 'auto' }))
+    expect(res.status).toBe(400)
+  })
+
   // --- Bad JSON ---
 
   it('returns 500 for completely malformed request body', async () => {

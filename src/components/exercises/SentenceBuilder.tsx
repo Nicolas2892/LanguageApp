@@ -82,7 +82,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
             key={i}
             type="button"
             onClick={() => !disabled && removeWord(i)}
-            className="px-3 py-1 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 disabled:opacity-50 active:scale-95 transition-transform"
+            className="px-3 py-1 bg-orange-500 dark:bg-orange-600 text-white rounded-full text-sm font-medium hover:bg-orange-600 dark:hover:bg-orange-700 disabled:opacity-50 active:scale-95 transition-transform"
             disabled={disabled}
           >
             {word}
@@ -97,7 +97,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
             key={i}
             type="button"
             onClick={() => !disabled && addWord(word, i)}
-            className="px-3 py-1 bg-gray-100 rounded-full text-sm hover:bg-gray-200 disabled:opacity-50 active:scale-95 transition-transform"
+            className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 active:scale-95 transition-transform"
             disabled={disabled}
           >
             {word}

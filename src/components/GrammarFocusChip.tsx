@@ -1,9 +1,9 @@
 export type GrammarFocus = 'indicative' | 'subjunctive' | 'both'
 
 const GRAMMAR_FOCUS_CONFIG: Record<GrammarFocus, { label: string; className: string }> = {
-  indicative:  { label: 'Indicative',  className: 'bg-sky-100 text-sky-700 border-sky-200' },
-  subjunctive: { label: 'Subjunctive', className: 'bg-violet-100 text-violet-700 border-violet-200' },
-  both:        { label: 'Both moods',  className: 'bg-amber-100 text-amber-700 border-amber-200' },
+  indicative:  { label: 'Indicative',  className: 'bg-sky-100 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-800' },
+  subjunctive: { label: 'Subjunctive', className: 'bg-violet-100 dark:bg-violet-950/40 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-800' },
+  both:        { label: 'Both moods',  className: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800' },
 }
 
 interface Props {

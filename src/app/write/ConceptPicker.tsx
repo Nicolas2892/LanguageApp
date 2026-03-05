@@ -44,7 +44,7 @@ function DifficultyBars({ difficulty }: { difficulty: number }) {
       {[1, 2, 3, 4, 5].map((i) => (
         <div
           key={i}
-          className={`h-1.5 w-4 rounded-full ${i <= difficulty ? 'bg-orange-500' : 'bg-gray-200'}`}
+          className={`h-1.5 w-4 rounded-full ${i <= difficulty ? 'bg-orange-500' : 'bg-gray-200 dark:bg-gray-700'}`}
         />
       ))}
     </div>
@@ -58,8 +58,8 @@ function getDifficultyLabel(count: number): string {
 }
 
 const MASTERY_BADGE: Record<'mastered' | 'learning', string> = {
-  mastered: 'bg-green-50 text-green-600 border-green-100',
-  learning: 'bg-blue-50 text-blue-500 border-blue-100',
+  mastered: 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border-green-100 dark:border-green-800',
+  learning: 'bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 border-blue-100 dark:border-blue-800',
 }
 
 export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) {
@@ -237,7 +237,7 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
                             key={concept.id}
                             className={`flex items-start gap-3 border rounded-xl p-3.5 cursor-pointer transition-colors ${
                               isChecked
-                                ? 'border-orange-400 bg-orange-50'
+                                ? 'border-orange-400 bg-orange-50 dark:bg-orange-950/20'
                                 : 'border-border bg-background hover:bg-muted/40'
                             }`}
                           >

@@ -39,12 +39,12 @@ export function HintPanel({ hint1, hint2, claudeHint, wrongAttempts, loadingHint
       </div>
 
       {hint1Revealed && hint1 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-900">
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-md p-3 text-amber-900 dark:text-amber-300">
           <span className="font-semibold">Hint: </span>{hint1}
         </div>
       )}
       {hint2Revealed && hint2 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-900">
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-md p-3 text-amber-900 dark:text-amber-300">
           <span className="font-semibold">Extra hint: </span>{hint2}
         </div>
       )}
@@ -60,7 +60,7 @@ export function HintPanel({ hint1, hint2, claudeHint, wrongAttempts, loadingHint
         <p className="text-xs text-muted-foreground animate-pulse">Generating example…</p>
       )}
       {claudeHint && (
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-blue-900">
+        <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-md p-3 text-blue-900 dark:text-blue-300">
           <span className="font-semibold">Worked example: </span>{claudeHint}
         </div>
       )}

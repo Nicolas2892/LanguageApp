@@ -103,7 +103,7 @@ export function NotificationSettings() {
 
       {notifState === 'granted' && (
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-green-700">
+          <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
             <Bell className="h-4 w-4" />
             <span>Notifications active — you&apos;ll be reminded when your streak is at risk.</span>
           </div>

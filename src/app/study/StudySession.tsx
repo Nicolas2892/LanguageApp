@@ -280,8 +280,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         </div>
         <div className="flex justify-center gap-6">
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-600">{state.correct} correct</span>
+            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <span className="text-sm font-medium text-green-600 dark:text-green-400">{state.correct} correct</span>
           </div>
           {missed > 0 && (
             <div className="flex items-center gap-1.5">
@@ -342,7 +342,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             {backLabel}
           </button>
           {generateError && (
-            <p className="text-sm text-red-600">{generateError}</p>
+            <p className="text-sm text-red-600 dark:text-red-400">{generateError}</p>
           )}
         </div>
       </div>
@@ -380,7 +380,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             {sprintConfig?.limitType === 'time' ? (
-              <span className={`font-mono font-semibold flex items-center gap-1 ${isTimeLow ? 'text-amber-500' : ''}`}>
+              <span className={`font-mono font-semibold flex items-center gap-1 ${isTimeLow ? 'text-amber-500 dark:text-amber-400' : ''}`}>
                 <Timer className="h-3.5 w-3.5" />
                 {formatTime(secondsLeft)}
               </span>

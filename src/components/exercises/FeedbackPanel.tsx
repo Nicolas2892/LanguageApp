@@ -19,7 +19,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }
   const isCorrect = result.is_correct
 
   return (
-    <div className={`rounded-xl border overflow-hidden ${isCorrect ? 'border-green-200' : 'border-red-200'}`}>
+    <div className={`rounded-xl border overflow-hidden ${isCorrect ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800'}`}>
       {/* Accent strip */}
       <div className={`h-1 ${isCorrect ? 'bg-green-500' : 'bg-red-500'}`} />
 
@@ -52,12 +52,12 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }
         <div className="space-y-2 text-sm">
           <div className="flex gap-2">
             <span className="text-muted-foreground w-28 shrink-0">Your answer:</span>
-            <span className={isCorrect ? 'text-green-700' : 'text-red-700'}>{userAnswer}</span>
+            <span className={isCorrect ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}>{userAnswer}</span>
           </div>
           {!isCorrect && result.corrected_version && (
             <div className="flex gap-2 items-center">
               <span className="text-muted-foreground w-28 shrink-0">Correct:</span>
-              <span className="text-green-700 font-medium flex-1">{result.corrected_version}</span>
+              <span className="text-green-700 dark:text-green-400 font-medium flex-1">{result.corrected_version}</span>
               <SpeakButton text={result.corrected_version} />
             </div>
           )}
@@ -65,7 +65,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }
 
         {/* Explanation */}
         {result.explanation && (
-          <p className="text-sm text-muted-foreground border-l-2 border-orange-300 pl-3 italic">
+          <p className="text-sm text-muted-foreground border-l-2 border-orange-300 dark:border-orange-700 pl-3 italic">
             {result.explanation}
           </p>
         )}

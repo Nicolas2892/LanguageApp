@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AccountForm } from '../AccountForm'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import type { Profile } from '@/lib/supabase/types'
 
 const baseProfile: Profile = {
@@ -15,6 +16,13 @@ const baseProfile: Profile = {
   created_at: '2026-01-01T00:00:00Z',
   onboarding_completed: true,
   push_subscription: null,
+  theme_preference: 'system',
+}
+
+function renderWithTheme(ui: React.ReactElement) {
+  return render(
+    <ThemeProvider initialTheme="system">{ui}</ThemeProvider>
+  )
 }
 
 const baseMastery = {
@@ -45,49 +53,49 @@ describe('AccountForm', () => {
   // --- Initial render ---
 
   it('pre-fills display name from profile', () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     expect((screen.getByLabelText('Display name') as HTMLInputElement).value).toBe('Nicolas')
   })
 
   it('pre-fills daily goal from profile', () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     expect((screen.getByLabelText('Daily goal (minutes)') as HTMLInputElement).value).toBe('15')
   })
 
   it('shows "Save changes" as initial button text', () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     expect(screen.getByRole('button', { name: 'Save changes' })).toBeTruthy()
   })
 
   // --- Computed level display ---
 
   it('displays the computed level badge', () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     // 'B1' appears in both the badge and the breakdown row — getAllByText is intentional
     expect(screen.getAllByText('B1').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('Intermediate')).toBeTruthy()
   })
 
   it('shows mastery breakdown per CEFR level', () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     expect(screen.getByText(/3 of 6 mastered/)).toBeTruthy()
     expect(screen.getByText(/0 of 12 mastered/)).toBeTruthy()
   })
 
   it('shows B2 label when computed_level is B2', () => {
     const profile = { ...baseProfile, computed_level: 'B2' }
-    render(<AccountForm profile={profile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={profile} mastery={baseMastery} />)
     expect(screen.getByText('Advanced')).toBeTruthy()
   })
 
   it('shows C1 label when computed_level is C1', () => {
     const profile = { ...baseProfile, computed_level: 'C1' }
-    render(<AccountForm profile={profile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={profile} mastery={baseMastery} />)
     expect(screen.getByText('Proficient')).toBeTruthy()
   })
 
   it('does not render level picker buttons', () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     expect(screen.queryByRole('button', { name: /^A2/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /^B1/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /^B2/ })).toBeNull()
@@ -96,7 +104,7 @@ describe('AccountForm', () => {
   // --- Validation (client-side) ---
 
   it('shows error when daily goal is below 5', async () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.clear(screen.getByLabelText('Daily goal (minutes)'))
     await userEvent.type(screen.getByLabelText('Daily goal (minutes)'), '4')
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
@@ -105,7 +113,7 @@ describe('AccountForm', () => {
   })
 
   it('shows error when daily goal exceeds 120', async () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.clear(screen.getByLabelText('Daily goal (minutes)'))
     await userEvent.type(screen.getByLabelText('Daily goal (minutes)'), '121')
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
@@ -114,7 +122,7 @@ describe('AccountForm', () => {
   })
 
   it('shows error when daily goal is not a number', async () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.clear(screen.getByLabelText('Daily goal (minutes)'))
     await userEvent.type(screen.getByLabelText('Daily goal (minutes)'), 'abc')
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
@@ -126,7 +134,7 @@ describe('AccountForm', () => {
 
   it('calls fetch with correct payload on save (no current_level)', async () => {
     mockFetchSuccess()
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/account/update',
@@ -143,7 +151,7 @@ describe('AccountForm', () => {
 
   it('does not include current_level in save payload', async () => {
     mockFetchSuccess()
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     const body = JSON.parse(vi.mocked(global.fetch).mock.calls[0][1]?.body as string)
     expect(body.current_level).toBeUndefined()
@@ -151,7 +159,7 @@ describe('AccountForm', () => {
 
   it('sends updated display name in payload', async () => {
     mockFetchSuccess()
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.clear(screen.getByLabelText('Display name'))
     await userEvent.type(screen.getByLabelText('Display name'), 'Carlos')
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
@@ -161,7 +169,7 @@ describe('AccountForm', () => {
 
   it('omits display_name from payload when field is empty', async () => {
     mockFetchSuccess()
-    render(<AccountForm profile={{ ...baseProfile, display_name: null }} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={{ ...baseProfile, display_name: null }} mastery={baseMastery} />)
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     const body = JSON.parse(vi.mocked(global.fetch).mock.calls[0][1]?.body as string)
     expect(body.display_name).toBeUndefined()
@@ -169,7 +177,7 @@ describe('AccountForm', () => {
 
   it('shows "Changes saved." after successful save', async () => {
     mockFetchSuccess()
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await waitFor(() => {
       expect(screen.getByText('Changes saved.')).toBeTruthy()
@@ -183,7 +191,7 @@ describe('AccountForm', () => {
         resolveFetch = () => resolve({ ok: true, json: async () => ({ ok: true }) } as Response)
       })
     )
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     const clickPromise = userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await waitFor(() => {
       expect(screen.queryByText('Saving…')).toBeTruthy()
@@ -196,7 +204,7 @@ describe('AccountForm', () => {
 
   it('shows API error message on failed save', async () => {
     mockFetchError('Server is unavailable')
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await waitFor(() => {
       expect(screen.getByText('Server is unavailable')).toBeTruthy()
@@ -205,7 +213,7 @@ describe('AccountForm', () => {
 
   it('does not show "Changes saved." after failed save', async () => {
     mockFetchError()
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await waitFor(() => {
       expect(screen.queryByText('Changes saved.')).toBeNull()
@@ -215,23 +223,44 @@ describe('AccountForm', () => {
   // --- Character count ---
 
   it('does not show character count when display name is short', () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     expect(screen.queryByText(/\/50/)).toBeNull()
   })
 
   it('shows character count when display name is 35 or more chars', async () => {
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     const input = screen.getByLabelText('Display name')
     await userEvent.clear(input)
     await userEvent.type(input, 'A'.repeat(35))
     expect(screen.getByText('35/50')).toBeTruthy()
   })
 
+  // --- Theme toggle ---
+
+  it('renders Light, System, and Dark theme buttons', () => {
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    expect(screen.getByRole('button', { name: /light/i })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /system/i })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /dark/i })).toBeTruthy()
+  })
+
+  it('clicking Dark theme button fires fetch to persist preference', async () => {
+    vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as Response)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    await userEvent.click(screen.getByRole('button', { name: /dark/i }))
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/account/update',
+      expect.objectContaining({
+        body: JSON.stringify({ theme_preference: 'dark' }),
+      })
+    )
+  })
+
   // --- Saved state cleared on edit ---
 
   it('clears "Changes saved." when display name is edited', async () => {
     mockFetchSuccess()
-    render(<AccountForm profile={baseProfile} mastery={baseMastery} />)
+    renderWithTheme(<AccountForm profile={baseProfile} mastery={baseMastery} />)
     await userEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await waitFor(() => expect(screen.getByText('Changes saved.')).toBeTruthy())
     await userEvent.type(screen.getByLabelText('Display name'), 'x')

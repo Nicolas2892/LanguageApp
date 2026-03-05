@@ -19,9 +19,9 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 const CEFR_COLORS: Record<string, { bar: string; text: string }> = {
-  B1: { bar: 'bg-green-500',  text: 'text-green-700'  },
-  B2: { bar: 'bg-amber-500',  text: 'text-amber-700'  },
-  C1: { bar: 'bg-violet-500', text: 'text-violet-700' },
+  B1: { bar: 'bg-green-500',  text: 'text-green-700 dark:text-green-400'  },
+  B2: { bar: 'bg-amber-500',  text: 'text-amber-700 dark:text-amber-400'  },
+  C1: { bar: 'bg-violet-500', text: 'text-violet-700 dark:text-violet-400' },
 }
 
 export default async function ProgressPage() {
@@ -227,8 +227,8 @@ export default async function ProgressPage() {
 
             {/* Streak */}
             <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                <Flame className="h-4 w-4 text-orange-600" />
+              <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center">
+                <Flame className="h-4 w-4 text-orange-600 dark:text-orange-400" />
               </div>
               <p className="text-2xl font-extrabold">{currentStreak}</p>
               <div>
@@ -239,10 +239,10 @@ export default async function ProgressPage() {
 
             {/* Mastered */}
             <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
-              <p className="text-2xl font-extrabold text-green-600">{totalMastered}</p>
+              <p className="text-2xl font-extrabold text-green-600 dark:text-green-400">{totalMastered}</p>
               <div>
                 <p className="text-xs font-medium">Mastered</p>
                 <p className="text-xs text-muted-foreground">of {totalConcepts} total</p>
@@ -251,10 +251,10 @@ export default async function ProgressPage() {
 
             {/* Production certified */}
             <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-amber-600" />
+              <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </div>
-              <p className="text-2xl font-extrabold text-amber-600">{totalProductionCertified}</p>
+              <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{totalProductionCertified}</p>
               <div>
                 <p className="text-xs font-medium">Active skills</p>
                 <p className="text-xs text-muted-foreground">key skill for B2</p>
@@ -263,10 +263,10 @@ export default async function ProgressPage() {
 
             {/* Accuracy */}
             <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-sky-100 flex items-center justify-center">
-                <Target className="h-4 w-4 text-sky-600" />
+              <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center">
+                <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" />
               </div>
-              <p className="text-2xl font-extrabold text-sky-600">{overallAccuracy}%</p>
+              <p className="text-2xl font-extrabold text-sky-600 dark:text-sky-400">{overallAccuracy}%</p>
               <div>
                 <p className="text-xs font-medium">Accuracy</p>
                 <p className="text-xs text-muted-foreground">across all exercises</p>
@@ -311,7 +311,7 @@ export default async function ProgressPage() {
             </div>
 
             {showB2Hint && (
-              <p className="text-xs text-amber-600 font-medium pt-1 border-t">
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium pt-1 border-t">
                 {b1Remaining} more concept{b1Remaining !== 1 ? 's' : ''} until you unlock B2
               </p>
             )}

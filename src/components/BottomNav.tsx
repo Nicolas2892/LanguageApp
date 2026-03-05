@@ -39,12 +39,12 @@ export function BottomNav() {
               href={href}
               className={`flex-1 flex flex-col items-center justify-center gap-1
                           transition-colors touch-manipulation
-                          ${active ? 'text-orange-500' : 'text-muted-foreground'}`}
+                          ${active ? 'text-orange-500 dark:text-orange-400' : 'text-muted-foreground'}`}
             >
               {/* Pill: wider than tall, matching iOS active indicator proportions */}
               <span
                 className={`rounded-full px-3 py-0.5 transition-colors
-                  ${active ? 'bg-orange-100' : ''}`}
+                  ${active ? 'bg-orange-100 dark:bg-orange-950/40' : ''}`}
               >
                 <Icon className="h-6 w-6" />
               </span>

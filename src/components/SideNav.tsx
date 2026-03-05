@@ -51,7 +51,7 @@ export function SideNav({ userInitials }: Props) {
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                 ${active
-                  ? 'bg-orange-50 text-orange-600'
+                  ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
             >
@@ -68,7 +68,7 @@ export function SideNav({ userInitials }: Props) {
           href="/account"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
             ${pathname.startsWith('/account')
-              ? 'bg-orange-50 text-orange-600'
+              ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
         >

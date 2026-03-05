@@ -170,7 +170,7 @@ export default async function DashboardPage() {
               <span className="text-muted-foreground">
                 {goalMet ? '✓ Daily goal met!' : 'Daily goal'}
               </span>
-              <span className={`font-medium ${goalMet ? 'text-green-600' : 'text-foreground'}`}>
+              <span className={`font-medium ${goalMet ? 'text-green-600 dark:text-green-400' : 'text-foreground'}`}>
                 {todayMinutes} / {dailyGoalMinutes} min
               </span>
             </div>
@@ -186,9 +186,9 @@ export default async function DashboardPage() {
         {/* Review card — primary emphasis when action is needed */}
         <div className={`rounded-xl p-6 space-y-3 border ${
           dueCount > 0 && studiedCount > 0
-            ? 'bg-orange-50/60 border-orange-200 border-l-4 border-l-orange-500'
+            ? 'bg-orange-50/60 dark:bg-orange-950/20 border-orange-200 dark:border-orange-900 border-l-4 border-l-orange-500'
             : studiedCount > 0 && dueCount === 0
-            ? 'border-l-4 border-l-green-500 border-green-200 bg-card'
+            ? 'border-l-4 border-l-green-500 border-green-200 dark:border-green-900 bg-card'
             : 'border-l-4 border-l-orange-500 bg-card'
         }`}>
           <div className="flex items-center justify-between">

@@ -182,7 +182,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
                       {limitType === 'time' ? `${val} min` : val}
                     </button>
                     {limitType === 'time' && val === 10 && (
-                      <span className="text-[10px] text-orange-500 font-semibold">Recommended</span>
+                      <span className="text-[10px] text-orange-500 dark:text-orange-400 font-semibold">Recommended</span>
                     )}
                   </div>
                 ))}

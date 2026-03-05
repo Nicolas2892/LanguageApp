@@ -43,7 +43,7 @@ export function FreeWritePrompt({
         <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1.5">
           Concept
         </p>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 text-xs font-semibold">
           {conceptTitle}
         </span>
       </div>
@@ -83,7 +83,7 @@ export function FreeWritePrompt({
           />
         </div>
         <div className="flex justify-end">
-          <span className={`text-xs ${overLimit ? 'text-red-500' : wordCount >= 150 ? 'text-amber-500' : 'text-muted-foreground'}`}>
+          <span className={`text-xs ${overLimit ? 'text-red-500 dark:text-red-400' : wordCount >= 150 ? 'text-amber-500 dark:text-amber-400' : 'text-muted-foreground'}`}>
             {wordCount} / 200 words
           </span>
         </div>

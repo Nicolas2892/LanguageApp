@@ -66,7 +66,7 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
       <p className="text-lg leading-relaxed">{exercise.prompt}</p>
 
       {erroneous && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-3 text-sm text-red-900">
+        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-md p-3 text-sm text-red-900 dark:text-red-300">
           <span className="font-semibold">Erroneous sentence: </span>
           <span className="italic">
             <AnnotatedText
