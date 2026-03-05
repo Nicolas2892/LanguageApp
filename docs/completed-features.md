@@ -4,6 +4,67 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Feat-H: Design & UX Review ✓ (2026-03)
+
+Full design polish pass. 1120 tests passing across 29 files.
+
+**Batch 1 — Remove Difficulty Bars**
+- Deleted `DifficultyBars` component from `src/app/curriculum/page.tsx`, `src/app/curriculum/[id]/page.tsx`, `src/app/write/ConceptPicker.tsx`
+- `difficulty` field stays in DB for SRS ordering; only the visual removed
+
+**Batch 2 — Icon System (strokeWidth=1.5)**
+- All content-area icons set to `strokeWidth={1.5}` (thinner, more refined)
+- Exceptions: SideNav + BottomNav keep default stroke weight
+- Tutor nav icon swapped `MessageSquare` → `Bot`
+- Files: dashboard, curriculum, progress, account, FeedbackPanel, StudySession, SprintCard, write, tutor, OnboardingTour, IOSInstallPrompt, PushPermissionPrompt, SessionConfig
+
+**Batch 3 — Colour Restraint**
+- `UserAvatar`: reverted to orange (`bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-200`) — grey was hard to spot
+- Fix-G (dark mode Review card): already resolved via `.review-card-warm` CSS class in `globals.css`
+
+**Batch 4 — Nav Reorder + Study Routing**
+- Nav order: Dashboard → Study → Curriculum → Progress → Tutor (both SideNav + BottomNav)
+- Study nav href: `/study` → `/study/configure`
+- Active state logic updated: `/study/*` paths activate the Study tab
+
+**Batch 5 — Configure Page Revamp**
+- `src/app/study/configure/page.tsx`: server component now fetches mastery data per module
+- `src/app/study/configure/SessionConfig.tsx`: mastery count per module button (`"12/23 mastered"`); session size pill selector 5/10/15/20/25 (default 10); passes `?size=N` to `/study`
+- `src/app/study/page.tsx`: reads `size` param, caps to 50, slices queue accordingly
+
+**Batch 6 — Free Write Discoverability**
+- Done screen (`StudySession.tsx`): "Free write about this topic →" CTA when `freeWriteConceptId` prop set
+- `/study` passes `freeWriteConceptId` when `?concept=<id>` (single-concept sessions only)
+
+**Batch 7 — Exercise Completion Counter**
+- `src/app/curriculum/[id]/page.tsx`: counts `exercise_attempts` for this concept server-side; shows "X exercises completed" with `CheckCircle2` icon when count > 0
+
+**Batch 8 — Progress Page: All-time Stats + Exercise Type Chart**
+- Two new all-time stat cards: total exercises completed + total learning hours
+- New `src/components/ExerciseTypeChart.tsx`: horizontal recharts BarChart of attempts per exercise type
+- CEFR level items: dashed vertical connector between levels (`border-l-2 border-dashed border-border`)
+
+**Batch 9 — Typography Polish**
+- All page `h1` tags: `text-2xl font-bold tracking-tight`
+- Section labels: `text-xs font-semibold uppercase tracking-widest text-muted-foreground`
+- Empty states in `/study`: inline SVG icons + rounded-full CTA buttons
+
+**Batch 10 — Graphical Elements**
+- Auth pages (`/auth/login`, `/auth/signup`): desktop two-column split — dark left panel with faint Ñ letterform (`rgba(255,255,255,0.04)`) + tagline "Advanced Spanish. Beautifully structured."; form on right; mobile unchanged
+- Dashboard: `h-px w-16 bg-gradient-to-r from-orange-500 to-transparent` accent line below greeting
+
+**Curriculum Module Rename (post Feat-H)**
+- `src/lib/curriculum/curriculum-plan.ts`: "The Subjunctive" (13 concepts) split into:
+  - "The Subjunctive: Core" — Unit 2.1, 5 concepts
+  - "The Subjunctive: Advanced" — Units 2.2+2.3, 8 concepts
+- `curriculum-plan.test.ts` updated: 7 modules, new name assertions, Core(5) + Advanced(8) counts
+- DB rename: manual SQL required — `UPDATE modules SET title = '...' WHERE id = '...'`
+
+**Curriculum locked concept UI**
+- `src/app/curriculum/page.tsx`: locked rows get `bg-muted/30 border-border/40` background; entire row content at `opacity-40`; lock icon inline left of title; title text `text-muted-foreground`
+
+---
+
 ## Phases 1–6E + BottomNav polish
 
 - Full auth flow (email/password, Supabase)

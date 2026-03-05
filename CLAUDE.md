@@ -186,7 +186,8 @@ Migrations (run once in Supabase SQL editor):
 ### Curriculum Seed Content
 **Currently in DB** (85 concepts, 787 exercises — Feat-E complete):
 - Module 1: Connectors & Discourse Markers — 4 units, 23 concepts
-- Module 2: The Subjunctive — 3 units, 13 concepts
+- Module 2a: The Subjunctive: Core — 1 unit, 5 concepts
+- Module 2b: The Subjunctive: Advanced — 2 units, 8 concepts
 - Module 3: Past Tenses — 3 units, 11 concepts
 - Module 4: Core Spanish Contrasts — 3 units, 12 concepts
 - Module 5: Verbal Periphrases — 3 units, 13 concepts
@@ -218,9 +219,9 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1111 tests across 28 files — all passing.**
+**Test suite: 1120 tests across 29 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 6 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**.
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review — icons, nav, configure revamp, auth split, ExerciseTypeChart, module rename)**.
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -277,7 +278,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - `vercel.json` daily cron 18:00 UTC; `CRON_SECRET` auth on send route
 
 **Feat-E: Content expansion via AI seeding script** ✅ *Complete — see `docs/completed-features.md`*
-- 85 concepts, 787 exercises live across 6 modules; Module 2 renamed to "The Subjunctive"
+- 85 concepts, 787 exercises live across 7 modules; Module 2 split into "The Subjunctive: Core" (5 concepts) + "The Subjunctive: Advanced" (8 concepts)
 - `scripts/approve-all.mjs` for bulk approval; `max_tokens: 8192` required to avoid truncation
 
 **Feat-F: Offline exercise packs (module download)**
@@ -293,17 +294,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 **Feat-G: Full Architecture and Security Review**
 - Conduct a full review of current app architecture and security to suggest both performance and security improvements to enhance it.
 
-**Feat-H: Another Design & UX Review *** ✅ *Complete*
-- Icon strokeWidth=1.5 on all content icons (not nav); Tutor nav icon → Bot
-- Removed DifficultyBars component from curriculum, concept detail, ConceptPicker
-- Nav reorder: Dashboard→Study→Curriculum→Progress→Tutor; Study → /study/configure
-- Configure page revamped: mastery count per module, session size picker (5–25)
-- UserAvatar neutral (bg-muted/text-muted-foreground, not orange)
-- Auth pages: desktop two-column split with dark Ñ panel + tagline
-- Dashboard: 2px gradient accent line below greeting
-- Progress: CEFR dashed connector, all-time stats cards, ExerciseTypeChart
-- Free write CTA on done screen (single-concept sessions); completion counter on concept detail
-- Improved empty states with inline SVG + CTA buttons
+**Feat-H: Another Design & UX Review** ✅ *Complete — see `docs/completed-features.md`*
 
 #### Strategic / Long-term
 
@@ -402,14 +393,12 @@ Items from full UX research audit (2026-03). Ordered by effort/impact. First 7 a
 
 ## Recommended Next Steps (priority order)
 
-### Polish & UX quality
+### Growth features (deferred)
 
-2. **UX-T: Dark mode color fixes** — Replace hardcoded orange/amber backgrounds with CSS variable-based classes. Key files: Review card warm tint, UserAvatar, hint boxes in HintPanel, FeedbackPanel accent strip.
+1. **Strat-A: Conjugation mode** — mirror Ella Verbs; 50/100/250 most-frequent verbs, conjugation drills in sentence context, favorites list, offline grading.
 
-### Later — Growth features (deferred)
+2. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
 
-3. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+3. **Feat-F: Offline exercise packs** — IndexedDB module download; deterministic grading for gap_fill/sentence_builder; queued batch-submit for AI-graded types on reconnect.
 
-4. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
-
-5. **Feat-A: Daily email reminders** *(not wanted — deferred indefinitely)*
+4. **Feat-A: Daily email reminders** *(not wanted — deferred indefinitely)*
