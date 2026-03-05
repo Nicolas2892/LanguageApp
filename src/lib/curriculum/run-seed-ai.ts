@@ -6,11 +6,12 @@
  * - Existing concepts: queries DB for current exercise counts per type,
  *   generates only the missing exercises (top-up to 3 per type)
  *
- * Output: docs/curriculum-review-YYYY-MM-DD.json (human-review artifact)
+ * Writes incrementally — safe to kill and re-run; already-generated concepts are skipped.
+ * Output file: docs/curriculum-review-YYYY-MM-DD.json (or --output <path>)
  *
  * Usage:
  *   NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... \
- *   pnpm seed:ai
+ *   pnpm seed:ai [--output <path>]
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -77,11 +78,6 @@ interface ReviewConcept {
   _annotationsValid: boolean
 }
 
-interface ExerciseTypeCount {
-  type: string
-  count: number
-}
-
 interface DbExerciseRow {
   type: string
   concept_id: string
@@ -96,6 +92,32 @@ interface DbConceptRow {
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function parseArgs(): { outputPath: string } {
+  const args = process.argv.slice(2)
+  const outIdx = args.indexOf('--output')
+  if (outIdx !== -1 && args[outIdx + 1]) {
+    return { outputPath: args[outIdx + 1] }
+  }
+  const dateStr = new Date().toISOString().slice(0, 10)
+  return { outputPath: path.join(process.cwd(), 'docs', `curriculum-review-${dateStr}.json`) }
+}
+
+/** Load existing results from file; return empty array if file doesn't exist. */
+function loadExisting(filePath: string): ReviewConcept[] {
+  if (!fs.existsSync(filePath)) return []
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf8')) as ReviewConcept[]
+  } catch {
+    console.warn(`⚠️  Could not parse existing file at ${filePath} — starting fresh`)
+    return []
+  }
+}
+
+/** Overwrite the output file with the full results array. */
+function saveResults(filePath: string, results: ReviewConcept[]): void {
+  fs.writeFileSync(filePath, JSON.stringify(results, null, 2), 'utf8')
 }
 
 function buildNewConceptPrompt(plan: ConceptPlan, exercisesNeeded: Array<{ type: ExerciseType; count: number }>): string {
@@ -201,6 +223,16 @@ function annotationsValid(exercises: ReviewExercise[]): boolean {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
+  const { outputPath } = parseArgs()
+
+  // Load any partial results from a previous interrupted run
+  const results: ReviewConcept[] = loadExisting(outputPath)
+  const alreadyGenerated = new Set(results.map((r) => r.title))
+
+  if (alreadyGenerated.size > 0) {
+    console.log(`📂 Resuming — ${alreadyGenerated.size} concepts already in ${path.basename(outputPath)}`)
+  }
+
   console.log('🤖 AI Curriculum Seed — generating exercises\n')
 
   // 1. Fetch all existing concepts from DB
@@ -217,7 +249,7 @@ async function main(): Promise<void> {
     (existingConcepts as DbConceptRow[]).map((c) => [c.title, c.id])
   )
 
-  // 2. Fetch exercise counts per concept per type for existing concepts
+  // 2. Fetch exercise counts per concept per type
   const { data: exerciseRows, error: exErr } = await supabase
     .from('exercises')
     .select('type, concept_id')
@@ -227,7 +259,6 @@ async function main(): Promise<void> {
     process.exit(1)
   }
 
-  // Build map: conceptId → { type → count }
   const exerciseCountMap = new Map<string, Map<string, number>>()
   for (const row of (exerciseRows as DbExerciseRow[])) {
     if (!exerciseCountMap.has(row.concept_id)) {
@@ -238,27 +269,31 @@ async function main(): Promise<void> {
   }
 
   console.log(`Found ${conceptsByTitle.size} existing concepts in DB`)
-  console.log(`Processing ${CURRICULUM_PLAN.length} concepts from CURRICULUM_PLAN\n`)
+  console.log(`Processing ${CURRICULUM_PLAN.length} concepts from CURRICULUM_PLAN`)
+  console.log(`Output: ${outputPath}\n`)
 
-  const results: ReviewConcept[] = []
   let skipped = 0
   let generated = 0
   let errors = 0
 
   for (const plan of CURRICULUM_PLAN) {
+    // Skip if already generated in a previous run
+    if (alreadyGenerated.has(plan.title)) {
+      console.log(`  ⏭  Already generated "${plan.title}" — skipping`)
+      skipped++
+      continue
+    }
+
     const existingId = conceptsByTitle.get(plan.title)
     const isNew = !existingId
 
-    // Compute which exercise types and how many are needed
     const exercisesNeeded: Array<{ type: ExerciseType; count: number }> = []
 
     if (isNew) {
-      // All 3 types, 3 each
       for (const type of plan.exerciseTypes) {
         exercisesNeeded.push({ type, count: EXERCISES_PER_TYPE })
       }
     } else {
-      // Top-up: compute missing per type
       const typeMap = exerciseCountMap.get(existingId!) ?? new Map()
       for (const type of plan.exerciseTypes) {
         const current = typeMap.get(type) ?? 0
@@ -338,13 +373,16 @@ async function main(): Promise<void> {
         _annotationsValid: allAnnotationsValid,
       }
 
+      // Append to results array and save immediately (resume-safe)
       results.push(reviewEntry)
+      alreadyGenerated.add(plan.title)
+      saveResults(outputPath, results)
       generated++
 
       if (!allAnnotationsValid) {
-        console.log(`    ⚠️  Some annotations failed validation — will store null (pnpm annotate will fix)`)
+        console.log(`    ⚠️  Some annotations failed validation — stored null (pnpm annotate will fix)`)
       } else {
-        console.log(`    ✅ Generated ${exercises.length} exercise(s)`)
+        console.log(`    ✅ Generated ${exercises.length} exercise(s) [${results.length} total in file]`)
       }
     } catch (err) {
       console.error(`    ❌ Unexpected error for "${plan.title}":`, err)
@@ -354,20 +392,16 @@ async function main(): Promise<void> {
     await delay(DELAY_MS)
   }
 
-  // 3. Write review file
-  const dateStr = new Date().toISOString().slice(0, 10)
-  const outputPath = path.join(process.cwd(), 'docs', `curriculum-review-${dateStr}.json`)
-  fs.writeFileSync(outputPath, JSON.stringify(results, null, 2), 'utf8')
-
   console.log('\n─────────────────────────────────────────')
-  console.log(`✅ Generated: ${generated} concepts`)
-  console.log(`⏭  Skipped:   ${skipped} concepts (already complete)`)
+  console.log(`✅ Generated: ${generated} concepts this run`)
+  console.log(`⏭  Skipped:   ${skipped} concepts (already done)`)
   console.log(`❌ Errors:    ${errors} concepts`)
+  console.log(`📄 Total in file: ${results.length} concepts`)
   console.log(`\n📄 Review file: ${outputPath}`)
   console.log('\nNext steps:')
-  console.log('  1. Review the JSON file and set "_approved": true for accepted concepts')
-  console.log('  2. Run: pnpm seed:ai:apply --dry-run <file>')
-  console.log('  3. Run: pnpm seed:ai:apply <file>')
+  console.log('  1. node scripts/approve-all.mjs <file>   (to approve all entries)')
+  console.log('  2. pnpm seed:ai:apply --dry-run <file>')
+  console.log('  3. pnpm seed:ai:apply <file>')
 }
 
 main().catch((err) => {
