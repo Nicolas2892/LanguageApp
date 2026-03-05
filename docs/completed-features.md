@@ -309,3 +309,73 @@ Eight targeted improvements to `src/app/dashboard/page.tsx` and `SprintCard.tsx`
 
 **Tests — 282 total (1 test description updated)**
 - `SprintCard.test.tsx` — "shows dueCount in collapsed heading" updated to "shows timed review heading"; now matches `getByText(/timed review/i)`
+
+---
+
+### UX Polish & Animations batch (UX-I through UX-S, UX-U, UX-V) ✓
+
+**Commit**: `feat(ux): UX-I through UX-S + UX-U/V — animations, polish, and micro-interactions`
+**Tests**: 293 passing (no new tests needed — all additive UI changes)
+
+**UX-I: Confetti celebration** (`StudySession.tsx`)
+- `canvas-confetti` + `@types/canvas-confetti` installed via pnpm
+- `useEffect` fires when `state.phase === 'done'` and accuracy ≥ 70%
+- `confettiFired` ref prevents double-fire in React StrictMode
+- Dynamic import (`import('canvas-confetti')`) to keep bundle split
+
+**UX-J: Study loop transitions** (`StudySession.tsx`, `globals.css`)
+- Exercise area wrapped in `<div key={index} className="... ${flashClass}">` — `key` change triggers re-mount and animation
+- Exercise enters with `animate-in slide-in-from-right-2 duration-200`
+- FeedbackPanel enters with `animate-in slide-in-from-bottom-3 duration-200` inside its own wrapper
+- Answer flash: `flashClass` state set to `animate-flash-green` / `animate-flash-red` on API return; `setTimeout(300ms)` delays state→feedback then clears flashClass
+- Flash keyframes in `globals.css` use `oklch` colour space to match existing palette
+
+**UX-K: Submit spinner** (`StudySession.tsx`)
+- Replaced `<p className="animate-pulse">Grading with AI…</p>` with `<div>` containing `Loader2` (lucide, `animate-spin`) + "Checking…" text
+- Rendered while `submitting && (state.phase === 'answering' || flashClass)` — disappears before feedback slides up
+
+**UX-L: Animated progress bars** (`AnimatedBar.tsx`, `dashboard/page.tsx`, `progress/page.tsx`)
+- New `src/components/AnimatedBar.tsx` — client component; `useState(0)` initial width, `useEffect` sets to `pct` after 80ms; CSS `transition-all duration-700`
+- Dashboard: replaces both inline divs in the curriculum progress bar, plus the daily goal bar inner div
+- Progress page: replaces the inner div in each of the three CEFR level bars (B1/B2/C1)
+
+**UX-M: Contextual motivational copy** (`dashboard/page.tsx`)
+- Date subtitle replaced by IIFE computing a state-aware string:
+  - `dueCount === 0 && studiedCount > 0` → "You're all caught up — perfect time to learn something new."
+  - `streak >= 30` → "30 days strong — you're unstoppable."
+  - `streak >= 7` → "7 days strong — you're building a real habit."
+  - `streak === 1` → "Day 1 — the hardest step is done."
+  - `streak === 0` → "Ready to start your streak?"
+  - else → formatted locale date (existing fallback)
+
+**UX-N: Autofocus inputs** — already implemented in both `GapFill.tsx` (first blank + 0-blank fallback) and `TextAnswer.tsx` (textarea); verified, no changes needed.
+
+**UX-O: Streak pulse** (`dashboard/page.tsx`)
+- `Flame` icon: `animate-pulse text-orange-500` when `streak >= 7`, plain `text-orange-400` otherwise
+
+**UX-P: Session exit button** — already implemented as part of UX-G (Dialog + X button in StudySession); verified, no changes needed.
+
+**UX-Q: Due count badge** (`dashboard/page.tsx`)
+- Review card: `dueCount >= 10` → red pulsing dot `h-2 w-2 rounded-full bg-red-500 animate-pulse` beside the count
+- `dueCount === 0 && studiedCount > 0` → `border-green-200 border-l-green-500` border + `CheckCircle2` (green) icon instead of `BookOpen`
+
+**UX-R: FeedbackPanel score label prominence** (`FeedbackPanel.tsx`)
+- Score label moved above feedback text; `text-2xl font-black` centred
+- Icon row (check/x + calendar) moved below the label, also centred
+- `Sparkles` icon (amber, `animate-in zoom-in-50 duration-300`) appears inline at score === 3
+
+**UX-S: Micro-interactions** (`SideNav.tsx`, `HintPanel.tsx`)
+- Logo link: `group` class; `<span className="inline-flex transition-transform duration-200 group-hover:rotate-6">` wraps `<LogoMark>`
+- Hint dots: `transition-colors duration-500` (extended from no-duration)
+
+**UX-U: Page fade-in on route change** (`PageWrapper.tsx`, `layout.tsx`)
+- New `src/components/PageWrapper.tsx` — `'use client'`; reads `usePathname()`; returns `<div key={pathname} className="animate-page-in">`
+- `@keyframes page-fade-in` in `globals.css`: `opacity 0→1, translateY 4px→0`, 150ms ease-out
+- Replaces bare `{children}` in `layout.tsx` `div.lg:ml-[220px]`
+
+**UX-V: First-run onboarding tour** (`OnboardingTour.tsx`, `dashboard/page.tsx`)
+- New `src/components/OnboardingTour.tsx` — `'use client'`; reads `localStorage.tour_dismissed` in `useEffect`; renders only when key is absent
+- Fixed-position overlay with semi-transparent backdrop; dismissible on backdrop click, X button, or "Got it →" CTA
+- Callout enters with `animate-in slide-in-from-bottom-4 duration-300`
+- Dismissal sets `localStorage.tour_dismissed = '1'`; never shown again
+- Rendered inside `<main>` at bottom of `dashboard/page.tsx`

@@ -205,7 +205,7 @@ Migrations (run once in Supabase SQL editor):
 
 **Test suite: 282 tests across 22 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -308,6 +308,51 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 ---
 
+#### UX Polish & Animations
+
+Items from full UX research audit (2026-03). Ordered by effort/impact. First 7 are **low-effort / high-impact** and should be tackled as a batch.
+
+**UX-I: Session-complete confetti celebration** ✅ *Complete — see `docs/completed-features.md`*
+- `canvas-confetti` burst on done screen when accuracy ≥ 70%; StrictMode-safe ref guard
+
+**UX-J: Study loop transitions** ✅ *Complete — see `docs/completed-features.md`*
+- Slide-in-right on exercise advance; slide-up FeedbackPanel; green/red flash before feedback appears
+
+**UX-K: Submit button loading state** ✅ *Complete — see `docs/completed-features.md`*
+- `Loader2` spinner + "Checking…" text shown while Claude grades
+
+**UX-L: Progress bars animate-in** ✅ *Complete — see `docs/completed-features.md`*
+- `AnimatedBar` client component; 80ms mount delay then 700ms CSS transition from 0→target
+
+**UX-M: Contextual dashboard copy** ✅ *Complete — see `docs/completed-features.md`*
+- State-aware subtitle based on streak + dueCount
+
+**UX-N: Autofocus inputs** ✅ *Already implemented* — GapFill + TextAnswer had `autoFocus`; verified
+
+**UX-O: Streak pulse** ✅ *Complete — see `docs/completed-features.md`*
+- `animate-pulse` on Flame icon at streak ≥ 7
+
+**UX-P: Session exit button** ✅ *Already implemented as part of UX-G* — Dialog + X button in StudySession
+
+**UX-Q: Due count badge** ✅ *Complete — see `docs/completed-features.md`*
+- Red dot badge at dueCount ≥ 10; green CheckCircle2 + green border when dueCount = 0
+
+**UX-R: FeedbackPanel score label prominence** ✅ *Complete — see `docs/completed-features.md`*
+- `text-2xl font-black` centred; Sparkles icon at score = 3
+
+**UX-S: Micro-interactions** ✅ *Complete — see `docs/completed-features.md`*
+- Logo hover:rotate-6; hint dot transition-colors duration-500
+
+**UX-T: Dark mode semantic color fixes** *(deferred — risk of visual regressions; tackle as dedicated session)*
+
+**UX-U: Page fade-in transitions** ✅ *Complete — see `docs/completed-features.md`*
+- `PageWrapper` client component uses `usePathname` as key; 150ms fade+slide on route change
+
+**UX-V: First-run onboarding tour** ✅ *Complete — see `docs/completed-features.md`*
+- `OnboardingTour` dismissible overlay; `localStorage.tour_dismissed` flag
+
+---
+
 ## Recommended Next Steps (priority order)
 
 ### Immediate — DB + content
@@ -320,12 +365,14 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 ### Polish & UX quality
 
-3. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
+3. **UX-T: Dark mode color fixes** — Replace hardcoded orange/amber backgrounds with CSS variable-based classes. Key files: Review card warm tint, UserAvatar, hint boxes in HintPanel, FeedbackPanel accent strip.
+
+4. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
 
 ### Later — Growth features (deferred)
 
-4. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+5. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
 
-5. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
+6. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
 
-6. **Feat-A: Daily email reminders** *(not wanted — deferred indefinitely)*
+7. **Feat-A: Daily email reminders** *(not wanted — deferred indefinitely)*
