@@ -7,6 +7,9 @@ export const BOOTSTRAP_SIZE = 5
 /** interval_days threshold above which a concept is considered mastered */
 export const MASTERY_THRESHOLD = 21
 
+/** Fraction of a CEFR level's concepts that must be attempted before the next level unlocks in the automatic queue */
+export const LEVEL_UNLOCK_THRESHOLD = 0.8
+
 /** Colour config for CEFR level chips (B1/B2/C1) */
 export const LEVEL_CHIP: Record<string, { label: string; className: string }> = {
   B1: { label: 'B1', className: 'bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800' },

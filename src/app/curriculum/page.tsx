@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { LevelChip } from '@/components/LevelChip'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
-import { Trophy, ChevronRight } from 'lucide-react'
+import { computeUnlockedLevels, computeUnlockProgress } from '@/lib/curriculum/prerequisites'
+import type { CefrLevel } from '@/lib/curriculum/prerequisites'
+import { Trophy, ChevronRight, Lock } from 'lucide-react'
 
 type MasteryState = 'mastered' | 'learning' | 'new'
 type FilterTab = 'all' | 'new' | 'learning' | 'mastered'
@@ -66,11 +68,12 @@ export default async function CurriculumPage({ searchParams }: Props) {
     ? rawLevel
     : 'all') as LevelFilter
 
-  const [modulesRes, unitsRes, conceptsRes, progressRes] = await Promise.all([
+  const [modulesRes, unitsRes, conceptsRes, progressRes, unlockedLevels] = await Promise.all([
     supabase.from('modules').select('id, title, order_index').order('order_index'),
     supabase.from('units').select('id, module_id, title, order_index').order('order_index'),
     supabase.from('concepts').select('id, unit_id, title, difficulty, level, grammar_focus').order('difficulty'),
     supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', user.id),
+    computeUnlockedLevels(supabase, user.id),
   ])
 
   type ModuleRow  = { id: string; title: string; order_index: number }
@@ -82,6 +85,12 @@ export default async function CurriculumPage({ searchParams }: Props) {
   const typedUnits    = (unitsRes.data    ?? []) as UnitRow[]
   const typedConcepts = (conceptsRes.data ?? []) as ConceptRow[]
   const progressMap   = new Map(((progressRes.data ?? []) as ProgressRow[]).map((p) => [p.concept_id, p.interval_days]))
+  const attemptedIds  = new Set((progressRes.data ?? []).map((p) => (p as ProgressRow).concept_id))
+  const unlockProgress = computeUnlockProgress(typedConcepts, attemptedIds)
+
+  function isLocked(concept: ConceptRow): boolean {
+    return !unlockedLevels.has((concept.level ?? 'B1') as CefrLevel)
+  }
 
   const unitsByModule  = new Map<string, UnitRow[]>()
   const conceptsByUnit = new Map<string, ConceptRow[]>()
@@ -166,6 +175,19 @@ export default async function CurriculumPage({ searchParams }: Props) {
           )
         })}
       </div>
+
+      {/* Unlock progress banner */}
+      {unlockProgress.nextLevel && (
+        <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm flex items-center gap-3">
+          <Lock className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span>
+            <span className="font-medium">{unlockProgress.nextLevel} content</span> is queued for when you&apos;re ready —{' '}
+            study <span className="font-medium">{unlockProgress.threshold - unlockProgress.attempted} more {unlockProgress.nextLevel === 'C1' ? 'B2' : 'B1'} concepts</span> to
+            add it to your automatic queue.{' '}
+            <span className="text-muted-foreground">({unlockProgress.attempted}/{unlockProgress.total} done)</span>
+          </span>
+        </div>
+      )}
 
       {/* Global empty state */}
       {!anyMatch && (filter !== 'all' || levelFilter !== 'all') && (
@@ -271,7 +293,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                 />
                                 <div className="flex items-center justify-between px-3 py-2.5 gap-2">
                                   {/* Left: title + difficulty */}
-                                  <div className="min-w-0 flex-1 space-y-1">
+                                  <div className={`min-w-0 flex-1 space-y-1 ${isLocked(concept) ? 'opacity-70' : ''}`}>
                                     <p className="font-medium text-sm leading-snug truncate">{concept.title}</p>
                                     <DifficultyBars difficulty={concept.difficulty} />
                                   </div>
@@ -279,6 +301,12 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                   <div className="flex items-center gap-2 shrink-0">
                                     <LevelChip level={concept.level} />
                                     <GrammarFocusChip focus={concept.grammar_focus} />
+                                    {isLocked(concept) && (
+                                      <Lock
+                                        className="h-3.5 w-3.5 text-muted-foreground shrink-0"
+                                        aria-label="Not yet in your automatic queue"
+                                      />
+                                    )}
                                     <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${cfg.className}`}>
                                       {cfg.label}
                                     </span>

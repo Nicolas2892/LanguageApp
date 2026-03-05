@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { StudySession } from './StudySession'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { SESSION_SIZE, BOOTSTRAP_SIZE } from '@/lib/constants'
+import { computeUnlockedLevels } from '@/lib/curriculum/prerequisites'
+import type { CefrLevel } from '@/lib/curriculum/prerequisites'
 import type { StudyItem } from './StudySession'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 
@@ -92,27 +94,31 @@ export default async function StudyPage({
         const { data: bootstrapConcepts } = await supabase
           .from('concepts')
           .select('id')
+          .eq('level', 'B1')
           .order('difficulty', { ascending: true })
           .limit(BOOTSTRAP_SIZE)
         conceptIds = (bootstrapConcepts ?? []).map((c) => (c as { id: string }).id)
       }
     }
   } else if (params.mode === 'new') {
-    // Learn new: concepts not yet studied (not in user_progress)
-    const { data: studiedProgress } = await supabase
-      .from('user_progress')
-      .select('concept_id')
-      .eq('user_id', user.id)
+    // Learn new: concepts not yet studied (not in user_progress), filtered to unlocked CEFR levels
+    const [studiedProgress, unlockedLevels] = await Promise.all([
+      supabase.from('user_progress').select('concept_id').eq('user_id', user.id),
+      computeUnlockedLevels(supabase, user.id),
+    ])
     const studiedIds = new Set(
-      (studiedProgress ?? []).map((p) => (p as { concept_id: string }).concept_id)
+      ((studiedProgress.data ?? []) as { concept_id: string }[]).map((p) => p.concept_id)
     )
     const { data: allConcepts } = await supabase
       .from('concepts')
-      .select('id')
+      .select('id, level')
       .order('difficulty', { ascending: true })
     const unlearnedIds = (allConcepts ?? [])
+      .filter((c) => {
+        const concept = c as { id: string; level: string | null }
+        return !studiedIds.has(concept.id) && unlockedLevels.has((concept.level ?? 'B1') as CefrLevel)
+      })
       .map((c) => (c as { id: string }).id)
-      .filter((id) => !studiedIds.has(id))
       .slice(0, SESSION_SIZE)
     if (unlearnedIds.length === 0) redirect('/dashboard')
     conceptIds = unlearnedIds
@@ -138,6 +144,7 @@ export default async function StudyPage({
         const { data: bootstrapConcepts } = await supabase
           .from('concepts')
           .select('id')
+          .eq('level', 'B1')
           .order('difficulty', { ascending: true })
           .limit(BOOTSTRAP_SIZE)
         conceptIds = (bootstrapConcepts ?? []).map((c) => (c as { id: string }).id)
