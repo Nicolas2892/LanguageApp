@@ -293,11 +293,17 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 **Feat-G: Full Architecture and Security Review**
 - Conduct a full review of current app architecture and security to suggest both performance and security improvements to enhance it.
 
-**Feat-H: Another Design & UX Review ***
-- Run another iteration of all UX Screens and Menus and suggest another set of improvements based on best practices. The goal should be to make the design feel elegant and polished without feeling playful. So closer to Babbel than to Dulingo.
-- Put specific focus on reviewing navigation structure, menu sequencing/navigation flows for users and layout to see if there are opportunities to improve app setup.
-- Put specific focus as well on ability to add any graphical elements that would enhance the app appearance to give it its own branding and character. 
-- Lastly review the icons used and check if there are any more polished appearing icon themes we might want to use to improve design.
+**Feat-H: Another Design & UX Review *** ✅ *Complete*
+- Icon strokeWidth=1.5 on all content icons (not nav); Tutor nav icon → Bot
+- Removed DifficultyBars component from curriculum, concept detail, ConceptPicker
+- Nav reorder: Dashboard→Study→Curriculum→Progress→Tutor; Study → /study/configure
+- Configure page revamped: mastery count per module, session size picker (5–25)
+- UserAvatar neutral (bg-muted/text-muted-foreground, not orange)
+- Auth pages: desktop two-column split with dark Ñ panel + tagline
+- Dashboard: 2px gradient accent line below greeting
+- Progress: CEFR dashed connector, all-time stats cards, ExerciseTypeChart
+- Free write CTA on done screen (single-concept sessions); completion counter on concept detail
+- Improved empty states with inline SVG + CTA buttons
 
 #### Strategic / Long-term
 
@@ -318,7 +324,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### Bugs / Layout Fixes
 
-**Fix-G: Review card has wrong background in dark mode**
+**Fix-G: Review card has wrong background in dark mode** *(implemented)*
 - **Problem**: The Review card on the dashboard shows a muddy brownish-gray tint in dark mode instead of matching the other dark cards. Visible in screenshot — the card is clearly lighter/warmer than "Learn new" and "Free write".
 - **Cause**: The warm tint is applied via `bg-orange-50/60` (orange-50 at 60% opacity). At 60% opacity over a dark background this composites into a brownish-gray. The `dark:bg-card` override added in UX-T does not appear to take effect — likely a Tailwind v4 CSS specificity or class-scanning issue with opacity-modified background classes inside dynamic ternary strings.
 - **Attempted fix**: `dark:bg-card` added to the ternary class string in `src/app/dashboard/page.tsx` — did not work.
@@ -384,7 +390,7 @@ Items from full UX research audit (2026-03). Ordered by effort/impact. First 7 a
 **UX-S: Micro-interactions** ✅ *Complete — see `docs/completed-features.md`*
 - Logo hover:rotate-6; hint dot transition-colors duration-500
 
-**UX-T: Dark mode semantic color fixes** *(deferred — risk of visual regressions; tackle as dedicated session)*
+**UX-T: Dark mode semantic color fixes** *(implemented)*
 
 **UX-U: Page fade-in transitions** ✅ *Complete — see `docs/completed-features.md`*
 - `PageWrapper` client component uses `usePathname` as key; 150ms fade+slide on route change
