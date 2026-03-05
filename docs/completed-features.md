@@ -382,50 +382,33 @@ Eight targeted improvements to `src/app/dashboard/page.tsx` and `SprintCard.tsx`
 
 ---
 
-## Feat-E: Curriculum Infrastructure ✓
+## Feat-E: Content Expansion — 85 Concepts, 787 Exercises ✓
 
-**Commit**: `feat(curriculum): expand to 85 concepts + seed:ai generation script`
-**Tests**: 1085 passing across 26 files (807 new — 792 from per-concept curriculum-plan tests + 15 from ai-seed-config tests)
+**Commits**: `feat(Feat-E): content expansion — 76/85 concepts seeded`, `feat(Feat-E): complete content expansion — 85 concepts, 787 exercises live`
+**Tests**: 1085 passing across 26 files (807 new — 792 from curriculum-plan tests + 15 from ai-seed-config tests)
+**DB state**: 85 concepts, 787 exercises, 6 modules — all live in Supabase
 
-### curriculum-design.md (docs/curriculum-design.md)
-- Full human-review reference: 85 concepts across 6 modules with level, grammar_focus, difficulty, and exercise types
-- Unit 1.2 expanded: +2 concepts (`por eso / por esa razón` B1, `así que` B1) → 7 concepts
-- Unit 1.4 renamed "Formal Structuring" → "Linking, Structuring & Reformulation"; expanded 2 → 6 concepts: adds `es decir / o sea`, `además`, `asimismo / incluso`, `en cuanto a / con respecto a`, `en definitiva / en conclusión / en suma`
-- Module 1 total: 17 → 23 concepts; overall: 79 → 85 concepts
-- New policy: **9 exercises per concept** (3 per type) — existing 21 concepts top up from 3 → 9
+### What was built
 
-### curriculum-plan.ts (src/lib/curriculum/curriculum-plan.ts)
-- `ConceptPlan` interface: `module`, `unit`, `title`, `description`, `level`, `grammar_focus`, `difficulty`, `type`, `exerciseTypes`
-- `CURRICULUM_PLAN: ConceptPlan[]` — 85 entries; includes existing 21 (skipped during creation, used for top-up) + 64 new
-- 6 modules: Connectors & Discourse Markers (23), The Subjunctive (13), Past Tenses (11), Core Spanish Contrasts (12), Verbal Periphrases (13), Complex Sentences (13)
+#### curriculum-plan.ts / ai-seed-config.ts / seed scripts
+- `ConceptPlan` interface + `CURRICULUM_PLAN[85]` — single source of truth for all concepts
+- `ai-seed-config.ts`: `EXERCISE_TYPE_RULES` (B1/B2/C1), `EXERCISES_PER_TYPE=3`
+- `run-seed-ai.ts` (`pnpm seed:ai`): resume-safe incremental writes after each concept; `--output` flag; `max_tokens: 8192`
+- `run-seed-ai-apply.ts` (`pnpm seed:ai:apply`): `_mode: 'new'|'topup'`; `--dry-run` flag
+- `scripts/approve-all.mjs`: bulk-sets `_approved: true` on all entries in a review JSON
 
-### ai-seed-config.ts (src/lib/curriculum/ai-seed-config.ts)
-- `EXERCISE_TYPE_RULES`: B1 → `[gap_fill, transformation, translation]`; B2 → `[gap_fill, translation, error_correction]`; C1 → `[transformation, translation, free_write]`
-- `EXERCISE_GENERATION_RULES`: detailed Claude instruction string per exercise type
-- `EXERCISES_PER_TYPE = 3`, `EXERCISES_PER_CONCEPT = 9`
+#### What's in the DB
+- **85 concepts** across 6 modules: Connectors & Discourse Markers (23), The Subjunctive (13), Past Tenses (11), Core Spanish Contrasts (12), Verbal Periphrases (13), Complex Sentences (13)
+- **787 exercises** (~9 per concept, 3 per exercise type)
+- 56/61 null-annotation exercises annotated via `pnpm annotate`
+- Module rename applied: `UPDATE modules SET title = 'The Subjunctive' WHERE title = 'Subjunctive Mastery';`
 
-### run-seed-ai.ts — `pnpm seed:ai`
-- Validates env vars (`SUPABASE_URL`, `SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`)
-- Queries DB: existing concept titles (skip-set) + exercise type counts per concept
-- For each concept in `CURRICULUM_PLAN`:
-  - New: generates explanation + 3 examples + 9 exercises (3 per type)
-  - Topup: computes `needed = 3 - currentCount` per type; skips concept entirely if all types already at 3
-- Claude `claude-sonnet-4-20250514`, `max_tokens: 4096`; 300ms delay between calls
-- Validates annotation concatenation per exercise; stores `null` on mismatch (pnpm annotate fixes later)
-- Writes `docs/curriculum-review-YYYY-MM-DD.json` with `_mode: 'new'|'topup'`, `_approved: false`, `_annotationsValid`
-
-### run-seed-ai-apply.ts — `pnpm seed:ai:apply [--dry-run] <file>`
-- Reads review JSON, processes only `_approved: true` entries
-- `_mode: 'new'`: upserts module (by title) → upserts unit (by title+module_id) → inserts concept → inserts exercises
-- `_mode: 'topup'`: looks up concept_id by title → inserts exercises only
-- `--dry-run` flag: prints plan without writing to DB
-- Uses `SupabaseClient<Database>` (typed client); all insert shapes validated by TypeScript
-
-### To fully complete Feat-E (not yet run):
-1. `pnpm seed:ai` (with env vars) → review `docs/curriculum-review-YYYY-MM-DD.json`
-2. Set `_approved: true` on quality entries
-3. `pnpm seed:ai:apply --dry-run <file>` → verify output
-4. `pnpm seed:ai:apply <file>` → apply to DB
-5. `pnpm annotate` → fill null annotations
-6. `UPDATE modules SET title = 'The Subjunctive' WHERE title = 'Subjunctive Mastery';`
+### Key implementation notes
+- `run-seed-ai.ts` is **resume-safe**: loads existing partial JSON on startup, skips already-generated titles, saves after each concept → safe to kill and re-run
+- `max_tokens` must be **8192** (not 4096) — some 9-exercise responses with full annotation spans exceed 4096 tokens and get truncated, producing invalid JSON
+- Strip markdown code fences before `JSON.parse` — Claude occasionally wraps responses in ` ```json ` blocks
+- Debug logging added: on parse failure, logs `stop_reason`, `output_tokens`, and first/last 100 chars of raw response
+- **Do not run `seed:ai:apply` twice on the same file** — the script has no idempotency guard; re-running will create duplicate concept rows and duplicate exercises (no unique constraint on concept title). If it happens, run a cleanup: for each duplicate title keep oldest by `created_at`, delete newer + its exercises; then trim excess exercises to 3 per type ordered by `created_at`
+- Env vars for seed scripts: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`
+- Extract env vars from `.env.local` with `grep '^VAR=' .env.local | cut -d= -f2-` (not `set -a; source` — fails on paths with spaces)
 

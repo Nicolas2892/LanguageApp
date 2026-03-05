@@ -184,19 +184,16 @@ Migrations (run once in Supabase SQL editor):
 - `isNewUser` flag uses `studiedCount` (any `user_progress` row), not `masteredCount`
 
 ### Curriculum Seed Content
-**Currently in DB** (21 concepts, 63 exercises):
-- Module 1: Connectors & Discourse Markers (3 units: Concessive, Causal/Consecutive, Adversative)
-- Module 2: Subjunctive Mastery (2 units: Present Triggers, Imperfect/Hypotheticals)
-- 21 concepts, 3 exercises each = 63 exercises total
-
-**Planned via `pnpm seed:ai`** (85 concepts total, 9 exercises each = 765 exercises):
-- Module 1 expanded to 4 units, 23 concepts (adds Unit 1.4 Linking/Structuring/Reformulation + 2 causal connectors)
-- Module 2 renamed to "The Subjunctive"; gains Unit 2.3 Complex Structures (4 new concepts)
-- Module 3: Past Tenses — 3 units, 11 concepts (all new)
-- Module 4: Core Spanish Contrasts — 3 units, 12 concepts (all new)
-- Module 5: Verbal Periphrases — 3 units, 13 concepts (all new)
-- Module 6: Complex Sentences — 3 units, 13 concepts (all new)
-- Full plan in `src/lib/curriculum/curriculum-plan.ts`; design reference in `docs/curriculum-design.md`
+**Currently in DB** (85 concepts, 787 exercises — Feat-E complete):
+- Module 1: Connectors & Discourse Markers — 4 units, 23 concepts
+- Module 2: The Subjunctive — 3 units, 13 concepts
+- Module 3: Past Tenses — 3 units, 11 concepts
+- Module 4: Core Spanish Contrasts — 3 units, 12 concepts
+- Module 5: Verbal Periphrases — 3 units, 13 concepts
+- Module 6: Complex Sentences — 3 units, 13 concepts
+- ~9 exercises per concept (3 per exercise type); 56/61 null-annotation exercises annotated
+- Full plan: `src/lib/curriculum/curriculum-plan.ts`; design reference: `docs/curriculum-design.md`
+- ⚠️ Do NOT re-run `pnpm seed:ai:apply` on an existing review file — no idempotency guard, will create duplicate concept rows. See `docs/completed-features.md` Feat-E for cleanup procedure.
 
 ### Shared Modules (added in pre-Phase 6 audit)
 - `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21
@@ -223,7 +220,7 @@ Migrations (run once in Supabase SQL editor):
 
 **Test suite: 1085 tests across 26 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips), Feat-E infrastructure (curriculum-plan.ts + seed:ai scripts).
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 6 modules)**.
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -272,13 +269,9 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - `NotificationSettings` on account page; `/api/push/subscribe` (POST/DELETE) + `/api/push/send` cron route
 - `vercel.json` daily cron 18:00 UTC; `CRON_SECRET` auth on send route
 
-**Feat-E: Content expansion via AI seeding script** *(infrastructure complete — ready to run)*
-- `curriculum-plan.ts` — single source of truth for all 85 concepts across 6 modules (21 existing + 64 new)
-- `ai-seed-config.ts` — EXERCISE_TYPE_RULES per CEFR level, EXERCISE_GENERATION_RULES per type, 9 exercises per concept (3 per type)
-- `run-seed-ai.ts` (`pnpm seed:ai`) — queries DB; generates 9 exercises for new concepts or tops up existing ones to 9; writes `docs/curriculum-review-YYYY-MM-DD.json`
-- `run-seed-ai-apply.ts` (`pnpm seed:ai:apply`) — applies `_approved: true` entries; `_mode: 'new'` upserts full hierarchy; `_mode: 'topup'` looks up concept and inserts missing exercises; `--dry-run` flag
-- **Target: 85 concepts, 765 exercises** across 6 modules (Past Tenses, Core Spanish Contrasts, Verbal Periphrases, Complex Sentences added)
-- **Next action**: run `pnpm seed:ai`, review JSON, approve entries, `pnpm seed:ai:apply`; then DB rename `UPDATE modules SET title = 'The Subjunctive' WHERE title = 'Subjunctive Mastery';`
+**Feat-E: Content expansion via AI seeding script** ✅ *Complete — see `docs/completed-features.md`*
+- 85 concepts, 787 exercises live across 6 modules; Module 2 renamed to "The Subjunctive"
+- `scripts/approve-all.mjs` for bulk approval; `max_tokens: 8192` required to avoid truncation
 
 **Feat-F: Offline exercise packs (module download)**
 - User downloads a full module's exercises to IndexedDB for offline use
@@ -375,19 +368,15 @@ Items from full UX research audit (2026-03). Ordered by effort/impact. First 7 a
 
 ## Recommended Next Steps (priority order)
 
-### Immediate — DB + content
+### Immediate — Learning quality
 
-1. **Feat-E: Run `pnpm seed:ai`** — Infrastructure is complete. Run the script, review `docs/curriculum-review-YYYY-MM-DD.json`, set `_approved: true` on quality entries, then run `pnpm seed:ai:apply`. Also run the DB rename: `UPDATE modules SET title = 'The Subjunctive' WHERE title = 'Subjunctive Mastery';`. Target: 85 concepts, 765 exercises across 6 modules. This is the single highest-leverage action for user retention.
-
-### Next — Learning quality
-
-2. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
+1. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
 
 ### Polish & UX quality
 
-3. **UX-T: Dark mode color fixes** — Replace hardcoded orange/amber backgrounds with CSS variable-based classes. Key files: Review card warm tint, UserAvatar, hint boxes in HintPanel, FeedbackPanel accent strip.
+2. **UX-T: Dark mode color fixes** — Replace hardcoded orange/amber backgrounds with CSS variable-based classes. Key files: Review card warm tint, UserAvatar, hint boxes in HintPanel, FeedbackPanel accent strip.
 
-4. **Feat-C: Padlock prerequisites** *(deferred to post-Feat-E)* — Revisit once catalogue reaches 40+ concepts. Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
+3. **Feat-C: Padlock prerequisites** *(now viable — 85 concepts in DB)* — Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
 
 ### Later — Growth features (deferred)
 
