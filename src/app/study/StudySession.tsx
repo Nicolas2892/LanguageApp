@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/dialog'
 import {
   PartyPopper, CheckCircle2, XCircle,
-  Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles, Timer, X,
+  Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles, Timer, X, Loader2,
 } from 'lucide-react'
 import { PushPermissionPrompt } from '@/components/PushPermissionPrompt'
 import type { Concept, Exercise } from '@/lib/supabase/types'
@@ -83,6 +83,9 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
 
   const [generatingMore, setGeneratingMore] = useState(false)
   const [generateError, setGenerateError] = useState<string | null>(null)
+  const [flashClass, setFlashClass] = useState<string | null>(null)
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const confettiFired = useRef(false)
 
   // Sprint: time mode countdown
   const totalSeconds = sprintConfig?.limitType === 'time' ? sprintConfig.limit * 60 : 0
@@ -97,6 +100,23 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     }, 1000)
     return () => clearInterval(id)
   }, [sprintConfig, state.phase])
+
+  // Cleanup flash timer on unmount
+  useEffect(() => {
+    return () => { if (flashTimerRef.current) clearTimeout(flashTimerRef.current) }
+  }, [])
+
+  // Confetti on done screen (≥70% accuracy)
+  useEffect(() => {
+    if (state.phase !== 'done') return
+    const pct = state.total > 0 ? Math.round((state.correct / state.total) * 100) : 0
+    if (pct >= 70 && !confettiFired.current) {
+      confettiFired.current = true
+      import('canvas-confetti').then(({ default: confetti }) => {
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } })
+      }).catch(() => {})
+    }
+  }, [state])
 
   // Timer expiry → done
   useEffect(() => {
@@ -155,10 +175,15 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       }
 
       if (!result.is_correct) setWrongAttempts((n) => n + 1)
-      setState({ phase: 'feedback', result, userAnswer: answer })
+      const fc = result.score >= 2 ? 'animate-flash-green' : 'animate-flash-red'
+      setFlashClass(fc)
+      setSubmitting(false)
+      flashTimerRef.current = setTimeout(() => {
+        setState({ phase: 'feedback', result, userAnswer: answer })
+        setFlashClass(null)
+      }, 300)
     } catch {
       alert('Something went wrong. Please try again.')
-    } finally {
       setSubmitting(false)
     }
   }
@@ -399,12 +424,15 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         </div>
 
         {/* Exercise */}
-        <div className="space-y-3">
-          {state.phase === 'answering' && (
-            <>
+        <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 ${flashClass ?? ''}`}>
+          {(state.phase === 'answering' || flashClass) && (
+            <div className="animate-in slide-in-from-right-2 duration-200">
               <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
               {submitting && (
-                <p className="text-sm text-muted-foreground animate-pulse">Grading with AI…</p>
+                <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Checking…</span>
+                </div>
               )}
               <HintPanel
                 hint1={current.exercise.hint_1}
@@ -414,17 +442,19 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                 loadingHint={loadingHint}
                 onRequestHint={handleRequestClaudeHint}
               />
-            </>
+            </div>
           )}
 
           {state.phase === 'feedback' && (
-            <FeedbackPanel
-              result={state.result}
-              userAnswer={state.userAnswer}
-              onNext={handleNext}
-              onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
-              isLast={isLast}
-            />
+            <div className="animate-in slide-in-from-bottom-3 duration-200">
+              <FeedbackPanel
+                result={state.result}
+                userAnswer={state.userAnswer}
+                onNext={handleNext}
+                onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
+                isLast={isLast}
+              />
+            </div>
           )}
         </div>
       </div>

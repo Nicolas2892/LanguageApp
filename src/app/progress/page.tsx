@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { AccuracyChart } from './AccuracyChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
+import { AnimatedBar } from '@/components/AnimatedBar'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import { Flame, CheckCircle, Zap, Target, BarChart2 } from 'lucide-react'
 import type { ExerciseAccuracy } from './AccuracyChart'
@@ -299,10 +300,7 @@ export default async function ProgressPage() {
                       </span>
                     </div>
                     <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
-                      <div
-                        className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${color?.bar ?? 'bg-gray-400'}`}
-                        style={{ width: `${pct}%` }}
-                      />
+                      <AnimatedBar pct={pct} className={color?.bar ?? 'bg-gray-400'} />
                     </div>
                     <div className="flex justify-end">
                       <p className={`text-[11px] font-medium ${color?.text ?? ''}`}>{pct}%</p>

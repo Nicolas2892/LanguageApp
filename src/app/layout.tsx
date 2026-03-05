@@ -6,6 +6,7 @@ import { IOSInstallPrompt } from "@/components/IOSInstallPrompt";
 import { AppHeader } from "@/components/AppHeader";
 import { BottomNav } from "@/components/BottomNav";
 import { SideNav } from "@/components/SideNav";
+import { PageWrapper } from "@/components/PageWrapper";
 import { createClient } from "@/lib/supabase/server";
 import { getInitials } from "@/lib/utils";
 
@@ -93,7 +94,7 @@ export default async function RootLayout({
         <SideNav userInitials={userInitials} />
         <div className="lg:ml-[220px]">
           <AppHeader userInitials={userInitials} />
-          {children}
+          <PageWrapper>{children}</PageWrapper>
         </div>
         <BottomNav />
         <ServiceWorkerRegistration />

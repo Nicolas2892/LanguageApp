@@ -3,10 +3,12 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { SprintCard } from '@/components/SprintCard'
+import { AnimatedBar } from '@/components/AnimatedBar'
+import { OnboardingTour } from '@/components/OnboardingTour'
 import type { Profile, Concept, Module } from '@/lib/supabase/types'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import {
-  Flame, Trophy, BookOpen, Sparkles, PenLine,
+  Flame, Trophy, BookOpen, Sparkles, PenLine, CheckCircle2,
 } from 'lucide-react'
 
 export default async function DashboardPage() {
@@ -116,7 +118,15 @@ export default async function DashboardPage() {
           })()}
         </div>
         <p className="text-muted-foreground text-sm">
-          {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+          {(() => {
+            const streak = profile?.streak ?? 0
+            if (dueCount === 0 && studiedCount > 0) return "You're all caught up — perfect time to learn something new."
+            if (streak >= 30) return "30 days strong — you're unstoppable."
+            if (streak >= 7) return "7 days strong — you're building a real habit."
+            if (streak === 1) return "Day 1 — the hardest step is done."
+            if (streak === 0) return "Ready to start your streak?"
+            return new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
+          })()}
         </p>
       </div>
 
@@ -125,7 +135,7 @@ export default async function DashboardPage() {
         {/* Stats row */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <Flame className="h-5 w-5 text-orange-500 shrink-0" />
+            <Flame className={`h-5 w-5 shrink-0 ${(profile?.streak ?? 0) >= 7 ? 'text-orange-500 animate-pulse' : 'text-orange-400'}`} />
             <div>
               <p className="text-2xl font-extrabold text-orange-500 leading-none">{profile?.streak ?? 0}</p>
               <p className="text-xs text-muted-foreground mt-0.5">day streak</p>
@@ -144,14 +154,8 @@ export default async function DashboardPage() {
         {!isNewUser && (
           <div className="space-y-1.5">
             <div className="flex h-2.5 rounded-full overflow-hidden bg-muted gap-0.5">
-              <div
-                className="bg-orange-500 transition-all duration-500 rounded-l-full"
-                style={{ width: `${masteredPct}%` }}
-              />
-              <div
-                className="bg-amber-300 transition-all duration-500"
-                style={{ width: `${learningPct}%` }}
-              />
+              <AnimatedBar pct={masteredPct} className="bg-orange-500 rounded-l-full" />
+              <AnimatedBar pct={learningPct} className="bg-amber-300" />
             </div>
             <p className="text-xs text-muted-foreground text-right">
               {masteredCount} mastered · {learningCount} in progress · {newConceptsCount} to start
@@ -171,10 +175,7 @@ export default async function DashboardPage() {
               </span>
             </div>
             <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${goalMet ? 'bg-green-500' : 'bg-orange-500'}`}
-                style={{ width: `${goalPct}%` }}
-              />
+              <AnimatedBar pct={goalPct} className={goalMet ? 'bg-green-500' : 'bg-orange-500'} />
             </div>
           </div>
         )}
@@ -186,11 +187,17 @@ export default async function DashboardPage() {
         <div className={`rounded-xl p-6 space-y-3 border ${
           dueCount > 0 && studiedCount > 0
             ? 'bg-orange-50/60 border-orange-200 border-l-4 border-l-orange-500'
+            : studiedCount > 0 && dueCount === 0
+            ? 'border-l-4 border-l-green-500 border-green-200 bg-card'
             : 'border-l-4 border-l-orange-500 bg-card'
         }`}>
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Review</p>
-            <BookOpen className="h-5 w-5 text-muted-foreground" />
+            {studiedCount > 0 && dueCount === 0 ? (
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+            ) : (
+              <BookOpen className="h-5 w-5 text-muted-foreground" />
+            )}
           </div>
           {studiedCount === 0 ? (
             <>
@@ -199,8 +206,11 @@ export default async function DashboardPage() {
             </>
           ) : dueCount > 0 ? (
             <>
-              <p className="text-xl font-bold">
+              <p className="text-xl font-bold flex items-center gap-2">
                 {dueCount} concept{dueCount !== 1 ? 's' : ''} due today
+                {dueCount >= 10 && (
+                  <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                )}
               </p>
               <Button asChild className="w-full rounded-full active:scale-95 transition-transform">
                 <Link href="/study">Start review →</Link>
@@ -265,6 +275,7 @@ export default async function DashboardPage() {
         {!isNewUser && <SprintCard dueCount={dueCount} modules={modules} dueCountByModule={dueCountByModule} />}
       </div>
 
+      <OnboardingTour />
     </main>
   )
 }

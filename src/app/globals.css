@@ -129,3 +129,20 @@
     touch-action: manipulation;
   }
 }
+
+@keyframes flash-green {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: oklch(0.97 0.05 145); }
+}
+@keyframes flash-red {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: oklch(0.97 0.05 20); }
+}
+.animate-flash-green { animation: flash-green 400ms ease-out; }
+.animate-flash-red   { animation: flash-red 400ms ease-out; }
+
+@keyframes page-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-page-in { animation: page-fade-in 150ms ease-out; }

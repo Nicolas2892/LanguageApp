@@ -31,9 +31,11 @@ export function SideNav({ userInitials }: Props) {
       {/* Logo */}
       <Link
         href="/dashboard"
-        className="flex items-center gap-2.5 px-5 h-14 border-b shrink-0"
+        className="group flex items-center gap-2.5 px-5 h-14 border-b shrink-0"
       >
-        <LogoMark size={32} />
+        <span className="inline-flex transition-transform duration-200 group-hover:rotate-6">
+          <LogoMark size={32} />
+        </span>
         <span className="font-bold text-sm">Español Avanzado</span>
       </Link>
 

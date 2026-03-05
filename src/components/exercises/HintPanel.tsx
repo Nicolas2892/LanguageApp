@@ -23,14 +23,14 @@ export function HintPanel({ hint1, hint2, claudeHint, wrongAttempts, loadingHint
         <span>Hints:</span>
         {hint1 && (
           <span
-            className={`h-2 w-2 rounded-full transition-colors ${
+            className={`h-2 w-2 rounded-full transition-colors duration-500 ${
               hint1Revealed ? 'bg-amber-400' : 'bg-border'
             }`}
           />
         )}
         {hint2 && (
           <span
-            className={`h-2 w-2 rounded-full transition-colors ${
+            className={`h-2 w-2 rounded-full transition-colors duration-500 ${
               hint2Revealed ? 'bg-amber-400' : 'bg-border'
             }`}
           />
