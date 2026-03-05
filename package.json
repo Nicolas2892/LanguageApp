@@ -11,7 +11,9 @@
     "test:watch": "vitest",
     "seed": "tsx src/lib/curriculum/run-seed.ts",
     "truncate": "tsx src/lib/curriculum/run-truncate.ts",
-    "annotate": "tsx src/lib/curriculum/run-annotate.ts"
+    "annotate": "tsx src/lib/curriculum/run-annotate.ts",
+    "seed:ai": "tsx src/lib/curriculum/run-seed-ai.ts",
+    "seed:ai:apply": "tsx src/lib/curriculum/run-seed-ai-apply.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
