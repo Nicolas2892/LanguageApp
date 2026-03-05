@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { createClient as createBrowserClient } from '@supabase/supabase-js'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
 import type { Concept, Exercise, AnnotationSpan } from '@/lib/supabase/types'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function createServiceRoleClient() {
-  return createBrowserClient(
+  return createAdminClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
@@ -30,21 +31,26 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    // Rate limit: 10 requests per 10 minutes per user
+    if (!checkRateLimit(user.id, 'exercises/generate', { maxRequests: 10, windowMs: 10 * 60 * 1000 }).allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
+    }
+
     const parsed = GenerateSchema.safeParse(await request.json())
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
     }
     const { concept_id, type } = parsed.data
 
-    // Fetch concept
+    // Fetch concept (explicit columns)
     const { data: conceptData } = await supabase
       .from('concepts')
-      .select('*')
+      .select('id, title, explanation, examples')
       .eq('id', concept_id)
       .single()
 
     if (!conceptData) return NextResponse.json({ error: 'Concept not found' }, { status: 404 })
-    const concept = conceptData as Concept
+    const concept = conceptData as Pick<Concept, 'id' | 'title' | 'explanation' | 'examples'>
 
     const typeLabel = type.replace(/_/g, ' ')
     const rule = TYPE_RULES[type]
@@ -127,7 +133,7 @@ Rules for ${typeLabel}: ${rule}`
         hint_2: generated.hint_2 ?? null,
         annotations: validatedAnnotations,
       })
-      .select('*')
+      .select('id, concept_id, type, prompt, expected_answer, answer_variants, hint_1, hint_2, annotations, created_at')
       .single()
 
     if (insertErr || !newExercise) {

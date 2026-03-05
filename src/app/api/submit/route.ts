@@ -5,7 +5,9 @@ import { gradeAnswer } from '@/lib/claude/grader'
 import { sm2, DEFAULT_PROGRESS } from '@/lib/srs'
 import type { SRSScore } from '@/lib/srs'
 import type { Concept, Exercise, UserProgress } from '@/lib/supabase/types'
-import { PRODUCTION_TYPES, computeLevel } from '@/lib/mastery/computeLevel'
+import { PRODUCTION_TYPES } from '@/lib/mastery/computeLevel'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { updateStreakIfNeeded, updateComputedLevel } from '@/lib/api-utils'
 
 const SubmitSchema = z.object({
   exercise_id: z.string().uuid(),
@@ -20,16 +22,21 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    // Rate limit: 60 requests per 10 minutes per user
+    if (!checkRateLimit(user.id, 'submit', { maxRequests: 60, windowMs: 10 * 60 * 1000 }).allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
+    }
+
     const parsed = SubmitSchema.safeParse(await request.json())
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
     }
     const { exercise_id, concept_id, user_answer, skip_srs } = parsed.data
 
-    // 1. Fetch exercise + concept
+    // 1. Fetch exercise + concept (explicit columns only)
     const { data: exercise, error: exErr } = await supabase
       .from('exercises')
-      .select('*')
+      .select('id, type, prompt, expected_answer, concept_id, annotations, hint_1, hint_2')
       .eq('id', exercise_id)
       .single()
 
@@ -40,7 +47,7 @@ export async function POST(request: Request) {
 
     const { data: concept, error: conceptErr } = await supabase
       .from('concepts')
-      .select('*')
+      .select('id, title, explanation, level, type, difficulty, grammar_focus, unit_id, examples')
       .eq('id', concept_id)
       .single()
 
@@ -65,7 +72,7 @@ export async function POST(request: Request) {
       // 3. Fetch current user_progress (or use defaults if first time)
       const { data: existingProgress } = await supabase
         .from('user_progress')
-        .select('*')
+        .select('ease_factor, interval_days, repetitions, due_date, production_mastered')
         .eq('user_id', user.id)
         .eq('concept_id', concept_id)
         .single()
@@ -104,26 +111,7 @@ export async function POST(request: Request) {
       }
 
       // 5c. Recompute and persist the user's CEFR level
-      const { data: levelRows } = await supabase
-        .from('concepts')
-        .select('level, user_progress!inner(production_mastered, interval_days)')
-        .eq('user_progress.user_id', user.id)
-
-      type LevelRow = { level: string; user_progress: { production_mastered: boolean; interval_days: number }[] }
-      const totalByLevel: Record<string, number> = {}
-      const masteredByLevel: Record<string, number> = {}
-      for (const row of ((levelRows ?? []) as LevelRow[])) {
-        totalByLevel[row.level] = (totalByLevel[row.level] ?? 0) + 1
-        const progress = row.user_progress[0]
-        if (progress?.interval_days >= 21 && progress?.production_mastered) {
-          masteredByLevel[row.level] = (masteredByLevel[row.level] ?? 0) + 1
-        }
-      }
-      const newComputedLevel = computeLevel(masteredByLevel, totalByLevel)
-      await supabase
-        .from('profiles')
-        .update({ computed_level: newComputedLevel })
-        .eq('id', user.id)
+      await updateComputedLevel(supabase, user.id)
     }
 
     // 6. Record the attempt
@@ -138,25 +126,8 @@ export async function POST(request: Request) {
         ai_feedback: gradeResult.feedback,
       })
 
-    // 7. Update streak — once per day on first submit
-    const todayDate = new Date().toISOString().split('T')[0]
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('streak, last_studied_date')
-      .eq('id', user.id)
-      .single()
-    const p = profileData as { streak: number; last_studied_date: string | null } | null
-    if (p && p.last_studied_date !== todayDate) {
-      const yesterday = new Date()
-      yesterday.setDate(yesterday.getDate() - 1)
-      const newStreak = p.last_studied_date === yesterday.toISOString().split('T')[0]
-        ? p.streak + 1
-        : 1
-      await supabase
-        .from('profiles')
-        .update({ streak: newStreak, last_studied_date: todayDate })
-        .eq('id', user.id)
-    }
+    // 7. Update streak atomically — once per day
+    await updateStreakIfNeeded(supabase, user.id)
 
     return NextResponse.json({
       ...gradeResult,

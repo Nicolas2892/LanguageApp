@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
-import type { Concept, Exercise } from '@/lib/supabase/types'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const HintSchema = z.object({
   exercise_id: z.string().uuid(),
@@ -15,6 +15,11 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    // Rate limit: 20 requests per 10 minutes per user
+    if (!checkRateLimit(user.id, 'hint', { maxRequests: 20, windowMs: 10 * 60 * 1000 }).allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
+    }
+
     const parsed = HintSchema.safeParse(await request.json())
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
@@ -22,16 +27,16 @@ export async function POST(request: Request) {
     const { exercise_id, concept_id } = parsed.data
 
     const [{ data: exercise }, { data: concept }] = await Promise.all([
-      supabase.from('exercises').select('*').eq('id', exercise_id).single(),
-      supabase.from('concepts').select('*').eq('id', concept_id).single(),
+      supabase.from('exercises').select('id, concept_id, prompt, expected_answer').eq('id', exercise_id).single(),
+      supabase.from('concepts').select('id, title, explanation').eq('id', concept_id).single(),
     ])
 
     if (!exercise || !concept) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
 
-    const ex = exercise as Exercise
-    const con = concept as Concept
+    const ex = exercise as { id: string; concept_id: string; prompt: string; expected_answer: string | null }
+    const con = concept as { id: string; title: string; explanation: string }
 
     // Verify exercise belongs to the requested concept
     if (ex.concept_id !== concept_id) {

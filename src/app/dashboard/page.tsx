@@ -21,7 +21,7 @@ export default async function DashboardPage() {
   todayStart.setHours(0, 0, 0, 0)
 
   const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes, dueByModuleRes, todaySessionsRes] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    supabase.from('profiles').select('streak, computed_level, display_name, daily_goal_minutes, last_studied_date').eq('id', user.id).single(),
     supabase
       .from('user_progress')
       .select('id', { count: 'exact', head: true })

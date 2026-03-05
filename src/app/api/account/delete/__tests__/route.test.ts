@@ -60,7 +60,8 @@ describe('POST /api/account/delete', () => {
     const res = await POST()
     expect(res.status).toBe(500)
     const body = await res.json()
-    expect(body.error).toBe('User not found')
+    // Generic message is returned — internal error detail is not leaked to client (S5 fix)
+    expect(body.error).toBe('Failed to delete account')
   })
 
   it('GET request returns 405', async () => {

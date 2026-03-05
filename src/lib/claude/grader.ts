@@ -48,7 +48,7 @@ Concept explanation: ${conceptExplanation}
 Exercise type: ${exerciseType}
 Exercise prompt: ${prompt}
 ${expectedLine}
-Student's answer: ${userAnswer}
+Student's answer: ${JSON.stringify(userAnswer)}
 
 Score the response:
 - 3: Perfectly correct, natural, and the target concept is used exactly right

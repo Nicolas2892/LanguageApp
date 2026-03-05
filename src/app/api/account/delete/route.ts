@@ -17,7 +17,10 @@ export async function POST() {
 
     const admin = createServiceRoleClient()
     const { error } = await admin.auth.admin.deleteUser(user.id)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) {
+      console.error('[account/delete] deleteUser error:', error.message)
+      return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 })
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {

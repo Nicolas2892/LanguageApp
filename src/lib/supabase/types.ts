@@ -315,7 +315,12 @@ export interface Database {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      increment_streak_if_new_day: {
+        Args: { p_user_id: string }
+        Returns: void
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }
