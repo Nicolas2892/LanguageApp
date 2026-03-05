@@ -324,11 +324,13 @@ async function main(): Promise<void> {
 
       const message = await anthropic.messages.create({
         model: MODEL,
-        max_tokens: 4096,
+        max_tokens: 8192,
         messages: [{ role: 'user', content: prompt }],
       })
 
-      const raw = message.content[0]?.type === 'text' ? message.content[0].text.trim() : ''
+      let raw = message.content[0]?.type === 'text' ? message.content[0].text.trim() : ''
+      // Strip markdown code fences if Claude wrapped the JSON
+      raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
 
       let parsed: {
         explanation?: string
@@ -340,6 +342,9 @@ async function main(): Promise<void> {
         parsed = JSON.parse(raw)
       } catch {
         console.error(`    ❌ JSON parse failed for "${plan.title}"`)
+        console.error(`       stop_reason: ${message.stop_reason}, tokens: ${message.usage.output_tokens}`)
+        console.error(`       raw start: ${JSON.stringify(raw.slice(0, 120))}`)
+        console.error(`       raw end:   ${JSON.stringify(raw.slice(-80))}`)
         errors++
         await delay(DELAY_MS)
         continue

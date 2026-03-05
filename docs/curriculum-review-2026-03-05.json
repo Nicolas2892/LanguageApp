@@ -15267,5 +15267,5921 @@
     "_approved": true,
     "_notes": "",
     "_annotationsValid": true
+  },
+  {
+    "title": "asimismo / del mismo modo / incluso",
+    "module": "Connectors & Discourse Markers",
+    "unit": "Linking, Structuring & Reformulation",
+    "level": "B2",
+    "grammar_focus": "indicative",
+    "difficulty": 3,
+    "type": "connector",
+    "explanation": "Asimismo y del mismo modo son conectores aditivos formales que significan 'likewise' o 'in the same way', usados para añadir información que apoya o complementa la idea anterior. Incluso funciona como conector inclusivo que significa 'even' o 'including', añadiendo énfasis a un elemento sorprendente o inesperado. Estos conectores fortalecen la argumentación al establecer paralelismos o destacar casos extremos.",
+    "examples": [
+      {
+        "es": "La empresa redujo costos; asimismo, mejoró la eficiencia operativa.",
+        "en": "The company reduced costs; likewise, it improved operational efficiency."
+      },
+      {
+        "es": "Los estudios confirman esta teoría. Del mismo modo, los experimentos recientes apoyan estas conclusiones.",
+        "en": "Studies confirm this theory. In the same way, recent experiments support these conclusions."
+      },
+      {
+        "es": "Todos los empleados participaron en la reunión, incluso los que estaban de vacaciones.",
+        "en": "All employees participated in the meeting, even those who were on vacation."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "La nueva ley protege a los trabajadores temporales; ___, garantiza mejores condiciones para los empleados permanentes.",
+        "expected_answer": "asimismo",
+        "hint_1": "Necesitas un conector formal que indique que se añade información complementaria.",
+        "hint_2": "Piensa en conectores que significan 'likewise' o 'también' en registro formal.",
+        "annotations": [
+          {
+            "text": "La nueva ley protege a los trabajadores temporales; ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": ", garantiza mejores condiciones para los empleados permanentes.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los países desarrollados deben reducir sus emisiones. ___, las naciones en desarrollo necesitan adoptar tecnologías limpias.",
+        "expected_answer": "Del mismo modo",
+        "hint_1": "Busca un conector que establezca un paralelismo entre las dos situaciones.",
+        "hint_2": "La expresión tiene tres palabras y significa 'in the same way'.",
+        "annotations": [
+          {
+            "text": "Los países desarrollados deben reducir sus emisiones. ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": ", las naciones en desarrollo necesitan adoptar tecnologías limpias.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "La conferencia atrajo a expertos internacionales, ___ algunos premios Nobel participaron en los debates.",
+        "expected_answer": "incluso",
+        "hint_1": "Necesitas un conector que enfatice lo sorprendente o extraordinario de la información.",
+        "hint_2": "Piensa en una palabra que significa 'even' y destaca casos extremos.",
+        "annotations": [
+          {
+            "text": "La conferencia atrajo a expertos internacionales, ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " algunos premios Nobel participaron en los debates.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The university improved its research facilities; likewise, it expanded the library resources.",
+        "expected_answer": "La universidad mejoró sus instalaciones de investigación; asimismo, amplió los recursos de la biblioteca.",
+        "hint_1": "Usa un conector formal que significa 'likewise' para conectar las dos ideas.",
+        "hint_2": "El conector va después del punto y coma, seguido de coma.",
+        "annotations": [
+          {
+            "text": "The university improved its research facilities; likewise, it expanded the library resources.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "Traditional methods have proven effective. In the same way, modern approaches show promising results.",
+        "expected_answer": "Los métodos tradicionales han demostrado ser efectivos. Del mismo modo, los enfoques modernos muestran resultados prometedores.",
+        "hint_1": "Usa la expresión de tres palabras que significa 'in the same way'.",
+        "hint_2": "El conector va al inicio de la segunda oración, seguido de coma.",
+        "annotations": [
+          {
+            "text": "Traditional methods have proven effective. In the same way, modern approaches show promising results.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "All participants completed the survey, even those who had technical difficulties.",
+        "expected_answer": "Todos los participantes completaron la encuesta, incluso los que tuvieron dificultades técnicas.",
+        "hint_1": "Usa el conector que significa 'even' para enfatizar lo sorprendente del caso.",
+        "hint_2": "El conector va antes de la información que se quiere destacar.",
+        "annotations": [
+          {
+            "text": "All participants completed the survey, even those who had technical difficulties.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "error_correction",
+        "prompt": "\"El proyecto beneficiará a las empresas locales; también mismo, creará nuevos empleos en la región.\"",
+        "expected_answer": "El proyecto beneficiará a las empresas locales; asimismo, creará nuevos empleos en la región.",
+        "hint_1": "El conector formal no es 'también mismo', es una sola palabra.",
+        "hint_2": "Revisa la forma correcta del conector que significa 'likewise'.",
+        "annotations": [
+          {
+            "text": "\"El proyecto beneficiará a las empresas locales; también mismo, creará nuevos empleos en la región.\"",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "error_correction",
+        "prompt": "\"Los estudiantes mejoraron en matemáticas. De la misma manera, sus calificaciones en ciencias aumentaron significativamente.\"",
+        "expected_answer": "Los estudiantes mejoraron en matemáticas. Del mismo modo, sus calificaciones en ciencias aumentaron significativamente.",
+        "hint_1": "La expresión correcta no es 'de la misma manera' sino otra forma más concisa.",
+        "hint_2": "Usa 'modo' en lugar de 'manera' en este conector formal.",
+        "annotations": [
+          {
+            "text": "\"Los estudiantes mejoraron en matemáticas. De la misma manera, sus calificaciones en ciencias aumentaron significativamente.\"",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "error_correction",
+        "prompt": "\"La reunión fue productiva para todos, inclusive para los miembros más escépticos del equipo.\"",
+        "expected_answer": "La reunión fue productiva para todos, incluso para los miembros más escépticos del equipo.",
+        "hint_1": "La palabra correcta no es 'inclusive' sino otra similar que significa 'even'.",
+        "hint_2": "Usa 'incluso' en lugar de 'inclusive' en este contexto.",
+        "annotations": [
+          {
+            "text": "\"La reunión fue productiva para todos, inclusive para los miembros más escépticos del equipo.\"",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-05T12:05:55.588Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "cuyo/cuya: posesión en oraciones de relativo",
+    "module": "Complex Sentences",
+    "unit": "Relative Clauses",
+    "level": "C1",
+    "grammar_focus": "indicative",
+    "difficulty": 4,
+    "type": "relative_clause",
+    "explanation": "Cuyo/cuya/cuyos/cuyas is a possessive relative pronoun meaning 'whose' used in formal Spanish. It agrees in gender and number with the noun it precedes (the possessed object), not with the antecedent (the possessor). This structure is essential for sophisticated written expression and appears frequently in academic and literary texts.",
+    "examples": [
+      {
+        "es": "El autor cuya obra analizamos recibió el Premio Nobel.",
+        "en": "The author whose work we are analyzing received the Nobel Prize."
+      },
+      {
+        "es": "La empresa cuyos empleados protestaron cerró definitivamente.",
+        "en": "The company whose employees protested closed permanently."
+      },
+      {
+        "es": "Los investigadores cuyas teorías revolucionaron la ciencia fueron reconocidos.",
+        "en": "The researchers whose theories revolutionized science were recognized."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "El científico ___ descubrimientos transformaron la medicina moderna recibió múltiples reconocimientos internacionales.",
+        "expected_answer": "cuyos",
+        "hint_1": "El pronombre debe concordar con 'descubrimientos' (masculino plural)",
+        "hint_2": "Recuerda que expresa posesión: los descubrimientos del científico",
+        "annotations": [
+          {
+            "text": "El científico ",
+            "form": null
+          },
+          {
+            "text": "___ ",
+            "form": null
+          },
+          {
+            "text": "descubrimientos ",
+            "form": null
+          },
+          {
+            "text": "transformaron ",
+            "form": "indicative"
+          },
+          {
+            "text": "la medicina moderna ",
+            "form": null
+          },
+          {
+            "text": "recibió ",
+            "form": "indicative"
+          },
+          {
+            "text": "múltiples reconocimientos internacionales.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "La novelista ___ protagonistas siempre reflejan conflictos sociales contemporáneos ha publicado su décima obra.",
+        "expected_answer": "cuyos",
+        "hint_1": "Observa el género y número del sustantivo que sigue al pronombre",
+        "hint_2": "Se refiere a 'los protagonistas de la novelista'",
+        "annotations": [
+          {
+            "text": "La novelista ",
+            "form": null
+          },
+          {
+            "text": "___ ",
+            "form": null
+          },
+          {
+            "text": "protagonistas siempre ",
+            "form": null
+          },
+          {
+            "text": "reflejan ",
+            "form": "indicative"
+          },
+          {
+            "text": "conflictos sociales contemporáneos ",
+            "form": null
+          },
+          {
+            "text": "ha publicado ",
+            "form": "indicative"
+          },
+          {
+            "text": "su décima obra.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los arquitectos ___ propuesta urbana fue seleccionada presentarán el proyecto final ante el comité evaluador.",
+        "expected_answer": "cuya",
+        "hint_1": "El pronombre concuerda con el sustantivo que lo sigue inmediatamente",
+        "hint_2": "'Propuesta' es femenino singular",
+        "annotations": [
+          {
+            "text": "Los arquitectos ",
+            "form": null
+          },
+          {
+            "text": "___ ",
+            "form": null
+          },
+          {
+            "text": "propuesta urbana ",
+            "form": null
+          },
+          {
+            "text": "fue seleccionada ",
+            "form": "indicative"
+          },
+          {
+            "text": "presentarán ",
+            "form": "indicative"
+          },
+          {
+            "text": "el proyecto final ante el comité evaluador.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: El director tiene una visión muy innovadora. Su última película ganó varios premios. → Combine using cuyo/cuya",
+        "expected_answer": "El director cuya última película ganó varios premios tiene una visión muy innovadora.",
+        "hint_1": "Identifica qué elemento expresa posesión entre las dos oraciones",
+        "hint_2": "El pronombre debe concordar con 'película'",
+        "annotations": [
+          {
+            "text": "Base: El director ",
+            "form": null
+          },
+          {
+            "text": "tiene ",
+            "form": "indicative"
+          },
+          {
+            "text": "una visión muy innovadora. Su última película ",
+            "form": null
+          },
+          {
+            "text": "ganó ",
+            "form": "indicative"
+          },
+          {
+            "text": "varios premios. → Combine using cuyo/cuya",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: La universidad ofrece becas especiales. Los estudiantes de esta universidad provienen de países en desarrollo. → Rewrite using cuyo/cuya",
+        "expected_answer": "La universidad cuyos estudiantes provienen de países en desarrollo ofrece becas especiales.",
+        "hint_1": "Determina qué sustantivo será poseído en la nueva estructura",
+        "hint_2": "Considera el orden lógico de la información",
+        "annotations": [
+          {
+            "text": "Base: La universidad ",
+            "form": null
+          },
+          {
+            "text": "ofrece ",
+            "form": "indicative"
+          },
+          {
+            "text": "becas especiales. Los estudiantes de esta universidad ",
+            "form": null
+          },
+          {
+            "text": "provienen ",
+            "form": "indicative"
+          },
+          {
+            "text": "de países en desarrollo. → Rewrite using cuyo/cuya",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Los investigadores han desarrollado una metodología revolucionaria. Sus resultados preliminares son prometedores. → Transform using cuyo/cuya",
+        "expected_answer": "Los investigadores cuyos resultados preliminares son prometedores han desarrollado una metodología revolucionaria.",
+        "hint_1": "Identifica la relación posesiva entre los elementos",
+        "hint_2": "Reorganiza las cláusulas para crear una oración compleja",
+        "annotations": [
+          {
+            "text": "Base: Los investigadores ",
+            "form": null
+          },
+          {
+            "text": "han desarrollado ",
+            "form": "indicative"
+          },
+          {
+            "text": "una metodología revolucionaria. Sus resultados preliminares ",
+            "form": null
+          },
+          {
+            "text": "son ",
+            "form": "indicative"
+          },
+          {
+            "text": "prometedores. → Transform using cuyo/cuya",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "free_write",
+        "prompt": "Describe a famous historical figure whose achievements or characteristics made them influential. Write 2-3 sentences using cuyo/cuya/cuyos/cuyas to show the relationship between the person and their accomplishments or traits.",
+        "expected_answer": "Leonardo da Vinci fue un genio renacentista cuyas obras artísticas y científicas siguen inspirando a generaciones. Este polímata italiano, cuyos inventos se adelantaron siglos a su época, demostró una curiosidad intelectual extraordinaria. Sus cuadernos, cuyo contenido revela una mente brillante, contienen diseños que parecían imposibles en el siglo XV.",
+        "hint_1": "Think about what the person possessed or was known for, then use the appropriate form",
+        "hint_2": "Remember that cuyo/cuya agrees with the thing possessed, not the person who possesses it",
+        "annotations": [
+          {
+            "text": "Describe a famous historical figure whose achievements or characteristics ",
+            "form": null
+          },
+          {
+            "text": "made ",
+            "form": null
+          },
+          {
+            "text": "them influential. ",
+            "form": null
+          },
+          {
+            "text": "Write ",
+            "form": null
+          },
+          {
+            "text": "2-3 sentences using cuyo/cuya/cuyos/cuyas to ",
+            "form": null
+          },
+          {
+            "text": "show ",
+            "form": null
+          },
+          {
+            "text": "the relationship between the person and their accomplishments or traits.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "free_write",
+        "prompt": "Write about a company or organization whose practices or policies you either admire or criticize. Use cuyo/cuya structures to explain the connection between the organization and its characteristics or actions.",
+        "expected_answer": "Apple es una corporación cuya estrategia de marketing ha revolucionado la industria tecnológica. Esta empresa, cuyos productos combinan diseño elegante y funcionalidad avanzada, ha creado un ecosistema digital único. Sin embargo, sus políticas laborales, cuyas condiciones han sido cuestionadas en algunas fábricas, generan controversia entre los consumidores conscientes.",
+        "hint_1": "Consider what aspects of the organization you want to highlight using possessive relationships",
+        "hint_2": "Use different forms (cuya/cuyo/cuyos/cuyas) depending on what the organization possesses",
+        "annotations": [
+          {
+            "text": "Write ",
+            "form": null
+          },
+          {
+            "text": "about a company or organization whose practices or policies you either ",
+            "form": null
+          },
+          {
+            "text": "admire ",
+            "form": null
+          },
+          {
+            "text": "or ",
+            "form": null
+          },
+          {
+            "text": "criticize",
+            "form": null
+          },
+          {
+            "text": ". ",
+            "form": null
+          },
+          {
+            "text": "Use ",
+            "form": null
+          },
+          {
+            "text": "cuyo/cuya structures to ",
+            "form": null
+          },
+          {
+            "text": "explain ",
+            "form": null
+          },
+          {
+            "text": "the connection between the organization and its characteristics or actions.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "free_write",
+        "prompt": "Discuss a book, film, or artistic work whose impact or themes have influenced society. Write 2-3 sentences explaining the work's significance using cuyo/cuya constructions.",
+        "expected_answer": "\"Cien años de soledad\" es una novela cuya narrativa mágico-realista influyó profundamente en la literatura mundial. Gabriel García Márquez, cuyo estilo literario captó la esencia de Latinoamérica, creó una obra universal. Este libro, cuyos temas exploran la soledad y el tiempo cíclico, sigue siendo estudiado en universidades de todo el mundo.",
+        "hint_1": "Focus on what the work possesses (themes, style, impact) and connect it to its significance",
+        "hint_2": "You can also mention the creator and use cuyo/cuya to describe their characteristics",
+        "annotations": [
+          {
+            "text": "Discuss ",
+            "form": null
+          },
+          {
+            "text": "a book, film, or artistic work whose impact or themes ",
+            "form": null
+          },
+          {
+            "text": "have influenced ",
+            "form": "indicative"
+          },
+          {
+            "text": "society. ",
+            "form": null
+          },
+          {
+            "text": "Write ",
+            "form": null
+          },
+          {
+            "text": "2-3 sentences ",
+            "form": null
+          },
+          {
+            "text": "explaining ",
+            "form": null
+          },
+          {
+            "text": "the work's significance using cuyo/cuya constructions.",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-05T12:07:16.938Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "tanto… que / tal… que",
+    "module": "Connectors & Discourse Markers",
+    "unit": "Causal & Consecutive Connectors",
+    "level": "B2",
+    "grammar_focus": "indicative",
+    "difficulty": 3,
+    "type": "connector",
+    "explanation": "Las estructuras tanto/tanta/tantos/tantas... que y tal/tales... que expresan un grado tan alto de intensidad que produce una consecuencia. Tanto concuerda con sustantivos (tanto dinero que, tantas personas que) mientras tal es invariable con sustantivos singulares y tales con plurales (tal velocidad que, tales gritos que). Ambas construcciones van seguidas del indicativo cuando expresan hechos reales.",
+    "examples": [
+      {
+        "es": "Había tanta niebla que no pudimos ver la carretera.",
+        "en": "There was so much fog that we couldn't see the road."
+      },
+      {
+        "es": "Fue tal su alegría que se puso a bailar en medio de la calle.",
+        "en": "His joy was such that he started dancing in the middle of the street."
+      },
+      {
+        "es": "Recibieron tantas llamadas que tuvieron que desconectar el teléfono.",
+        "en": "They received so many calls that they had to disconnect the phone."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "El concierto tuvo ___ éxito que agotaron las entradas en dos horas.",
+        "expected_answer": "tal",
+        "hint_1": "Se refiere al grado de éxito, no a la cantidad",
+        "hint_2": "Usa la forma invariable que no concuerda con el sustantivo",
+        "annotations": [
+          {
+            "text": "El concierto tuvo ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " éxito que ",
+            "form": null
+          },
+          {
+            "text": "agotaron",
+            "form": "indicative"
+          },
+          {
+            "text": " las entradas en dos horas.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los estudiantes hicieron ___ preguntas durante la conferencia que el profesor tuvo que quedarse una hora extra.",
+        "expected_answer": "tantas",
+        "hint_1": "Se refiere a la cantidad de preguntas",
+        "hint_2": "Debe concordar en género y número con el sustantivo",
+        "annotations": [
+          {
+            "text": "Los estudiantes ",
+            "form": null
+          },
+          {
+            "text": "hicieron",
+            "form": "indicative"
+          },
+          {
+            "text": " ___ preguntas durante la conferencia que el profesor ",
+            "form": null
+          },
+          {
+            "text": "tuvo",
+            "form": "indicative"
+          },
+          {
+            "text": " que quedarse una hora extra.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Había ___ tráfico en la autopista que decidimos tomar el tren.",
+        "expected_answer": "tanto",
+        "hint_1": "Se refiere a la cantidad de tráfico",
+        "hint_2": "Debe concordar con un sustantivo masculino singular",
+        "annotations": [
+          {
+            "text": "Había ___ tráfico en la autopista que ",
+            "form": null
+          },
+          {
+            "text": "decidimos",
+            "form": "indicative"
+          },
+          {
+            "text": " tomar el tren.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: La película era muy aburrida. Por eso me quedé dormido. → Rewrite using tanto... que",
+        "expected_answer": "La película era tan aburrida que me quedé dormido.",
+        "hint_1": "Usa 'tan' antes del adjetivo para expresar el grado",
+        "hint_2": "Combina las dos oraciones en una sola estructura",
+        "annotations": [
+          {
+            "text": "Base: La película ",
+            "form": null
+          },
+          {
+            "text": "era",
+            "form": "indicative"
+          },
+          {
+            "text": " muy aburrida. Por eso me ",
+            "form": null
+          },
+          {
+            "text": "quedé",
+            "form": "indicative"
+          },
+          {
+            "text": " dormido. → Rewrite using tanto... que",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Su generosidad es extraordinaria. Todos la admiran. → Rewrite using tal... que",
+        "expected_answer": "Tiene tal generosidad que todos la admiran.",
+        "hint_1": "Convierte el adjetivo en sustantivo para usar 'tal'",
+        "hint_2": "Reestructura la primera oración para introducir 'tal'",
+        "annotations": [
+          {
+            "text": "Base: Su generosidad ",
+            "form": null
+          },
+          {
+            "text": "es",
+            "form": "indicative"
+          },
+          {
+            "text": " extraordinaria. Todos la ",
+            "form": null
+          },
+          {
+            "text": "admiran",
+            "form": "indicative"
+          },
+          {
+            "text": ". → Rewrite using tal... que",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Había muchísimos turistas. No pudimos entrar al museo. → Rewrite using tantos... que",
+        "expected_answer": "Había tantos turistas que no pudimos entrar al museo.",
+        "hint_1": "Sustituye 'muchísimos' por 'tantos' y conecta con 'que'",
+        "hint_2": "La segunda oración se convierte en la consecuencia",
+        "annotations": [
+          {
+            "text": "Base: ",
+            "form": null
+          },
+          {
+            "text": "Había",
+            "form": "indicative"
+          },
+          {
+            "text": " muchísimos turistas. No ",
+            "form": null
+          },
+          {
+            "text": "pudimos",
+            "form": "indicative"
+          },
+          {
+            "text": " entrar al museo. → Rewrite using tantos... que",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The weather was so bad that they cancelled the outdoor festival.",
+        "expected_answer": "El tiempo estaba tan malo que cancelaron el festival al aire libre.",
+        "hint_1": "Usa 'tan' con adjetivos para expresar grado",
+        "hint_2": "La consecuencia va después de 'que'",
+        "annotations": [
+          {
+            "text": "The weather was so bad that they cancelled the outdoor festival.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "She received such good news that she started crying with joy.",
+        "expected_answer": "Recibió tales noticias que se puso a llorar de alegría.",
+        "hint_1": "Usa 'tales' para sustantivos en plural",
+        "hint_2": "'Such good news' se traduce como 'tales noticias'",
+        "annotations": [
+          {
+            "text": "She received such good news that she started crying with joy.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "There were so many people at the concert that we couldn't find our seats.",
+        "expected_answer": "Había tanta gente en el concierto que no pudimos encontrar nuestros asientos.",
+        "hint_1": "'People' es 'gente', un sustantivo femenino singular",
+        "hint_2": "Usa 'tanta' para concordar con 'gente'",
+        "annotations": [
+          {
+            "text": "There were so many people at the concert that we couldn't find our seats.",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-05T12:09:48.825Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "en primer lugar / a continuación / por último",
+    "module": "Connectors & Discourse Markers",
+    "unit": "Linking, Structuring & Reformulation",
+    "level": "B1",
+    "grammar_focus": "indicative",
+    "difficulty": 1,
+    "type": "connector",
+    "explanation": "Los marcadores 'en primer lugar', 'a continuación' y 'por último' organizan información en secuencia ordenada. Se usan para estructurar presentaciones, explicaciones o instrucciones de forma clara y lógica. Estos conectores ayudan al oyente o lector a seguir el desarrollo de las ideas paso a paso.",
+    "examples": [
+      {
+        "es": "En primer lugar, debemos analizar el problema. A continuación, buscaremos posibles soluciones. Por último, implementaremos la mejor opción.",
+        "en": "First of all, we must analyze the problem. Next, we will look for possible solutions. Finally, we will implement the best option."
+      },
+      {
+        "es": "Para preparar la cena, en primer lugar lavamos las verduras. Seguidamente, las cortamos en trozos pequeños.",
+        "en": "To prepare dinner, first we wash the vegetables. Then, we cut them into small pieces."
+      },
+      {
+        "es": "El proyecto tiene tres fases: en primer lugar, la investigación; a continuación, el desarrollo; finalmente, la evaluación de resultados.",
+        "en": "The project has three phases: first, research; then, development; finally, evaluation of results."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "Para organizar tu escritorio de trabajo: ___ retira todos los papeles innecesarios, después clasifica los documentos importantes y finalmente organiza tus materiales de oficina.",
+        "expected_answer": "en primer lugar",
+        "hint_1": "Necesitas un marcador que indique el primer paso de una secuencia.",
+        "hint_2": "Este conector se usa para introducir el punto inicial de una lista ordenada.",
+        "annotations": [
+          {
+            "text": "Para organizar tu escritorio de trabajo: ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " retira",
+            "form": "indicative"
+          },
+          {
+            "text": " todos los papeles innecesarios, después ",
+            "form": null
+          },
+          {
+            "text": "clasifica",
+            "form": "indicative"
+          },
+          {
+            "text": " los documentos importantes y finalmente ",
+            "form": null
+          },
+          {
+            "text": "organiza",
+            "form": "indicative"
+          },
+          {
+            "text": " tus materiales de oficina.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "El médico explicó el tratamiento: primero tomarás estas pastillas durante una semana, ___ realizarás ejercicios de rehabilitación y después volverás para una revisión.",
+        "expected_answer": "a continuación",
+        "hint_1": "Busca el marcador que indica el segundo paso en una secuencia.",
+        "hint_2": "Este conector significa 'después' o 'seguidamente' en una enumeración ordenada.",
+        "annotations": [
+          {
+            "text": "El médico ",
+            "form": null
+          },
+          {
+            "text": "explicó",
+            "form": "indicative"
+          },
+          {
+            "text": " el tratamiento: primero ",
+            "form": null
+          },
+          {
+            "text": "tomarás",
+            "form": "indicative"
+          },
+          {
+            "text": " estas pastillas durante una semana, ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "realizarás",
+            "form": "indicative"
+          },
+          {
+            "text": " ejercicios de rehabilitación y después ",
+            "form": null
+          },
+          {
+            "text": "volverás",
+            "form": "indicative"
+          },
+          {
+            "text": " para una revisión.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "La conferencia tiene un programa muy completo: en primer lugar, la presentación del proyecto, después el debate con los asistentes y ___ la sesión de preguntas y respuestas.",
+        "expected_answer": "por último",
+        "hint_1": "Necesitas el marcador que cierra una secuencia de tres elementos.",
+        "hint_2": "Este conector indica el punto final de una enumeración ordenada.",
+        "annotations": [
+          {
+            "text": "La conferencia ",
+            "form": null
+          },
+          {
+            "text": "tiene",
+            "form": "indicative"
+          },
+          {
+            "text": " un programa muy completo: en primer lugar, la presentación del proyecto, después el debate con los asistentes y ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " la sesión de preguntas y respuestas.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Primero estudiamos la teoría, después hacemos ejercicios prácticos y al final evaluamos los resultados. → Rewrite using formal discourse markers for sequencing",
+        "expected_answer": "En primer lugar estudiamos la teoría, a continuación hacemos ejercicios prácticos y por último evaluamos los resultados.",
+        "hint_1": "Cambia los marcadores informales por sus equivalentes formales de secuenciación.",
+        "hint_2": "Usa los tres marcadores principales para organizar discursos: inicio, continuación y cierre.",
+        "annotations": [
+          {
+            "text": "Base: Primero ",
+            "form": null
+          },
+          {
+            "text": "estudiamos",
+            "form": "indicative"
+          },
+          {
+            "text": " la teoría, después ",
+            "form": null
+          },
+          {
+            "text": "hacemos",
+            "form": "indicative"
+          },
+          {
+            "text": " ejercicios prácticos y al final ",
+            "form": null
+          },
+          {
+            "text": "evaluamos",
+            "form": "indicative"
+          },
+          {
+            "text": " los resultados. → Rewrite using formal discourse markers for sequencing",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: La empresa debe modernizarse: necesita actualizar su tecnología, formar a sus empleados y revisar sus procesos. → Rewrite organizing the points with sequence markers",
+        "expected_answer": "La empresa debe modernizarse: en primer lugar, necesita actualizar su tecnología, a continuación, formar a sus empleados y, por último, revisar sus procesos.",
+        "hint_1": "Organiza los tres puntos usando marcadores de secuencia apropiados.",
+        "hint_2": "Estructura la información con conectores que muestren el orden lógico de las acciones.",
+        "annotations": [
+          {
+            "text": "Base: La empresa ",
+            "form": null
+          },
+          {
+            "text": "debe",
+            "form": "indicative"
+          },
+          {
+            "text": " modernizarse: ",
+            "form": null
+          },
+          {
+            "text": "necesita",
+            "form": "indicative"
+          },
+          {
+            "text": " actualizar su tecnología, formar a sus empleados y revisar sus procesos. → Rewrite organizing the points with sequence markers",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Para resolver este conflicto, hablaremos con ambas partes, analizaremos sus argumentos y buscaremos una solución justa. → Rewrite using discourse sequencing markers",
+        "expected_answer": "Para resolver este conflicto, en primer lugar hablaremos con ambas partes, seguidamente analizaremos sus argumentos y finalmente buscaremos una solución justa.",
+        "hint_1": "Introduce marcadores que indiquen claramente el orden de las acciones.",
+        "hint_2": "Usa conectores formales que estructuren el proceso de resolución del conflicto.",
+        "annotations": [
+          {
+            "text": "Base: Para resolver este conflicto, ",
+            "form": null
+          },
+          {
+            "text": "hablaremos",
+            "form": "indicative"
+          },
+          {
+            "text": " con ambas partes, ",
+            "form": null
+          },
+          {
+            "text": "analizaremos",
+            "form": "indicative"
+          },
+          {
+            "text": " sus argumentos y ",
+            "form": null
+          },
+          {
+            "text": "buscaremos",
+            "form": "indicative"
+          },
+          {
+            "text": " una solución justa. → Rewrite using discourse sequencing markers",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "First of all, we need to identify the problem, then we'll develop a strategy, and finally we'll implement the solution.",
+        "expected_answer": "En primer lugar, necesitamos identificar el problema, a continuación desarrollaremos una estrategia y, por último, implementaremos la solución.",
+        "hint_1": "Usa los marcadores formales de secuenciación del discurso en español.",
+        "hint_2": "Estructura la oración con los tres conectores principales para organizar las acciones.",
+        "annotations": [
+          {
+            "text": "First of all, we need to identify the problem, then we'll develop a strategy, and finally we'll implement the solution.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The cooking process is simple: first you heat the oil, next you add the vegetables, and lastly you season with salt and pepper.",
+        "expected_answer": "El proceso de cocina es simple: en primer lugar calientas el aceite, a continuación añades las verduras y, por último, sazonas con sal y pimienta.",
+        "hint_1": "Traduce usando los marcadores de secuencia formales del español.",
+        "hint_2": "Mantén la estructura clara con los tres conectores de ordenación del discurso.",
+        "annotations": [
+          {
+            "text": "The cooking process is simple: first you heat the oil, next you add the vegetables, and lastly you season with salt and pepper.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "To prepare for the exam: first read all the material, then make summary notes, and finally practice with sample questions.",
+        "expected_answer": "Para prepararse para el examen: en primer lugar lee todo el material, seguidamente haz notas de resumen y, finalmente, practica con preguntas de ejemplo.",
+        "hint_1": "Utiliza los conectores formales de secuenciación para organizar los consejos.",
+        "hint_2": "Estructura las recomendaciones con marcadores que indiquen el orden lógico.",
+        "annotations": [
+          {
+            "text": "To prepare for the exam: first read all the material, then make summary notes, and finally practice with sample questions.",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-05T12:11:49.361Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "Pasiva perifrástica: ser + participio",
+    "module": "Complex Sentences",
+    "unit": "Passive Voice",
+    "level": "B2",
+    "grammar_focus": "indicative",
+    "difficulty": 3,
+    "type": "passive",
+    "explanation": "La pasiva perifrástica se forma con ser + participio pasado y se usa cuando queremos enfocar la acción más que el agente. El participio concuerda en género y número con el sujeto paciente. Es muy común en registros formales y escritos, especialmente en noticias, textos académicos y documentos oficiales.",
+    "examples": [
+      {
+        "es": "El nuevo hospital fue inaugurado por el ministro de Salud.",
+        "en": "The new hospital was inaugurated by the Minister of Health."
+      },
+      {
+        "es": "Las propuestas serán evaluadas por un comité de expertos.",
+        "en": "The proposals will be evaluated by a committee of experts."
+      },
+      {
+        "es": "Los documentos han sido revisados y aprobados esta mañana.",
+        "en": "The documents have been reviewed and approved this morning."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "Los resultados del estudio ___ publicados en la revista científica más prestigiosa del país.",
+        "expected_answer": "fueron",
+        "hint_1": "Necesitas el verbo 'ser' en pretérito indefinido",
+        "hint_2": "Los resultados recibieron la acción de ser publicados",
+        "annotations": [
+          {
+            "text": "Los resultados del estudio ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " publicados en la revista científica más prestigiosa del país.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Las nuevas medidas de seguridad ___ implementadas por la dirección después del incidente.",
+        "expected_answer": "han sido",
+        "hint_1": "Usa el presente perfecto del verbo 'ser'",
+        "hint_2": "Las medidas recibieron la acción en el pasado con relevancia presente",
+        "annotations": [
+          {
+            "text": "Las nuevas medidas de seguridad ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " implementadas por la dirección después del incidente.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "El proyecto de renovación urbana ___ aprobado unánimemente por el ayuntamiento en la sesión de ayer.",
+        "expected_answer": "fue",
+        "hint_1": "Necesitas 'ser' en pretérito indefinido para una acción puntual",
+        "hint_2": "El proyecto recibió la aprobación en un momento específico del pasado",
+        "annotations": [
+          {
+            "text": "El proyecto de renovación urbana ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " aprobado unánimemente por el ayuntamiento en la sesión de ayer.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: El comité evaluará todas las solicitudes antes del viernes. → Rewrite using pasiva perifrástica",
+        "expected_answer": "Todas las solicitudes serán evaluadas por el comité antes del viernes.",
+        "hint_1": "Convierte 'todas las solicitudes' en el sujeto paciente",
+        "hint_2": "Usa 'ser' en futuro + participio 'evaluadas'",
+        "annotations": [
+          {
+            "text": "Base: El comité evaluará todas las solicitudes antes del viernes. → Rewrite using pasiva perifrástica",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Los investigadores han descubierto una nueva especie marina. → Rewrite using pasiva perifrástica",
+        "expected_answer": "Una nueva especie marina ha sido descubierta por los investigadores.",
+        "hint_1": "El objeto directo se convierte en sujeto paciente",
+        "hint_2": "Mantén el tiempo verbal: presente perfecto de 'ser' + participio",
+        "annotations": [
+          {
+            "text": "Base: Los investigadores han descubierto una nueva especie marina. → Rewrite using pasiva perifrástica",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: La empresa canceló todos los vuelos debido a la huelga. → Rewrite using pasiva perifrástica",
+        "expected_answer": "Todos los vuelos fueron cancelados por la empresa debido a la huelga.",
+        "hint_1": "Transforma 'todos los vuelos' en el sujeto que recibe la acción",
+        "hint_2": "Usa 'fueron cancelados' manteniendo el pretérito indefinido",
+        "annotations": [
+          {
+            "text": "Base: La empresa canceló todos los vuelos debido a la huelga. → Rewrite using pasiva perifrástica",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The ancient manuscripts were carefully restored by the museum specialists.",
+        "expected_answer": "Los manuscritos antiguos fueron cuidadosamente restaurados por los especialistas del museo.",
+        "hint_1": "Usa 'ser' en pretérito indefinido + participio que concuerde",
+        "hint_2": "El participio debe concordar con 'manuscritos' (masculino plural)",
+        "annotations": [
+          {
+            "text": "The ancient manuscripts were carefully restored by the museum specialists.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The new environmental policies will be discussed by parliament next week.",
+        "expected_answer": "Las nuevas políticas medioambientales serán discutidas por el parlamento la próxima semana.",
+        "hint_1": "Necesitas futuro simple de 'ser' + participio femenino plural",
+        "hint_2": "El participio 'discutidas' debe concordar con 'políticas'",
+        "annotations": [
+          {
+            "text": "The new environmental policies will be discussed by parliament next week.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The Nobel Prize has been awarded to three scientists for their groundbreaking research.",
+        "expected_answer": "El Premio Nobel ha sido otorgado a tres científicos por su investigación revolucionaria.",
+        "hint_1": "Usa presente perfecto de 'ser' + participio masculino singular",
+        "hint_2": "El participio concuerda con 'Premio Nobel' (masculino singular)",
+        "annotations": [
+          {
+            "text": "The Nobel Prize has been awarded to three scientists for their groundbreaking research.",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-05T12:13:35.433Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "por eso / por esa razón",
+    "module": "Connectors & Discourse Markers",
+    "unit": "Causal & Consecutive Connectors",
+    "level": "B1",
+    "grammar_focus": "indicative",
+    "difficulty": 1,
+    "type": "connector",
+    "explanation": "Por eso y por esa razón son conectores consecutivos que expresan causa-efecto, significando 'that is why' o 'for that reason'. Se usan para unir una causa ya mencionada con su resultado o consecuencia. Ambas expresiones son intercambiables y van seguidas del modo indicativo.",
+    "examples": [
+      {
+        "es": "Llueve mucho hoy, por eso no saldremos al parque.",
+        "en": "It's raining a lot today, that's why we won't go to the park."
+      },
+      {
+        "es": "Mi hermana estudió medicina durante seis años; por esa razón ahora trabaja en el hospital.",
+        "en": "My sister studied medicine for six years; for that reason she now works at the hospital."
+      },
+      {
+        "es": "El tráfico estaba terrible esta mañana, por eso llegué tarde a la oficina.",
+        "en": "Traffic was terrible this morning, that's why I arrived late to the office."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "El restaurante tenía muy malas reseñas en internet, ___ decidimos ir a otro lugar.",
+        "expected_answer": "por eso",
+        "hint_1": "Necesitas un conector consecutivo que exprese causa-efecto",
+        "hint_2": "La expresión tiene dos palabras y significa 'that's why'",
+        "annotations": [
+          {
+            "text": "El",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "restaurante",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tenía",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "muy",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "malas",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "reseñas",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "en",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "internet",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "decidimos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "ir",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "otro",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "lugar",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los precios de la gasolina han subido muchísimo, ___ ahora uso más el transporte público.",
+        "expected_answer": "por esa razón",
+        "hint_1": "Busca un conector que explique la consecuencia de la subida de precios",
+        "hint_2": "Es una expresión de tres palabras que significa 'for that reason'",
+        "annotations": [
+          {
+            "text": "Los",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "precios",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "de",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "la",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "gasolina",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "han",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "subido",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "muchísimo",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "ahora",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "uso",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "más",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "el",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "transporte",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "público",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Mi jefe canceló todas las reuniones de la semana, ___ tengo más tiempo para terminar el proyecto.",
+        "expected_answer": "por eso",
+        "hint_1": "Necesitas mostrar la consecuencia positiva de la cancelación",
+        "hint_2": "Usa el conector consecutivo más común de dos palabras",
+        "annotations": [
+          {
+            "text": "Mi",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "jefe",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "canceló",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "todas",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "las",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "reuniones",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "de",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "la",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "semana",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tengo",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "más",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tiempo",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "para",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "terminar",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "el",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "proyecto",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: El vuelo se retrasó tres horas debido a la tormenta, así que perdimos la conexión. → Rewrite using por eso",
+        "expected_answer": "El vuelo se retrasó tres horas debido a la tormenta, por eso perdimos la conexión.",
+        "hint_1": "Reemplaza 'así que' con el conector consecutivo solicitado",
+        "hint_2": "La estructura de la oración se mantiene igual, solo cambia el conector",
+        "annotations": [
+          {
+            "text": "Base:",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "El",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "vuelo",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "se",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "retrasó",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tres",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "horas",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "debido",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "la",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tormenta",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "así",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "que",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "perdimos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "la",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "conexión",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "por",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "eso",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Como mi hermana no habla inglés, no puede trabajar en esa empresa internacional. → Rewrite using por esa razón",
+        "expected_answer": "Mi hermana no habla inglés, por esa razón no puede trabajar en esa empresa internacional.",
+        "hint_1": "Elimina 'como' y reorganiza la oración para usar el conector consecutivo",
+        "hint_2": "La causa va primero, luego el conector y después la consecuencia",
+        "annotations": [
+          {
+            "text": "Base:",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Como",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "mi",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "hermana",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "no",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "habla",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "inglés",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "no",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "puede",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "trabajar",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "en",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "esa",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "empresa",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "internacional",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "por",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "esa",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "razón",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Había mucho ruido en el apartamento de arriba, entonces decidimos mudarnos. → Rewrite using por eso",
+        "expected_answer": "Había mucho ruido en el apartamento de arriba, por eso decidimos mudarnos.",
+        "hint_1": "Sustituye 'entonces' por el conector consecutivo pedido",
+        "hint_2": "Mantén el resto de la oración exactamente igual",
+        "annotations": [
+          {
+            "text": "Base:",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Había",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "mucho",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "ruido",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "en",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "el",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "apartamento",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "de",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "arriba",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "entonces",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "decidimos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "mudarnos",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "por",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "eso",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The concert was sold out, that's why we stayed home and watched a movie.",
+        "expected_answer": "El concierto estaba agotado, por eso nos quedamos en casa y vimos una película.",
+        "hint_1": "Usa 'por eso' para traducir 'that's why'",
+        "hint_2": "El verbo 'stayed' se traduce como 'nos quedamos'",
+        "annotations": [
+          {
+            "text": "The",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "concert",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "was",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "sold",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "out",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "that's",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "why",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "we",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "stayed",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "home",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "and",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "watched",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "movie",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "My car broke down yesterday, for that reason I took the bus to work today.",
+        "expected_answer": "Mi carro se descompuso ayer, por esa razón tomé el autobús al trabajo hoy.",
+        "hint_1": "Traduce 'for that reason' como 'por esa razón'",
+        "hint_2": "'Broke down' se puede traducir como 'se descompuso' o 'se averió'",
+        "annotations": [
+          {
+            "text": "My",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "car",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "broke",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "down",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "yesterday",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "for",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "that",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "reason",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "I",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "took",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "the",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "bus",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "to",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "work",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "today",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "She studied abroad for two years, that's why she speaks French so well.",
+        "expected_answer": "Ella estudió en el extranjero durante dos años, por eso habla francés tan bien.",
+        "hint_1": "Usa 'por eso' para expresar la consecuencia",
+        "hint_2": "'Studied abroad' se traduce como 'estudió en el extranjero'",
+        "annotations": [
+          {
+            "text": "She",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "studied",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "abroad",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "for",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "two",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "years",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "that's",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "why",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "she",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "speaks",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "French",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "so",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "well",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-05T12:25:36.135Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "así que",
+    "module": "Connectors & Discourse Markers",
+    "unit": "Causal & Consecutive Connectors",
+    "level": "B1",
+    "grammar_focus": "indicative",
+    "difficulty": 2,
+    "type": "connector",
+    "explanation": "\"Así que\" is a colloquial consecutive connector meaning \"so\" or \"and so\" that introduces a logical result or decision. It's used in informal contexts to connect a cause with its consequence, always followed by the indicative mood. This connector is very common in spoken Spanish to show natural cause-and-effect relationships.",
+    "examples": [
+      {
+        "es": "Estaba lloviendo mucho, así que decidimos quedarnos en casa.",
+        "en": "It was raining a lot, so we decided to stay home."
+      },
+      {
+        "es": "No tengo dinero suficiente, así que no puedo comprar el regalo.",
+        "en": "I don't have enough money, so I can't buy the gift."
+      },
+      {
+        "es": "El tren se retrasó dos horas, así que llegamos tarde a la reunión.",
+        "en": "The train was delayed two hours, so we arrived late to the meeting."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "Mi hermana perdió las llaves del coche, ___ tuvimos que llamar a un cerrajero.",
+        "expected_answer": "así que",
+        "hint_1": "This connector introduces a consequence or result",
+        "hint_2": "Use the colloquial consecutive connector meaning 'so'",
+        "annotations": [
+          {
+            "text": "Mi",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "hermana",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "perdió",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "las",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "llaves",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "del",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "coche",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tuvimos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "que",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "llamar",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "un",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "cerrajero",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "El restaurante estaba cerrado por vacaciones, ___ fuimos a cenar a otro lugar.",
+        "expected_answer": "así que",
+        "hint_1": "Connect the cause with its logical consequence",
+        "hint_2": "Use the informal connector that means 'so' or 'and so'",
+        "annotations": [
+          {
+            "text": "El",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "restaurante",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "estaba",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "cerrado",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "por",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "vacaciones",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "fuimos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "cenar",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "otro",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "lugar",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los niños terminaron temprano la tarea, ___ pueden jugar en el parque.",
+        "expected_answer": "así que",
+        "hint_1": "Show the result of finishing homework early",
+        "hint_2": "Use the consecutive connector for informal speech",
+        "annotations": [
+          {
+            "text": "Los",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "niños",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "terminaron",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "temprano",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "la",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tarea",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "pueden",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "jugar",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "en",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "el",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "parque",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: El precio de los vuelos subió mucho. Por eso cancelamos el viaje. → Rewrite using así que",
+        "expected_answer": "El precio de los vuelos subió mucho, así que cancelamos el viaje.",
+        "hint_1": "Combine both sentences with the colloquial consecutive connector",
+        "hint_2": "Replace 'por eso' with the target connector and join the sentences",
+        "annotations": [
+          {
+            "text": "Base",
+            "form": null
+          },
+          {
+            "text": ":",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "El",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "precio",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "de",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "los",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "vuelos",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "subió",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "mucho",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Por",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "eso",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "cancelamos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "el",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "viaje",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "así",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "que",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: No había más entradas disponibles. Decidimos ver otra película. → Rewrite using así que",
+        "expected_answer": "No había más entradas disponibles, así que decidimos ver otra película.",
+        "hint_1": "Connect the cause with its natural consequence using the target connector",
+        "hint_2": "Join both sentences with a comma and the colloquial consecutive connector",
+        "annotations": [
+          {
+            "text": "Base",
+            "form": null
+          },
+          {
+            "text": ":",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "No",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "había",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "más",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "entradas",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "disponibles",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Decidimos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "ver",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "otra",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "película",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "así",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "que",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Mi teléfono se quedó sin batería. No pude llamarte antes. → Rewrite using así que",
+        "expected_answer": "Mi teléfono se quedó sin batería, así que no pude llamarte antes.",
+        "hint_1": "Show the consequence of the phone running out of battery",
+        "hint_2": "Use the informal consecutive connector to link cause and effect",
+        "annotations": [
+          {
+            "text": "Base",
+            "form": null
+          },
+          {
+            "text": ":",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Mi",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "teléfono",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "se",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "quedó",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "sin",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "batería",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "No",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "pude",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "llamarte",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "antes",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "así",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "que",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The weather forecast said it would rain, so we brought our umbrellas.",
+        "expected_answer": "El pronóstico del tiempo dijo que llovería, así que trajimos nuestros paraguas.",
+        "hint_1": "Use the colloquial consecutive connector for 'so'",
+        "hint_2": "Connect the weather forecast with the logical action taken",
+        "annotations": [
+          {
+            "text": "The",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "weather",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "forecast",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "said",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "it",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "would",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "rain",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "so",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "we",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "brought",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "our",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "umbrellas",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "I was really tired, so I went to bed early.",
+        "expected_answer": "Estaba muy cansado, así que me acosté temprano.",
+        "hint_1": "Express the result of feeling tired",
+        "hint_2": "Use the informal connector that introduces consequences",
+        "annotations": [
+          {
+            "text": "I",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "was",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "really",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tired",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "so",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "I",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "went",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "to",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "bed",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "early",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The store was having a big sale, so we bought several items.",
+        "expected_answer": "La tienda tenía una gran rebaja, así que compramos varios artículos.",
+        "hint_1": "Show what happened because of the sale",
+        "hint_2": "Use the consecutive connector common in spoken Spanish",
+        "annotations": [
+          {
+            "text": "The",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "store",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "was",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "having",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "big",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "sale",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "so",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "we",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "bought",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "several",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "items",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-05T12:26:23.092Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "es decir / o sea",
+    "module": "Connectors & Discourse Markers",
+    "unit": "Linking, Structuring & Reformulation",
+    "level": "B1",
+    "grammar_focus": "indicative",
+    "difficulty": 2,
+    "type": "connector",
+    "explanation": "\"Es decir\" and \"o sea\" are reformulation markers used to clarify, paraphrase, or specify what has just been said, both meaning \"that is to say\" or \"in other words.\" \"Es decir\" is neutral and formal, while \"o sea\" is colloquial and commonly used in spoken Spanish. They help the speaker rephrase information to make it clearer or more precise.",
+    "examples": [
+      {
+        "es": "Llegará mañana por la mañana, es decir, antes del mediodía.",
+        "en": "He'll arrive tomorrow morning, that is to say, before noon."
+      },
+      {
+        "es": "No me gusta nada ese lugar, o sea, prefiero quedarme en casa.",
+        "en": "I don't like that place at all, in other words, I prefer to stay home."
+      },
+      {
+        "es": "Necesitamos más tiempo, es decir, no podemos terminar hoy.",
+        "en": "We need more time, that is to say, we can't finish today."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "El examen será la próxima semana, ___ tenemos siete días para estudiar.",
+        "expected_answer": "es decir",
+        "hint_1": "Necesitas un marcador de reformulación neutral.",
+        "hint_2": "Piensa en una expresión formal que significa \"en otras palabras\".",
+        "annotations": [
+          {
+            "text": "El",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "examen",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "será",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "la",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "próxima",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "semana",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tenemos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "siete",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "días",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "para",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "estudiar",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "No puedo ir al cine esta noche, ___ ya tengo otros planes.",
+        "expected_answer": "o sea",
+        "hint_1": "Usa un marcador de reformulación coloquial.",
+        "hint_2": "Piensa en una expresión informal que se usa mucho al hablar.",
+        "annotations": [
+          {
+            "text": "No",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "puedo",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "ir",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "al",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "cine",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "esta",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "noche",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "ya",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tengo",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "otros",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "planes",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "La reunión terminó muy tarde, ___ todos llegamos agotados a casa.",
+        "expected_answer": "es decir",
+        "hint_1": "Necesitas reformular la información de manera formal.",
+        "hint_2": "Usa la expresión más neutral para aclarar la consecuencia.",
+        "annotations": [
+          {
+            "text": "La",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "reunión",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "terminó",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "muy",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tarde",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "todos",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "llegamos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "agotados",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "casa",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: María estudia medicina. Quiere ser doctora. → Rewrite using es decir to clarify her goal",
+        "expected_answer": "María estudia medicina, es decir, quiere ser doctora.",
+        "hint_1": "Combina las dos oraciones usando el marcador de reformulación.",
+        "hint_2": "La segunda oración aclara el propósito de la primera.",
+        "annotations": [
+          {
+            "text": "Base",
+            "form": null
+          },
+          {
+            "text": ":",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "María",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "estudia",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "medicina",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Quiere",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "ser",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "doctora",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "es",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "decir",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "to",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "clarify",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "her",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "goal",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Este restaurante es muy caro. No podemos permitírnoslo. → Rewrite using o sea to explain the consequence",
+        "expected_answer": "Este restaurante es muy caro, o sea, no podemos permitírnoslo.",
+        "hint_1": "Une las oraciones con un marcador coloquial de reformulación.",
+        "hint_2": "La segunda oración explica la consecuencia de la primera.",
+        "annotations": [
+          {
+            "text": "Base",
+            "form": null
+          },
+          {
+            "text": ":",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Este",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "restaurante",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "es",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "muy",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "caro",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "No",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "podemos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "permitírnoslo",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "o",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "sea",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "to",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "explain",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "the",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "consequence",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Trabajo en el sector público. Soy funcionario del gobierno. → Rewrite using es decir to specify your job",
+        "expected_answer": "Trabajo en el sector público, es decir, soy funcionario del gobierno.",
+        "hint_1": "Conecta las oraciones para que la segunda especifique la primera.",
+        "hint_2": "Usa el marcador formal de reformulación.",
+        "annotations": [
+          {
+            "text": "Base",
+            "form": null
+          },
+          {
+            "text": ":",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Trabajo",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "en",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "el",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "sector",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "público",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Soy",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "funcionario",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "del",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "gobierno",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "es",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "decir",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "to",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "specify",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "your",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "job",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The meeting is at 3 PM, that is to say, right after lunch.",
+        "expected_answer": "La reunión es a las 3 de la tarde, es decir, justo después del almuerzo.",
+        "hint_1": "Usa el marcador de reformulación más formal.",
+        "hint_2": "La segunda parte aclara cuándo es exactamente la reunión.",
+        "annotations": [
+          {
+            "text": "The",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "meeting",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "is",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "at",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "3",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "PM",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "that",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "is",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "to",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "say",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "right",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "after",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "lunch",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "I don't have money right now, in other words, I can't buy the tickets.",
+        "expected_answer": "No tengo dinero ahora mismo, o sea, no puedo comprar las entradas.",
+        "hint_1": "\"In other words\" aquí suena coloquial, no formal.",
+        "hint_2": "Usa el marcador de reformulación más informal.",
+        "annotations": [
+          {
+            "text": "I",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "don't",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "have",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "money",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "right",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "now",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "in",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "other",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "words",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "I",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "can't",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "buy",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "the",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tickets",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "She lives in the capital, that is to say, she lives in Madrid.",
+        "expected_answer": "Ella vive en la capital, es decir, vive en Madrid.",
+        "hint_1": "Usa el marcador de reformulación neutral y formal.",
+        "hint_2": "La segunda parte especifica cuál es la capital.",
+        "annotations": [
+          {
+            "text": "She",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "lives",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "in",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "the",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "capital",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "that",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "is",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "to",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "say",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "she",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "lives",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "in",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Madrid",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-05T12:27:12.275Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "Volver a + infinitivo (repetición)",
+    "module": "Verbal Periphrases",
+    "unit": "Advanced Periphrases",
+    "level": "B1",
+    "grammar_focus": "indicative",
+    "difficulty": 2,
+    "type": "periphrasis",
+    "explanation": "La estructura 'volver a + infinitivo' expresa la repetición de una acción de manera más natural que usar 'otra vez'. Se conjuga el verbo 'volver' según el sujeto y tiempo, seguido de la preposición 'a' y el infinitivo del verbo principal. Es la forma preferida en español para indicar que algo se hace nuevamente.",
+    "examples": [
+      {
+        "es": "Volvió a llamar a las ocho de la noche.",
+        "en": "He called again at eight in the evening."
+      },
+      {
+        "es": "No quiero volver a cometer el mismo error.",
+        "en": "I don't want to make the same mistake again."
+      },
+      {
+        "es": "¿Cuándo volverás a visitarnos?",
+        "en": "When will you visit us again?"
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "Después del accidente, María tardó tres meses en ___ conducir por la autopista.",
+        "expected_answer": "volver a",
+        "hint_1": "Necesitas la estructura que expresa repetición de una acción.",
+        "hint_2": "Recuerda que después va el infinitivo 'conducir'.",
+        "annotations": [
+          {
+            "text": "Después",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "del",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "accidente",
+            "form": null
+          },
+          {
+            "text": ",",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "María",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tardó",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tres",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "meses",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "en",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "conducir",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "por",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "la",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "autopista",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "El restaurante cerró el año pasado pero ___ abrir en primavera con nuevos dueños.",
+        "expected_answer": "volverá a",
+        "hint_1": "Piensa en el tiempo futuro del verbo que expresa repetición.",
+        "hint_2": "La acción de abrir se repetirá en el futuro.",
+        "annotations": [
+          {
+            "text": "El",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "restaurante",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "cerró",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "el",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "año",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "pasado",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "pero",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "abrir",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "en",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "primavera",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "con",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "nuevos",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "dueños",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los estudiantes tuvieron que ___ hacer el examen porque hubo problemas técnicos.",
+        "expected_answer": "volver a",
+        "hint_1": "Usa la estructura que indica repetición de una acción.",
+        "hint_2": "El verbo principal ya está en infinitivo después del espacio.",
+        "annotations": [
+          {
+            "text": "Los",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "estudiantes",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tuvieron",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "que",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "hacer",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "el",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "examen",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "porque",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "hubo",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "problemas",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "técnicos",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Pedro llamó otra vez a su hermana por teléfono. → Rewrite using 'volver a + infinitivo'",
+        "expected_answer": "Pedro volvió a llamar a su hermana por teléfono.",
+        "hint_1": "Sustituye 'otra vez' por la estructura de repetición más natural.",
+        "hint_2": "Conjuga 'volver' en pretérito indefinido y usa el infinitivo del verbo principal.",
+        "annotations": [
+          {
+            "text": "Base",
+            "form": null
+          },
+          {
+            "text": ":",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Pedro",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "llamó",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "otra",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "vez",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "su",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "hermana",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "por",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "teléfono",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "'",
+            "form": null
+          },
+          {
+            "text": "volver",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "+",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "infinitivo",
+            "form": null
+          },
+          {
+            "text": "'",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Los turistas visitaron el museo una segunda vez. → Rewrite using 'volver a + infinitivo'",
+        "expected_answer": "Los turistas volvieron a visitar el museo.",
+        "hint_1": "Reemplaza la expresión de repetición por la estructura más natural en español.",
+        "hint_2": "El verbo principal debe ir en infinitivo después de 'volver a'.",
+        "annotations": [
+          {
+            "text": "Base",
+            "form": null
+          },
+          {
+            "text": ":",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Los",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "turistas",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "visitaron",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "el",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "museo",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "una",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "segunda",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "vez",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "'",
+            "form": null
+          },
+          {
+            "text": "volver",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "+",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "infinitivo",
+            "form": null
+          },
+          {
+            "text": "'",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Mañana intentaré hacer ejercicio de nuevo. → Rewrite using 'volver a + infinitivo'",
+        "expected_answer": "Mañana volveré a intentar hacer ejercicio.",
+        "hint_1": "Cambia la expresión 'de nuevo' por la estructura de repetición preferida.",
+        "hint_2": "Usa el futuro simple del verbo auxiliar de repetición.",
+        "annotations": [
+          {
+            "text": "Base",
+            "form": null
+          },
+          {
+            "text": ":",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Mañana",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "intentaré",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "hacer",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "ejercicio",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "de",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "nuevo",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "→",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Rewrite",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "using",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "'",
+            "form": null
+          },
+          {
+            "text": "volver",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "a",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "+",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "infinitivo",
+            "form": null
+          },
+          {
+            "text": "'",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "She started working at the same company again last month.",
+        "expected_answer": "Volvió a trabajar en la misma empresa el mes pasado.",
+        "hint_1": "Usa la estructura española preferida para expresar repetición de acciones.",
+        "hint_2": "El verbo principal debe estar en infinitivo.",
+        "annotations": [
+          {
+            "text": "She",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "started",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "working",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "at",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "the",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "same",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "company",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "again",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "last",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "month",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "I hope it doesn't rain again tomorrow.",
+        "expected_answer": "Espero que no vuelva a llover mañana.",
+        "hint_1": "Recuerda que después de 'espero que' necesitas subjuntivo.",
+        "hint_2": "Usa la estructura de repetición conjugada en subjuntivo.",
+        "annotations": [
+          {
+            "text": "I",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "hope",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "it",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "doesn't",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "rain",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "again",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tomorrow",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "We will travel to Italy again next summer.",
+        "expected_answer": "Volveremos a viajar a Italia el próximo verano.",
+        "hint_1": "Usa la estructura española natural para expresar que la acción se repetirá.",
+        "hint_2": "Conjuga en futuro simple el verbo que indica repetición.",
+        "annotations": [
+          {
+            "text": "We",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "will",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "travel",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "to",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "Italy",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "again",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "next",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "summer",
+            "form": null
+          },
+          {
+            "text": ".",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-05T12:27:57.403Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
   }
 ]
