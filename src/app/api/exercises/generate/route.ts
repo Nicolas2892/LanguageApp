@@ -69,11 +69,12 @@ Rules for ${typeLabel}: ${rule}`
 
     const message = await anthropic.messages.create({
       model: TUTOR_MODEL,
-      max_tokens: 512,
+      max_tokens: 2048,
       messages: [{ role: 'user', content: promptText }],
     })
 
-    const raw = message.content[0]?.type === 'text' ? message.content[0].text.trim() : ''
+    const rawText = message.content[0]?.type === 'text' ? message.content[0].text.trim() : ''
+    const raw = rawText.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/i, '').trim()
 
     let generated: { prompt: string; expected_answer: string; hint_1: string; hint_2: string; annotations?: AnnotationSpan[] }
     try {

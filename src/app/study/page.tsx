@@ -29,6 +29,7 @@ export default async function StudyPage({
 
   const params = await searchParams
   const filterTypes = params.types ? params.types.split(',').filter(Boolean) : []
+  const GENERATABLE_TYPES = new Set(['gap_fill', 'translation', 'transformation', 'error_correction'])
   const isPracticeMode = params.practice === 'true' && !!params.concept && filterTypes.length > 0
   const isSprint = params.mode === 'sprint'
   const sprintLimitType = params.limitType === 'count' ? 'count' : 'time'
@@ -226,7 +227,7 @@ export default async function StudyPage({
           items={items}
           practiceMode={isPracticeMode}
           generateConfig={
-            isPracticeMode && params.concept && filterTypes[0]
+            isPracticeMode && params.concept && filterTypes[0] && GENERATABLE_TYPES.has(filterTypes[0])
               ? {
                   conceptId: params.concept,
                   concept: conceptMap.get(params.concept)!,
