@@ -218,9 +218,9 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1085 tests across 26 files — all passing.**
+**Test suite: 1111 tests across 28 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 6 modules)**.
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 6 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**.
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -263,6 +263,13 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 **Feat-A: Daily email reminders** *(deferred — not wanted)*
 
+**Feat-C: Guided CEFR progression** ✅ *Complete*
+- `src/lib/curriculum/prerequisites.ts` — `computeUnlockedLevels()` + `computeUnlockProgress()` helpers
+- `LEVEL_UNLOCK_THRESHOLD = 0.8` in constants; B2 unlocks when ≥80% of B1 concepts attempted; C1 unlocks when ≥80% of B2 attempted
+- `mode=new` queue filtered to unlocked levels only; bootstrap always B1-only
+- Curriculum page: informational `Lock` icon badge on locked concepts + progress banner; Practice buttons always remain active (no hard gates)
+- 13 new tests in `prerequisites.test.ts`
+
 **Feat-D: Web push notifications** ✅ *Complete — see `docs/completed-features.md`*
 - VAPID-based push via `web-push`; `profiles.push_subscription jsonb` (migration 009)
 - SW push + notificationclick handlers; `PushPermissionPrompt` in study done screen
@@ -283,11 +290,26 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - Migration: no schema change needed; offline queue lives entirely in IndexedDB on the client
 - **Do not implement without a written PM decision on conflict resolution strategy and UI for queued/pending sync state.**
 
+**Feat-G: Full Architecture and Security Review**
+- Conduct a full review of current app architecture and security to suggest both performance and security improvements to enhance it.
+
+**Feat-H: Another Design & UX Review ***
+- Run another iteration of all UX Screens and Menus and suggest another set of improvements based on best practices. The goal should be to make the design feel elegant and polished without feeling playful. So closer to Babbel than to Dulingo.
+- Put specific focus on reviewing navigation structure, menu sequencing/navigation flows for users and layout to see if there are opportunities to improve app setup.
+- Put specific focus as well on ability to add any graphical elements that would enhance the app appearance to give it its own branding and character. 
+- Lastly review the icons used and check if there are any more polished appearing icon themes we might want to use to improve design.
+
 #### Strategic / Long-term
 
-**Strat-A: Shareable progress card** *(deferred — implement after content depth is sufficient)*
-- `/progress/share` route: server-rendered OG image (via Next.js `ImageResponse`) showing streak, mastered count, level
-- "Share my progress" button on dashboard + `/progress`; triggers `navigator.share` or copies URL
+**Strat-A: Mirror some of Ella Verbs features by implementing a dedicated conjugation mode** 
+- Enable user to run conjugation drills applying the same drill customization features also provided by ella verbs
+- Enable a dictionary/list of 50/100/250 most frequent verbs including subpages for conjugation tables
+- ability to 'favorite' verbs into a custom training list. 
+- Conjugation should happen in sentence context
+- No use of Claude for grading, everything should be prestored, rather challenge the user to fill in right conjugation in-context sentences. As a result should enable offline mode.
+- Ideally mix some of the connectors/concepts that trigger subjunctive vs. indicative into pre-generated sentences to enable cross-learning. 
+- Grading Model for Tense Mastery (independent of module mastery in curriculum)
+- Again do indepth research as a PM And UX Designer how Ella verbs works and how we can copy the same approach they and all related features we need
 
 **Strat-B: Admin content panel** *(deferred — implement when content iteration becomes a bottleneck)*
 - `/admin` route gated by `is_admin boolean` on `profiles`
@@ -295,6 +317,12 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - Stretch: inline edit for concept explanation and exercise prompt text
 
 #### Bugs / Layout Fixes
+
+**Fix-G: Review card has wrong background in dark mode**
+- **Problem**: The Review card on the dashboard shows a muddy brownish-gray tint in dark mode instead of matching the other dark cards. Visible in screenshot — the card is clearly lighter/warmer than "Learn new" and "Free write".
+- **Cause**: The warm tint is applied via `bg-orange-50/60` (orange-50 at 60% opacity). At 60% opacity over a dark background this composites into a brownish-gray. The `dark:bg-card` override added in UX-T does not appear to take effect — likely a Tailwind v4 CSS specificity or class-scanning issue with opacity-modified background classes inside dynamic ternary strings.
+- **Attempted fix**: `dark:bg-card` added to the ternary class string in `src/app/dashboard/page.tsx` — did not work.
+- **Suggested approach**: Move the warm tint to a conditional inline style (`style={{ backgroundColor: 'oklch(...)' }}`) so it only applies in light mode, or replace `bg-orange-50/60` with a solid non-opacity class like `bg-orange-50` and add `dark:bg-card` — removing the opacity modifier which is likely the root cause of the override failing.
 
 **Fix-F: Write page sticky footer misaligned on desktop (deferred)**
 - **Problem**: On desktop, the sticky footer ("Start writing →" button) in `ConceptPicker.tsx` is centered against the full viewport width, while the module cards above are centered within the content area to the right of the 220px sidebar. This makes the button appear shifted left compared to the content.
@@ -376,12 +404,10 @@ Items from full UX research audit (2026-03). Ordered by effort/impact. First 7 a
 
 2. **UX-T: Dark mode color fixes** — Replace hardcoded orange/amber backgrounds with CSS variable-based classes. Key files: Review card warm tint, UserAvatar, hint boxes in HintPanel, FeedbackPanel accent strip.
 
-3. **Feat-C: Padlock prerequisites** *(now viable — 85 concepts in DB)* — Will need a `concept_prerequisites` join table (multiple prerequisites per concept) rather than a single nullable column.
-
 ### Later — Growth features (deferred)
 
-5. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
+3. **Strat-A: Shareable progress card** — `/progress/share` OG image via `ImageResponse`; `navigator.share` button on dashboard.
 
-6. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
+4. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
 
-7. **Feat-A: Daily email reminders** *(not wanted — deferred indefinitely)*
+5. **Feat-A: Daily email reminders** *(not wanted — deferred indefinitely)*
