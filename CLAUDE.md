@@ -25,6 +25,8 @@ pnpm test                 # Vitest unit tests (one-shot)
 pnpm test:watch           # Vitest watch mode
 pnpm seed                 # Seed curriculum data into Supabase (requires env vars)
 pnpm annotate             # Annotate exercises with grammatical spans via Claude (requires env vars)
+pnpm seed:ai              # Generate new concepts + top-up existing → docs/curriculum-review-YYYY-MM-DD.json
+pnpm seed:ai:apply        # Apply approved entries from review JSON to Supabase
 ```
 
 Seed command requires env vars:
@@ -38,6 +40,12 @@ Annotate command requires env vars:
 NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm annotate
 ```
 Annotates all exercises where `annotations IS NULL`; safe to re-run (skips already-annotated rows).
+
+Seed:ai command requires env vars:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm seed:ai
+```
+Queries DB for existing exercise counts; generates missing exercises for new and existing concepts; writes review JSON to `docs/`. Set `_approved: true` on entries, then run `pnpm seed:ai:apply [--dry-run] <file>`.
 
 ## Git / GitHub Workflow
 
@@ -176,9 +184,19 @@ Migrations (run once in Supabase SQL editor):
 - `isNewUser` flag uses `studiedCount` (any `user_progress` row), not `masteredCount`
 
 ### Curriculum Seed Content
+**Currently in DB** (21 concepts, 63 exercises):
 - Module 1: Connectors & Discourse Markers (3 units: Concessive, Causal/Consecutive, Adversative)
 - Module 2: Subjunctive Mastery (2 units: Present Triggers, Imperfect/Hypotheticals)
-- 21 concepts, 3 exercises each = 63 exercises total (3rd exercise is free_write or error_correction)
+- 21 concepts, 3 exercises each = 63 exercises total
+
+**Planned via `pnpm seed:ai`** (85 concepts total, 9 exercises each = 765 exercises):
+- Module 1 expanded to 4 units, 23 concepts (adds Unit 1.4 Linking/Structuring/Reformulation + 2 causal connectors)
+- Module 2 renamed to "The Subjunctive"; gains Unit 2.3 Complex Structures (4 new concepts)
+- Module 3: Past Tenses — 3 units, 11 concepts (all new)
+- Module 4: Core Spanish Contrasts — 3 units, 12 concepts (all new)
+- Module 5: Verbal Periphrases — 3 units, 13 concepts (all new)
+- Module 6: Complex Sentences — 3 units, 13 concepts (all new)
+- Full plan in `src/lib/curriculum/curriculum-plan.ts`; design reference in `docs/curriculum-design.md`
 
 ### Shared Modules (added in pre-Phase 6 audit)
 - `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21
@@ -203,9 +221,9 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 282 tests across 22 files — all passing.**
+**Test suite: 1085 tests across 26 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips).
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips), Feat-E infrastructure (curriculum-plan.ts + seed:ai scripts).
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -254,11 +272,13 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - `NotificationSettings` on account page; `/api/push/subscribe` (POST/DELETE) + `/api/push/send` cron route
 - `vercel.json` daily cron 18:00 UTC; `CRON_SECRET` auth on send route
 
-**Feat-E: Content expansion via AI seeding script**
-- `pnpm seed:ai` script: uses Claude to draft 3–5 new concepts per unit with 3 exercises each
-- Output to a JSON review file first; human approval before DB insert
-- New module candidates: Verb Constructions (ser/estar in context, reflexive verbs, subjunctive triggers)
-- Target: 40+ total concepts across 3 modules
+**Feat-E: Content expansion via AI seeding script** *(infrastructure complete — ready to run)*
+- `curriculum-plan.ts` — single source of truth for all 85 concepts across 6 modules (21 existing + 64 new)
+- `ai-seed-config.ts` — EXERCISE_TYPE_RULES per CEFR level, EXERCISE_GENERATION_RULES per type, 9 exercises per concept (3 per type)
+- `run-seed-ai.ts` (`pnpm seed:ai`) — queries DB; generates 9 exercises for new concepts or tops up existing ones to 9; writes `docs/curriculum-review-YYYY-MM-DD.json`
+- `run-seed-ai-apply.ts` (`pnpm seed:ai:apply`) — applies `_approved: true` entries; `_mode: 'new'` upserts full hierarchy; `_mode: 'topup'` looks up concept and inserts missing exercises; `--dry-run` flag
+- **Target: 85 concepts, 765 exercises** across 6 modules (Past Tenses, Core Spanish Contrasts, Verbal Periphrases, Complex Sentences added)
+- **Next action**: run `pnpm seed:ai`, review JSON, approve entries, `pnpm seed:ai:apply`; then DB rename `UPDATE modules SET title = 'The Subjunctive' WHERE title = 'Subjunctive Mastery';`
 
 **Feat-F: Offline exercise packs (module download)**
 - User downloads a full module's exercises to IndexedDB for offline use
@@ -357,7 +377,7 @@ Items from full UX research audit (2026-03). Ordered by effort/impact. First 7 a
 
 ### Immediate — DB + content
 
-1. **Feat-E: Content expansion via AI seeding** — Run `pnpm seed:ai` to draft 3–5 new concepts per unit (output to JSON for human approval before DB insert). Target 40+ concepts across 3 modules. Adds Module 3 (Verb Constructions: ser/estar, reflexive verbs). This is the single highest-leverage action for user retention.
+1. **Feat-E: Run `pnpm seed:ai`** — Infrastructure is complete. Run the script, review `docs/curriculum-review-YYYY-MM-DD.json`, set `_approved: true` on quality entries, then run `pnpm seed:ai:apply`. Also run the DB rename: `UPDATE modules SET title = 'The Subjunctive' WHERE title = 'Subjunctive Mastery';`. Target: 85 concepts, 765 exercises across 6 modules. This is the single highest-leverage action for user retention.
 
 ### Next — Learning quality
 
