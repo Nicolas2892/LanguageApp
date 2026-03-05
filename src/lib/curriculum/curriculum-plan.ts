@@ -287,11 +287,11 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
 
-  // ─── Module 2: The Subjunctive ────────────────────────────────────────────
+  // ─── Module 2a: The Subjunctive: Core / 2b: The Subjunctive: Advanced ─────
 
   // Unit 2.1 — Present Subjunctive Triggers
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Core',
     unit: 'Present Subjunctive Triggers',
     title: 'Verbos de deseo (querer, esperar, desear)',
     description: 'verbs of desire and wish (querer que, esperar que, desear que) that trigger the present subjunctive in the subordinate clause when the subject of the main verb differs from that of the subordinate verb',
@@ -302,7 +302,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Core',
     unit: 'Present Subjunctive Triggers',
     title: 'Verbos de emoción (alegrarse, temer, sorprender)',
     description: 'verbs of emotion (alegrarse de que, temer que, sorprender que, encantar que, molestar que) that trigger the subjunctive — the emotional reaction is in the main clause, the cause or object is in the subjunctive clause',
@@ -313,7 +313,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Core',
     unit: 'Present Subjunctive Triggers',
     title: 'Verbos de duda y negación (dudar, no creer, negar)',
     description: 'verbs of doubt and denial (dudar que, no creer que, negar que) that trigger subjunctive, contrasting with their affirmative forms (creer que, pensar que) which take indicative',
@@ -324,7 +324,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Core',
     unit: 'Present Subjunctive Triggers',
     title: 'Conjunciones temporales con subjuntivo (cuando, en cuanto, hasta que)',
     description: 'temporal conjunctions (cuando, en cuanto, hasta que, tan pronto como, antes de que) that require subjunctive when referring to future or hypothetical events, but indicative when referring to habitual or past actions',
@@ -335,7 +335,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Core',
     unit: 'Present Subjunctive Triggers',
     title: 'Conjunciones finales (para que, a fin de que)',
     description: 'final/purpose conjunctions (para que, a fin de que, con el objetivo de que) that always require subjunctive because they express a purpose or goal that has not yet been achieved',
@@ -348,7 +348,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 2.2 — Imperfect Subjunctive & Hypotheticals
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Advanced',
     unit: 'Imperfect Subjunctive & Hypotheticals',
     title: 'Condicional tipo 2: Si + imperfecto de subjuntivo',
     description: 'type 2 conditional: si + imperfecto de subjuntivo (si tuviera…) + condicional simple (tendría) to express hypothetical or contrary-to-fact present/future situations',
@@ -359,7 +359,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Advanced',
     unit: 'Imperfect Subjunctive & Hypotheticals',
     title: 'Condicional tipo 3: Si + pluscuamperfecto de subjuntivo',
     description: 'type 3 conditional: si + pluscuamperfecto de subjuntivo (si hubiera tenido…) + condicional compuesto (habría tenido) to express counterfactual past situations — "if I had done X, I would have done Y"',
@@ -370,7 +370,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'free_write'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Advanced',
     unit: 'Imperfect Subjunctive & Hypotheticals',
     title: 'Ojalá + imperfecto de subjuntivo',
     description: 'ojalá with imperfect subjunctive to express an unlikely or impossible wish about the present or future — contrasting with ojalá + present subjunctive (likely wish) and ojalá + pluscuamperfecto (regret about past)',
@@ -381,7 +381,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Advanced',
     unit: 'Imperfect Subjunctive & Hypotheticals',
     title: 'Imperfecto de subjuntivo en estilo indirecto',
     description: 'use of imperfect subjunctive in reported speech when the main verb is in the past tense and the original utterance contained present subjunctive — part of the sequence of tenses (concordancia de tiempos)',
@@ -394,7 +394,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 2.3 — Complex Subjunctive Structures
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Advanced',
     unit: 'Complex Subjunctive Structures',
     title: 'Subjuntivo con antecedente indefinido o negado',
     description: 'subjunctive in relative clauses when the antecedent is unknown, non-existent, or being sought — contrasting with indicative when the antecedent is specific and known',
@@ -405,7 +405,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Advanced',
     unit: 'Complex Subjunctive Structures',
     title: 'por + adj/adv + que (+ subjuntivo)',
     description: 'concessive structure por + adjective/adverb + que + subjunctive to express "however + adj/adv" — e.g. por difícil que sea, por mucho que insistas — a C1 structural pattern for nuanced written argumentation',
@@ -416,7 +416,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'free_write'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Advanced',
     unit: 'Complex Subjunctive Structures',
     title: 'Secuencia de tiempos (concordancia verbal)',
     description: 'sequence of tenses (concordancia de tiempos verbales): when a subjunctive clause depends on a past-tense main verb, the correct subjunctive tense shifts from present to imperfect, and from perfect to pluperfect',
@@ -427,7 +427,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['transformation', 'translation', 'free_write'],
   },
   {
-    module: 'The Subjunctive',
+    module: 'The Subjunctive: Advanced',
     unit: 'Complex Subjunctive Structures',
     title: 'que yo sepa / que yo recuerde (subjuntivo epistémico)',
     description: 'epistemic parenthetical phrases with subjunctive (que yo sepa, que yo recuerde, que yo vea) to express the speaker\'s limited certainty — "as far as I know / to my knowledge / that I can recall"',

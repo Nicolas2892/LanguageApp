@@ -94,15 +94,16 @@ describe('CURRICULUM_PLAN', () => {
       expect(unique.size).toBe(titles.length)
     })
 
-    it('groups into exactly 6 distinct modules', () => {
+    it('groups into exactly 7 distinct modules', () => {
       const modules = new Set(CURRICULUM_PLAN.map((c) => c.module))
-      expect(modules.size).toBe(6)
+      expect(modules.size).toBe(7)
     })
 
-    it('contains the expected 6 module names', () => {
+    it('contains the expected 7 module names', () => {
       const modules = new Set(CURRICULUM_PLAN.map((c) => c.module))
       expect(modules).toContain('Connectors & Discourse Markers')
-      expect(modules).toContain('The Subjunctive')
+      expect(modules).toContain('The Subjunctive: Core')
+      expect(modules).toContain('The Subjunctive: Advanced')
       expect(modules).toContain('Past Tenses')
       expect(modules).toContain('Core Spanish Contrasts')
       expect(modules).toContain('Verbal Periphrases')
@@ -114,9 +115,14 @@ describe('CURRICULUM_PLAN', () => {
       expect(count).toBe(23)
     })
 
-    it('has Module 2 with 13 concepts', () => {
-      const count = CURRICULUM_PLAN.filter((c) => c.module === 'The Subjunctive').length
-      expect(count).toBe(13)
+    it('has The Subjunctive: Core with 5 concepts', () => {
+      const count = CURRICULUM_PLAN.filter((c) => c.module === 'The Subjunctive: Core').length
+      expect(count).toBe(5)
+    })
+
+    it('has The Subjunctive: Advanced with 8 concepts', () => {
+      const count = CURRICULUM_PLAN.filter((c) => c.module === 'The Subjunctive: Advanced').length
+      expect(count).toBe(8)
     })
 
     it('has Module 3 with 11 concepts', () => {
