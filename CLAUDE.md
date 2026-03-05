@@ -232,11 +232,11 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### Pedagogical / Learning Quality
 
-**Ped-B: AI-generated exercises enter the SRS review pool automatically**
-- P8 generate route already inserts into `exercises` table permanently (reusable)
-- SRS queue already picks a random exercise per concept from all available — AI-generated ones are included automatically once inserted; no architecture change needed
-- Benefit: pool grows over time, reducing repetition and token waste; user cannot memorise specific phrasings
-- Fix-D is applied (service role insert in generate route); verify in testing that generated exercises appear in subsequent SRS sessions
+**Ped-B: AI-generated exercises enter the SRS review pool automatically** ✅ *Complete*
+- `/api/exercises/generate` inserts into `exercises` table via service role; SRS queue picks randomly from all available exercises per concept — AI-generated ones included automatically
+- `max_tokens` raised to 2048 (was 512 — caused JSON truncation → parse failures → "Failed to generate exercises"); markdown fence stripping added as defensive measure
+- "Generate 3 more" button hidden for `sentence_builder` and `free_write` (unsupported by generate route's Zod schema)
+- Verified working in production (2026-03)
 
 **Ped-D: Gap-fill same-concept redesign** ✅ *Complete — see `docs/completed-features.md`*
 - All 21 gap_fill exercises redesigned: 13 reduced to 1 blank (same-concept only); 8 already-correct 2-blank exercises cleaned up. Inline underline inputs with ch-width sizing + Enter auto-advance. DB re-seeded and re-annotated.
@@ -395,10 +395,6 @@ Items from full UX research audit (2026-03). Ordered by effort/impact. First 7 a
 ---
 
 ## Recommended Next Steps (priority order)
-
-### Immediate — Learning quality
-
-1. **Ped-B: Verify AI-generated exercises enter SRS pool** — Confirm that exercises inserted by `/api/exercises/generate` (drill mode) appear in subsequent SRS sessions. Requires manual testing after a drill session. No code change expected; this is a validation step.
 
 ### Polish & UX quality
 
