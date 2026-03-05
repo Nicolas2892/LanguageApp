@@ -186,7 +186,7 @@ export default async function DashboardPage() {
         {/* Review card — primary emphasis when action is needed */}
         <div className={`rounded-xl p-6 space-y-3 border ${
           dueCount > 0 && studiedCount > 0
-            ? 'bg-orange-50/60 dark:bg-card border-orange-200 dark:border-orange-900 border-l-4 border-l-orange-500'
+            ? 'review-card-warm border-orange-200 dark:border-orange-900 border-l-4 border-l-orange-500'
             : studiedCount > 0 && dueCount === 0
             ? 'border-l-4 border-l-green-500 border-green-200 dark:border-green-900 bg-card'
             : 'border-l-4 border-l-orange-500 bg-card'

@@ -146,3 +146,11 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 .animate-page-in { animation: page-fade-in 150ms ease-out; }
+
+/* Fix-G + UX-T: Review card warm tint — reliable dark mode override via unlayered CSS */
+.review-card-warm {
+  background-color: oklch(0.97 0.05 47 / 0.6); /* orange-50 at 60% opacity */
+}
+.dark .review-card-warm {
+  background-color: var(--card); /* resolves to oklch(0.205 0 0) in dark mode */
+}

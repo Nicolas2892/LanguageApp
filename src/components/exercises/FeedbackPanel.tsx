@@ -65,7 +65,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }
 
         {/* Explanation */}
         {result.explanation && (
-          <p className="text-sm text-muted-foreground border-l-2 border-orange-300 dark:border-orange-700 pl-3 italic">
+          <p className="text-sm text-muted-foreground border-l-2 border-muted-foreground/30 pl-3 italic">
             {result.explanation}
           </p>
         )}
