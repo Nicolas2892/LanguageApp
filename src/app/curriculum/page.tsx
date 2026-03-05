@@ -288,7 +288,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                   {/* Left: title + lock icon */}
                                   <div className="min-w-0 flex-1 flex items-center gap-1.5">
                                     {locked && <Lock className="h-3 w-3 shrink-0 text-muted-foreground" strokeWidth={1.5} />}
-                                    <p className="font-medium text-sm leading-snug truncate">{concept.title}</p>
+                                    <p className={`font-medium text-sm leading-snug truncate ${locked ? 'text-muted-foreground' : ''}`}>{concept.title}</p>
                                   </div>
                                   {/* Right: badges + practice shortcut */}
                                   <div className="flex items-center gap-2 shrink-0">
