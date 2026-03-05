@@ -163,23 +163,29 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           ...(practiceMode && { skip_srs: true }),
         }),
       })
-      const result = await res.json() as GradeResult & { next_review_in_days: number }
-      setScores((s) => [...s, result.score])
+      const result = await res.json()
+      if (!res.ok) {
+        alert('Something went wrong. Please try again.')
+        setSubmitting(false)
+        return
+      }
+      const gradeResult = result as GradeResult & { next_review_in_days: number }
+      setScores((s) => [...s, gradeResult.score])
 
       // Track missed concepts (score < 2)
-      if (result.score < 2) {
+      if (gradeResult.score < 2) {
         setMissedConcepts((prev) => {
           if (prev.some((c) => c.id === current.concept.id)) return prev
           return [...prev, { id: current.concept.id, title: current.concept.title }]
         })
       }
 
-      if (!result.is_correct) setWrongAttempts((n) => n + 1)
-      const fc = result.score >= 2 ? 'animate-flash-green' : 'animate-flash-red'
+      if (!gradeResult.is_correct) setWrongAttempts((n) => n + 1)
+      const fc = gradeResult.score >= 2 ? 'animate-flash-green' : 'animate-flash-red'
       setFlashClass(fc)
       setSubmitting(false)
       flashTimerRef.current = setTimeout(() => {
-        setState({ phase: 'feedback', result, userAnswer: answer })
+        setState({ phase: 'feedback', result: gradeResult, userAnswer: answer })
         setFlashClass(null)
       }, 300)
     } catch {
@@ -249,7 +255,14 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
         fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
       ])
-      const newItems: StudyItem[] = [r1, r2, r3].map((ex) => ({
+      const exercises = [r1, r2, r3].filter(
+        (ex) => ex && typeof ex.id === 'string'
+      )
+      if (exercises.length === 0) {
+        setGenerateError('Failed to generate exercises. Please try again.')
+        return
+      }
+      const newItems: StudyItem[] = exercises.map((ex) => ({
         concept: generateConfig.concept,
         exercise: ex as Exercise,
       }))
