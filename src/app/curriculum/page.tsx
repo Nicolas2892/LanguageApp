@@ -267,10 +267,16 @@ export default async function CurriculumPage({ searchParams }: Props) {
                             const state = getMasteryState(intervalDays)
                             const cfg   = MASTERY_BADGE[state]
 
+                            const locked = isLocked(concept)
+
                             return (
                               <div
                                 key={concept.id}
-                                className="relative border rounded-lg bg-background hover:bg-muted/40 transition-colors"
+                                className={`relative border rounded-lg transition-colors ${
+                                  locked
+                                    ? 'bg-muted/30 border-border/40'
+                                    : 'bg-background hover:bg-muted/40'
+                                }`}
                               >
                                 {/* Full-row link to detail page */}
                                 <Link
@@ -278,21 +284,16 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                   className="absolute inset-0 rounded-lg"
                                   aria-label={`View ${concept.title}`}
                                 />
-                                <div className="flex items-center justify-between px-3 py-2.5 gap-2">
-                                  {/* Left: title */}
-                                  <div className={`min-w-0 flex-1 ${isLocked(concept) ? 'opacity-70' : ''}`}>
+                                <div className={`flex items-center justify-between px-3 py-2.5 gap-2 ${locked ? 'opacity-40' : ''}`}>
+                                  {/* Left: title + lock icon */}
+                                  <div className="min-w-0 flex-1 flex items-center gap-1.5">
+                                    {locked && <Lock className="h-3 w-3 shrink-0 text-muted-foreground" strokeWidth={1.5} />}
                                     <p className="font-medium text-sm leading-snug truncate">{concept.title}</p>
                                   </div>
                                   {/* Right: badges + practice shortcut */}
                                   <div className="flex items-center gap-2 shrink-0">
                                     <LevelChip level={concept.level} />
                                     <GrammarFocusChip focus={concept.grammar_focus} />
-                                    {isLocked(concept) && (
-                                      <Lock
-                                        className="h-3.5 w-3.5 text-muted-foreground shrink-0" strokeWidth={1.5}
-                                        aria-label="Not yet in your automatic queue"
-                                      />
-                                    )}
                                     <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${cfg.className}`}>
                                       {cfg.label}
                                     </span>
