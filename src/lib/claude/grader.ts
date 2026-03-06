@@ -68,7 +68,7 @@ Respond with this exact JSON structure:
   const message = await anthropic.messages.create({
     model: TUTOR_MODEL,
     max_tokens: 512,
-    system: systemPrompt,
+    system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: userPrompt }],
   })
 

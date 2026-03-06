@@ -9,6 +9,25 @@ import type { CefrLevel } from '@/lib/curriculum/prerequisites'
 import type { StudyItem } from './StudySession'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 
+function interleaveByUnit(items: StudyItem[]): StudyItem[] {
+  const groups = new Map<string, StudyItem[]>()
+  for (const item of items) {
+    const uid = item.concept.unit_id
+    const arr = groups.get(uid) ?? []
+    arr.push(item)
+    groups.set(uid, arr)
+  }
+  const queues = Array.from(groups.values())
+  const result: StudyItem[] = []
+  const maxLen = Math.max(...queues.map((q) => q.length), 0)
+  for (let i = 0; i < maxLen; i++) {
+    for (const queue of queues) {
+      if (i < queue.length) result.push(queue[i])
+    }
+  }
+  return result
+}
+
 export default async function StudyPage({
   searchParams,
 }: {
@@ -237,8 +256,12 @@ export default async function StudyPage({
     }
   }
 
+  // Interleave by unit in SRS/sprint modes so each session mixes grammar areas (Ped-H)
+  const shouldInterleave = !params.concept && !params.unit && !params.module && !isPracticeMode
+  const orderedItems = shouldInterleave ? interleaveByUnit(items) : items
+
   // Cap items to sessionSize (only in non-sprint, non-drill modes)
-  const cappedItems = (!isSprint && !isPracticeMode) ? items.slice(0, sessionSize) : items
+  const cappedItems = (!isSprint && !isPracticeMode) ? orderedItems.slice(0, sessionSize) : orderedItems
 
   if (cappedItems.length === 0) redirect('/dashboard')
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
@@ -78,6 +78,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const [missedConcepts, setMissedConcepts] = useState<Array<{ id: string; title: string }>>([])
   const [showExitDialog, setShowExitDialog] = useState(false)
 
+  const [, startTransition] = useTransition()
   const [wrongAttempts, setWrongAttempts] = useState(0)
   const [claudeHint, setClaudeHint] = useState<string | null>(null)
   const [loadingHint, setLoadingHint] = useState(false)
@@ -247,10 +248,12 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         }),
       }).catch(() => {})
     } else {
-      setIndex((i) => i + 1)
-      setState({ phase: 'answering' })
-      setWrongAttempts(0)
-      setClaudeHint(null)
+      startTransition(() => {
+        setIndex((i) => i + 1)
+        setState({ phase: 'answering' })
+        setWrongAttempts(0)
+        setClaudeHint(null)
+      })
     }
   }
 
