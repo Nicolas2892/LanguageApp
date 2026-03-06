@@ -83,6 +83,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const [claudeHint, setClaudeHint] = useState<string | null>(null)
   const [loadingHint, setLoadingHint] = useState(false)
 
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [generatingMore, setGeneratingMore] = useState(false)
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [flashClass, setFlashClass] = useState<string | null>(null)
@@ -167,6 +168,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
 
   async function handleSubmit(answer: string) {
     setSubmitting(true)
+    setSubmitError(null)
     try {
       const res = await fetch('/api/submit', {
         method: 'POST',
@@ -180,7 +182,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       })
       const result = await res.json()
       if (!res.ok) {
-        alert('Something went wrong. Please try again.')
+        setSubmitError('Something went wrong. Please try again.')
         setSubmitting(false)
         return
       }
@@ -204,7 +206,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         setFlashClass(null)
       }, 300)
     } catch {
-      alert('Something went wrong. Please try again.')
+      setSubmitError('Something went wrong. Please try again.')
       setSubmitting(false)
     }
   }
@@ -310,7 +312,11 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       : "Rough session — that's exactly what review is for."
     return (
       <div className="space-y-6 text-center py-8">
-        <PartyPopper className="h-14 w-14 text-orange-500 mx-auto" strokeWidth={1.5} />
+        <div className="flex justify-center">
+          <div className={pct < 70 ? 'rounded-full ring-2 ring-orange-400 ring-offset-2 animate-pulse p-2' : ''}>
+            <PartyPopper className="h-14 w-14 text-orange-500 animate-in zoom-in-50 duration-500" strokeWidth={1.5} />
+          </div>
+        </div>
         <div>
           <p className="text-5xl font-extrabold">{pct}%</p>
           <p className="text-muted-foreground mt-1 text-sm">{sessionLabel}</p>
@@ -479,6 +485,9 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                   <Loader2 className="h-4 w-4 animate-spin" />
                   <span>Checking…</span>
                 </div>
+              )}
+              {submitError && (
+                <p className="text-sm text-destructive mt-2">{submitError}</p>
               )}
               <HintPanel
                 hint1={current.exercise.hint_1}

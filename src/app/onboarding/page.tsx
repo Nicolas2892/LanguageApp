@@ -63,6 +63,7 @@ export default async function OnboardingPage() {
             Answer these {items.length} questions — no hints, no pressure. Your results will
             personalise your study queue from the start.
           </p>
+          <p className="text-xs text-muted-foreground">Takes about 3 minutes.</p>
         </div>
         <ErrorBoundary>
           <DiagnosticSession items={items} />

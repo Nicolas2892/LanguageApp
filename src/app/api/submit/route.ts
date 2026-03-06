@@ -110,24 +110,22 @@ export async function POST(request: Request) {
           .eq('concept_id', concept_id)
       }
 
-      // 5c. Recompute and persist the user's CEFR level
-      await updateComputedLevel(supabase, user.id)
     }
 
-    // 6. Record the attempt
-    await supabase
-      .from('exercise_attempts')
-      .insert({
+    // 6–8. Fire-and-forget: record attempt + streak + computed level
+    const bgOps: PromiseLike<unknown>[] = [
+      supabase.from('exercise_attempts').insert({
         user_id: user.id,
         exercise_id,
         user_answer,
         is_correct: gradeResult.is_correct,
         ai_score: gradeResult.score,
         ai_feedback: gradeResult.feedback,
-      })
-
-    // 7. Update streak atomically — once per day
-    await updateStreakIfNeeded(supabase, user.id)
+      }),
+      updateStreakIfNeeded(supabase, user.id),
+    ]
+    if (!skip_srs) bgOps.push(updateComputedLevel(supabase, user.id))
+    Promise.all(bgOps).catch(console.error)
 
     return NextResponse.json({
       ...gradeResult,

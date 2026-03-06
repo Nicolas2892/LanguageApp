@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
-import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { SCORE_CONFIG } from '@/lib/scoring'
 import type { Concept, Exercise } from '@/lib/supabase/types'
@@ -38,12 +37,14 @@ export function DiagnosticSession({ items }: Props) {
   const [submitting, setSubmitting] = useState(false)
   const [completing, setCompleting] = useState(false)
   const [results, setResults] = useState<DiagnosticResult[]>([])
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const current = items[index]
   const progress = (index / items.length) * 100
 
   async function handleSubmit(answer: string) {
     setSubmitting(true)
+    setSubmitError(null)
     try {
       const res = await fetch('/api/submit', {
         method: 'POST',
@@ -66,7 +67,7 @@ export function DiagnosticSession({ items }: Props) {
       ])
       setState({ phase: 'feedback', result, userAnswer: answer })
     } catch {
-      alert('Something went wrong. Please try again.')
+      setSubmitError('Something went wrong. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -121,12 +122,16 @@ export function DiagnosticSession({ items }: Props) {
   return (
     <div className="space-y-6">
       {/* Progress header */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Question {index + 1} of {items.length}</span>
-          <Badge variant="outline" className="capitalize">{current.concept.type} practice</Badge>
+      <div className="space-y-3">
+        <div className="flex items-center gap-1.5">
+          {items.map((_, i) => (
+            <span
+              key={i}
+              className={`h-2 w-2 rounded-full inline-block ${i <= index ? 'bg-primary' : 'bg-muted'}`}
+            />
+          ))}
         </div>
-        <Progress value={progress} className="h-1.5" />
+        <Progress value={progress} className="h-2 transition-all duration-700" />
       </div>
 
       {/* Concept context */}
@@ -137,15 +142,14 @@ export function DiagnosticSession({ items }: Props) {
 
       {/* Exercise */}
       <div className="space-y-3">
-        <Badge variant="secondary" className="text-xs capitalize">
-          {current.exercise.type.replace('_', ' ')}
-        </Badge>
-
         {state.phase === 'answering' && (
           <>
             <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
             {submitting && (
               <p className="text-sm text-muted-foreground animate-pulse">Thinking…</p>
+            )}
+            {submitError && (
+              <p className="text-sm text-destructive">{submitError}</p>
             )}
           </>
         )}

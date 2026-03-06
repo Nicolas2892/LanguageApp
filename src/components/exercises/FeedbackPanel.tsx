@@ -50,16 +50,22 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }
 
         {/* Your answer vs correct */}
         <div className="space-y-2 text-sm">
-          <div className="flex gap-2">
-            <span className="text-muted-foreground w-28 shrink-0">Your answer:</span>
-            <span className={isCorrect ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}>{userAnswer}</span>
-          </div>
-          {!isCorrect && result.corrected_version && (
-            <div className="flex gap-2 items-center">
-              <span className="text-muted-foreground w-28 shrink-0">Correct:</span>
-              <span className="text-green-700 dark:text-green-400 font-medium flex-1">{result.corrected_version}</span>
-              <SpeakButton text={result.corrected_version} />
+          {isCorrect ? (
+            <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border-l-4 border-green-400 px-3 py-2">
+              {userAnswer}
             </div>
+          ) : (
+            <>
+              <div className="rounded-lg bg-red-50 dark:bg-red-950/30 border-l-4 border-red-400 px-3 py-2">
+                {userAnswer}
+              </div>
+              {result.corrected_version && (
+                <div className="rounded-lg bg-green-50 dark:bg-green-950/30 border-l-4 border-green-400 px-3 py-2 flex items-center justify-between">
+                  <span>{result.corrected_version}</span>
+                  <SpeakButton text={result.corrected_version} />
+                </div>
+              )}
+            </>
           )}
         </div>
 

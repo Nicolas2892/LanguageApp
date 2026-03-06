@@ -8,6 +8,8 @@ const CSP = [
   "font-src 'self' data:",
   "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com",
   "frame-ancestors 'none'",
+  "worker-src 'self'",
+  "manifest-src 'self'",
 ].join('; ')
 
 const securityHeaders = [
