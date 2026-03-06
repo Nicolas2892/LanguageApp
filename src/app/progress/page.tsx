@@ -265,7 +265,7 @@ export default async function ProgressPage() {
               <p className="text-2xl font-extrabold">{currentStreak}</p>
               <div>
                 <p className="text-xs font-medium">Day streak</p>
-                <p className="text-xs text-muted-foreground">Keep it up!</p>
+                <p className="text-xs text-muted-foreground">{currentStreak < 7 ? 'Building something.' : "Don't break it now."}</p>
               </div>
             </div>
 
@@ -396,25 +396,25 @@ export default async function ProgressPage() {
             </section>
           )}
 
-          {/* Where you're strongest */}
+          {/* Skill breakdown */}
           {exerciseAccuracy.length > 0 && (
             <section className="space-y-3">
-              <h2 className="font-bold text-base">Where you&apos;re strongest</h2>
-              {showInsight && (
-                <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
-                  Best:{' '}
-                  <span className="font-medium text-foreground">
-                    {TYPE_LABELS[bestType!.type] ?? bestType!.type}
-                  </span>{' '}
-                  ({bestType!.accuracy}%)&nbsp;·&nbsp;Needs work:{' '}
-                  <span className="font-medium text-foreground">
-                    {TYPE_LABELS[worstType!.type] ?? worstType!.type}
-                  </span>{' '}
-                  ({worstType!.accuracy}%)
-                </p>
-              )}
+              <h2 className="font-bold text-base">Skill breakdown</h2>
               <div className="bg-card rounded-xl border p-5 shadow-sm">
                 <AccuracyChart data={exerciseAccuracy} />
+                {showInsight && (
+                  <p className="text-xs text-muted-foreground border-t mt-3 pt-3">
+                    Best:{' '}
+                    <span className="font-medium text-foreground">
+                      {TYPE_LABELS[bestType!.type] ?? bestType!.type}
+                    </span>{' '}
+                    ({bestType!.accuracy}%)&nbsp;·&nbsp;Needs work:{' '}
+                    <span className="font-medium text-foreground">
+                      {TYPE_LABELS[worstType!.type] ?? worstType!.type}
+                    </span>{' '}
+                    ({worstType!.accuracy}%)
+                  </p>
+                )}
               </div>
             </section>
           )}

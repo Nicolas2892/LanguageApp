@@ -53,9 +53,9 @@ export function OnboardingTour() {
           </button>
         </div>
         <div>
-          <p className="font-bold text-base">Start here</p>
+          <p className="font-bold text-base">You&apos;re set up.</p>
           <p className="text-sm text-muted-foreground mt-1">
-            Your first review queue is ready. Tap <span className="font-semibold text-foreground">Start review</span> above to begin spaced repetition — the fastest way to build lasting Spanish.
+            Your first exercises are ready — hit <span className="font-semibold text-foreground">Start review</span> and the app takes care of the rest. No planning, just practice.
           </p>
         </div>
         <button

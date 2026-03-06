@@ -59,9 +59,9 @@ export default function SignupPage() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-sm shadow-lg">
           <CardHeader>
-            <CardTitle>Check your email</CardTitle>
+            <CardTitle>One more step</CardTitle>
             <CardDescription>
-              We sent a confirmation link to your inbox. Click it to activate your account.
+              We&apos;ve sent you a link. Click it and you&apos;re in — takes less than a minute.
             </CardDescription>
           </CardHeader>
           <CardFooter>
@@ -103,7 +103,7 @@ export default function SignupPage() {
               <LogoMark size={48} />
             </div>
             <CardTitle className="text-2xl font-bold">Create account</CardTitle>
-            <CardDescription>Start your journey with Español Avanzado</CardDescription>
+            <CardDescription>B2 doesn&apos;t happen by accident.</CardDescription>
           </CardHeader>
 
           {/* Google OAuth */}

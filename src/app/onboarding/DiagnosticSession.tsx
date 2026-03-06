@@ -110,7 +110,7 @@ export function DiagnosticSession({ items }: Props) {
     return (
       <div className="space-y-4 text-center py-8">
         <div className="text-4xl">🎉</div>
-        <p className="font-semibold text-lg">Diagnostic complete!</p>
+        <p className="font-semibold text-lg">All done — your study queue is being built.</p>
         <p className="text-sm text-muted-foreground">
           {completing ? 'Personalising your study queue…' : 'Redirecting to dashboard…'}
         </p>
@@ -145,7 +145,7 @@ export function DiagnosticSession({ items }: Props) {
           <>
             <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
             {submitting && (
-              <p className="text-sm text-muted-foreground animate-pulse">Grading with AI…</p>
+              <p className="text-sm text-muted-foreground animate-pulse">Thinking…</p>
             )}
           </>
         )}

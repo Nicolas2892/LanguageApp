@@ -80,7 +80,7 @@ export default function LoginPage() {
               <LogoMark size={48} />
             </div>
             <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
-            <CardDescription>Continue your journey with Español Avanzado</CardDescription>
+            <CardDescription>Pick up where you left off.</CardDescription>
           </CardHeader>
 
           {/* Google OAuth */}

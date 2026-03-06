@@ -185,48 +185,53 @@ export default async function DashboardPage() {
       {/* Mode cards */}
       <div className="space-y-3">
         {/* Review card — primary emphasis when action is needed */}
-        <div className={`rounded-xl p-6 space-y-3 border ${
-          dueCount > 0 && studiedCount > 0
-            ? 'review-card-warm border-orange-200 dark:border-orange-900 border-l-4 border-l-orange-500'
-            : studiedCount > 0 && dueCount === 0
-            ? 'border-l-4 border-l-green-500 border-green-200 dark:border-green-900 bg-card'
-            : 'border-l-4 border-l-orange-500 bg-card'
-        }`}>
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Review</p>
-            {studiedCount > 0 && dueCount === 0 ? (
-              <CheckCircle2 className="h-5 w-5 text-green-500" strokeWidth={1.5} />
-            ) : (
-              <BookOpen className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-            )}
-          </div>
-          {studiedCount === 0 ? (
-            <>
-              <p className="text-xl font-bold">No reviews yet</p>
-              <p className="text-muted-foreground text-sm">Complete your first session to begin spaced repetition.</p>
-            </>
-          ) : dueCount > 0 ? (
-            <>
-              <p className="text-xl font-bold flex items-center gap-2">
-                {dueCount} concept{dueCount !== 1 ? 's' : ''} due today
-                {dueCount >= 10 && (
-                  <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+        {(() => {
+          const reviewCardIsDue = dueCount > 0 && studiedCount > 0
+          return (
+            <div className={`rounded-xl p-6 space-y-3 border ${
+              reviewCardIsDue
+                ? 'bg-primary text-primary-foreground border-primary'
+                : studiedCount > 0 && dueCount === 0
+                ? 'border-l-4 border-l-green-500 border-green-200 dark:border-green-900 bg-card'
+                : 'border-l-4 border-l-orange-500 bg-card'
+            }`}>
+              <div className="flex items-center justify-between">
+                <p className={`text-xs font-semibold uppercase tracking-widest ${reviewCardIsDue ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>Review</p>
+                {studiedCount > 0 && dueCount === 0 ? (
+                  <CheckCircle2 className="h-5 w-5 text-green-500" strokeWidth={1.5} />
+                ) : (
+                  <BookOpen className={`h-5 w-5 ${reviewCardIsDue ? 'text-primary-foreground/70' : 'text-muted-foreground'}`} strokeWidth={1.5} />
                 )}
-              </p>
-              <Button asChild className="w-full rounded-full active:scale-95 transition-transform">
-                <Link href="/study">Start review →</Link>
-              </Button>
-            </>
-          ) : (
-            <>
-              <p className="text-xl font-bold">All caught up!</p>
-              <p className="text-muted-foreground text-sm">No reviews due. Come back tomorrow.</p>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/study/configure">Practice anyway →</Link>
-              </Button>
-            </>
-          )}
-        </div>
+              </div>
+              {studiedCount === 0 ? (
+                <>
+                  <p className="text-xl font-bold">No reviews yet</p>
+                  <p className="text-muted-foreground text-sm">Finish your first session and we&apos;ll take it from there.</p>
+                </>
+              ) : dueCount > 0 ? (
+                <>
+                  <p className="text-xl font-bold flex items-center gap-2">
+                    {dueCount} concept{dueCount !== 1 ? 's' : ''} due today
+                    {dueCount >= 10 && (
+                      <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                    )}
+                  </p>
+                  <Button asChild variant={reviewCardIsDue ? 'secondary' : 'default'} className="w-full rounded-full active:scale-95 transition-transform">
+                    <Link href="/study">Start review →</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="text-xl font-bold">All caught up!</p>
+                  <p className="text-muted-foreground text-sm">You&apos;re clear for today. Use the time to push ahead.</p>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/study/configure">Practice anyway →</Link>
+                  </Button>
+                </>
+              )}
+            </div>
+          )
+        })()}
 
         {/* Learn new card */}
         {newConceptsCount > 0 && (
@@ -252,7 +257,7 @@ export default async function DashboardPage() {
               <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <p className="text-xl font-bold">{writeConcept.title}</p>
-            <p className="text-xs text-muted-foreground -mt-1">Your weakest concept right now</p>
+            <p className="text-xs text-muted-foreground -mt-1">Worth some extra time today</p>
             <Button asChild variant="outline" className="w-full">
               <Link href={`/write?suggested=${writeConcept.id}`}>Write about this →</Link>
             </Button>

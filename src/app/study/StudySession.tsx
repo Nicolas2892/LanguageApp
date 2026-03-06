@@ -119,6 +119,19 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     }
   }, [state])
 
+  // Enter/Space to advance after feedback (UX-X)
+  useEffect(() => {
+    if (state.phase !== 'feedback') return
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        handleNext()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [state.phase, handleNext])
+
   // Timer expiry → done
   useEffect(() => {
     if (sprintConfig?.limitType !== 'time') return
@@ -285,12 +298,19 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     const pct = state.total > 0 ? Math.round((state.correct / state.total) * 100) : 0
     const missed = state.total - state.correct
     const backLabel = returnHref ? 'Back to concept' : sprintConfig ? 'Back to Home' : 'Done'
+    const sessionLabel = pct >= 90
+      ? "That's as clean as it gets."
+      : pct >= 70
+      ? "Solid work — the gaps are already queued for next time."
+      : pct >= 50
+      ? "The tough ones are the ones worth repeating."
+      : "Rough session — that's exactly what review is for."
     return (
       <div className="space-y-6 text-center py-8">
         <PartyPopper className="h-14 w-14 text-orange-500 mx-auto" strokeWidth={1.5} />
         <div>
           <p className="text-5xl font-extrabold">{pct}%</p>
-          <p className="text-muted-foreground mt-1 text-sm">Session complete</p>
+          <p className="text-muted-foreground mt-1 text-sm">{sessionLabel}</p>
         </div>
         <div className="flex justify-center gap-6">
           <div className="flex items-center gap-1.5">
@@ -311,7 +331,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         )}
         {!practiceMode && !sprintConfig && (
           <p className="text-muted-foreground text-sm">
-            The SRS has scheduled your next reviews based on your performance.
+            Your next sessions are already lined up — the hard work is remembering when it counts.
           </p>
         )}
 
