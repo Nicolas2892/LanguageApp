@@ -2,6 +2,27 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## 🚨 URGENT — Production Regression (introduced 2026-03-07)
+
+**Status: BROKEN IN PRODUCTION — exercise submission returns 500 "something went wrong" for all users.**
+
+**Introduced by:** commit `8d3dc1e` — features SEC-02 (global rate limiter via Vercel KV / @vercel/kv) and PERF-01 (parallel DB fetches in `/api/submit`).
+
+**Symptom:** Every exercise submission fails. Users cannot study at all. Additionally, exercise loading times appear to have *worsened* since these changes, not improved as intended by PERF-01.
+
+**Attempted fix (2026-03-07, commit `f029608`):** Reverted `concepts!inner` join to `Promise.all` parallel queries; wrapped KV calls in try/catch. Still broken in production after deploy.
+
+**Next debugging steps (start here on next session):**
+1. Check Vercel Function logs for the exact error thrown in `/api/submit` — the `console.error('[submit] error:', err)` line will show the real cause.
+2. Suspect the `@vercel/kv` static import itself — even with try/catch, the module-level `import { kv } from '@vercel/kv'` may throw or hang if `KV_REST_API_URL` / `KV_REST_API_TOKEN` env vars are missing or misconfigured on Vercel. Consider making the import dynamic (`const { kv } = await import('@vercel/kv')`) inside the try block, or remove the KV path entirely and revert to in-memory until KV credentials are confirmed working.
+3. Verify `KV_REST_API_URL` and `KV_REST_API_TOKEN` are set in Vercel Project Settings → Environment Variables for the Production environment.
+4. If KV is confirmed as the root cause: temporarily comment out the entire KV branch in `src/lib/rate-limit.ts` to restore the in-memory fallback, redeploy, and confirm submissions work before re-introducing KV.
+5. For the loading time regression: profile `/api/submit` end-to-end in Vercel logs — if PERF-01 made things worse, the `Promise.all` for exercise+concept fetches may be causing connection pool contention. Consider reverting to sequential fetches as a quick fix.
+
+---
+
 ### General comments
 You are an Expert in Product Management work, Coding and UX Research, alongside being a world-class language teacher and learner who is really experienced in Spanish. Your job is to make a great app to help advanced Spanish learners go from B1 to B2 and eventually C1 through offering advanced exercises specifically targeted on active recall. We cover a market gap here as existing applications (DuoLingo, Babbel) offer too simplistic exercises not challenging enough and other solutions such as KwizIQ do not offer sufficient variation in exercises (most being multiple choice). Our Design has to be sleek and modern. The main usage point will be as an application on iOS and in the Browser (comparable to Babbel) - so we always need that cross-device functionality. No progress should ever be stored on the device, it should all live in the cloud.
 
