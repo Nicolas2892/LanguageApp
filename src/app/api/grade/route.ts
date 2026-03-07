@@ -6,12 +6,12 @@ import { sm2, DEFAULT_PROGRESS } from '@/lib/srs'
 import type { SRSScore } from '@/lib/srs'
 import type { Concept, UserProgress } from '@/lib/supabase/types'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { updateStreakIfNeeded, updateComputedLevel } from '@/lib/api-utils'
+import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib/api-utils'
 
 const GradeSchema = z.object({
   concept_ids: z.array(z.string().uuid()).min(1).max(5),
   ai_prompt: z.string().min(1).max(2000),
-  user_answer: z.string().min(1).max(2000),
+  user_answer: z.string().min(1).max(1000),
 })
 
 export async function POST(request: Request) {
@@ -19,6 +19,10 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     // Rate limit: 20 requests per 10 minutes per user
     if (!checkRateLimit(user.id, 'grade', { maxRequests: 20, windowMs: 10 * 60 * 1000 }).allowed) {

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { validateOrigin } from '@/lib/api-utils'
 
 const AccountUpdateSchema = z.object({
   display_name: z.string().min(1).max(50).optional(),
@@ -13,6 +14,10 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const parsed = AccountUpdateSchema.safeParse(await request.json())
     if (!parsed.success) {

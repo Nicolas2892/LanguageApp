@@ -1,6 +1,23 @@
 /**
  * Shared helpers used by /api/submit and /api/grade to avoid duplicated logic.
  */
+
+/**
+ * Validates the Origin header to prevent CSRF attacks.
+ * Returns false if the header is missing or doesn't match the deployment origin.
+ * Env vars are read at call time so tests can override process.env safely.
+ */
+export function validateOrigin(request: Request): boolean {
+  const origin = request.headers.get('origin')
+  if (!origin) return false
+
+  if (process.env.NODE_ENV !== 'production' && origin === 'http://localhost:3000') {
+    return true
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
+  return !!siteUrl && origin === siteUrl
+}
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { computeLevel } from '@/lib/mastery/computeLevel'
 

@@ -5,6 +5,7 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 vi.mock('@/lib/supabase/server')
 vi.mock('@supabase/supabase-js')
+vi.mock('@/lib/api-utils', () => ({ validateOrigin: vi.fn(() => true) }))
 
 const mockGetUser = vi.fn()
 const mockDeleteUser = vi.fn()
@@ -26,6 +27,9 @@ function setupMocks({
   } as never)
 }
 
+const dummyRequest = () =>
+  new Request('http://localhost:3000/api/account/delete', { method: 'POST' })
+
 describe('POST /api/account/delete', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -35,7 +39,7 @@ describe('POST /api/account/delete', () => {
 
   it('returns 401 when unauthenticated', async () => {
     setupMocks({ userId: null })
-    const res = await POST()
+    const res = await POST(dummyRequest())
     expect(res.status).toBe(401)
     const body = await res.json()
     expect(body.error).toBe('Unauthorized')
@@ -43,13 +47,13 @@ describe('POST /api/account/delete', () => {
 
   it('calls admin.deleteUser with the correct user ID', async () => {
     setupMocks({ userId: 'user-42' })
-    await POST()
+    await POST(dummyRequest())
     expect(mockDeleteUser).toHaveBeenCalledWith('user-42')
   })
 
   it('returns 200 { ok: true } on success', async () => {
     setupMocks()
-    const res = await POST()
+    const res = await POST(dummyRequest())
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.ok).toBe(true)
@@ -57,7 +61,7 @@ describe('POST /api/account/delete', () => {
 
   it('returns 500 { error } when deleteUser fails', async () => {
     setupMocks({ deleteError: { message: 'User not found' } })
-    const res = await POST()
+    const res = await POST(dummyRequest())
     expect(res.status).toBe(500)
     const body = await res.json()
     // Generic message is returned — internal error detail is not leaked to client (S5 fix)
@@ -76,7 +80,7 @@ describe('POST /api/account/delete', () => {
       auth: { getUser: mockGetUser },
       from: mockFrom,
     } as never)
-    await POST()
+    await POST(dummyRequest())
     expect(mockFrom).not.toHaveBeenCalled()
   })
 })

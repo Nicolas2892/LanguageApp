@@ -7,12 +7,12 @@ import type { SRSScore } from '@/lib/srs'
 import type { Concept, Exercise, UserProgress } from '@/lib/supabase/types'
 import { PRODUCTION_TYPES } from '@/lib/mastery/computeLevel'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { updateStreakIfNeeded, updateComputedLevel } from '@/lib/api-utils'
+import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib/api-utils'
 
 const SubmitSchema = z.object({
   exercise_id: z.string().uuid(),
   concept_id: z.string().uuid(),
-  user_answer: z.string().min(1).max(2000),
+  user_answer: z.string().min(1).max(1000),
   skip_srs: z.boolean().optional(),
 })
 
@@ -21,6 +21,10 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     // Rate limit: 60 requests per 10 minutes per user
     if (!checkRateLimit(user.id, 'submit', { maxRequests: 60, windowMs: 10 * 60 * 1000 }).allowed) {

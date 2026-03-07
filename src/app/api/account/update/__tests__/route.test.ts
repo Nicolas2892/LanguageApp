@@ -3,6 +3,7 @@ import { POST } from '../route'
 import { createClient } from '@/lib/supabase/server'
 
 vi.mock('@/lib/supabase/server')
+vi.mock('@/lib/api-utils', () => ({ validateOrigin: vi.fn(() => true) }))
 
 const mockEq = vi.fn()
 const mockUpdate = vi.fn()
