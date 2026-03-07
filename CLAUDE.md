@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Status: BROKEN IN PRODUCTION — exercise submission returns 500 "something went wrong" for all users.**
 
-**Introduced by:** commit `8d3dc1e` — features SEC-02 (global rate limiter via Vercel KV / @vercel/kv) and PERF-01 (parallel DB fetches in `/api/submit`).
+**Introduced by:** commit `8d3dc1e` — which bundled three features in one commit: **SEC-02** (global rate limiter via Vercel KV / `@vercel/kv`), **PERF-01** (parallel DB fetches in `/api/submit`), and **Ped-G** (mistake review mode). The commits immediately before this (`803a1b5` — SEC-01/SEC-03/SEC-04/ARCH-01, and `e997ffd` — SEC-05/ARCH-03/PERF-02/UX-AC/AD/AE) were all working fine in production.
 
 **Symptom:** Every exercise submission fails. Users cannot study at all. Additionally, exercise loading times appear to have *worsened* since these changes, not improved as intended by PERF-01.
 
