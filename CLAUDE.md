@@ -4,23 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## 🚨 URGENT — Production Regression (introduced 2026-03-07)
+## ✅ Production Regression — RESOLVED (2026-03-07)
 
-**Status: BROKEN IN PRODUCTION — exercise submission returns 500 "something went wrong" for all users.**
+**Status: Fixed in commit `7c1a916`.** Exercise submissions were returning 500 for all users.
 
-**Introduced by:** commit `8d3dc1e` — which bundled three features in one commit: **SEC-02** (global rate limiter via Vercel KV / `@vercel/kv`), **PERF-01** (parallel DB fetches in `/api/submit`), and **Ped-G** (mistake review mode). The commits immediately before this — `803a1b5` (SEC-01/SEC-03/SEC-04/ARCH-01) and `e997ffd` (SEC-05/ARCH-03/PERF-02/UX-AC/AD/AE) — were **not properly tested in production** and must also be treated as suspect. The last confirmed-working production state is unknown; bisect from `e997ffd` backward if the issue persists after fixing `8d3dc1e`.
+**Root causes found & fixed:**
+1. `validateOrigin` (`src/lib/api-utils.ts`) returned `false` (→ 403) when `NEXT_PUBLIC_SITE_URL` was not set in Vercel env vars. Fixed to fail-open with a warning when the env var is absent. **Action needed:** set `NEXT_PUBLIC_SITE_URL=https://<your-domain>` in Vercel Project Settings → Environment Variables → Production to re-enable strict CSRF protection.
+2. Top-level `import { kv } from '@vercel/kv'` in `src/lib/rate-limit.ts` could crash the entire route module at load time before any try/catch could run. Fixed to dynamic import inside the try block.
 
-**Symptom:** Every exercise submission fails. Users cannot study at all. Additionally, exercise loading times appear to have *worsened* since these changes, not improved as intended by PERF-01.
+---
 
-**Attempted fix (2026-03-07, commit `f029608`):** Reverted `concepts!inner` join to `Promise.all` parallel queries; wrapped KV calls in try/catch. Still broken in production after deploy.
+## ⚠️ Production Performance Issue — Under Investigation (2026-03-07)
 
-**Next debugging steps (start here on next session):**
-1. Check Vercel Function logs for the exact error thrown in `/api/submit` — the `console.error('[submit] error:', err)` line will show the real cause.
-2. Suspect the `@vercel/kv` static import itself — even with try/catch, the module-level `import { kv } from '@vercel/kv'` may throw or hang if `KV_REST_API_URL` / `KV_REST_API_TOKEN` env vars are missing or misconfigured on Vercel. Consider making the import dynamic (`const { kv } = await import('@vercel/kv')`) inside the try block, or remove the KV path entirely and revert to in-memory until KV credentials are confirmed working.
-3. Verify `KV_REST_API_URL` and `KV_REST_API_TOKEN` are set in Vercel Project Settings → Environment Variables for the Production environment.
-4. If KV is confirmed as the root cause: temporarily comment out the entire KV branch in `src/lib/rate-limit.ts` to restore the in-memory fallback, redeploy, and confirm submissions work before re-introducing KV.
-5. For the loading time regression: profile `/api/submit` end-to-end in Vercel logs — if PERF-01 made things worse, the `Promise.all` for exercise+concept fetches may be causing connection pool contention. Consider reverting to sequential fetches as a quick fix.
-6. If fixes to `8d3dc1e` don't resolve the issue: use `git bisect` or sequentially revert to `803a1b5` then `e997ffd` to narrow down which commit first introduced the breakage. Key changes to audit in those commits: SEC-01 (push subscription SSRF fix), SEC-03 (CSRF Origin header check in `validateOrigin`), ARCH-01 (CI/CD GitHub Actions), SEC-05 (CSP headers), ARCH-03 (toast error handling), PERF-02 (computedLevel throttle).
+**Symptom (confirmed in production):** Both screen load times and Claude grading response times are noticeably slow. This predates or was worsened by the recent commits.
+
+**Suspected causes (to investigate):**
+1. **Claude grading latency** — every submission awaits a non-streaming Claude Sonnet call (~2–6s). Candidates: streaming the grading response (Perf-A #1), switching to Haiku for grading (ARCH-02, requires ≥90% quality validation), or prefetching the next exercise during feedback (Perf-A #4).
+2. **Sequential DB writes in `/api/submit`** — post-grading: SRS upsert → `production_mastered` update → `updateComputedLevel` (multi-join) → `exercise_attempts` insert → streak RPC all run sequentially (~150–300ms total). Fix: fire-and-forget all non-blocking writes (PERF-01).
+3. **Screen/page load times** — likely Supabase round-trips on server components (no caching). Profile each page in Vercel logs to identify the slowest queries.
+
+**Next steps:**
+- Check Vercel Function logs for p50/p95 durations on `/api/submit` to split Claude time vs DB time.
+- Implement PERF-01 (fire-and-forget DB writes) — safe, no quality risk, ~150ms gain.
+- Evaluate Perf-A #4 (prefetch next exercise during feedback) — pure frontend, zero backend change.
+- Do NOT switch grading model (ARCH-02) without offline quality validation first.
 
 ---
 
