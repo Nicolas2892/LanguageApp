@@ -473,3 +473,85 @@ Eight targeted improvements to `src/app/dashboard/page.tsx` and `SprintCard.tsx`
 - Env vars for seed scripts: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`
 - Extract env vars from `.env.local` with `grep '^VAR=' .env.local | cut -d= -f2-` (not `set -a; source` — fails on paths with spaces)
 
+---
+
+## Copy & UX Polish Sprint ✓ (2026-03)
+
+**Commits**: `feat: copy sprint + UX polish (Copy-A–K, UX-X, UX-AF, UX-AG)`
+
+### Copy-A through Copy-K — All string replacements ✓
+
+Drop-in string replacements, no logic or schema changes:
+
+- **Copy-A** (`DiagnosticSession.tsx`): "Grading with AI…" → "Thinking…"
+- **Copy-B** (`StudySession.tsx`): "The SRS has scheduled your next reviews…" → "Your next sessions are already lined up — the hard work is remembering when it counts."
+- **Copy-C** (`StudySession.tsx`): Static "Session complete" → score-bracket strings computed from `pct`: ≥90% "That's as clean as it gets." / 70–89% "Solid work — the gaps are already queued for next time." / 50–69% "The tough ones are the ones worth repeating." / <50% "Rough session — that's exactly what review is for."
+- **Copy-D** (`dashboard/page.tsx`): "No reviews due. Come back tomorrow." → "You're clear for today. Use the time to push ahead."
+- **Copy-E** (`dashboard/page.tsx`): "Complete your first session to begin spaced repetition." → "Finish your first session and we'll take it from there."
+- **Copy-F** (`signup/page.tsx`): "Start your journey with Español Avanzado" → "B2 doesn't happen by accident."; login: "Continue your journey…" → "Pick up where you left off."
+- **Copy-G** (`signup/page.tsx`): "Check your email" → "One more step"; confirmation body rewritten to be friendlier and concise.
+- **Copy-H** (`dashboard/page.tsx`): "Your weakest concept right now" → "Worth some extra time today"
+- **Copy-I** (`OnboardingTour.tsx`): "Start here" → "You're set up."; body rewritten without SRS jargon.
+- **Copy-J** (`progress/page.tsx`): Dynamic streak sub-label — streak < 7: "Building something." / ≥7: "Don't break it now."
+- **Copy-K** (`DiagnosticSession.tsx`): "Diagnostic complete!" → "All done — your study queue is being built."
+
+### UX-X: Enter/Space to advance after feedback ✓
+- `StudySession.tsx` — `useEffect` + `keydown` listener; active only when `phase === 'feedback'`; Enter/Space calls `handleNext()`; disabled during `answering` phase so Enter still submits
+
+### UX-AF: Dashboard Review card filled treatment when due ✓
+- `src/app/dashboard/page.tsx` — when `dueCount > 0 && studiedCount > 0`, Review card upgrades to `bg-primary text-primary-foreground`; button → `variant="secondary"`; all other cards and states unchanged
+
+### UX-AG: Progress page "Skill breakdown" ✓
+- `src/app/progress/page.tsx` — heading "Where you're strongest" → "Skill breakdown"; insight paragraph moved inside the chart card as `border-t mt-3 pt-3` footer
+
+---
+
+## Security, Performance & Architecture Sprints ✓ (2026-03)
+
+**Commits**: `feat: SEC-05, ARCH-03, PERF-02, UX-AC, UX-AD, UX-AE batch` · `perf: prompt caching, SRS interleaving, useTransition for study session` · `feat: SEC-01, SEC-03, SEC-04, ARCH-01 security sprint`
+**Tests**: 1132 passing across 31 files
+
+### UX-AC: Feedback panel — visual answer comparison blocks ✓
+- `src/components/exercises/FeedbackPanel.tsx` — replaced label-value rows with two stacked pill blocks: user answer in `bg-red-50 dark:bg-red-950/30 border-l-4 border-red-400 rounded-lg`, correct answer in green equivalent; correct state: single green block; `SpeakButton` right-aligned on correct block
+
+### UX-AD: Session done screen — score-bracket emotional framing ✓
+- `StudySession.tsx` — `sessionLabel` computed from `pct` bracket (paired with Copy-C); pct < 70 uses `animate-pulse` ring on PartyPopper instead of confetti; `PartyPopper` icon animates in with `zoom-in-50 duration-500`
+
+### UX-AE: Onboarding diagnostic assessment feel ✓
+- `src/app/onboarding/page.tsx` — "Takes about 3 minutes." added as `text-xs text-muted-foreground`; progress bar `h-1.5` → `h-2` with `transition-all duration-700`
+- `src/app/onboarding/DiagnosticSession.tsx` — "Question N of N" text replaced with step-dot indicator (`●●○○○○`, `h-2 w-2 rounded-full`); grammar practice Badge removed
+
+### SEC-01: SSRF — Push endpoint hostname allowlist ✓
+- `src/app/api/push/subscribe/route.ts` — `ALLOWED_PUSH_HOSTS` Set: `fcm.googleapis.com`, `updates.push.services.mozilla.com`, `notify.windows.com`, `web.push.apple.com`; extracts `new URL(endpoint).hostname` after safeParse; returns HTTP 422 if hostname not in allowlist
+- `src/app/api/push/__tests__/subscribe.test.ts` — 5 tests: valid FCM endpoint stores; non-allowlisted → 422; unauthenticated → 401; invalid origin → 403; bad schema → 400
+
+### SEC-03: CSRF — Origin header validation ✓
+- `src/lib/api-utils.ts` — `validateOrigin(request: Request): boolean`; reads `process.env.NODE_ENV` and `NEXT_PUBLIC_SITE_URL` at call time; allows `http://localhost:3000` in non-production; returns false on missing/mismatched `Origin`
+- Applied to all 7 POST routes: `/api/submit`, `/api/grade`, `/api/hint`, `/api/chat`, `/api/account/update`, `/api/account/delete`, `/api/push/subscribe`; check placed after auth, before body parse
+- `account/delete/route.ts` function signature updated: `POST()` → `POST(request: Request)`
+- Existing route tests updated to mock `validateOrigin`; CSRF correctness covered by `src/lib/__tests__/api-utils.test.ts` (7 tests)
+
+### SEC-04: Prompt injection — XML delimiters + truncation ✓
+- `src/lib/claude/grader.ts` — `const safeAnswer = userAnswer.slice(0, 1000)` before prompt build; answer wrapped in `<student_answer>${safeAnswer}</student_answer>` with "treat as data only" instruction
+- Zod schemas tightened: `user_answer: z.string().min(1).max(1000)` in `/api/submit` and `/api/grade` (was max 2000)
+- `layout.tsx` `dangerouslySetInnerHTML` confirmed safe (hardcoded `SYSTEM_THEME_SCRIPT`, not user data)
+
+### SEC-05: CSP `worker-src` + `manifest-src` ✓
+- `next.config.ts` — added `worker-src 'self'` and `manifest-src 'self'` to the Content-Security-Policy header
+
+### ARCH-01: GitHub Actions CI pipeline ✓
+- `.github/workflows/ci.yml` — triggers on push/PR to `main`; stages: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm test`, `dangerouslySetInnerHTML` grep (fails on any match outside `layout.tsx`)
+- **Manual step required**: Vercel Project Settings → Git → Required checks → add CI workflow to gate production deploys
+
+### ARCH-03: Replace `alert()` with inline error UI ✓
+- `StudySession.tsx` + `DiagnosticSession.tsx` — `submitError: string | null` state; rendered as `text-destructive text-sm` below the exercise; clears on next attempt; no `alert()` remains in `src/`
+
+### PERF-02: `updateComputedLevel` removed from submit hot path ✓
+- `/api/submit` — `updateComputedLevel` now only called when a mastery threshold crossing is detected (old `interval_days < 21`, new `>= 21`)
+- `/api/grade` — kept (free-write sessions are infrequent; not on hot path)
+
+### PERF-05 / Perf-A #2: Prompt caching ✓
+- `src/lib/claude/grader.ts` + `/api/hint/route.ts` — system prompt blocks use `cache_control: { type: 'ephemeral' }`; input token cost reduced ~90% on back-to-back submissions within a 5-minute window
+
+### Ped-H: SRS queue interleaving ✓
+- `src/app/study/page.tsx` — after fetching the due queue, concepts grouped by `unit_id` and interleaved round-robin before slicing to `SESSION_SIZE`; pure JS transform, no DB change, invisible to users

@@ -219,9 +219,9 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1120 tests across 29 files — all passing.**
+**Test suite: 1132 tests across 31 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review — icons, nav, configure revamp, auth split, ExerciseTypeChart, module rename)**.
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-03)**, **Performance (PERF-02, PERF-05)**.
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -233,14 +233,9 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### Pedagogical / Learning Quality
 
-**Ped-B: AI-generated exercises enter the SRS review pool automatically** ✅ *Complete*
-- `/api/exercises/generate` inserts into `exercises` table via service role; SRS queue picks randomly from all available exercises per concept — AI-generated ones included automatically
-- `max_tokens` raised to 2048 (was 512 — caused JSON truncation → parse failures → "Failed to generate exercises"); markdown fence stripping added as defensive measure
-- "Generate 3 more" button hidden for `sentence_builder` and `free_write` (unsupported by generate route's Zod schema)
-- Verified working in production (2026-03)
+**Ped-B** ✅ *Complete — see `docs/completed-features.md`*
 
 **Ped-D: Gap-fill same-concept redesign** ✅ *Complete — see `docs/completed-features.md`*
-- All 21 gap_fill exercises redesigned: 13 reduced to 1 blank (same-concept only); 8 already-correct 2-blank exercises cleaned up. Inline underline inputs with ch-width sizing + Enter auto-advance. DB re-seeded and re-annotated.
 
 **Ped-F: Shared AI-generated exercise pool + adaptive grading strategy** *(requires PM/UX research before implementation)*
 - **Problem statement**: Currently, drill mode generates exercises per-user on demand, wasting tokens and producing fragmented, non-reusable content. As the concept pool grows (Feat-E target: 40+ concepts), individual per-user generation is unsustainable.
@@ -258,28 +253,36 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - **Do not implement without a written PM decision on cap, dedup, and grading model.**
 
 **Ped-E: Grammatical structure highlighting** ✅ *Complete — see `docs/completed-features.md`*
-- `exercises.annotations jsonb` (migration 008), `AnnotatedText.tsx`, `pnpm annotate` CLI, generate route stores annotations, GapFill/TextAnswer/ErrorCorrection use AnnotatedText
+
+**Ped-G: Mistake review mode**
+- Research: Serfaty & Serrano (2024) showed learners who completed 3+ relearning sessions on previously-wrong items scored dramatically higher on delayed posttests. Error-targeted relearning is the single highest-ROI study activity.
+- Pull from `exercise_attempts WHERE score <= 1` for the current user, re-queue those exercises as a dedicated study mode ("Review mistakes").
+- Surface as a card on dashboard (when mistake count > 0) and as an option in `/study/configure`.
+- No new DB schema needed — data already exists in `exercise_attempts`.
+- Dedup: show each concept at most once per review session (pick the most-recent failed attempt per concept).
+
+**Ped-H: Interleaving in SRS queue** ✅ *Complete — see `docs/completed-features.md`*
+
+**Ped-I: Concept grammar cheat-sheet**
+- Before the first exercise of a concept in a session, show a collapsed/expandable accordion with a 2–3 sentence grammar rule summary. Fills the gap between the full tutor (chat) and zero context.
+- This differentiates us from Clozemaster (no context) and KwizIQ (static help pages) — learners get just-in-time reference at the moment of practice.
+- Requires `grammar_summary text` column added to `concepts` table (migration). Seed via a script that uses Claude to generate summaries for all 85 concepts (similar to `pnpm annotate` pattern).
+- Show summary as a collapsible card at the top of the exercise; collapsed by default after first concept in session.
+
+**Ped-J: "Hard" flag on a concept**
+- User can mark a concept as "always include more of these." Feeds a weighted sampling so flagged concepts appear more frequently in SRS queue even if not technically due.
+- Implementation: `is_hard boolean DEFAULT false` on `user_progress`. Toggle via a button (e.g., flag icon) in the study session feedback panel and on the curriculum concept row.
+- Weight rule: if `is_hard = true`, treat due_date as always today (or halve the interval multiplier). Simple, no new API route needed — just modify SRS query.
 
 #### New Features
 
 **Feat-A: Daily email reminders** *(deferred — not wanted)*
 
-**Feat-C: Guided CEFR progression** ✅ *Complete*
-- `src/lib/curriculum/prerequisites.ts` — `computeUnlockedLevels()` + `computeUnlockProgress()` helpers
-- `LEVEL_UNLOCK_THRESHOLD = 0.8` in constants; B2 unlocks when ≥80% of B1 concepts attempted; C1 unlocks when ≥80% of B2 attempted
-- `mode=new` queue filtered to unlocked levels only; bootstrap always B1-only
-- Curriculum page: informational `Lock` icon badge on locked concepts + progress banner; Practice buttons always remain active (no hard gates)
-- 13 new tests in `prerequisites.test.ts`
+**Feat-C: Guided CEFR progression** ✅ *Complete — see `docs/completed-features.md`*
 
 **Feat-D: Web push notifications** ✅ *Complete — see `docs/completed-features.md`*
-- VAPID-based push via `web-push`; `profiles.push_subscription jsonb` (migration 009)
-- SW push + notificationclick handlers; `PushPermissionPrompt` in study done screen
-- `NotificationSettings` on account page; `/api/push/subscribe` (POST/DELETE) + `/api/push/send` cron route
-- `vercel.json` daily cron 18:00 UTC; `CRON_SECRET` auth on send route
 
 **Feat-E: Content expansion via AI seeding script** ✅ *Complete — see `docs/completed-features.md`*
-- 85 concepts, 787 exercises live across 7 modules; Module 2 split into "The Subjunctive: Core" (5 concepts) + "The Subjunctive: Advanced" (8 concepts)
-- `scripts/approve-all.mjs` for bulk approval; `max_tokens: 8192` required to avoid truncation
 
 **Feat-F: Offline exercise packs (module download)**
 - User downloads a full module's exercises to IndexedDB for offline use
@@ -291,10 +294,79 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - Migration: no schema change needed; offline queue lives entirely in IndexedDB on the client
 - **Do not implement without a written PM decision on conflict resolution strategy and UI for queued/pending sync state.**
 
-**Feat-G: Full Architecture and Security Review**
-- Conduct a full review of current app architecture and security to suggest both performance and security improvements to enhance it.
+**Feat-G: Full Architecture and Security Review** ✅ *Complete — audit conducted 2026-03, tickets filed as SEC-01–05, PERF-01–05, ARCH-01–03 below*
+
+#### Security
+
+**SEC-01: SSRF via unvalidated push subscription endpoint** ✅ *Complete — see `docs/completed-features.md`*
+
+**SEC-02: In-memory rate limiter is instance-scoped, not global** *(Critical)*
+- **Vulnerability**: `src/lib/rate-limit.ts` uses a module-scope `Map`. Vercel runs multiple concurrent instances per region; each maintains an independent counter. A user can submit 60×N requests (N = warm instances) before being rate-limited — effectively bypassing the limit entirely against the Anthropic API.
+- **Fix**: Replace with Vercel KV (Upstash Redis). Pattern: `await kv.incr(key)` + `kv.expire(key, windowSeconds)`. Alternatively a Supabase RPC-backed atomic counter. Remove the in-memory `Map` entirely.
+- **Acceptance criteria**: Rate limit counters are consistent across all function instances. `/api/submit` returns HTTP 429 after exactly 60 requests/10 min regardless of which instance handles each request. Check adds ≤ 20ms latency at p95.
+
+**SEC-03: No CSRF protection on state-mutating API routes** ✅ *Complete — see `docs/completed-features.md`*
+
+**SEC-04: Prompt injection via unescaped `user_answer` in grading prompt** ✅ *Complete — see `docs/completed-features.md`*
+
+**SEC-05: CSP missing `worker-src` and `manifest-src` directives** ✅ *Complete — see `docs/completed-features.md`*
+
+#### Performance (from audit)
+
+**PERF-01: Sequential DB writes block `/api/submit` response** *(High)*
+- **Bottleneck**: After Claude returns, 6 DB operations execute sequentially: fetch user_progress → upsert user_progress → update production_mastered → `updateComputedLevel` (multi-join) → insert exercise_attempts → streak RPC. Each Supabase round-trip adds ~20–50ms. Total post-grading DB latency: ~150–300ms.
+- **Fix**: Two-phase restructure. Phase A (blocking, needed for response): SRS upsert only. Phase B (fire-and-forget, non-blocking): `production_mastered` update, `updateComputedLevel`, `exercise_attempts` insert, streak RPC — dispatched via `Promise.all([...]).catch(console.error)` without `await`. Also parallelise the initial exercise + concept fetches into `Promise.all`.
+- **Acceptance criteria**: Exercise + concept fetches are parallel. `exercise_attempts`, `updateComputedLevel`, `updateStreakIfNeeded` are fire-and-forget. `next_review_in_days` remains correct. P50 post-Claude latency reduces by ≥ 150ms.
+
+**PERF-02: `updateComputedLevel` called on every exercise submission** ✅ *Complete — see `docs/completed-features.md`*
+
+**PERF-03: N+1 query pattern in `/api/push/send` cron** *(High)*
+- **Bottleneck**: Fetches all subscribers (1 query), then executes a separate `user_progress` count query per user. With N subscribers → N+1 queries. No pagination — at 10,000 users, loads all JSONB push_subscription blobs into memory.
+- **Fix**: Single SQL query with LEFT JOIN/subquery to get subscribers + due counts in one round-trip. Process in batches of ≤ 500 with pagination.
+- **Acceptance criteria**: Cron executes exactly 1 DB query regardless of subscriber count. Batches of ≤ 500 processed. Cron completes in < 10 seconds for 1,000 subscribers.
+
+**PERF-04: Middleware DB query on every authenticated page navigation** *(Medium)*
+- **Bottleneck**: `supabase/middleware.ts` queries `profiles.onboarding_completed` on every non-public page load (~20–40ms per navigation). Redundant for the 99%+ of users who completed onboarding long ago.
+- **Fix**: Cache `onboarding_completed = true` in a short-lived `HttpOnly; SameSite=Lax` cookie set by `/api/onboarding/complete`. Middleware checks cookie first; only hits DB on cache miss.
+- **Acceptance criteria**: Users with completed onboarding: zero DB queries in middleware. Onboarding redirect still fires correctly for new users. P50 middleware latency reduces from ~35ms to ≤ 5ms for returning users.
+
+**PERF-05: Claude prompt caching not used on grading system prompt** ✅ *Complete — see `docs/completed-features.md`*
+
+#### Architecture (from audit)
+
+**ARCH-01: No CI/CD pipeline — untested code ships directly to production** ✅ *Complete — see `docs/completed-features.md`*
+- **Note**: Vercel production gate must be configured manually in Project Settings → Git → Required checks.
+
+**ARCH-02: Single Claude model for all AI tasks — suboptimal cost/speed tradeoff** *(Medium)*
+- **Debt**: `TUTOR_MODEL = 'claude-sonnet-4-20250514'` used for grading (structured JSON, 512 tokens), hints (short generation, 256 tokens), tutor chat (reasoning, 1024 tokens), and exercise generation (creative, 8192 tokens). Grading and hints don't require Sonnet's reasoning capacity. Haiku 4.5 is 3–5× faster and ~10× cheaper for structured tasks.
+- **Fix**: Define `GRADE_MODEL = 'claude-haiku-4-5-20251001'` for grading + hints. Keep `TUTOR_MODEL = 'claude-sonnet-4-20250514'` for chat + generation. **Prerequisite**: offline quality validation — grade 50 sample exercises with both models, confirm ≥ 90% score agreement before switching.
+- **Acceptance criteria**: `grader.ts` + `/api/hint` use `GRADE_MODEL`. `tutor.ts` + exercise generate use `TUTOR_MODEL`. Offline validation test passes ≥ 90% agreement. Anthropic cost per session reduces by ≥ 60%.
+
+**ARCH-03: `alert()` used for production error handling** ✅ *Complete — see `docs/completed-features.md`*
 
 **Feat-H: Another Design & UX Review** ✅ *Complete — see `docs/completed-features.md`*
+
+**Feat-I: TTS audio for exercise prompts**
+- B2→C1 learners need listening exposure, but the app currently has zero audio. Even basic text-to-speech adds a listening dimension that is currently entirely absent.
+- The `useSpeech` hook already exists in the codebase (used by `IOSInstallPrompt`). Wire a speaker icon button to it in GapFill, TextAnswer, and ErrorCorrection — clicking reads the prompt text aloud in Spanish using the Web Speech API (`speechSynthesis`, es-ES voice).
+- Zero infrastructure cost, works cross-platform (iOS Safari, Chrome, Firefox). No new API route or DB change needed.
+- UX detail: auto-play on first render of each exercise is optional (could be a user preference); manual tap is the safe default.
+- Stretch: highlight the word being spoken in sync with `SpeechSynthesisUtterance.onboundary` events.
+
+**Feat-J: Personal concept notes**
+- Users want to add a personal mnemonic or note per concept (e.g., "remember: ojalá ALWAYS subjunctive"). Reduces dependency on the tutor for basic rule reminders.
+- Implementation: `user_notes text` column on `user_progress` (or a separate `user_concept_notes` table if multi-note support is wanted). Simple textarea shown in a popover/drawer on the concept curriculum page and optionally in the study session footer.
+- No Claude call needed — pure user text, stored in Supabase.
+
+**Perf-A: Grading latency / time-to-answer improvements**
+- **Problem**: Every exercise submission calls Claude (non-streaming) for grading. Claude Sonnet 4.6 TTFT is ~2 seconds; p95 end-to-end can be 4–6 seconds. Users sit watching a spinner after every answer, breaking flow.
+- **Candidate approaches (remaining)**:
+  1. **Stream the grading response** — Switch `/api/submit` to a streaming response. Send score + short label first (< 10 tokens), then stream the full feedback. Biggest UX win.
+  2. ~~Prompt caching~~ ✅ *Done (PERF-05)*
+  3. **Switch to Haiku for grading** — Requires offline quality validation (≥ 90% score agreement vs. Sonnet on 50 exercises) before switching. See ARCH-02.
+  4. **Prefetch next exercise** — While the user reads feedback, silently fetch the next exercise data in the background. Pure frontend, no API change.
+  5. **Optimistic local score for gap_fill** — Client-side accent-normalised string match for single-blank gap_fill; show "Correct!" immediately, still send to Claude async for SM-2 scoring.
+- **Do not implement #3 (model switch) without an offline quality validation test.**
 
 #### Strategic / Long-term
 
@@ -315,11 +387,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### Bugs / Layout Fixes
 
-**Fix-G: Review card has wrong background in dark mode** *(implemented)*
-- **Problem**: The Review card on the dashboard shows a muddy brownish-gray tint in dark mode instead of matching the other dark cards. Visible in screenshot — the card is clearly lighter/warmer than "Learn new" and "Free write".
-- **Cause**: The warm tint is applied via `bg-orange-50/60` (orange-50 at 60% opacity). At 60% opacity over a dark background this composites into a brownish-gray. The `dark:bg-card` override added in UX-T does not appear to take effect — likely a Tailwind v4 CSS specificity or class-scanning issue with opacity-modified background classes inside dynamic ternary strings.
-- **Attempted fix**: `dark:bg-card` added to the ternary class string in `src/app/dashboard/page.tsx` — did not work.
-- **Suggested approach**: Move the warm tint to a conditional inline style (`style={{ backgroundColor: 'oklch(...)' }}`) so it only applies in light mode, or replace `bg-orange-50/60` with a solid non-opacity class like `bg-orange-50` and add `dark:bg-card` — removing the opacity modifier which is likely the root cause of the override failing.
+**Fix-G: Review card has wrong background in dark mode** *(implemented — `dark:bg-card` override; root cause: opacity-modified Tailwind class specificity in Tailwind v4)*
 
 **Fix-F: Write page sticky footer misaligned on desktop (deferred)**
 - **Problem**: On desktop, the sticky footer ("Start writing →" button) in `ConceptPicker.tsx` is centered against the full viewport width, while the module cards above are centered within the content area to the right of the 220px sidebar. This makes the button appear shifted left compared to the content.
@@ -328,6 +396,21 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - **Current state**: Footer is `left-0 right-0` (full width) — misaligned on desktop but functional. Mobile is unaffected.
 
 #### UX Audits & Polish
+
+**UX-W: Exercise UI clarity audit**
+- **Problem**: The exercise screen currently renders a lot of simultaneous information: progress counter, concept name, unit breadcrumb, exercise type chip, grammar focus chip, level chip (B1/B2/C1), annotated prompt, input area, hint dots, and submit button. This is high cognitive overhead before the learner has even read the question.
+- **Research**: Duolingo's 2024 home screen redesign research showed that reducing visible UI elements per screen improved task completion and reduced abandonment. Cognitive load theory (Sweller) confirms that extraneous visual elements consume working memory that should be spent on the learning task.
+- **Principles to apply**:
+  1. **Progressive disclosure**: show minimum needed to do the task; reveal metadata only on request.
+  2. **Single focal point**: the prompt + input should be the only high-contrast elements. Everything else should be low-contrast/secondary.
+  3. **Collapse metadata into one row**: merge exercise type chip, grammar focus chip, and level chip into a single compact metadata row using muted text, not coloured chips, to reduce visual noise.
+  4. **Show level chip only once per concept per session** (not on every card) — after the first card, the user knows what level they're on.
+  5. **Hint system**: hint dots can be hidden until the first wrong attempt (don't show 3 empty dots before the user has tried).
+- **Audit tasks**:
+  - Read `src/components/exercises/GapFill.tsx`, `TextAnswer.tsx`, `ErrorCorrection.tsx`, `SentenceBuilder.tsx`, and `StudySession.tsx` to inventory every UI element rendered per exercise.
+  - Produce a before/after element count and propose which elements to hide, collapse, or demote to secondary styling.
+  - Prototype the change in `StudySession.tsx` header area first before touching individual exercise components.
+- **Do not implement without a design review of the proposed element inventory reduction.**
 
 **UX-D: Dashboard page UX audit** ✅ *Complete — see `docs/completed-features.md`*
 - Single-column layout (removed lg:grid-cols-2); LEVEL_CHIP badge; daily goal progress bar; Review card warm tint when due; Free write sub-label + fallback card; Sprint copy fix; legend "in progress" / "to start".
@@ -348,57 +431,72 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### UX Polish & Animations
 
-Items from full UX research audit (2026-03). Ordered by effort/impact. First 7 are **low-effort / high-impact** and should be tackled as a batch.
+**UX-I through UX-V, UX-T** ✅ *All complete — see `docs/completed-features.md`*
 
-**UX-I: Session-complete confetti celebration** ✅ *Complete — see `docs/completed-features.md`*
-- `canvas-confetti` burst on done screen when accuracy ≥ 70%; StrictMode-safe ref guard
+**UX-X: Enter/Space to advance after feedback** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-J: Study loop transitions** ✅ *Complete — see `docs/completed-features.md`*
-- Slide-in-right on exercise advance; slide-up FeedbackPanel; green/red flash before feedback appears
+**UX-Y: Weekly progress snapshot on dashboard**
+- Show a compact "This week" row on the dashboard: exercises completed, new concepts introduced, accuracy %, alongside a small sparkline trend vs. last week.
+- Research: Duolingo's weekly recap feature measurably improved W4 retention by closing the loop on longer-term progress without requiring a full progress page visit.
+- Implementation: aggregate query on `exercise_attempts` filtered to `created_at >= current_week_start`. Dashboard-only, client component. No new DB schema needed.
 
-**UX-K: Submit button loading state** ✅ *Complete — see `docs/completed-features.md`*
-- `Loader2` spinner + "Checking…" text shown while Claude grades
+**UX-Z: Session time estimate**
+- Show "~N min remaining" in the study session header based on a rolling average of per-exercise submission times (client-side, reset each session).
+- Reduces mid-session abandonment: users who don't know how long it'll take quit early. Knowing "2 min left" creates commitment.
+- Pure client-side, no backend. Rolling average seeded with a 30-second default for the first exercise.
 
-**UX-L: Progress bars animate-in** ✅ *Complete — see `docs/completed-features.md`*
-- `AnimatedBar` client component; 80ms mount delay then 700ms CSS transition from 0→target
+**UX-AA: Concept mastery milestone moment**
+- When a concept's `interval_days` crosses the `MASTERY_THRESHOLD` (21 days) for the first time, show a brief congratulatory overlay (beyond the session-end confetti) that names the specific concept mastered: "You've mastered *El subjuntivo con ojalá*!"
+- Bridges the gap between short-term feedback (confetti on session end) and long-term identity ("I am mastering Spanish"). Research on intrinsic motivation shows named milestones build stronger long-term engagement than generic rewards.
+- Implementation: check in `/api/submit` response whether `interval_days` just crossed 21 (was < 21, now ≥ 21). Return a `mastered: true` flag. `StudySession.tsx` shows the milestone overlay before advancing.
 
-**UX-M: Contextual dashboard copy** ✅ *Complete — see `docs/completed-features.md`*
-- State-aware subtitle based on streak + dueCount
+**UX-AB: Concept explanation card — collapse on repeat exercises**
+- **Problem**: The "Concept" explanation card renders on every exercise, including the 5th time a user sees the same concept in a session. On mobile it pushes the exercise prompt below the fold.
+- **Solution**: Track the current concept ID across the session. Show the full card only on the **first exercise of each concept** per session. On subsequent exercises for the same concept, collapse to a single-line `"[Concept title]  ↓ remind me"` toggle that expands inline on tap.
+- **Implementation**: In `StudySession.tsx`, add a `seenConceptIds` ref (Set) that persists across renders. Before rendering the explanation card, check if `current.concept.id` is already in the set. Add it on first render. Collapse state drives a `max-height` transition (200ms ease-in) — no display:none.
+- **Acceptance criteria**: First exercise of each new concept → full card visible. Repeat concept → single-line collapsed toggle. Expand/collapse animates in 200ms. No layout shift.
 
-**UX-N: Autofocus inputs** ✅ *Already implemented* — GapFill + TextAnswer had `autoFocus`; verified
+**UX-AC: Feedback panel — visual answer comparison blocks** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-O: Streak pulse** ✅ *Complete — see `docs/completed-features.md`*
-- `animate-pulse` on Flame icon at streak ≥ 7
+**UX-AD: Session done screen — score-bracket emotional framing** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-P: Session exit button** ✅ *Already implemented as part of UX-G* — Dialog + X button in StudySession
+**UX-AE: Onboarding diagnostic — assessment feel, not pop quiz** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-Q: Due count badge** ✅ *Complete — see `docs/completed-features.md`*
-- Red dot badge at dueCount ≥ 10; green CheckCircle2 + green border when dueCount = 0
+**UX-AF: Dashboard primary action card — filled treatment when reviews are due** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-R: FeedbackPanel score label prominence** ✅ *Complete — see `docs/completed-features.md`*
-- `text-2xl font-black` centred; Sparkles icon at score = 3
+**UX-AG: Progress page — fix "Where you're strongest" section** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-S: Micro-interactions** ✅ *Complete — see `docs/completed-features.md`*
-- Logo hover:rotate-6; hint dot transition-colors duration-500
+---
 
-**UX-T: Dark mode semantic color fixes** *(implemented)*
+#### Copy & Tone
 
-**UX-U: Page fade-in transitions** ✅ *Complete — see `docs/completed-features.md`*
-- `PageWrapper` client component uses `usePathname` as key; 150ms fade+slide on route change
-
-**UX-V: First-run onboarding tour** ✅ *Complete — see `docs/completed-features.md`*
-- `OnboardingTour` dismissible overlay; `localStorage.tour_dismissed` flag
+**Copy-A through Copy-K** ✅ *All complete — see `docs/completed-features.md`*
 
 ---
 
 ## Recommended Next Steps (priority order)
 
+### Security & performance (remaining)
+1. SEC-02 — Global rate limiter (Vercel KV / Upstash Redis) — replace in-memory Map
+2. PERF-01 — Parallelise + fire-and-forget DB writes in `/api/submit`
+3. ARCH-02 — Per-task Claude model (Haiku for grading; validate ≥90% agreement first)
+4. PERF-03 — N+1 fix in push cron (single JOIN + pagination)
+5. PERF-04 — Middleware onboarding check cache (HttpOnly cookie)
+
+### Polish & effectiveness
+1. Perf-A #4 — Prefetch next exercise during feedback (pure frontend)
+2. Ped-G — Mistake review mode (`exercise_attempts WHERE score <= 1`)
+3. UX-AB — Concept explanation collapse on repeat exercises
+4. UX-W — Exercise UI clarity audit (design review before implementing)
+5. Ped-I — Grammar cheat-sheet (`grammar_summary` column + collapsible card)
+6. Feat-I — TTS audio (wire `useSpeech` to exercise prompts)
+7. UX-AA — Concept mastery milestone overlay
+8. UX-Y — Weekly progress snapshot on dashboard
+9. UX-Z — Session time estimate
+10. Ped-J — "Hard" flag on a concept
+
 ### Growth features (deferred)
-
-1. **Strat-A: Conjugation mode** — mirror Ella Verbs; 50/100/250 most-frequent verbs, conjugation drills in sentence context, favorites list, offline grading.
-
-2. **Strat-B: Admin content panel** — `/admin` gated by `profiles.is_admin`; read-only exercise/concept browser with attempt counts.
-
-3. **Feat-F: Offline exercise packs** — IndexedDB module download; deterministic grading for gap_fill/sentence_builder; queued batch-submit for AI-graded types on reconnect.
-
-4. **Feat-A: Daily email reminders** *(not wanted — deferred indefinitely)*
+- Strat-A — Conjugation mode (mirror Ella Verbs)
+- Strat-B — Admin content panel (`/admin` gated by `is_admin`)
+- Feat-F — Offline exercise packs (IndexedDB; PM decision needed first)
+- Feat-A — Daily email reminders *(not wanted — deferred indefinitely)*
