@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     }
 
     // Rate limit: 20 requests per 10 minutes per user
-    if (!checkRateLimit(user.id, 'grade', { maxRequests: 20, windowMs: 10 * 60 * 1000 }).allowed) {
+    if (!(await checkRateLimit(user.id, 'grade', { maxRequests: 20, windowMs: 10 * 60 * 1000 })).allowed) {
       return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
     }
 
@@ -104,10 +104,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // 5. Recompute and persist the user's CEFR level after all upserts
-    await updateComputedLevel(supabase, user.id)
-
-    // Use the first concept's SRS for the response (for next_review_in_days display)
+    // 5. Fetch the first concept's SRS interval for the response
     const { data: firstProgress } = await supabase
       .from('user_progress')
       .select('interval_days')
@@ -116,20 +113,19 @@ export async function POST(request: Request) {
       .single()
     const nextReviewDays = (firstProgress as { interval_days: number } | null)?.interval_days ?? 1
 
-    // 6. Record the attempt (exercise_id is null for AI-generated prompts)
-    await supabase
-      .from('exercise_attempts')
-      .insert({
+    // 6–8. Fire-and-forget: computed level, attempt record, streak
+    Promise.all([
+      updateComputedLevel(supabase, user.id),
+      supabase.from('exercise_attempts').insert({
         user_id: user.id,
         exercise_id: null,
         user_answer,
         is_correct: gradeResult.is_correct,
         ai_score: gradeResult.score,
         ai_feedback: gradeResult.feedback,
-      })
-
-    // 7. Update streak atomically — once per day
-    await updateStreakIfNeeded(supabase, user.id)
+      }),
+      updateStreakIfNeeded(supabase, user.id),
+    ]).catch(console.error)
 
     return NextResponse.json({
       ...gradeResult,

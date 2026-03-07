@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     }
 
     // Rate limit: 20 requests per 10 minutes per user
-    if (!checkRateLimit(user.id, 'hint', { maxRequests: 20, windowMs: 10 * 60 * 1000 }).allowed) {
+    if (!(await checkRateLimit(user.id, 'hint', { maxRequests: 20, windowMs: 10 * 60 * 1000 })).allowed) {
       return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
     }
 

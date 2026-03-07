@@ -58,6 +58,8 @@ export default async function StudyPage({
   const today = new Date().toISOString().split('T')[0]
 
   let conceptIds: string[] = []
+  // Review mode: maps conceptId → specific exerciseId to replay
+  const reviewExerciseByConceptId = new Map<string, string>()
 
   if (params.concept) {
     // Single concept — always practice regardless of due date
@@ -144,6 +146,48 @@ export default async function StudyPage({
       .slice(0, SESSION_SIZE)
     if (unlearnedIds.length === 0) redirect('/dashboard')
     conceptIds = unlearnedIds
+  } else if (params.mode === 'review') {
+    // Mistake review: most-recent failed attempt per concept
+    const { data: failedAttempts } = await supabase
+      .from('exercise_attempts')
+      .select('exercise_id')
+      .eq('user_id', user.id)
+      .lte('ai_score', 1)
+      .not('exercise_id', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(100)
+
+    const failedExerciseIds = (failedAttempts ?? [])
+      .map((a) => (a as { exercise_id: string | null }).exercise_id)
+      .filter((id): id is string => id !== null)
+
+    if (failedExerciseIds.length === 0) redirect('/dashboard')
+
+    // Fetch exercises to map exerciseId → conceptId
+    const { data: failedExercisesData } = await supabase
+      .from('exercises')
+      .select('id, concept_id')
+      .in('id', failedExerciseIds)
+
+    const exerciseToConceptMap = new Map(
+      (failedExercisesData ?? []).map((e) => {
+        const ex = e as { id: string; concept_id: string }
+        return [ex.id, ex.concept_id] as [string, string]
+      })
+    )
+
+    // Walk in most-recent-first order, deduplicate by concept
+    const seenConceptIds = new Set<string>()
+    for (const exId of failedExerciseIds) {
+      const conceptId = exerciseToConceptMap.get(exId)
+      if (!conceptId || seenConceptIds.has(conceptId)) continue
+      seenConceptIds.add(conceptId)
+      reviewExerciseByConceptId.set(conceptId, exId)
+      if (reviewExerciseByConceptId.size >= sessionSize) break
+    }
+
+    if (reviewExerciseByConceptId.size === 0) redirect('/dashboard')
+    conceptIds = [...seenConceptIds]
   } else {
     // Default: SRS due queue
     const { data: dueProgress } = await supabase
@@ -249,6 +293,12 @@ export default async function StudyPage({
       for (const ex of exArr) {
         items.push({ concept, exercise: ex })
       }
+    } else if (reviewExerciseByConceptId.size > 0) {
+      // Review mode: use the specific failed exercise for this concept
+      const targetExId = reviewExerciseByConceptId.get(conceptId)
+      const exercise = (targetExId ? exArr.find((e) => e.id === targetExId) : undefined)
+        ?? exArr[Math.floor(Math.random() * exArr.length)]
+      items.push({ concept, exercise })
     } else {
       // SRS mode: one random exercise per concept
       const exercise = exArr[Math.floor(Math.random() * exArr.length)]
@@ -257,7 +307,7 @@ export default async function StudyPage({
   }
 
   // Interleave by unit in SRS/sprint modes so each session mixes grammar areas (Ped-H)
-  const shouldInterleave = !params.concept && !params.unit && !params.module && !isPracticeMode
+  const shouldInterleave = !params.concept && !params.unit && !params.module && !isPracticeMode && params.mode !== 'review'
   const orderedItems = shouldInterleave ? interleaveByUnit(items) : items
 
   // Cap items to sessionSize (only in non-sprint, non-drill modes)

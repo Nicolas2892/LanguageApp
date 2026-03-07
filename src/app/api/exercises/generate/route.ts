@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     // Rate limit: 10 requests per 10 minutes per user
-    if (!checkRateLimit(user.id, 'exercises/generate', { maxRequests: 10, windowMs: 10 * 60 * 1000 }).allowed) {
+    if (!(await checkRateLimit(user.id, 'exercises/generate', { maxRequests: 10, windowMs: 10 * 60 * 1000 })).allowed) {
       return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
     }
 

@@ -8,7 +8,7 @@ import { OnboardingTour } from '@/components/OnboardingTour'
 import type { Profile, Concept, Module } from '@/lib/supabase/types'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import {
-  Flame, Trophy, BookOpen, Sparkles, PenLine, CheckCircle2,
+  Flame, Trophy, BookOpen, Sparkles, PenLine, CheckCircle2, RotateCcw,
 } from 'lucide-react'
 
 export default async function DashboardPage() {
@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
 
-  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes, dueByModuleRes, todaySessionsRes] = await Promise.all([
+  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes, dueByModuleRes, todaySessionsRes, mistakeAttemptsRes] = await Promise.all([
     supabase.from('profiles').select('streak, computed_level, display_name, daily_goal_minutes, last_studied_date').eq('id', user.id).single(),
     supabase
       .from('user_progress')
@@ -57,6 +57,13 @@ export default async function DashboardPage() {
       .select('started_at, ended_at')
       .eq('user_id', user.id)
       .gte('started_at', todayStart.toISOString()),
+    supabase
+      .from('exercise_attempts')
+      .select('exercise_id')
+      .eq('user_id', user.id)
+      .lte('ai_score', 1)
+      .not('exercise_id', 'is', null)
+      .limit(100),
   ])
 
   const profile = profileRes.data as Profile | null
@@ -86,6 +93,23 @@ export default async function DashboardPage() {
       .eq('id', weakestConceptId)
       .single()
     writeConcept = conceptData as Pick<Concept, 'id' | 'title'> | null
+  }
+
+  // Compute distinct mistake concept count
+  const mistakeExerciseIds = [...new Set(
+    (mistakeAttemptsRes.data ?? [])
+      .map((a) => (a as { exercise_id: string | null }).exercise_id)
+      .filter((id): id is string => id !== null)
+  )]
+  let mistakeConceptCount = 0
+  if (!isNewUser && mistakeExerciseIds.length > 0) {
+    const { data: mistakeExercises } = await supabase
+      .from('exercises')
+      .select('concept_id')
+      .in('id', mistakeExerciseIds)
+    mistakeConceptCount = new Set(
+      (mistakeExercises ?? []).map((e) => (e as { concept_id: string }).concept_id)
+    ).size
   }
 
   type SessionRow = { started_at: string; ended_at: string | null }
@@ -279,6 +303,22 @@ export default async function DashboardPage() {
 
         {/* Sprint card — hidden for brand-new users */}
         {!isNewUser && <SprintCard dueCount={dueCount} modules={modules} dueCountByModule={dueCountByModule} />}
+
+        {/* Review mistakes card — shown when user has failed attempts */}
+        {!isNewUser && mistakeConceptCount > 0 && (
+          <div className="border border-l-4 border-l-amber-500 rounded-xl p-6 space-y-3 bg-card">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Review mistakes</p>
+              <RotateCcw className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
+            </div>
+            <p className="text-xl font-bold">
+              {mistakeConceptCount} concept{mistakeConceptCount !== 1 ? 's' : ''} to revisit
+            </p>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/study?mode=review">Review now →</Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       <OnboardingTour />
