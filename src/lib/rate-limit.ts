@@ -33,10 +33,15 @@ export async function checkRateLimit(
 
   // Use KV when configured (production); fall back to in-memory for local dev
   if (process.env.KV_REST_API_URL) {
-    const windowSecs = Math.ceil(opts.windowMs / 1000)
-    const count = await kv.incr(key)
-    if (count === 1) await kv.expire(key, windowSecs)
-    return { allowed: count <= opts.maxRequests }
+    try {
+      const windowSecs = Math.ceil(opts.windowMs / 1000)
+      const count = await kv.incr(key)
+      if (count === 1) await kv.expire(key, windowSecs)
+      return { allowed: count <= opts.maxRequests }
+    } catch (err) {
+      console.error('[rate-limit] KV error, falling back to in-memory:', err)
+      // fall through to in-memory below
+    }
   }
 
   // In-memory fallback

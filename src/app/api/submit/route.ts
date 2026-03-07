@@ -37,20 +37,28 @@ export async function POST(request: Request) {
     }
     const { exercise_id, concept_id, user_answer, skip_srs } = parsed.data
 
-    // 1. Fetch exercise + concept in a single joined query (1 round-trip instead of 2)
-    const { data: exerciseRow, error: exErr } = await supabase
-      .from('exercises')
-      .select('id, type, prompt, expected_answer, concept_id, annotations, hint_1, hint_2, concepts!inner(id, title, explanation, level, type, difficulty, grammar_focus, unit_id, examples)')
-      .eq('id', exercise_id)
-      .eq('concept_id', concept_id)
-      .single()
+    // 1. Fetch exercise + concept in parallel (2 concurrent queries, no join syntax risk)
+    const [
+      { data: exercise, error: exErr },
+      { data: concept, error: conceptErr },
+    ] = await Promise.all([
+      supabase
+        .from('exercises')
+        .select('id, type, prompt, expected_answer, concept_id, annotations, hint_1, hint_2')
+        .eq('id', exercise_id)
+        .eq('concept_id', concept_id)
+        .single(),
+      supabase
+        .from('concepts')
+        .select('id, title, explanation, level, type, difficulty, grammar_focus, unit_id, examples')
+        .eq('id', concept_id)
+        .single(),
+    ])
 
-    if (exErr || !exerciseRow) {
-      return NextResponse.json({ error: 'Exercise not found' }, { status: 404 })
-    }
-    type ExerciseWithConcept = Exercise & { concepts: Concept }
-    const typedExercise = exerciseRow as ExerciseWithConcept
-    const typedConcept = typedExercise.concepts
+    if (exErr || !exercise) return NextResponse.json({ error: 'Exercise not found' }, { status: 404 })
+    if (conceptErr || !concept) return NextResponse.json({ error: 'Concept not found' }, { status: 404 })
+    const typedExercise = exercise as Exercise
+    const typedConcept = concept as Concept
 
     // 2. Grade with Claude
     const gradeResult = await gradeAnswer({
