@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Status: BROKEN IN PRODUCTION — exercise submission returns 500 "something went wrong" for all users.**
 
-**Introduced by:** commit `8d3dc1e` — which bundled three features in one commit: **SEC-02** (global rate limiter via Vercel KV / `@vercel/kv`), **PERF-01** (parallel DB fetches in `/api/submit`), and **Ped-G** (mistake review mode). The commits immediately before this (`803a1b5` — SEC-01/SEC-03/SEC-04/ARCH-01, and `e997ffd` — SEC-05/ARCH-03/PERF-02/UX-AC/AD/AE) were all working fine in production.
+**Introduced by:** commit `8d3dc1e` — which bundled three features in one commit: **SEC-02** (global rate limiter via Vercel KV / `@vercel/kv`), **PERF-01** (parallel DB fetches in `/api/submit`), and **Ped-G** (mistake review mode). The commits immediately before this — `803a1b5` (SEC-01/SEC-03/SEC-04/ARCH-01) and `e997ffd` (SEC-05/ARCH-03/PERF-02/UX-AC/AD/AE) — were **not properly tested in production** and must also be treated as suspect. The last confirmed-working production state is unknown; bisect from `e997ffd` backward if the issue persists after fixing `8d3dc1e`.
 
 **Symptom:** Every exercise submission fails. Users cannot study at all. Additionally, exercise loading times appear to have *worsened* since these changes, not improved as intended by PERF-01.
 
@@ -20,6 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. Verify `KV_REST_API_URL` and `KV_REST_API_TOKEN` are set in Vercel Project Settings → Environment Variables for the Production environment.
 4. If KV is confirmed as the root cause: temporarily comment out the entire KV branch in `src/lib/rate-limit.ts` to restore the in-memory fallback, redeploy, and confirm submissions work before re-introducing KV.
 5. For the loading time regression: profile `/api/submit` end-to-end in Vercel logs — if PERF-01 made things worse, the `Promise.all` for exercise+concept fetches may be causing connection pool contention. Consider reverting to sequential fetches as a quick fix.
+6. If fixes to `8d3dc1e` don't resolve the issue: use `git bisect` or sequentially revert to `803a1b5` then `e997ffd` to narrow down which commit first introduced the breakage. Key changes to audit in those commits: SEC-01 (push subscription SSRF fix), SEC-03 (CSRF Origin header check in `validateOrigin`), ARCH-01 (CI/CD GitHub Actions), SEC-05 (CSP headers), ARCH-03 (toast error handling), PERF-02 (computedLevel throttle).
 
 ---
 
