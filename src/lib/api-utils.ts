@@ -16,7 +16,11 @@ export function validateOrigin(request: Request): boolean {
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-  return !!siteUrl && origin === siteUrl
+  if (!siteUrl) {
+    console.warn('[validateOrigin] NEXT_PUBLIC_SITE_URL not set — skipping origin check')
+    return true
+  }
+  return origin === siteUrl
 }
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { computeLevel } from '@/lib/mastery/computeLevel'

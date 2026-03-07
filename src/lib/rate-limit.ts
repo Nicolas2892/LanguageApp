@@ -3,8 +3,6 @@
  * Uses Vercel KV (Redis) in production for global consistency across all instances.
  * Falls back to in-memory when KV is not configured (local dev / CI).
  */
-import { kv } from '@vercel/kv'
-
 export interface RateLimitOptions {
   /** Maximum requests allowed within the window */
   maxRequests: number
@@ -34,6 +32,7 @@ export async function checkRateLimit(
   // Use KV when configured (production); fall back to in-memory for local dev
   if (process.env.KV_REST_API_URL) {
     try {
+      const { kv } = await import('@vercel/kv')
       const windowSecs = Math.ceil(opts.windowMs / 1000)
       const count = await kv.incr(key)
       if (count === 1) await kv.expire(key, windowSecs)

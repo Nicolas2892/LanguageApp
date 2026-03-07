@@ -46,10 +46,11 @@ describe('validateOrigin', () => {
     expect(validateOrigin(makeRequest('https://evil.com'))).toBe(false)
   })
 
-  it('returns false when NEXT_PUBLIC_SITE_URL is not set and origin is not localhost', () => {
+  it('returns true (fail-open) when NEXT_PUBLIC_SITE_URL is not set — avoids blocking production when env var is missing', () => {
     process.env.NODE_ENV = 'production'
     delete process.env.NEXT_PUBLIC_SITE_URL
-    expect(validateOrigin(makeRequest('https://evil.com'))).toBe(false)
+    // Intentional: missing env var warns but does not block requests (fail-open)
+    expect(validateOrigin(makeRequest('https://evil.com'))).toBe(true)
   })
 
   it('returns false for localhost in production when NEXT_PUBLIC_SITE_URL does not match', () => {
