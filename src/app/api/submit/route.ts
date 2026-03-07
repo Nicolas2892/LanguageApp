@@ -104,19 +104,10 @@ export async function POST(request: Request) {
           last_reviewed_at: new Date().toISOString(),
         }, { onConflict: 'user_id,concept_id' })
 
-      // 5b. Set production_mastered if this is a Tier 2/3 exercise answered correctly
-      const isProductionType = (PRODUCTION_TYPES as readonly string[]).includes(typedExercise.type)
-      if (isProductionType && gradeResult.score >= 2) {
-        await supabase
-          .from('user_progress')
-          .update({ production_mastered: true })
-          .eq('user_id', user.id)
-          .eq('concept_id', concept_id)
-      }
-
     }
 
-    // 6–8. Fire-and-forget: record attempt + streak + computed level
+    // Fire-and-forget: record attempt + streak + production_mastered + computed level
+    const isProductionType = (PRODUCTION_TYPES as readonly string[]).includes(typedExercise.type)
     const bgOps: PromiseLike<unknown>[] = [
       supabase.from('exercise_attempts').insert({
         user_id: user.id,
@@ -128,7 +119,18 @@ export async function POST(request: Request) {
       }),
       updateStreakIfNeeded(supabase, user.id),
     ]
-    if (!skip_srs) bgOps.push(updateComputedLevel(supabase, user.id))
+    if (!skip_srs) {
+      if (isProductionType && gradeResult.score >= 2) {
+        bgOps.push(
+          supabase
+            .from('user_progress')
+            .update({ production_mastered: true })
+            .eq('user_id', user.id)
+            .eq('concept_id', concept_id),
+        )
+      }
+      bgOps.push(updateComputedLevel(supabase, user.id))
+    }
     Promise.all(bgOps).catch(console.error)
 
     return NextResponse.json({

@@ -20,12 +20,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Suspected causes (to investigate):**
 1. **Claude grading latency** — every submission awaits a non-streaming Claude Sonnet call (~2–6s). Candidates: streaming the grading response (Perf-A #1), switching to Haiku for grading (ARCH-02, requires ≥90% quality validation), or prefetching the next exercise during feedback (Perf-A #4).
-2. **Sequential DB writes in `/api/submit`** — post-grading: SRS upsert → `production_mastered` update → `updateComputedLevel` (multi-join) → `exercise_attempts` insert → streak RPC all run sequentially (~150–300ms total). Fix: fire-and-forget all non-blocking writes (PERF-01).
+2. **Sequential DB writes in `/api/submit`** — ✅ Fixed (PERF-01): `production_mastered`, `updateComputedLevel`, `exercise_attempts`, and streak are all fire-and-forget. Only the SRS upsert blocks.
 3. **Screen/page load times** — likely Supabase round-trips on server components (no caching). Profile each page in Vercel logs to identify the slowest queries.
 
 **Next steps:**
 - Check Vercel Function logs for p50/p95 durations on `/api/submit` to split Claude time vs DB time.
-- Implement PERF-01 (fire-and-forget DB writes) — safe, no quality risk, ~150ms gain.
 - Evaluate Perf-A #4 (prefetch next exercise during feedback) — pure frontend, zero backend change.
 - Do NOT switch grading model (ARCH-02) without offline quality validation first.
 
@@ -329,10 +328,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 **SEC-01: SSRF via unvalidated push subscription endpoint** ✅ *Complete — see `docs/completed-features.md`*
 
-**SEC-02: In-memory rate limiter is instance-scoped, not global** *(Critical)*
-- **Vulnerability**: `src/lib/rate-limit.ts` uses a module-scope `Map`. Vercel runs multiple concurrent instances per region; each maintains an independent counter. A user can submit 60×N requests (N = warm instances) before being rate-limited — effectively bypassing the limit entirely against the Anthropic API.
-- **Fix**: Replace with Vercel KV (Upstash Redis). Pattern: `await kv.incr(key)` + `kv.expire(key, windowSeconds)`. Alternatively a Supabase RPC-backed atomic counter. Remove the in-memory `Map` entirely.
-- **Acceptance criteria**: Rate limit counters are consistent across all function instances. `/api/submit` returns HTTP 429 after exactly 60 requests/10 min regardless of which instance handles each request. Check adds ≤ 20ms latency at p95.
+**SEC-02: In-memory rate limiter is instance-scoped, not global** ✅ *Complete — see `docs/completed-features.md`*
 
 **SEC-03: No CSRF protection on state-mutating API routes** ✅ *Complete — see `docs/completed-features.md`*
 
@@ -342,10 +338,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### Performance (from audit)
 
-**PERF-01: Sequential DB writes block `/api/submit` response** *(High)*
-- **Bottleneck**: After Claude returns, 6 DB operations execute sequentially: fetch user_progress → upsert user_progress → update production_mastered → `updateComputedLevel` (multi-join) → insert exercise_attempts → streak RPC. Each Supabase round-trip adds ~20–50ms. Total post-grading DB latency: ~150–300ms.
-- **Fix**: Two-phase restructure. Phase A (blocking, needed for response): SRS upsert only. Phase B (fire-and-forget, non-blocking): `production_mastered` update, `updateComputedLevel`, `exercise_attempts` insert, streak RPC — dispatched via `Promise.all([...]).catch(console.error)` without `await`. Also parallelise the initial exercise + concept fetches into `Promise.all`.
-- **Acceptance criteria**: Exercise + concept fetches are parallel. `exercise_attempts`, `updateComputedLevel`, `updateStreakIfNeeded` are fire-and-forget. `next_review_in_days` remains correct. P50 post-Claude latency reduces by ≥ 150ms.
+**PERF-01: Sequential DB writes block `/api/submit` response** ✅ *Complete — see `docs/completed-features.md`*
 
 **PERF-02: `updateComputedLevel` called on every exercise submission** ✅ *Complete — see `docs/completed-features.md`*
 
@@ -506,11 +499,9 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 ## Recommended Next Steps (priority order)
 
 ### Security & performance (remaining)
-1. SEC-02 — Global rate limiter (Vercel KV / Upstash Redis) — replace in-memory Map
-2. PERF-01 — Parallelise + fire-and-forget DB writes in `/api/submit`
-3. ARCH-02 — Per-task Claude model (Haiku for grading; validate ≥90% agreement first)
-4. PERF-03 — N+1 fix in push cron (single JOIN + pagination)
-5. PERF-04 — Middleware onboarding check cache (HttpOnly cookie)
+1. ARCH-02 — Per-task Claude model (Haiku for grading; validate ≥90% agreement first)
+2. PERF-03 — N+1 fix in push cron (single JOIN + pagination)
+3. PERF-04 — Middleware onboarding check cache (HttpOnly cookie)
 
 ### Polish & effectiveness
 1. Perf-A #4 — Prefetch next exercise during feedback (pure frontend)

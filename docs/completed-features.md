@@ -506,6 +506,23 @@ Drop-in string replacements, no logic or schema changes:
 
 ---
 
+## PERF-01 + SEC-02 ✓ (2026-03-07)
+
+**Tests**: 1132 passing across 31 files (no new tests needed — pure restructure)
+
+### PERF-01: Fire-and-forget DB writes in `/api/submit` ✓
+- **What changed**: `production_mastered` update moved from awaited block into `bgOps` fire-and-forget array alongside `exercise_attempts` insert, `updateStreakIfNeeded`, and `updateComputedLevel`.
+- **Before**: SRS upsert → `production_mastered` (await) → then fire-and-forget for the rest.
+- **After**: SRS upsert only blocks; all other writes (`production_mastered`, `exercise_attempts`, streak, `updateComputedLevel`) dispatched via `Promise.all(bgOps).catch(console.error)` with no `await`.
+- Exercise + concept fetches already parallel (`Promise.all`) since a prior session.
+- `next_review_in_days` unaffected — computed from the SRS upsert which still blocks.
+
+### SEC-02: Global rate limiter via Vercel KV ✓
+- Already implemented in a prior session. `src/lib/rate-limit.ts` uses `kv.incr(key)` + `kv.expire(key, windowSecs)` when `KV_REST_API_URL` is set; falls back to in-memory `Map` for local dev and CI. Dynamic import inside `try` block prevents crash at module load time.
+- **Action needed**: Ensure `KV_REST_API_URL` and `KV_REST_API_TOKEN` env vars are set in Vercel Project Settings → Environment Variables → Production (from Vercel KV / Upstash dashboard).
+
+---
+
 ## Security, Performance & Architecture Sprints ✓ (2026-03)
 
 **Commits**: `feat: SEC-05, ARCH-03, PERF-02, UX-AC, UX-AD, UX-AE batch` · `perf: prompt caching, SRS interleaving, useTransition for study session` · `feat: SEC-01, SEC-03, SEC-04, ARCH-01 security sprint`
