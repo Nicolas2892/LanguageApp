@@ -4,34 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## ✅ Production Regression — RESOLVED (2026-03-07)
-
-**Status: Fixed in commit `7c1a916`.** Exercise submissions were returning 500 for all users.
-
-**Root causes found & fixed:**
-1. `validateOrigin` (`src/lib/api-utils.ts`) returned `false` (→ 403) when `NEXT_PUBLIC_SITE_URL` was not set in Vercel env vars. Fixed to fail-open with a warning when the env var is absent. **Action needed:** set `NEXT_PUBLIC_SITE_URL=https://<your-domain>` in Vercel Project Settings → Environment Variables → Production to re-enable strict CSRF protection.
-2. Top-level `import { kv } from '@vercel/kv'` in `src/lib/rate-limit.ts` could crash the entire route module at load time before any try/catch could run. Fixed to dynamic import inside the try block.
-
----
-
-## ✅ Production Performance — Resolved (2026-03-08)
-
-**PERF-01** ✅ Sequential DB writes fire-and-forget in `/api/submit`
-**PERF-02** ✅ `updateComputedLevel` only on mastery threshold crossing
-**PERF-03** ✅ Push cron N+1 replaced with single JOIN RPC + batch pagination (migration `012_push_due_count_rpc.sql` applied)
-**PERF-04** ✅ Middleware onboarding check cached via HttpOnly cookie — zero DB queries for returning users
-**PERF-05** ✅ Prompt caching on grading + hint system prompts
-**ARCH-02** ✅ Haiku (`claude-haiku-4-5-20251001`) for grading + hints — validated 93.8% score agreement vs Sonnet; Sonnet retained for tutor + exercise generation
-
----
-
 ### General comments
 You are an Expert in Product Management work, Coding and UX Research, alongside being a world-class language teacher and learner who is really experienced in Spanish. Your job is to make a great app to help advanced Spanish learners go from B1 to B2 and eventually C1 through offering advanced exercises specifically targeted on active recall. We cover a market gap here as existing applications (DuoLingo, Babbel) offer too simplistic exercises not challenging enough and other solutions such as KwizIQ do not offer sufficient variation in exercises (most being multiple choice). Our Design has to be sleek and modern. The main usage point will be as an application on iOS and in the Browser (comparable to Babbel) - so we always need that cross-device functionality. No progress should ever be stored on the device, it should all live in the cloud.
 
 - If you have questions for clarification that woud help improve your work, always ask them to the user before starting your work or edits.
-- Always add Unit Tests for newly created features when writing them so we can test the application well. 
+- Always add Unit Tests for newly created features when writing them so we can test the application well.
 - Keep a best in class code hygiene and syntax to make the code as easy to maintain as possible.
 - BEFORE you commit or do any edits or changes, always activate plan mode, irrespective if the user has triggered it already or not to create an step-by-step implementation. Present the plan back to the user and only if confirmed then move ahead.
+
 ## Commands
 
 Node/pnpm are installed via Homebrew and not in the default PATH. Always prefix shell commands with:
@@ -90,7 +70,7 @@ Remote: `https://github.com/Nicolas2892/LanguageApp.git`
 ### Tech Stack
 - **Next.js 16** (App Router, `src/` layout, TypeScript, Server + Client Components)
 - **Supabase** — Postgres + Auth + RLS (no Supabase CLI; migrations run manually in SQL editor)
-- **Claude API** (`claude-sonnet-4-20250514`) — grades every exercise response; no user self-rating
+- **Claude API** — `claude-sonnet-4-20250514` (TUTOR_MODEL) for tutor + exercise generation; `claude-haiku-4-5-20251001` (GRADE_MODEL) for grading + hints (validated 93.8% score agreement vs Sonnet)
 - **shadcn/ui** + Tailwind v4 (Neutral theme)
 - **recharts** — progress analytics charts
 - **Vitest** + **@testing-library/react** — unit + component tests (`src/**/__tests__/`)
@@ -151,10 +131,11 @@ Session configure page (`/study/configure`) builds these params via a UI before 
 ### Exercise Types & Components
 | Type | Component | Notes |
 |---|---|---|
-| `gap_fill` | `GapFill.tsx` | Single-line input |
-| `transformation` `translation` `free_write` | `TextAnswer.tsx` | Multi-line textarea |
-| `sentence_builder` | `SentenceBuilder.tsx` | Word chip bank; parses `[w1/w2/w3]` tokens from prompt |
-| `error_correction` | `ErrorCorrection.tsx` | Extracts `"quoted sentence"` from prompt, pre-populates textarea with warning |
+| `gap_fill` | `GapFill.tsx` | Single-line input; SpeakButton wired |
+| `transformation` `translation` `free_write` | `TextAnswer.tsx` | Multi-line textarea; SpeakButton wired |
+| `sentence_builder` | `SentenceBuilder.tsx` | Word chip bank; parses `[w1/w2/w3]` tokens from prompt; SpeakButton wired |
+| `error_correction` | `ErrorCorrection.tsx` | Extracts `"quoted sentence"` from prompt, pre-populates textarea; SpeakButton wired |
+| `free_write` (write page) | `FreeWritePrompt.tsx` | SpeakButton + STT mic dictation (Web Speech API, es-ES) |
 
 All routed through shared `ExerciseRenderer` in `src/components/exercises/ExerciseRenderer.tsx`.
 
@@ -199,13 +180,16 @@ All routes except `/auth/*` redirect unauthenticated users to `/auth/login`. Pro
 Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/001_initial_schema.sql`
 - `supabase/migrations/002_onboarding_flag.sql`
-- `supabase/migrations/003_indexes.sql` — study_sessions index (already applied)
+- `supabase/migrations/003_indexes.sql` — study_sessions index
 - inline (applied) — `ALTER TABLE exercise_attempts ALTER COLUMN exercise_id DROP NOT NULL;`
 - `supabase/migrations/005_fix_google_oauth_trigger.sql` — fixed handle_new_user trigger for Google OAuth
-- `supabase/migrations/006_computed_level.sql` — `concepts.level`, `user_progress.production_mastered`, `profiles.computed_level`; seeds 21 concept CEFR tags; grandfathers existing production attempts
-- `supabase/migrations/007_grammar_focus.sql` — `concepts.grammar_focus text CHECK ('indicative'|'subjunctive'|'both')`; seeded for all 21 concepts
-- `supabase/migrations/008_exercise_annotations.sql` — `exercises.annotations jsonb NULL`; filled by `pnpm annotate` after running
-- `supabase/migrations/012_push_due_count_rpc.sql` — `get_subscribers_with_due_counts(p_today, p_limit, p_offset)` RPC for PERF-03 (applied 2026-03-08)
+- `supabase/migrations/006_computed_level.sql` — `concepts.level`, `user_progress.production_mastered`, `profiles.computed_level`
+- `supabase/migrations/007_grammar_focus.sql` — `concepts.grammar_focus text CHECK ('indicative'|'subjunctive'|'both')`
+- `supabase/migrations/008_exercise_annotations.sql` — `exercises.annotations jsonb NULL`
+- `supabase/migrations/009_push_subscription.sql` — `profiles.push_subscription jsonb NULL`
+- `supabase/migrations/010_theme_preference.sql` — `profiles.theme_preference text DEFAULT 'system'`
+- `supabase/migrations/011_streak_rpc.sql` — `increment_streak_if_new_day(p_user_id uuid)` atomic RPC
+- `supabase/migrations/012_push_due_count_rpc.sql` — `get_subscribers_with_due_counts(...)` RPC
 
 ### Dashboard Stats
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
@@ -214,7 +198,7 @@ Migrations (run once in Supabase SQL editor):
 - `isNewUser` flag uses `studiedCount` (any `user_progress` row), not `masteredCount`
 
 ### Curriculum Seed Content
-**Currently in DB** (85 concepts, 787 exercises — Feat-E complete):
+**Currently in DB** (85 concepts, 787 exercises):
 - Module 1: Connectors & Discourse Markers — 4 units, 23 concepts
 - Module 2a: The Subjunctive: Core — 1 unit, 5 concepts
 - Module 2b: The Subjunctive: Advanced — 2 units, 8 concepts
@@ -226,291 +210,136 @@ Migrations (run once in Supabase SQL editor):
 - Full plan: `src/lib/curriculum/curriculum-plan.ts`; design reference: `docs/curriculum-design.md`
 - ⚠️ Do NOT re-run `pnpm seed:ai:apply` on an existing review file — no idempotency guard, will create duplicate concept rows. See `docs/completed-features.md` Feat-E for cleanup procedure.
 
-### Shared Modules (added in pre-Phase 6 audit)
-- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21
-- `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map used by FeedbackPanel + DiagnosticSession)
-- `src/components/exercises/ExerciseRenderer.tsx` — shared exercise switch (used by StudySession + DiagnosticSession)
-- `src/components/exercises/FreeWritePrompt.tsx` — AI prompt display + textarea; used by WriteSession
+### Key Shared Components & Utilities
+- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, LEVEL_CHIP
+- `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map)
+- `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
+- `src/lib/hooks/useSpeech.ts` — TTS hook; `src/components/SpeakButton.tsx` — speaker button (wired in all 5 exercise types)
+- `src/lib/hooks/useSpeechRecognition.ts` — STT hook (Web Speech API, es-ES, SSR-safe); `src/components/MicButton.tsx` — mic button used in FreeWritePrompt
+- `src/components/exercises/ExerciseRenderer.tsx` — shared exercise switch
+- `src/components/exercises/FreeWritePrompt.tsx` — AI prompt + textarea + SpeakButton + MicButton; used by WriteSession
 - `src/components/ErrorBoundary.tsx` — wraps StudySession, DiagnosticSession, WriteSession
-- `src/lib/curriculum/run-truncate.ts` — deletes curriculum tables in FK order; `pnpm truncate`
+- `src/lib/rate-limit.ts` — `checkRateLimit(userId, routeKey, opts)` sliding-window (backed by @vercel/kv)
+- `src/lib/api-utils.ts` — `updateStreakIfNeeded` + `updateComputedLevel` shared by submit + grade
 
-### Free-Write Flow (P6-A)
+### API Security
+- All POST routes validated with Zod v3 schemas
+- CSRF protection via `validateOrigin` in `src/lib/api-utils.ts` — set `NEXT_PUBLIC_SITE_URL=https://<domain>` in Vercel env vars to enable strict mode
+- `next.config.ts` — CSP, X-Frame-Options, Referrer-Policy, `Permissions-Policy: microphone=()` globally; `/write(.*)` overrides to `microphone=(self)` for STT
+
+### Free-Write Flow
 - `/write?concept=<id>` — dedicated page; not part of SRS study queue
 - `POST /api/topic` — generates prompt; Claude non-streaming, max_tokens 256
-- `POST /api/grade` — grades answer; mirrors `/api/submit` but no exercise lookup; inserts `exercise_attempts` with `exercise_id: null`
-- `exercise_attempts.exercise_id` is nullable in DB and in `src/lib/supabase/types.ts`
-- Dashboard shows "Free write" card pointing to weakest unmastered concept (hidden for new users)
+- `POST /api/grade` — grades answer; inserts `exercise_attempts` with `exercise_id: null`
+- STT mic button overlaid on textarea; transcript appended with space separator; permission-denied + unsupported-browser (Firefox) fallbacks
 
-### API Security (added in pre-Phase 6 audit)
-- All 5 POST routes validated with Zod v3 schemas (submit, hint, chat, onboarding/complete, sessions/complete)
-- `/api/hint` cross-validates exercise.concept_id === requested concept_id
-- `/api/chat` ReadableStream has try/catch for mid-stream errors
-- `next.config.ts` — reactStrictMode=true + X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy
+---
 
 ## Current Status
 
 **Test suite: 1199 tests across 37 files — all passing.**
 
-**E2E infrastructure: Playwright smoke tests live** (`pnpm test:e2e`) — 4 scenarios covering submit→feedback, done screen, drill mode, and multi-exercise sessions. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`. See `e2e/` directory.
+**E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
-**CI: Fully green (TypeScript + lint + tests) as of 2026-03-08.**
+**CI: Fully green (TypeScript + lint + tests).**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E, **Fix-I**), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-02, ARCH-03)**, **Performance (PERF-01, PERF-02, PERF-03, PERF-04, PERF-05)**, **Perf-A #4 (prefetch next route + drill auto-generation during feedback)**, **UX-AB, UX-Y, UX-Z, UX-AA (session polish + dashboard weekly snapshot)**, **Feat-I (TTS all exercises + STT dictation on free-write)**.
-
-→ Full implementation details of all completed work: `docs/completed-features.md`
+→ Full implementation history: `docs/completed-features.md`
 
 ---
 
-### Phase 9 — Backlog
+## Backlog
 
-Items are grouped by type and roughly ordered by priority within each group. Completed items moved to `docs/completed-features.md`.
+Items are ordered by priority within each group. Full details of completed work in `docs/completed-features.md`.
 
-#### Pedagogical / Learning Quality
+### Pedagogical / Learning Quality
 
-**Ped-B** ✅ *Complete — see `docs/completed-features.md`*
-
-**Ped-D: Gap-fill same-concept redesign** ✅ *Complete — see `docs/completed-features.md`*
-
-**Ped-F: Shared AI-generated exercise pool + adaptive grading strategy** *(requires PM/UX research before implementation)*
-- **Problem statement**: Currently, drill mode generates exercises per-user on demand, wasting tokens and producing fragmented, non-reusable content. As the concept pool grows (Feat-E target: 40+ concepts), individual per-user generation is unsustainable.
-- **Core idea**: AI-generated exercises should be inserted into the shared `exercises` table (already done via service role in `/api/exercises/generate`) and served to ALL users — not regenerated per user. Before generating, the route should check whether sufficient exercises already exist for that concept (e.g. ≥ N exercises) and skip generation entirely if so.
-- **Token efficiency rule**: Define a per-concept exercise cap (e.g. 10–15 exercises). If `COUNT(exercises WHERE concept_id = X) >= cap`, return existing exercises randomly rather than generating new ones. This prevents unbounded growth and eliminates duplicate token spend.
-- **Grading strategy open question**: As the pool grows from 3 → 10–15 exercises per concept, the current implicit model of "pass all exercises = mastered" breaks down. Two candidate approaches:
-  1. **Relative mastery**: SM-2 SRS already operates per-concept, not per-exercise — grading is already relative (a score feeds into ease_factor and interval regardless of how many exercises exist). This may already be correct and no change needed.
-  2. **Stratified sampling**: Ensure each study session samples exercises proportionally across exercise types (gap_fill, translation, transformation, free_write, etc.) so a growing pool doesn't skew toward the most-common type.
-- **UX open question**: Should users see which exercises are "shared" vs. "seeded"? Or is the pool fully transparent? Does the user get any agency over generation (e.g. "Generate a new variation")?
-- **Research needed before implementation**:
-  - Define the per-concept exercise cap and the trigger condition for generation (e.g. always top-up to N)
-  - Decide whether exercise deduplication is needed (similar prompts from different generation runs)
-  - Confirm the grading model is truly concept-level (SRS) and not exercise-level — review `/api/submit` and SM-2 logic
-  - Consider admin tooling (Strat-B) to review and curate AI-generated exercises before they enter the shared pool
+**Ped-F: Shared AI-generated exercise pool + adaptive grading strategy** *(PM research required before implementation)*
+- Currently, drill mode generates exercises per-user on demand, wasting tokens. AI-generated exercises should insert into the shared `exercises` table and be served to all users.
+- Define a per-concept exercise cap (e.g. 10–15). If `COUNT >= cap`, return existing exercises randomly rather than generating new ones.
+- Open questions: deduplication strategy, whether stratified sampling by exercise type is needed, admin tooling (Strat-B) for curation.
 - **Do not implement without a written PM decision on cap, dedup, and grading model.**
 
-**Ped-E: Grammatical structure highlighting** ✅ *Complete — see `docs/completed-features.md`*
-
 **Ped-G: Mistake review mode**
-- Research: Serfaty & Serrano (2024) showed learners who completed 3+ relearning sessions on previously-wrong items scored dramatically higher on delayed posttests. Error-targeted relearning is the single highest-ROI study activity.
-- Pull from `exercise_attempts WHERE score <= 1` for the current user, re-queue those exercises as a dedicated study mode ("Review mistakes").
+- Pull from `exercise_attempts WHERE score <= 1` for the current user, re-queue as a dedicated "Review mistakes" session.
 - Surface as a card on dashboard (when mistake count > 0) and as an option in `/study/configure`.
-- No new DB schema needed — data already exists in `exercise_attempts`.
-- Dedup: show each concept at most once per review session (pick the most-recent failed attempt per concept).
-
-**Ped-H: Interleaving in SRS queue** ✅ *Complete — see `docs/completed-features.md`*
+- No new DB schema needed. Dedup: one concept per session (most-recent failed attempt).
 
 **Ped-I: Concept grammar cheat-sheet**
-- Before the first exercise of a concept in a session, show a collapsed/expandable accordion with a 2–3 sentence grammar rule summary. Fills the gap between the full tutor (chat) and zero context.
-- This differentiates us from Clozemaster (no context) and KwizIQ (static help pages) — learners get just-in-time reference at the moment of practice.
-- Requires `grammar_summary text` column added to `concepts` table (migration). Seed via a script that uses Claude to generate summaries for all 85 concepts (similar to `pnpm annotate` pattern).
-- Show summary as a collapsible card at the top of the exercise; collapsed by default after first concept in session.
+- Before the first exercise of a concept in a session, show a collapsible accordion with a 2–3 sentence grammar rule summary.
+- Requires `grammar_summary text` column on `concepts` (migration + seed script similar to `pnpm annotate`).
+- Collapsed by default after first concept in session.
 
 **Ped-J: "Hard" flag on a concept**
-- User can mark a concept as "always include more of these." Feeds a weighted sampling so flagged concepts appear more frequently in SRS queue even if not technically due.
-- Implementation: `is_hard boolean DEFAULT false` on `user_progress`. Toggle via a button (e.g., flag icon) in the study session feedback panel and on the curriculum concept row.
-- Weight rule: if `is_hard = true`, treat due_date as always today (or halve the interval multiplier). Simple, no new API route needed — just modify SRS query.
+- `is_hard boolean DEFAULT false` on `user_progress`. Toggle via flag icon in feedback panel and curriculum row.
+- Weight rule: if `is_hard = true`, treat due_date as always today (or halve interval multiplier). No new API route needed.
 
-#### New Features
+### New Features
+
+**Feat-F: Offline exercise packs (module download)** *(PM decision required first)*
+- `gap_fill` + `sentence_builder` graded locally (accent-normalised string match); open-ended types (`translation`, `transformation`, `error_correction`) queued for AI grading on reconnect; `free_write` always excluded.
+- SRS updates queued in IndexedDB, flushed when `navigator.onLine` is true; conflict resolution strategy needed.
+- **Do not implement without a written PM decision on conflict resolution and sync UI.**
 
 **Feat-A: Daily email reminders** *(deferred — not wanted)*
 
-**Feat-C: Guided CEFR progression** ✅ *Complete — see `docs/completed-features.md`*
+### Bugs / Layout Fixes
 
-**Feat-D: Web push notifications** ✅ *Complete — see `docs/completed-features.md`*
+**Fix-H: Curriculum "Practice" sessions too short — enforce minimum 5 exercises**
+- `/study?concept=<id>` can return < 5 exercises if concept has few seeded rows, ending sessions prematurely.
+- Fix: after fetching exercises for concept mode, pad by cycling if `exercises.length < 5`. No DB change needed.
+- Acceptance criteria: always ≥ 5 exercises, no duplicate consecutive exercises if pool ≥ 2.
 
-**Feat-E: Content expansion via AI seeding script** ✅ *Complete — see `docs/completed-features.md`*
+**Fix-F: Write page sticky footer misaligned on desktop** *(deferred)*
+- Footer uses `position: fixed; left: 0; right: 0`, ignoring the `lg:ml-[220px]` sidebar layout wrapper.
+- Proper fix: restructure footer to render inside the layout wrapper using `sticky`, or read sidebar width at runtime via JS.
+- Do not attempt again without a clear plan — previous fixes introduced regressions.
 
-**Feat-F: Offline exercise packs (module download)**
-- User downloads a full module's exercises to IndexedDB for offline use
-- `gap_fill` + `sentence_builder` graded locally (deterministic string match, accent-normalised)
-- `translation` / `transformation` / `error_correction` answers queued locally; batch-submitted + AI-graded on reconnect
-- `free_write` always excluded — always requires AI grading; not available offline
-- SRS updates queued locally, flushed when `navigator.onLine` is true; conflict resolution needed for multi-device offline scenarios (last-write-wins or merge by most-recent timestamp)
-- "One right answer" assumption holds well for gap_fill/sentence_builder; breaks for open-ended types — those must stay online-only for AI grading
-- Migration: no schema change needed; offline queue lives entirely in IndexedDB on the client
-- **Do not implement without a written PM decision on conflict resolution strategy and UI for queued/pending sync state.**
+### UX Audits & Polish
 
-**Feat-G: Full Architecture and Security Review** ✅ *Complete — audit conducted 2026-03, tickets filed as SEC-01–05, PERF-01–05, ARCH-01–03 below*
+**UX-AH: PM & UX review — exercise entry flows and drill/practice mode redesign** *(research required before any implementation)*
+- Too many overlapping entry points (`/study`, `/study/configure`, curriculum "Practice" button, dashboard CTAs, Sprint, Free Write) all landing on identical-looking sessions with no mode indicator.
+- Key issues: Drill/Practice/Review not distinguished in UI; auto-generation invisible; session length unpredictable; configurator mostly unused.
+- **Suggested next step**: flow diagram of all entry points → URL params → behaviour → exit states; define a simplified 2-mode model (Review = SRS-due; Practice = free drill). **No UI changes without the diagram and agreed mode definition.**
 
-#### Security
+**UX-W: Exercise UI clarity audit** *(design review required before implementing)*
+- Exercise screen has too many simultaneous elements (progress counter, concept name, breadcrumb, 3 chips, prompt, input, hint dots, submit).
+- Principles: progressive disclosure, single focal point, collapse 3 chips into one muted metadata row, hide hint dots until first wrong attempt.
+- Audit tasks: inventory all elements in GapFill/TextAnswer/ErrorCorrection/SentenceBuilder/StudySession; produce before/after element count; prototype in StudySession header first.
 
-**SEC-01: SSRF via unvalidated push subscription endpoint** ✅ *Complete — see `docs/completed-features.md`*
-**SEC-02: In-memory rate limiter is instance-scoped, not global** ✅ *Complete — see `docs/completed-features.md`*
-**SEC-03: No CSRF protection on state-mutating API routes** ✅ *Complete — see `docs/completed-features.md`*
-**SEC-04: Prompt injection via unescaped `user_answer` in grading prompt** ✅ *Complete — see `docs/completed-features.md`*
-**SEC-05: CSP missing `worker-src` and `manifest-src` directives** ✅ *Complete — see `docs/completed-features.md`*
+### Performance
 
-#### Performance (from audit)
+**Perf-A: Stream grading response** *(remaining item)*
+- Switch `/api/submit` to streaming: send score + label first (< 10 tokens), then stream full feedback. Biggest latency UX win remaining.
+- Also consider: optimistic local score for single-blank `gap_fill` (client-side accent-normalised match → show "Correct!" immediately, submit to Claude async for SM-2).
 
-**PERF-01: Sequential DB writes block `/api/submit` response** ✅ *Complete — see `docs/completed-features.md`*
-**PERF-02: `updateComputedLevel` called on every exercise submission** ✅ *Complete — see `docs/completed-features.md`*
-**PERF-03: N+1 query pattern in `/api/push/send` cron** ✅ *Complete — see `docs/completed-features.md`*
-**PERF-04: Middleware DB query on every authenticated page navigation** ✅ *Complete — see `docs/completed-features.md`*
-**PERF-05: Claude prompt caching not used on grading system prompt** ✅ *Complete — see `docs/completed-features.md`*
+### Strategic / Long-term
 
-#### Architecture (from audit)
-
-**ARCH-01: No CI/CD pipeline — untested code ships directly to production** ✅ *Complete — see `docs/completed-features.md`*
-- **Note**: Vercel production gate must be configured manually in Project Settings → Git → Required checks.
-**ARCH-02: Single Claude model for all AI tasks — suboptimal cost/speed tradeoff** ✅ *Complete — see `docs/completed-features.md`*
-**ARCH-03: `alert()` used for production error handling** ✅ *Complete — see `docs/completed-features.md`*
-**Feat-H: Another Design & UX Review** ✅ *Complete — see `docs/completed-features.md`*
-**Feat-I: TTS audio for exercise prompts + STT dictation on free-write** ✅ *Complete — commit `850b33d`*
-- TTS: SpeakButton wired in all 5 exercise types (GapFill, TextAnswer already done; ErrorCorrection, SentenceBuilder, FreeWritePrompt added)
-- STT (free-write only): `useSpeechRecognition` hook + `MicButton` component; mic overlaid on textarea; transcript appended; permission-denied and unsupported-browser fallbacks
-- `next.config.ts`: `Permissions-Policy: microphone=(self)` on `/write(.*)` only; `microphone=()` everywhere else
-- Tests: 37 files, 1199 passing
-
-**Feat-J: Personal concept notes**
-- Users want to add a personal mnemonic or note per concept (e.g., "remember: ojalá ALWAYS subjunctive"). Reduces dependency on the tutor for basic rule reminders.
-- Implementation: `user_notes text` column on `user_progress` (or a separate `user_concept_notes` table if multi-note support is wanted). Simple textarea shown in a popover/drawer on the concept curriculum page and optionally in the study session footer.
-- No Claude call needed — pure user text, stored in Supabase.
-
-**Perf-A: Grading latency / time-to-answer improvements**
-- **Problem**: Every exercise submission calls Claude (non-streaming) for grading. Claude Sonnet 4.6 TTFT is ~2 seconds; p95 end-to-end can be 4–6 seconds. Users sit watching a spinner after every answer, breaking flow.
-- **Candidate approaches (remaining)**:
-  1. **Stream the grading response** — Switch `/api/submit` to a streaming response. Send score + short label first (< 10 tokens), then stream the full feedback. Biggest UX win.
-  2. ~~Prompt caching~~ ✅ *Done (PERF-05)*
-  3. **Switch to Haiku for grading** — Requires offline quality validation (≥ 90% score agreement vs. Sonnet on 50 exercises) before switching. See ARCH-02.
-  4. ~~**Prefetch next exercise + drill auto-generation**~~ ✅ *Done (Perf-A #4, commit `8a5a20f`; race condition fixed in Fix-I, commit `5797a5c`)*
-  5. **Optimistic local score for gap_fill** — Client-side accent-normalised string match for single-blank gap_fill; show "Correct!" immediately, still send to Claude async for SM-2 scoring.
-- **Do not implement #3 (model switch) without an offline quality validation test.**
-
-#### Strategic / Long-term
-
-**Strat-A: Mirror some of Ella Verbs features by implementing a dedicated conjugation mode** 
-- Enable user to run conjugation drills applying the same drill customization features also provided by ella verbs
-- Enable a dictionary/list of 50/100/250 most frequent verbs including subpages for conjugation tables
-- ability to 'favorite' verbs into a custom training list. 
-- Conjugation should happen in sentence context
-- No use of Claude for grading, everything should be prestored, rather challenge the user to fill in right conjugation in-context sentences. As a result should enable offline mode.
-- Ideally mix some of the connectors/concepts that trigger subjunctive vs. indicative into pre-generated sentences to enable cross-learning. 
-- Grading Model for Tense Mastery (independent of module mastery in curriculum)
-- Again do indepth research as a PM And UX Designer how Ella verbs works and how we can copy the same approach they and all related features we need
+**Strat-A: Conjugation mode (mirror Ella Verbs)**
+- Conjugation drills in sentence context; dictionary of 50/100/250 most-frequent verbs with conjugation table subpages; favourite verbs list; pre-generated sentences mixing subjunctive/indicative triggers for cross-learning; local grading (no Claude); tense mastery model independent of SRS.
+- Research needed: deep PM/UX audit of Ella Verbs feature set before implementation.
 
 **Strat-B: Admin content panel** *(deferred — implement when content iteration becomes a bottleneck)*
-- `/admin` route gated by `is_admin boolean` on `profiles`
-- Read-only v1: list all concepts/exercises with attempt counts
-- Stretch: inline edit for concept explanation and exercise prompt text
+- `/admin` route gated by `is_admin boolean` on `profiles`; read-only v1 (concept/exercise list with attempt counts); stretch: inline edit.
 
-**Strat-C: Evaluate Claude API audio for pronunciation exercises** *(future research only — do not implement without a pronunciation exercise type)*
-- The current STT implementation uses the browser-native Web Speech API (Google/Apple engines), optimised for fluent native speech. For a future **pronunciation exercise type** (learner speaks a target sentence and receives accuracy feedback), browser STT may not be accurate enough on learner/accented Spanish.
-- At that point, evaluate switching to Claude's native audio input API (`claude-sonnet-4-6` supports MP3/WAV/WebM audio messages). Claude would receive the audio + target sentence and return a pronunciation accuracy score + feedback — combining transcription and assessment in one call.
-- Trade-offs vs. browser STT: higher accuracy on non-native speech; adds latency (1–3s round-trip); adds per-call API cost; requires new `/api/transcribe` route + client-side `MediaRecorder` audio capture.
-- **Do not implement without a defined pronunciation exercise type and PM decision on accuracy threshold requirements.**
-
-#### Bugs / Layout Fixes
-
-**Fix-I: Drill auto-generation race condition** ✅ *Complete — see `docs/completed-features.md`*
-
-**Fix-H: Curriculum "Practice" sessions too short — enforce minimum 5 exercises per concept**
-- **Problem**: Clicking "Practice" on a curriculum concept page links to `/study?concept=<id>`, which fetches all available exercises for that concept (up to SESSION_SIZE=10). If the concept has fewer than 5 exercises in the DB, the session ends almost immediately — causing user friction and a feeling of incompleteness.
-- **Fix**: When building a concept-specific practice queue (`?concept=<id>`), enforce a minimum of 5 exercises. If fewer than 5 distinct exercises exist, repeat exercises (cycle through them) until the queue reaches 5. This ensures every concept practice session always feels like a real session.
-- **Implementation**: In the server-side queue-building logic for `/study` (concept mode), after fetching exercises, pad the array by cycling if `exercises.length < 5`. No DB change needed.
-- **Acceptance criteria**: `/study?concept=<id>` always delivers ≥ 5 exercises regardless of how many are seeded for that concept. Session counter shows correct count. No duplicate consecutive exercises if pool ≥ 2.
-
-**Fix-G: Review card has wrong background in dark mode** *(implemented — `dark:bg-card` override; root cause: opacity-modified Tailwind class specificity in Tailwind v4)*
-
-**Fix-F: Write page sticky footer misaligned on desktop (deferred)**
-- **Problem**: On desktop, the sticky footer ("Start writing →" button) in `ConceptPicker.tsx` is centered against the full viewport width, while the module cards above are centered within the content area to the right of the 220px sidebar. This makes the button appear shifted left compared to the content.
-- **Cause**: The footer uses `position: fixed; left: 0; right: 0`, so it spans the full viewport and ignores the `lg:ml-[220px]` wrapper in `layout.tsx`. Attempts to fix via `lg:left-[220px]` (Tailwind arbitrary responsive class — not reliably generated in Tailwind v4 without tailwind.config.js) and a `--sidebar-width` CSS variable both introduced new regressions.
-- **Do not attempt again without a clear plan.** Proper fix likely requires either: (a) restructuring the footer to render outside `ConceptPicker` as a page-level element that is naturally inside the `lg:ml-[220px]` layout wrapper but uses `sticky`/`fixed` positioning, or (b) a JavaScript-based approach that reads the sidebar width at runtime.
-- **Current state**: Footer is `left-0 right-0` (full width) — misaligned on desktop but functional. Mobile is unaffected.
-
-#### UX Audits & Polish
-
-**UX-AH: PM & UX review — exercise entry flows and drill/practice mode redesign** *(confirmed confusing in production smoke-test 2026-03-08 — research required before any implementation)*
-
-- **Problem statement**: The app currently has too many overlapping ways to start practising, with no clear mental model for the user. A learner can enter exercises via: the dashboard "Start review" CTA, the "Practice anyway" fallback, the "Start learning" new-concepts flow, `/study/configure` (session configurator), the curriculum concept "Practice" button, the Free Write card, and the Sprint mode shortcut. Each of these lands on `/study` with different URL params (`mode=`, `practice=true`, `types=`, `size=`, `limitType=`, etc.) but the exercise screen looks identical regardless of which entry point was used. The user has no persistent awareness of which mode they are in or why.
-- **Specific issues observed**:
-  1. **"Drill" vs "Practice" vs "Review" are not distinguished in the UI** — the session screen shows the same chrome for all three, even though they have meaningfully different purposes (SRS-due recall vs. free repetition vs. new learning).
-  2. **Auto-generation in drill mode is partially invisible** — when the app generates more exercises, the Next button is now disabled with a spinner (Fix-I), but there is no session length indicator that grows or explicit "Generating more exercises…" label.
-  3. **Session length is unpredictable** — in drill/practice mode the session can be 1 exercise or 20+ depending on auto-generation. Users cannot plan their time. Research (Duolingo, 2023 habit study) shows that time-bounded or count-bounded sessions significantly improve session completion rates.
-  4. **Entry via `/study/configure`** adds configuration friction before every session, but the configurator UI is unfamiliar enough that most users likely skip it and just hit the dashboard CTA — meaning the configurator is mostly unused.
-  5. **"Practice" button on curriculum concept pages** leads to an undefined-length auto-generating session with no explanation of what drill mode is or how it differs from the SRS review.
-- **PM research questions to answer before implementing**:
-  - Should drill mode be a distinct, named product concept ("Drill") separate from the SRS "Review" — with its own visual identity (different header colour, icon, label)?
-  - What is the right session length for drill mode? Fixed count (e.g. always 10)? User-set? Or open-ended with an explicit "Stop" button?
-  - Does the user need to see the auto-generation happening, or should generation be pre-emptive enough that it's always invisible?
-  - Should `/study/configure` be removed entirely in favour of smarter defaults and in-session controls?
-  - How do Babbel and Clozemaster handle the distinction between spaced-repetition review and free-practice drilling? Are there patterns to borrow?
-- **Suggested next step**: Produce a flow diagram mapping every current entry point → URL params → session behaviour → exit state. Use it to identify redundancies, merge or remove entry points, and define a simplified 2-mode model (Review = SRS-due; Practice = free drill on any concept). Present the diagram as a PM artefact before writing any code.
-- **Do not implement any UI changes without the flow diagram and a written mode definition agreed with the user.**
-
-**UX-W: Exercise UI clarity audit**
-- **Problem**: The exercise screen currently renders a lot of simultaneous information: progress counter, concept name, unit breadcrumb, exercise type chip, grammar focus chip, level chip (B1/B2/C1), annotated prompt, input area, hint dots, and submit button. This is high cognitive overhead before the learner has even read the question.
-- **Research**: Duolingo's 2024 home screen redesign research showed that reducing visible UI elements per screen improved task completion and reduced abandonment. Cognitive load theory (Sweller) confirms that extraneous visual elements consume working memory that should be spent on the learning task.
-- **Principles to apply**:
-  1. **Progressive disclosure**: show minimum needed to do the task; reveal metadata only on request.
-  2. **Single focal point**: the prompt + input should be the only high-contrast elements. Everything else should be low-contrast/secondary.
-  3. **Collapse metadata into one row**: merge exercise type chip, grammar focus chip, and level chip into a single compact metadata row using muted text, not coloured chips, to reduce visual noise.
-  4. **Show level chip only once per concept per session** (not on every card) — after the first card, the user knows what level they're on.
-  5. **Hint system**: hint dots can be hidden until the first wrong attempt (don't show 3 empty dots before the user has tried).
-- **Audit tasks**:
-  - Read `src/components/exercises/GapFill.tsx`, `TextAnswer.tsx`, `ErrorCorrection.tsx`, `SentenceBuilder.tsx`, and `StudySession.tsx` to inventory every UI element rendered per exercise.
-  - Produce a before/after element count and propose which elements to hide, collapse, or demote to secondary styling.
-  - Prototype the change in `StudySession.tsx` header area first before touching individual exercise components.
-- **Do not implement without a design review of the proposed element inventory reduction.**
-
-**UX-D: Dashboard page UX audit** ✅ *Complete — see `docs/completed-features.md`*
-- Single-column layout (removed lg:grid-cols-2); LEVEL_CHIP badge; daily goal progress bar; Review card warm tint when due; Free write sub-label + fallback card; Sprint copy fix; legend "in progress" / "to start".
-
-**UX-E: Progress page UX audit** ✅ *Complete — see `docs/completed-features.md`*
-- 4-card coloured stat row (Streak/Mastered/Active skills/Accuracy); CEFR Level Journey replaces MasteryChart; horizontal colour-coded AccuracyChart; study consistency section (session count + hrs); header with subtitle + level badge; MasteryChart deleted.
-
-**UX-F: ConceptPicker (free write concept selection) UX overhaul** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-G: Exercise session UX audit** ✅ *Complete — see `docs/completed-features.md`*
-
-#### Design
-
-**Design-A: App logo** ✅ *Complete*
-- Speech bubble + Ñ mark; updated `icon.tsx`, `apple-icon.tsx`, `public/logo.svg`; replaces "ES" auth block and AppHeader text mark
-
----
-
-#### UX Polish & Animations
-
-**UX-I through UX-V, UX-T** ✅ *All complete — see `docs/completed-features.md`*
-
-**UX-X: Enter/Space to advance after feedback** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-Y: Weekly progress snapshot on dashboard** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-Z: Session time estimate** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-AA: Concept mastery milestone moment** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-AB: Concept explanation card — collapsed by default** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-AC: Feedback panel — visual answer comparison blocks** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-AD: Session done screen — score-bracket emotional framing** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-AE: Onboarding diagnostic — assessment feel, not pop quiz** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-AF: Dashboard primary action card — filled treatment when reviews are due** ✅ *Complete — see `docs/completed-features.md`*
-
-**UX-AG: Progress page — fix "Where you're strongest" section** ✅ *Complete — see `docs/completed-features.md`*
-
----
-
-#### Copy & Tone
-
-**Copy-A through Copy-K** ✅ *All complete — see `docs/completed-features.md`*
+**Strat-C: Evaluate Claude API audio for pronunciation exercises** *(future research only)*
+- Current STT (Web Speech API) is optimised for fluent native speech. For a future pronunciation exercise type, evaluate `claude-sonnet-4-6` native audio input (MP3/WAV/WebM) for combined transcription + accuracy scoring.
+- Trade-offs: higher accuracy on learner speech; +1–3s latency; per-call cost; needs `/api/transcribe` + `MediaRecorder`.
+- **Do not implement without a defined pronunciation exercise type and PM decision on accuracy requirements.**
 
 ---
 
 ## Recommended Next Steps (priority order)
 
 ### Polish & effectiveness
-1. UX-AH — PM/UX review of exercise entry flows and drill/practice mode redesign (research first)
-2. Fix-H — Curriculum "Practice" minimum 5 exercises (pad queue if concept has fewer)
-3. Ped-G — Mistake review mode (`exercise_attempts WHERE score <= 1`)
+1. UX-AH — PM/UX review of exercise entry flows (flow diagram first, no code)
+2. Fix-H — Curriculum "Practice" minimum 5 exercises
+3. Ped-G — Mistake review mode
 4. UX-W — Exercise UI clarity audit (design review before implementing)
 5. Ped-I — Grammar cheat-sheet (`grammar_summary` column + collapsible card)
 6. Ped-J — "Hard" flag on a concept
 
 ### Growth features (deferred)
-- Strat-A — Conjugation mode (mirror Ella Verbs)
-- Strat-B — Admin content panel (`/admin` gated by `is_admin`)
-- Feat-F — Offline exercise packs (IndexedDB; PM decision needed first)
+- Strat-A — Conjugation mode (deep PM/UX research first)
+- Strat-B — Admin content panel
+- Feat-F — Offline exercise packs (PM decision on conflict resolution first)
 - Feat-A — Daily email reminders *(not wanted — deferred indefinitely)*

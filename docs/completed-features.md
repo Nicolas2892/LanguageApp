@@ -682,3 +682,45 @@ Cleared all pre-existing lint + TypeScript errors that had been failing CI on ev
 - **react-hooks/set-state-in-effect** in `IOSInstallCard.tsx`, `IOSInstallPrompt.tsx`, `OnboardingTour.tsx`, `auth/login/page.tsx`, `useSpeech.ts`: valid on-mount localStorage/platform detection patterns — added disable comments.
 - **api-utils.test.ts**: `process.env.NODE_ENV` is read-only — replaced direct assignment with `vi.stubEnv('NODE_ENV', value)` / `vi.unstubAllEnvs()`.
 - **vitest.config.ts**: Added `exclude: ['e2e/**']` to prevent Playwright spec (`e2e/smoke.spec.ts`) from being picked up by Vitest.
+
+---
+
+## Feat-I: TTS All Exercises + STT Dictation on Free-Write ✓ (2026-03-08)
+
+**Commit**: `850b33d`
+
+### TTS completion
+SpeakButton (existing `src/components/SpeakButton.tsx` + `src/lib/hooks/useSpeech.ts`) was already wired in GapFill and TextAnswer. Added to the remaining 3 exercise types:
+- `ErrorCorrection.tsx` — prompt wrapped in `flex items-start gap-2` div; SpeakButton reads full `exercise.prompt`
+- `SentenceBuilder.tsx` — SpeakButton added to both the main path (bracket notation stripped via `.replace(/\s*\[[^\]]+\]/, '')`) and the fallback (no-bracket) path
+- `FreeWritePrompt.tsx` — SpeakButton inline with "Writing prompt" header label; only rendered when `!loadingPrompt`
+
+### STT dictation (free-write page only)
+**New hook** `src/lib/hooks/useSpeechRecognition.ts`:
+- Wraps native Web Speech API (`SpeechRecognition` / `webkitSpeechRecognition`); lang `es-ES`, `continuous: false`, `interimResults: false`
+- Returns `{ supported, listening, transcript, error, permissionState, start, stop }`
+- SSR-safe (`typeof window` guard); cleanup via `abort()` on unmount
+- Firefox / unsupported browsers → `supported: false` (detected in `useEffect` on mount)
+- `permissionState` set to `'denied'` on `not-allowed` error, `'granted'` on first successful result
+
+**New component** `src/components/MicButton.tsx`:
+- 4 render states: idle (Mic icon) / listening (Mic + `animate-pulse` orange) / not-supported (MicOff, disabled + tooltip) / permission-denied (MicOff, disabled + tooltip)
+- `no-speech` and `audio-capture` errors shown as small inline messages
+
+**FreeWritePrompt changes**:
+- `useSpeechRecognition` hook instantiated; `useEffect` watches `transcript` and appends to answer with space separator (space omitted if answer already ends with space)
+- Textarea wrapped in `relative` div; MicButton overlaid `absolute bottom-2 right-2`; textarea gains `pr-12` to avoid text under button
+- Mic button disabled while `disabled` or `loadingPrompt`
+
+**Note on privacy**: Chrome Web Speech API streams audio to Google's servers; Safari uses Apple's engine. Our server never receives raw audio — only the text transcript.
+
+### Permissions-Policy
+`next.config.ts` updated from a single global `headers()` entry to two:
+1. `/(.*)`  → `Permissions-Policy: microphone=()` (blocks mic everywhere)
+2. `/write(.*)` → `Permissions-Policy: microphone=(self)` (override: allow mic on free-write page only)
+
+### Tests added (37 files, 1199 total)
+- `src/lib/hooks/__tests__/useSpeechRecognition.test.ts` — 12 tests; `MockSpeechRecognition` class stubbed via `vi.stubGlobal`; covers supported detection, start/stop/onresult/onerror/onend, abort on unmount
+- `src/components/exercises/__tests__/ErrorCorrection.test.tsx` — 7 tests; `useSpeech` mocked with `enabled: true` to render SpeakButton
+- `src/components/exercises/__tests__/SentenceBuilder.test.tsx` — 8 tests; covers main path, fallback path, SpeakButton render, chip interaction
+- `src/components/exercises/__tests__/FreeWritePrompt.test.tsx` — updated; `useSpeechRecognition` mocked via `vi.fn()` to allow per-test state overrides; +10 new tests covering TTS render, STT supported/denied/listening/loading states
