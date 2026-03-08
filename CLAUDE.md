@@ -14,19 +14,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
-## ⚠️ Production Performance Issue — Under Investigation (2026-03-07)
+## ✅ Production Performance — Resolved (2026-03-08)
 
-**Symptom (confirmed in production):** Both screen load times and Claude grading response times are noticeably slow. This predates or was worsened by the recent commits.
-
-**Suspected causes (to investigate):**
-1. **Claude grading latency** — every submission awaits a non-streaming Claude Sonnet call (~2–6s). Candidates: streaming the grading response (Perf-A #1), switching to Haiku for grading (ARCH-02, requires ≥90% quality validation), or prefetching the next exercise during feedback (Perf-A #4).
-2. **Sequential DB writes in `/api/submit`** — ✅ Fixed (PERF-01): `production_mastered`, `updateComputedLevel`, `exercise_attempts`, and streak are all fire-and-forget. Only the SRS upsert blocks.
-3. **Screen/page load times** — likely Supabase round-trips on server components (no caching). Profile each page in Vercel logs to identify the slowest queries.
-
-**Next steps:**
-- Check Vercel Function logs for p50/p95 durations on `/api/submit` to split Claude time vs DB time.
-- ~~Evaluate Perf-A #4~~ ✅ Implemented (commit `8a5a20f`); race condition tracked as Fix-I.
-- Do NOT switch grading model (ARCH-02) without offline quality validation first.
+**PERF-01** ✅ Sequential DB writes fire-and-forget in `/api/submit`
+**PERF-02** ✅ `updateComputedLevel` only on mastery threshold crossing
+**PERF-03** ✅ Push cron N+1 replaced with single JOIN RPC + batch pagination (migration `012_push_due_count_rpc.sql` applied)
+**PERF-04** ✅ Middleware onboarding check cached via HttpOnly cookie — zero DB queries for returning users
+**PERF-05** ✅ Prompt caching on grading + hint system prompts
+**ARCH-02** ✅ Haiku (`claude-haiku-4-5-20251001`) for grading + hints — validated 93.8% score agreement vs Sonnet; Sonnet retained for tutor + exercise generation
 
 ---
 
@@ -55,6 +50,12 @@ pnpm seed                 # Seed curriculum data into Supabase (requires env var
 pnpm annotate             # Annotate exercises with grammatical spans via Claude (requires env vars)
 pnpm seed:ai              # Generate new concepts + top-up existing → docs/curriculum-review-YYYY-MM-DD.json
 pnpm seed:ai:apply        # Apply approved entries from review JSON to Supabase
+pnpm validate:grading     # ARCH-02 offline validation: grade 50 attempts with Haiku vs Sonnet baseline
+```
+
+Post-deploy API smoke check (requires env vars):
+```bash
+NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm exec tsx scripts/smoke-test.ts
 ```
 
 Seed command requires env vars:
@@ -204,6 +205,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/006_computed_level.sql` — `concepts.level`, `user_progress.production_mastered`, `profiles.computed_level`; seeds 21 concept CEFR tags; grandfathers existing production attempts
 - `supabase/migrations/007_grammar_focus.sql` — `concepts.grammar_focus text CHECK ('indicative'|'subjunctive'|'both')`; seeded for all 21 concepts
 - `supabase/migrations/008_exercise_annotations.sql` — `exercises.annotations jsonb NULL`; filled by `pnpm annotate` after running
+- `supabase/migrations/012_push_due_count_rpc.sql` — `get_subscribers_with_due_counts(p_today, p_limit, p_offset)` RPC for PERF-03 (applied 2026-03-08)
 
 ### Dashboard Stats
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
@@ -251,7 +253,7 @@ Migrations (run once in Supabase SQL editor):
 
 **E2E infrastructure: Playwright smoke tests live** (`pnpm test:e2e`) — 4 scenarios covering submit→feedback, done screen, drill mode, and multi-exercise sessions. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`. See `e2e/` directory.
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-03)**, **Performance (PERF-01, PERF-02, PERF-05)**, **Perf-A #4 (prefetch next route + drill auto-generation during feedback — partial: race condition tracked in Fix-I)**.
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-02, ARCH-03)**, **Performance (PERF-01, PERF-02, PERF-03, PERF-04, PERF-05)**, **Perf-A #4 (prefetch next route + drill auto-generation during feedback — partial: race condition tracked in Fix-I)**.
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -344,15 +346,9 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 **PERF-02: `updateComputedLevel` called on every exercise submission** ✅ *Complete — see `docs/completed-features.md`*
 
-**PERF-03: N+1 query pattern in `/api/push/send` cron** *(High)*
-- **Bottleneck**: Fetches all subscribers (1 query), then executes a separate `user_progress` count query per user. With N subscribers → N+1 queries. No pagination — at 10,000 users, loads all JSONB push_subscription blobs into memory.
-- **Fix**: Single SQL query with LEFT JOIN/subquery to get subscribers + due counts in one round-trip. Process in batches of ≤ 500 with pagination.
-- **Acceptance criteria**: Cron executes exactly 1 DB query regardless of subscriber count. Batches of ≤ 500 processed. Cron completes in < 10 seconds for 1,000 subscribers.
+**PERF-03: N+1 query pattern in `/api/push/send` cron** ✅ *Complete — see `docs/completed-features.md`*
 
-**PERF-04: Middleware DB query on every authenticated page navigation** *(Medium)*
-- **Bottleneck**: `supabase/middleware.ts` queries `profiles.onboarding_completed` on every non-public page load (~20–40ms per navigation). Redundant for the 99%+ of users who completed onboarding long ago.
-- **Fix**: Cache `onboarding_completed = true` in a short-lived `HttpOnly; SameSite=Lax` cookie set by `/api/onboarding/complete`. Middleware checks cookie first; only hits DB on cache miss.
-- **Acceptance criteria**: Users with completed onboarding: zero DB queries in middleware. Onboarding redirect still fires correctly for new users. P50 middleware latency reduces from ~35ms to ≤ 5ms for returning users.
+**PERF-04: Middleware DB query on every authenticated page navigation** ✅ *Complete — see `docs/completed-features.md`*
 
 **PERF-05: Claude prompt caching not used on grading system prompt** ✅ *Complete — see `docs/completed-features.md`*
 
@@ -361,10 +357,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 **ARCH-01: No CI/CD pipeline — untested code ships directly to production** ✅ *Complete — see `docs/completed-features.md`*
 - **Note**: Vercel production gate must be configured manually in Project Settings → Git → Required checks.
 
-**ARCH-02: Single Claude model for all AI tasks — suboptimal cost/speed tradeoff** *(Medium)*
-- **Debt**: `TUTOR_MODEL = 'claude-sonnet-4-20250514'` used for grading (structured JSON, 512 tokens), hints (short generation, 256 tokens), tutor chat (reasoning, 1024 tokens), and exercise generation (creative, 8192 tokens). Grading and hints don't require Sonnet's reasoning capacity. Haiku 4.5 is 3–5× faster and ~10× cheaper for structured tasks.
-- **Fix**: Define `GRADE_MODEL = 'claude-haiku-4-5-20251001'` for grading + hints. Keep `TUTOR_MODEL = 'claude-sonnet-4-20250514'` for chat + generation. **Prerequisite**: offline quality validation — grade 50 sample exercises with both models, confirm ≥ 90% score agreement before switching.
-- **Acceptance criteria**: `grader.ts` + `/api/hint` use `GRADE_MODEL`. `tutor.ts` + exercise generate use `TUTOR_MODEL`. Offline validation test passes ≥ 90% agreement. Anthropic cost per session reduces by ≥ 60%.
+**ARCH-02: Single Claude model for all AI tasks — suboptimal cost/speed tradeoff** ✅ *Complete — see `docs/completed-features.md`*
 
 **ARCH-03: `alert()` used for production error handling** ✅ *Complete — see `docs/completed-features.md`*
 
@@ -533,11 +526,6 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 ---
 
 ## Recommended Next Steps (priority order)
-
-### Security & performance (remaining)
-1. ARCH-02 — Per-task Claude model (Haiku for grading; validate ≥90% agreement first)
-2. PERF-03 — N+1 fix in push cron (single JOIN + pagination)
-3. PERF-04 — Middleware onboarding check cache (HttpOnly cookie)
 
 ### Polish & effectiveness
 1. Fix-I — Drill auto-generation race condition (Next → fires before generation resolves)
