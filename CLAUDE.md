@@ -25,7 +25,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Next steps:**
 - Check Vercel Function logs for p50/p95 durations on `/api/submit` to split Claude time vs DB time.
-- Evaluate Perf-A #4 (prefetch next exercise during feedback) — pure frontend, zero backend change.
+- ~~Evaluate Perf-A #4~~ ✅ Implemented (commit `8a5a20f`); race condition tracked as Fix-I.
 - Do NOT switch grading model (ARCH-02) without offline quality validation first.
 
 ---
@@ -249,7 +249,9 @@ Migrations (run once in Supabase SQL editor):
 
 **Test suite: 1132 tests across 31 files — all passing.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-03)**, **Performance (PERF-02, PERF-05)**.
+**E2E infrastructure: Playwright smoke tests live** (`pnpm test:e2e`) — 4 scenarios covering submit→feedback, done screen, drill mode, and multi-exercise sessions. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`. See `e2e/` directory.
+
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-03)**, **Performance (PERF-01, PERF-02, PERF-05)**, **Perf-A #4 (prefetch next route + drill auto-generation during feedback — partial: race condition tracked in Fix-I)**.
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -386,7 +388,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
   1. **Stream the grading response** — Switch `/api/submit` to a streaming response. Send score + short label first (< 10 tokens), then stream the full feedback. Biggest UX win.
   2. ~~Prompt caching~~ ✅ *Done (PERF-05)*
   3. **Switch to Haiku for grading** — Requires offline quality validation (≥ 90% score agreement vs. Sonnet on 50 exercises) before switching. See ARCH-02.
-  4. **Prefetch next exercise** — While the user reads feedback, silently fetch the next exercise data in the background. Pure frontend, no API change.
+  4. ~~**Prefetch next exercise + drill auto-generation**~~ ✅ *Done (Perf-A #4, commit `8a5a20f`)* — implemented; race condition logged as Fix-I.
   5. **Optimistic local score for gap_fill** — Client-side accent-normalised string match for single-blank gap_fill; show "Correct!" immediately, still send to Claude async for SM-2 scoring.
 - **Do not implement #3 (model switch) without an offline quality validation test.**
 
@@ -538,8 +540,9 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 3. PERF-04 — Middleware onboarding check cache (HttpOnly cookie)
 
 ### Polish & effectiveness
-1. Perf-A #4 — Prefetch next exercise during feedback (pure frontend)
-2. Fix-H — Curriculum "Practice" minimum 5 exercises (pad queue if concept has fewer)
+1. Fix-I — Drill auto-generation race condition (Next → fires before generation resolves)
+2. UX-AH — PM/UX review of exercise entry flows and drill/practice mode redesign (research first)
+3. Fix-H — Curriculum "Practice" minimum 5 exercises (pad queue if concept has fewer)
 3. Ped-G — Mistake review mode (`exercise_attempts WHERE score <= 1`)
 5. UX-AB — Concept explanation collapse on repeat exercises
 6. UX-W — Exercise UI clarity audit (design review before implementing)
