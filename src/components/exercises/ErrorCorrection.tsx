@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { AnnotatedText } from '@/components/AnnotatedText'
+import { SpeakButton } from '@/components/SpeakButton'
 import type { Exercise, AnnotationSpan } from '@/lib/supabase/types'
 
 // Extract the erroneous sentence from the prompt.
@@ -63,7 +64,10 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <p className="text-lg leading-relaxed">{exercise.prompt}</p>
+      <div className="flex items-start gap-2">
+        <p className="text-lg leading-relaxed flex-1">{exercise.prompt}</p>
+        <SpeakButton text={exercise.prompt} />
+      </div>
 
       {erroneous && (
         <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-md p-3 text-sm text-red-900 dark:text-red-300">

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
+import { SpeakButton } from '@/components/SpeakButton'
 import type { Exercise } from '@/lib/supabase/types'
 
 interface Props {
@@ -52,7 +53,10 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
   if (words.length === 0) {
     return (
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(fallbackValue.trim()) }} className="space-y-4">
-        <p className="text-xl leading-relaxed font-medium">{exercise.prompt}</p>
+        <div className="flex items-start gap-2">
+          <p className="text-xl leading-relaxed font-medium flex-1">{exercise.prompt}</p>
+          <SpeakButton text={exercise.prompt} />
+        </div>
         <input
           className="w-full border rounded-md px-3 py-2 text-base"
           value={fallbackValue}
@@ -69,9 +73,12 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Instruction (strip the bracket part) */}
-      <p className="text-xl leading-relaxed font-medium">
-        {exercise.prompt.replace(/\s*\[[^\]]+\]/, '')}
-      </p>
+      <div className="flex items-start gap-2">
+        <p className="text-xl leading-relaxed font-medium flex-1">
+          {exercise.prompt.replace(/\s*\[[^\]]+\]/, '')}
+        </p>
+        <SpeakButton text={exercise.prompt.replace(/\s*\[[^\]]+\]/, '')} />
+      </div>
 
       {/* Construction area */}
       <div className="min-h-12 border-2 border-dashed rounded-lg p-3 flex flex-wrap gap-2 bg-muted/30">

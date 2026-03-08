@@ -2,6 +2,29 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { FreeWritePrompt } from '../FreeWritePrompt'
+import type { UseSpeechRecognitionReturn } from '@/lib/hooks/useSpeechRecognition'
+
+// Default STT state — supported and idle
+const defaultStt: UseSpeechRecognitionReturn = {
+  supported: true,
+  listening: false,
+  transcript: '',
+  error: null,
+  permissionState: 'unknown',
+  start: vi.fn(),
+  stop: vi.fn(),
+}
+
+const mockUseSpeechRecognition = vi.fn(() => defaultStt)
+
+vi.mock('@/lib/hooks/useSpeechRecognition', () => ({
+  useSpeechRecognition: () => mockUseSpeechRecognition(),
+}))
+
+// Enable SpeakButton
+vi.mock('@/lib/hooks/useSpeech', () => ({
+  useSpeech: () => ({ speak: vi.fn(), speaking: false, enabled: true, toggle: vi.fn() }),
+}))
 
 const baseProps = {
   prompt: 'Write about a typical day in your city.',
@@ -19,6 +42,7 @@ function words(n: number) {
 describe('FreeWritePrompt', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockUseSpeechRecognition.mockReturnValue(defaultStt)
   })
 
   // --- Rendering ---
@@ -175,5 +199,50 @@ describe('FreeWritePrompt', () => {
     render(<FreeWritePrompt {...baseProps} loadingPrompt={true} />)
     expect(screen.getByPlaceholderText('Write your answer in Spanish…')).toBeDisabled()
     expect(screen.getByText('Generate different prompt').closest('button')).toBeDisabled()
+  })
+
+  // --- TTS (SpeakButton) ---
+
+  it('renders SpeakButton (Play audio) when prompt is loaded', () => {
+    render(<FreeWritePrompt {...baseProps} />)
+    expect(screen.getByLabelText('Play audio')).toBeTruthy()
+  })
+
+  it('does not render SpeakButton while prompt is loading', () => {
+    render(<FreeWritePrompt {...baseProps} loadingPrompt={true} />)
+    expect(screen.queryByLabelText('Play audio')).toBeNull()
+  })
+
+  // --- STT (MicButton) ---
+
+  it('renders the mic dictation button when STT is supported', () => {
+    render(<FreeWritePrompt {...baseProps} />)
+    expect(screen.getByLabelText('Start dictation')).toBeTruthy()
+  })
+
+  it('renders mic-off button when STT is not supported', () => {
+    mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, supported: false })
+    render(<FreeWritePrompt {...baseProps} />)
+    expect(screen.getByLabelText('Speech recognition not supported')).toBeTruthy()
+  })
+
+  it('renders mic-off button when permission is denied', () => {
+    mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, permissionState: 'denied' })
+    render(<FreeWritePrompt {...baseProps} />)
+    expect(screen.getByLabelText('Microphone access denied')).toBeTruthy()
+  })
+
+  it('mic button is disabled when loadingPrompt=true', () => {
+    render(<FreeWritePrompt {...baseProps} loadingPrompt={true} />)
+    const dictateBtn = screen.queryByLabelText('Start dictation')
+    if (dictateBtn) {
+      expect((dictateBtn as HTMLButtonElement).disabled).toBe(true)
+    }
+  })
+
+  it('mic button shows listening state while recording', () => {
+    mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, listening: true })
+    render(<FreeWritePrompt {...baseProps} />)
+    expect(screen.getByLabelText('Stop dictation')).toBeTruthy()
   })
 })

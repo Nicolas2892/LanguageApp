@@ -27,7 +27,17 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react'],
   },
   async headers() {
-    return [{ source: '/(.*)', headers: securityHeaders }]
+    return [
+      // Apply all security headers globally (microphone blocked everywhere)
+      { source: '/(.*)', headers: securityHeaders },
+      // Override: allow microphone on the free-write page only (STT)
+      {
+        source: '/write(.*)',
+        headers: [
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(self), geolocation=()' },
+        ],
+      },
+    ]
   },
 };
 
