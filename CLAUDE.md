@@ -249,13 +249,13 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1162 tests across 34 files — all passing.**
+**Test suite: 1199 tests across 37 files — all passing.**
 
 **E2E infrastructure: Playwright smoke tests live** (`pnpm test:e2e`) — 4 scenarios covering submit→feedback, done screen, drill mode, and multi-exercise sessions. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`. See `e2e/` directory.
 
 **CI: Fully green (TypeScript + lint + tests) as of 2026-03-08.**
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E, **Fix-I**), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-02, ARCH-03)**, **Performance (PERF-01, PERF-02, PERF-03, PERF-04, PERF-05)**, **Perf-A #4 (prefetch next route + drill auto-generation during feedback)**, **UX-AB, UX-Y, UX-Z, UX-AA (session polish + dashboard weekly snapshot)**.
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E, **Fix-I**), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-02, ARCH-03)**, **Performance (PERF-01, PERF-02, PERF-03, PERF-04, PERF-05)**, **Perf-A #4 (prefetch next route + drill auto-generation during feedback)**, **UX-AB, UX-Y, UX-Z, UX-AA (session polish + dashboard weekly snapshot)**, **Feat-I (TTS all exercises + STT dictation on free-write)**.
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -353,12 +353,11 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 **ARCH-02: Single Claude model for all AI tasks — suboptimal cost/speed tradeoff** ✅ *Complete — see `docs/completed-features.md`*
 **ARCH-03: `alert()` used for production error handling** ✅ *Complete — see `docs/completed-features.md`*
 **Feat-H: Another Design & UX Review** ✅ *Complete — see `docs/completed-features.md`*
-**Feat-I: TTS audio for exercise prompts**
-- B2→C1 learners need listening exposure, but the app currently has zero audio. Even basic text-to-speech adds a listening dimension that is currently entirely absent.
-- The `useSpeech` hook already exists in the codebase (used by `IOSInstallPrompt`). Wire a speaker icon button to it in GapFill, TextAnswer, and ErrorCorrection — clicking reads the prompt text aloud in Spanish using the Web Speech API (`speechSynthesis`, es-ES voice).
-- Zero infrastructure cost, works cross-platform (iOS Safari, Chrome, Firefox). No new API route or DB change needed.
-- UX detail: auto-play on first render of each exercise is optional (could be a user preference); manual tap is the safe default.
-- Stretch: highlight the word being spoken in sync with `SpeechSynthesisUtterance.onboundary` events.
+**Feat-I: TTS audio for exercise prompts + STT dictation on free-write** ✅ *Complete — commit `850b33d`*
+- TTS: SpeakButton wired in all 5 exercise types (GapFill, TextAnswer already done; ErrorCorrection, SentenceBuilder, FreeWritePrompt added)
+- STT (free-write only): `useSpeechRecognition` hook + `MicButton` component; mic overlaid on textarea; transcript appended; permission-denied and unsupported-browser fallbacks
+- `next.config.ts`: `Permissions-Policy: microphone=(self)` on `/write(.*)` only; `microphone=()` everywhere else
+- Tests: 37 files, 1199 passing
 
 **Feat-J: Personal concept notes**
 - Users want to add a personal mnemonic or note per concept (e.g., "remember: ojalá ALWAYS subjunctive"). Reduces dependency on the tutor for basic rule reminders.
@@ -391,6 +390,12 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - `/admin` route gated by `is_admin boolean` on `profiles`
 - Read-only v1: list all concepts/exercises with attempt counts
 - Stretch: inline edit for concept explanation and exercise prompt text
+
+**Strat-C: Evaluate Claude API audio for pronunciation exercises** *(future research only — do not implement without a pronunciation exercise type)*
+- The current STT implementation uses the browser-native Web Speech API (Google/Apple engines), optimised for fluent native speech. For a future **pronunciation exercise type** (learner speaks a target sentence and receives accuracy feedback), browser STT may not be accurate enough on learner/accented Spanish.
+- At that point, evaluate switching to Claude's native audio input API (`claude-sonnet-4-6` supports MP3/WAV/WebM audio messages). Claude would receive the audio + target sentence and return a pronunciation accuracy score + feedback — combining transcription and assessment in one call.
+- Trade-offs vs. browser STT: higher accuracy on non-native speech; adds latency (1–3s round-trip); adds per-call API cost; requires new `/api/transcribe` route + client-side `MediaRecorder` audio capture.
+- **Do not implement without a defined pronunciation exercise type and PM decision on accuracy threshold requirements.**
 
 #### Bugs / Layout Fixes
 
@@ -502,8 +507,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 3. Ped-G — Mistake review mode (`exercise_attempts WHERE score <= 1`)
 4. UX-W — Exercise UI clarity audit (design review before implementing)
 5. Ped-I — Grammar cheat-sheet (`grammar_summary` column + collapsible card)
-6. Feat-I — TTS audio (wire `useSpeech` to exercise prompts)
-7. Ped-J — "Hard" flag on a concept
+6. Ped-J — "Hard" flag on a concept
 
 ### Growth features (deferred)
 - Strat-A — Conjugation mode (mirror Ella Verbs)
