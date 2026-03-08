@@ -239,44 +239,32 @@ describe('StudySession — UX-Z time estimate', () => {
 
 // ── UX-AB: Concept collapse ───────────────────────────────────────────────────
 describe('StudySession — UX-AB concept collapse', () => {
-  it('shows full explanation card on the first exercise (no toggle button)', async () => {
+  it('shows "Concept Notes ↓" toggle collapsed by default on every exercise', () => {
     render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
-    // Full explanation visible
-    expect(screen.getByText('Test explanation')).toBeTruthy()
-    // No toggle button
-    expect(screen.queryByText(/remind me/)).toBeNull()
+    const toggle = screen.getByRole('button', { name: /Concept Notes/i })
+    expect(toggle.textContent).toContain('Concept Notes ↓')
+    // Collapsed: aria-expanded is false
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
   })
 
-  it('shows "↓ remind me" toggle on second exercise with the same concept', async () => {
-    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
-    await submitAndWaitForFeedback()
-    await userEvent.click(screen.getByTestId('next-btn'))
-    await waitFor(() => expect(screen.getByText(/remind me/)).toBeTruthy())
-  })
-
-  it('clicking toggle expands explanation and sets aria-expanded=true', async () => {
-    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
-    await submitAndWaitForFeedback()
-    await userEvent.click(screen.getByTestId('next-btn'))
-    const toggle = await screen.findByRole('button', { name: /remind me/i })
+  it('clicking toggle expands explanation and changes label to "Concept Notes ↑"', async () => {
+    render(<StudySession items={[makeItem()]} />)
+    const toggle = screen.getByRole('button', { name: /Concept Notes/i })
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
     await userEvent.click(toggle)
-    // After click the button text changes to "↑ hide"
-    expect(screen.getByText(/hide/)).toBeTruthy()
+    expect(screen.getByText('Concept Notes ↑')).toBeTruthy()
   })
 
-  it('shows full card when a NEW concept appears for the first time', async () => {
-    const conceptB: Concept = { ...mockConcept, id: 'concept-2', title: 'Concept B', explanation: 'B explanation' }
-    const items: StudyItem[] = [
-      { concept: mockConcept, exercise: makeExercise('e1') },
-      { concept: conceptB, exercise: makeExercise('e2') },
-    ]
-    render(<StudySession items={items} />)
+  it('collapses again after moving to the next exercise', async () => {
+    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
+    // Expand on exercise 1
+    await userEvent.click(screen.getByRole('button', { name: /Concept Notes/i }))
+    expect(screen.getByText('Concept Notes ↑')).toBeTruthy()
+    // Submit and advance
     await submitAndWaitForFeedback()
     await userEvent.click(screen.getByTestId('next-btn'))
-    // Full explanation of concept B should be visible immediately
-    await waitFor(() => expect(screen.getByText('B explanation')).toBeTruthy())
-    expect(screen.queryByText(/remind me/)).toBeNull()
+    // Exercise 2 should be collapsed again
+    await waitFor(() => expect(screen.getByText('Concept Notes ↓')).toBeTruthy())
   })
 })
 

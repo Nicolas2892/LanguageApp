@@ -95,8 +95,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const exerciseStartRef = useRef<number>(Date.now())
   const [submissionTimes, setSubmissionTimes] = useState<number[]>([])
 
-  // UX-AB: concept explanation collapse on repeat encounters
-  const seenConceptIdsRef = useRef<Set<string>>(new Set())
+  // UX-AB: concept explanation collapsed by default
   const [isConceptExpanded, setIsConceptExpanded] = useState(false)
 
   // UX-AA: mastery milestone overlay
@@ -230,9 +229,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     ? Math.max(1, Math.round((remainingCount * avgSeconds) / 60))
     : null
 
-  // UX-AB: first encounter check — concept card shows full only on first exercise of each concept
-  const isFirstConceptEncounter = !seenConceptIdsRef.current.has(current.concept.id)
-
   // Progress bar values
   const progressPct = sprintConfig?.limitType === 'time'
     ? totalSeconds > 0 ? (secondsLeft / totalSeconds) * 100 : 0
@@ -346,8 +342,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         }),
       }).catch(() => {})
     } else {
-      // UX-AB: mark this concept as seen before moving to next exercise
-      seenConceptIdsRef.current.add(current.concept.id)
+      // UX-AB: collapse concept note on each new exercise
       setIsConceptExpanded(false)
       // UX-Z: reset exercise start time
       exerciseStartRef.current = Date.now()
@@ -598,35 +593,26 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           </span>
         </div>
 
-        {/* Concept explanation — full card on first encounter; collapsible on repeat */}
-        {isFirstConceptEncounter ? (
-          <div className="bg-muted/50 rounded-lg p-4 text-sm">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Concept</p>
-            <p>{current.concept.explanation}</p>
-          </div>
-        ) : (
-          <div className="bg-muted/50 rounded-lg text-sm overflow-hidden">
-            <button
-              onClick={() => setIsConceptExpanded((e) => !e)}
-              className="w-full flex items-center justify-between px-4 py-2.5 text-left"
-              aria-expanded={isConceptExpanded}
-            >
-              <span className="font-medium">{current.concept.title}</span>
-              <span className="text-xs text-muted-foreground">
-                {isConceptExpanded ? '↑ hide' : '↓ remind me'}
-              </span>
-            </button>
-            <div
-              className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
-              style={{ maxHeight: isConceptExpanded ? '16rem' : '0' }}
-            >
-              <div className="px-4 pb-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Concept</p>
-                <p>{current.concept.explanation}</p>
-              </div>
+        {/* Concept explanation — collapsed by default */}
+        <div className="bg-muted/50 rounded-lg text-sm overflow-hidden">
+          <button
+            onClick={() => setIsConceptExpanded((e) => !e)}
+            className="w-full flex items-center justify-between px-4 py-2.5 text-left"
+            aria-expanded={isConceptExpanded}
+          >
+            <span className="text-xs font-semibold text-muted-foreground">
+              {isConceptExpanded ? 'Concept Notes ↑' : 'Concept Notes ↓'}
+            </span>
+          </button>
+          <div
+            className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
+            style={{ maxHeight: isConceptExpanded ? '16rem' : '0' }}
+          >
+            <div className="px-4 pb-4">
+              <p>{current.concept.explanation}</p>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Exercise */}
         <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 animate-exercise-in ${flashClass ?? ''}`}>
