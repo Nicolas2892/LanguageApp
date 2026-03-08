@@ -10,6 +10,7 @@ import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import {
   Flame, Trophy, BookOpen, Sparkles, PenLine, CheckCircle2, RotateCcw,
 } from 'lucide-react'
+import { WeeklySnapshot } from '@/components/WeeklySnapshot'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -20,7 +21,16 @@ export default async function DashboardPage() {
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
 
-  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes, dueByModuleRes, todaySessionsRes, mistakeAttemptsRes] = await Promise.all([
+  // Week boundaries (Mon–Sun)
+  const now = new Date()
+  const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay()
+  const thisWeekStart = new Date(now)
+  thisWeekStart.setDate(now.getDate() - (dayOfWeek - 1))
+  thisWeekStart.setHours(0, 0, 0, 0)
+  const lastWeekStart = new Date(thisWeekStart)
+  lastWeekStart.setDate(thisWeekStart.getDate() - 7)
+
+  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes, dueByModuleRes, todaySessionsRes, mistakeAttemptsRes, thisWeekAttemptsRes, lastWeekAttemptsRes, thisWeekSessionsRes, lastWeekSessionsRes] = await Promise.all([
     supabase.from('profiles').select('streak, computed_level, display_name, daily_goal_minutes, last_studied_date').eq('id', user.id).single(),
     supabase
       .from('user_progress')
@@ -64,6 +74,29 @@ export default async function DashboardPage() {
       .lte('ai_score', 1)
       .not('exercise_id', 'is', null)
       .limit(100),
+    // UX-Y: weekly snapshot
+    supabase
+      .from('exercise_attempts')
+      .select('ai_score')
+      .eq('user_id', user.id)
+      .gte('created_at', thisWeekStart.toISOString()),
+    supabase
+      .from('exercise_attempts')
+      .select('ai_score')
+      .eq('user_id', user.id)
+      .gte('created_at', lastWeekStart.toISOString())
+      .lt('created_at', thisWeekStart.toISOString()),
+    supabase
+      .from('study_sessions')
+      .select('started_at, ended_at')
+      .eq('user_id', user.id)
+      .gte('started_at', thisWeekStart.toISOString()),
+    supabase
+      .from('study_sessions')
+      .select('started_at, ended_at')
+      .eq('user_id', user.id)
+      .gte('started_at', lastWeekStart.toISOString())
+      .lt('started_at', thisWeekStart.toISOString()),
   ])
 
   const profile = profileRes.data as Profile | null
@@ -123,6 +156,32 @@ export default async function DashboardPage() {
 
   const masteredPct = totalConcepts > 0 ? (masteredCount / totalConcepts) * 100 : 0
   const learningPct = totalConcepts > 0 ? (learningCount / totalConcepts) * 100 : 0
+
+  // UX-Y: weekly snapshot stats
+  type AttemptRow = { ai_score: number | null }
+  type SessionRow2 = { started_at: string; ended_at: string | null }
+
+  const thisWeekAttempts = (thisWeekAttemptsRes.data ?? []) as AttemptRow[]
+  const lastWeekAttempts = (lastWeekAttemptsRes.data ?? []) as AttemptRow[]
+  const thisWeekExercises = thisWeekAttempts.length
+  const lastWeekExercises = lastWeekAttempts.length
+  const thisWeekAccuracy = thisWeekExercises > 0
+    ? Math.round(thisWeekAttempts.filter((a) => (a.ai_score ?? 0) >= 2).length / thisWeekExercises * 100)
+    : null
+  const lastWeekAccuracy = lastWeekExercises > 0
+    ? Math.round(lastWeekAttempts.filter((a) => (a.ai_score ?? 0) >= 2).length / lastWeekExercises * 100)
+    : null
+  const calcMinutes = (sessions: SessionRow2[]) =>
+    sessions.reduce((sum, s) => {
+      if (!s.ended_at) return sum
+      return sum + Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)
+    }, 0)
+  const thisWeekMinutes = calcMinutes((thisWeekSessionsRes.data ?? []) as SessionRow2[])
+  const lastWeekMinutes = calcMinutes((lastWeekSessionsRes.data ?? []) as SessionRow2[])
+  const exerciseDelta = lastWeekExercises > 0 ? thisWeekExercises - lastWeekExercises : null
+  const accuracyDelta = thisWeekAccuracy !== null && lastWeekAccuracy !== null
+    ? thisWeekAccuracy - lastWeekAccuracy : null
+  const minutesDelta = lastWeekMinutes > 0 ? thisWeekMinutes - lastWeekMinutes : null
 
   return (
     <main className="max-w-lg mx-auto p-6 md:p-8 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-8">
@@ -205,6 +264,18 @@ export default async function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* UX-Y: Weekly snapshot — only shown after user has studied this week */}
+      {thisWeekExercises > 0 && (
+        <WeeklySnapshot
+          exercises={thisWeekExercises}
+          accuracy={thisWeekAccuracy}
+          minutes={thisWeekMinutes}
+          exerciseDelta={exerciseDelta}
+          accuracyDelta={accuracyDelta}
+          minutesDelta={minutesDelta}
+        />
+      )}
 
       {/* Mode cards */}
       <div className="space-y-3">

@@ -74,6 +74,8 @@ const mockGradeResult = {
   corrected_version: '',
   explanation: 'Well done.',
   next_review_in_days: 7,
+  just_mastered: false,
+  mastered_concept_title: null,
 }
 
 function makeItem(exerciseId = 'exercise-1'): StudyItem {
@@ -116,6 +118,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.useRealTimers()
 })
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -203,5 +206,184 @@ describe('StudySession — Perf-A #4 prefetch & auto-generation', () => {
       (call) => call[0] === '/api/exercises/generate',
     )
     expect(generateCalls).toHaveLength(0)
+  })
+})
+
+// ── UX-Z: Time estimate ───────────────────────────────────────────────────────
+describe('StudySession — UX-Z time estimate', () => {
+  it('does not show time estimate in sprint mode', async () => {
+    render(
+      <StudySession
+        items={[makeItem('e1'), makeItem('e2'), makeItem('e3')]}
+        sprintConfig={{ limitType: 'count', limit: 3 }}
+      />,
+    )
+    await submitAndWaitForFeedback()
+    expect(screen.queryByText(/min/)).toBeNull()
+  })
+
+  it('does not show time estimate when only 1 exercise remains', async () => {
+    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
+    await submitAndWaitForFeedback()
+    // After first submit, 1 exercise remains — no estimate shown
+    expect(screen.queryByText(/min/)).toBeNull()
+  })
+
+  it('shows "~N min" estimate after first submission in multi-exercise session', async () => {
+    render(<StudySession items={[makeItem('e1'), makeItem('e2'), makeItem('e3')]} />)
+    await submitAndWaitForFeedback()
+    // 2 remaining exercises — estimate should appear
+    expect(screen.getByText(/~\d+ min/)).toBeTruthy()
+  })
+})
+
+// ── UX-AB: Concept collapse ───────────────────────────────────────────────────
+describe('StudySession — UX-AB concept collapse', () => {
+  it('shows full explanation card on the first exercise (no toggle button)', async () => {
+    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
+    // Full explanation visible
+    expect(screen.getByText('Test explanation')).toBeTruthy()
+    // No toggle button
+    expect(screen.queryByText(/remind me/)).toBeNull()
+  })
+
+  it('shows "↓ remind me" toggle on second exercise with the same concept', async () => {
+    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
+    await submitAndWaitForFeedback()
+    await userEvent.click(screen.getByTestId('next-btn'))
+    await waitFor(() => expect(screen.getByText(/remind me/)).toBeTruthy())
+  })
+
+  it('clicking toggle expands explanation and sets aria-expanded=true', async () => {
+    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
+    await submitAndWaitForFeedback()
+    await userEvent.click(screen.getByTestId('next-btn'))
+    const toggle = await screen.findByRole('button', { name: /remind me/i })
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    await userEvent.click(toggle)
+    // After click the button text changes to "↑ hide"
+    expect(screen.getByText(/hide/)).toBeTruthy()
+  })
+
+  it('shows full card when a NEW concept appears for the first time', async () => {
+    const conceptB: Concept = { ...mockConcept, id: 'concept-2', title: 'Concept B', explanation: 'B explanation' }
+    const items: StudyItem[] = [
+      { concept: mockConcept, exercise: makeExercise('e1') },
+      { concept: conceptB, exercise: makeExercise('e2') },
+    ]
+    render(<StudySession items={items} />)
+    await submitAndWaitForFeedback()
+    await userEvent.click(screen.getByTestId('next-btn'))
+    // Full explanation of concept B should be visible immediately
+    await waitFor(() => expect(screen.getByText('B explanation')).toBeTruthy())
+    expect(screen.queryByText(/remind me/)).toBeNull()
+  })
+})
+
+// ── UX-AA: Mastery overlay ────────────────────────────────────────────────────
+describe('StudySession — UX-AA mastery overlay', () => {
+  it('does not show overlay when just_mastered is false', async () => {
+    render(<StudySession items={[makeItem()]} />)
+    await submitAndWaitForFeedback()
+    expect(screen.queryByText('Concept mastered!')).toBeNull()
+  })
+
+  it('shows overlay with concept title when just_mastered is true', async () => {
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/submit') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            ...mockGradeResult,
+            just_mastered: true,
+            mastered_concept_title: 'El Subjuntivo',
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+    render(<StudySession items={[makeItem()]} />)
+    await submitAndWaitForFeedback()
+    await waitFor(() => expect(screen.getByText('Concept mastered!')).toBeTruthy())
+    // The mastery overlay contains the concept title in a <span>
+    expect(screen.getByText('El Subjuntivo')).toBeTruthy()
+  })
+
+  it('"Continue" button closes the overlay', async () => {
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/submit') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            ...mockGradeResult,
+            just_mastered: true,
+            mastered_concept_title: 'Test Concept',
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+    render(<StudySession items={[makeItem()]} />)
+    await submitAndWaitForFeedback()
+    await waitFor(() => screen.getByText('Concept mastered!'))
+    await userEvent.click(screen.getByRole('button', { name: /continue/i }))
+    await waitFor(() => expect(screen.queryByText('Concept mastered!')).toBeNull())
+  })
+
+  it('schedules a 4-second auto-dismiss timer when overlay opens', async () => {
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout')
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/submit') {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            ...mockGradeResult,
+            just_mastered: true,
+            mastered_concept_title: 'El Subjuntivo',
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+    render(<StudySession items={[makeItem()]} />)
+    await submitAndWaitForFeedback()
+    await waitFor(() => screen.getByText('Concept mastered!'))
+    // Verify that a 4000ms dismiss timer was scheduled by the useEffect
+    const dismissTimers = setTimeoutSpy.mock.calls.filter(([, ms]) => ms === 4000)
+    expect(dismissTimers.length).toBeGreaterThan(0)
+  })
+
+  it('fires overlay only once per concept even if same concept submits twice', async () => {
+    let callCount = 0
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/submit') {
+        callCount++
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({
+            ...mockGradeResult,
+            just_mastered: true,
+            mastered_concept_title: 'El Subjuntivo',
+          }),
+        })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
+    // First submission — overlay should show
+    await submitAndWaitForFeedback()
+    await waitFor(() => screen.getByText('Concept mastered!'))
+    // Close it
+    await userEvent.click(screen.getByRole('button', { name: /continue/i }))
+    await waitFor(() => expect(screen.queryByText('Concept mastered!')).toBeNull())
+    // Move to next exercise (same concept) via next-btn on feedback panel
+    const nextBtn = screen.getByTestId('next-btn')
+    await userEvent.click(nextBtn)
+    // Second submission — should NOT reopen overlay
+    await waitFor(() => screen.getByTestId('submit-exercise'))
+    await submitAndWaitForFeedback()
+    await act(async () => { await new Promise((r) => setTimeout(r, 50)) })
+    expect(callCount).toBeGreaterThanOrEqual(2)
+    expect(screen.queryByText('Concept mastered!')).toBeNull()
   })
 })

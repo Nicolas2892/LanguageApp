@@ -8,6 +8,7 @@ import type { Concept, Exercise, UserProgress } from '@/lib/supabase/types'
 import { PRODUCTION_TYPES } from '@/lib/mastery/computeLevel'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib/api-utils'
+import { MASTERY_THRESHOLD } from '@/lib/constants'
 
 const SubmitSchema = z.object({
   exercise_id: z.string().uuid(),
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
     })
 
     let nextReviewInDays = 0
+    let justMastered = false
 
     if (!skip_srs) {
       // 3. Fetch current user_progress (or use defaults if first time)
@@ -81,6 +83,8 @@ export async function POST(request: Request) {
         .eq('concept_id', concept_id)
         .single()
 
+      const prevIntervalDays = existingProgress?.interval_days ?? 0
+
       const currentProgress = existingProgress ?? {
         ...DEFAULT_PROGRESS,
         user_id: user.id,
@@ -90,6 +94,7 @@ export async function POST(request: Request) {
       // 4. Calculate new SRS values
       const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore)
       nextReviewInDays = newSRS.interval_days
+      justMastered = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD
 
       // 5. Upsert user_progress
       await supabase
@@ -136,6 +141,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ...gradeResult,
       next_review_in_days: nextReviewInDays,
+      just_mastered: justMastered,
+      mastered_concept_title: justMastered ? typedConcept.title : null,
     })
   } catch (err) {
     console.error('[submit] error:', err)

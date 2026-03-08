@@ -91,6 +91,19 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const confettiFired = useRef(false)
   const autoGenerateTriggeredRef = useRef(false)
 
+  // UX-Z: per-exercise timing for "~N min remaining"
+  const exerciseStartRef = useRef<number>(Date.now())
+  const [submissionTimes, setSubmissionTimes] = useState<number[]>([])
+
+  // UX-AB: concept explanation collapse on repeat encounters
+  const seenConceptIdsRef = useRef<Set<string>>(new Set())
+  const [isConceptExpanded, setIsConceptExpanded] = useState(false)
+
+  // UX-AA: mastery milestone overlay
+  const [masteryOverlayOpen, setMasteryOverlayOpen] = useState(false)
+  const [masteredConceptTitle, setMasteredConceptTitle] = useState<string | null>(null)
+  const masteredConceptIdsThisSession = useRef<Set<string>>(new Set())
+
   // Sprint: time mode countdown
   const totalSeconds = sprintConfig?.limitType === 'time' ? sprintConfig.limit * 60 : 0
   const [secondsLeft, setSecondsLeft] = useState(totalSeconds)
@@ -127,6 +140,13 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     if (state.phase !== 'done') return
     router.prefetch(returnHref ?? '/study')
   }, [state.phase, router, returnHref])
+
+  // UX-AA: auto-dismiss mastery overlay after 4s
+  useEffect(() => {
+    if (!masteryOverlayOpen) return
+    const id = setTimeout(() => setMasteryOverlayOpen(false), 4000)
+    return () => clearTimeout(id)
+  }, [masteryOverlayOpen])
 
   // Auto-generate drill exercises during feedback on last loaded exercise
   useEffect(() => {
@@ -201,6 +221,18 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
 
   const current = dynamicItems[index]
 
+  // UX-Z: estimated minutes remaining
+  const avgSeconds = submissionTimes.length > 0
+    ? submissionTimes.reduce((a, b) => a + b, 0) / submissionTimes.length
+    : 30
+  const remainingCount = effectiveLength - (index + 1)
+  const estimatedMinutes = !sprintConfig && remainingCount > 1
+    ? Math.max(1, Math.round((remainingCount * avgSeconds) / 60))
+    : null
+
+  // UX-AB: first encounter check — concept card shows full only on first exercise of each concept
+  const isFirstConceptEncounter = !seenConceptIdsRef.current.has(current.concept.id)
+
   // Progress bar values
   const progressPct = sprintConfig?.limitType === 'time'
     ? totalSeconds > 0 ? (secondsLeft / totalSeconds) * 100 : 0
@@ -228,7 +260,11 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         setSubmitting(false)
         return
       }
-      const gradeResult = result as GradeResult & { next_review_in_days: number }
+      const gradeResult = result as GradeResult & {
+        next_review_in_days: number
+        just_mastered: boolean
+        mastered_concept_title: string | null
+      }
       setScores((s) => [...s, gradeResult.score])
 
       // Track missed concepts (score < 2)
@@ -238,6 +274,24 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           return [...prev, { id: current.concept.id, title: current.concept.title }]
         })
       }
+
+      // UX-AA: show mastery milestone overlay (once per concept per session)
+      if (
+        gradeResult.just_mastered &&
+        gradeResult.mastered_concept_title &&
+        !masteredConceptIdsThisSession.current.has(current.concept.id)
+      ) {
+        masteredConceptIdsThisSession.current.add(current.concept.id)
+        setMasteredConceptTitle(gradeResult.mastered_concept_title)
+        setMasteryOverlayOpen(true)
+        import('canvas-confetti').then(({ default: confetti }) => {
+          confetti({ particleCount: 60, spread: 50, origin: { y: 0.5 }, scalar: 0.8 })
+        }).catch(() => {})
+      }
+
+      // UX-Z: record time taken for this exercise
+      const elapsedSec = Math.max(1, Math.round((Date.now() - exerciseStartRef.current) / 1000))
+      setSubmissionTimes((prev) => [...prev, elapsedSec])
 
       if (!gradeResult.is_correct) setWrongAttempts((n) => n + 1)
       const fc = gradeResult.score >= 2 ? 'animate-flash-green' : 'animate-flash-red'
@@ -292,6 +346,11 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         }),
       }).catch(() => {})
     } else {
+      // UX-AB: mark this concept as seen before moving to next exercise
+      seenConceptIdsRef.current.add(current.concept.id)
+      setIsConceptExpanded(false)
+      // UX-Z: reset exercise start time
+      exerciseStartRef.current = Date.now()
       startTransition(() => {
         autoGenerateTriggeredRef.current = false
         setIndex((i) => i + 1)
@@ -450,6 +509,26 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
 
   return (
     <>
+      {/* UX-AA: Mastery milestone overlay */}
+      <Dialog open={masteryOverlayOpen} onOpenChange={setMasteryOverlayOpen}>
+        <DialogContent className="text-center max-w-sm">
+          <DialogHeader className="items-center gap-3">
+            <div className="text-4xl">🏆</div>
+            <DialogTitle className="text-xl">Concept mastered!</DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground text-sm">
+            You&apos;ve mastered{' '}
+            <span className="font-semibold text-foreground">{masteredConceptTitle}</span>.
+            It&apos;s now in your long-term memory.
+          </p>
+          <DialogFooter className="sm:justify-center">
+            <Button onClick={() => setMasteryOverlayOpen(false)} className="w-full sm:w-auto">
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Exit confirmation dialog */}
       <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <DialogContent>
@@ -480,7 +559,14 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                 {formatTime(secondsLeft)}
               </span>
             ) : (
-              <span className="font-medium">{index + 1} / {effectiveLength}</span>
+              <span className="font-medium">
+              {index + 1} / {effectiveLength}
+              {estimatedMinutes !== null && (
+                <span className="text-muted-foreground font-normal ml-1.5">
+                  · ~{estimatedMinutes} min
+                </span>
+              )}
+            </span>
             )}
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="capitalize text-xs">{current.concept.type} practice</Badge>
@@ -512,11 +598,35 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           </span>
         </div>
 
-        {/* Concept explanation */}
-        <div className="bg-muted/50 rounded-lg p-4 text-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Concept</p>
-          <p>{current.concept.explanation}</p>
-        </div>
+        {/* Concept explanation — full card on first encounter; collapsible on repeat */}
+        {isFirstConceptEncounter ? (
+          <div className="bg-muted/50 rounded-lg p-4 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Concept</p>
+            <p>{current.concept.explanation}</p>
+          </div>
+        ) : (
+          <div className="bg-muted/50 rounded-lg text-sm overflow-hidden">
+            <button
+              onClick={() => setIsConceptExpanded((e) => !e)}
+              className="w-full flex items-center justify-between px-4 py-2.5 text-left"
+              aria-expanded={isConceptExpanded}
+            >
+              <span className="font-medium">{current.concept.title}</span>
+              <span className="text-xs text-muted-foreground">
+                {isConceptExpanded ? '↑ hide' : '↓ remind me'}
+              </span>
+            </button>
+            <div
+              className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
+              style={{ maxHeight: isConceptExpanded ? '16rem' : '0' }}
+            >
+              <div className="px-4 pb-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Concept</p>
+                <p>{current.concept.explanation}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Exercise */}
         <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 animate-exercise-in ${flashClass ?? ''}`}>
