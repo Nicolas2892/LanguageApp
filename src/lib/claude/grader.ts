@@ -1,4 +1,4 @@
-import { anthropic, TUTOR_MODEL } from './client'
+import { anthropic, GRADE_MODEL } from './client'
 import type { SRSScore } from '@/lib/srs'
 import { parseExpectedAnswers } from '@/lib/exercises/gapFill'
 
@@ -17,7 +17,7 @@ export async function gradeAnswer({
   prompt,
   expectedAnswer,
   userAnswer,
-  model = TUTOR_MODEL,
+  model = GRADE_MODEL,
 }: {
   conceptTitle: string
   conceptExplanation: string
@@ -76,7 +76,10 @@ Respond with this exact JSON structure:
     messages: [{ role: 'user', content: userPrompt }],
   })
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+  const raw = message.content[0].type === 'text' ? message.content[0].text : ''
+  // Strip markdown fences in case the model wraps JSON in ```json ... ```
+  const fenceMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
+  const text = fenceMatch ? fenceMatch[1].trim() : raw.trim()
 
   try {
     const parsed = JSON.parse(text) as GradeResult

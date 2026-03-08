@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
+import { anthropic, GRADE_MODEL } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { validateOrigin } from '@/lib/api-utils'
 
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     const message = await anthropic.messages.create({
-      model: TUTOR_MODEL,
+      model: GRADE_MODEL,
       max_tokens: 256,
       system: [{ type: 'text', text: 'You are a Spanish B1→B2 tutor. Give a brief worked example that demonstrates the target concept in a different sentence from the exercise. Be concise — one or two sentences max.', cache_control: { type: 'ephemeral' } }],
       messages: [{

@@ -1,0 +1,228 @@
+{
+  "run_at": "2026-03-08T13:50:09.662Z",
+  "candidate_model": "claude-haiku-4-5-20251001",
+  "baseline_model": "claude-sonnet-4-20250514",
+  "total_samples": 16,
+  "graded": 16,
+  "errors": 0,
+  "exact_agreement_rate": 0.9375,
+  "near_agreement_rate": 0.9375,
+  "gate_threshold": 0.9,
+  "gate_passed": true,
+  "by_exercise_type": {
+    "gap_fill": {
+      "total": 12,
+      "exact": 11,
+      "near": 11
+    },
+    "transformation": {
+      "total": 4,
+      "exact": 4,
+      "near": 4
+    }
+  },
+  "disagreements": [
+    {
+      "attempt_id": "207193de-7b1a-4dd3-82ef-4f327a12ccf8",
+      "type": "gap_fill",
+      "sonnet": 0,
+      "haiku": 2,
+      "delta": 2,
+      "user_answer": "haca"
+    }
+  ],
+  "all_results": [
+    {
+      "attempt_id": "207193de-7b1a-4dd3-82ef-4f327a12ccf8",
+      "exercise_type": "gap_fill",
+      "user_answer": "haca",
+      "sonnet_score": 0,
+      "haiku_score": 2,
+      "score_delta": 2,
+      "exact_match": false,
+      "near_match": false,
+      "haiku_feedback": "Your answer is correct in meaning and demonstrates proper use of the imperfect indicative with 'aunque', but you are missing the accent mark on the 'a'.",
+      "haiku_corrected_version": "hacía"
+    },
+    {
+      "attempt_id": "965ca9f4-7108-47c6-ab9b-fc7ca96e1a3d",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Excellent — you've correctly placed 'sin embargo' as a formal adversative connector after the semicolon.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "46ac4c20-071c-4f9a-a19b-7283d3e6dfbf",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You correctly identified and placed 'sin embargo' in this adversative construction.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "edea90dd-3487-4e64-a62a-9b981f654531",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You've correctly filled in the gap with 'sin embargo' and properly applied the formal adversative connector in its correct position after the semicolon.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "42c27958-cd3f-4292-aca3-9dc81529c235",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You correctly filled in 'sin embargo' with proper spelling, accent, and placement.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "b3ca0ad6-60ee-4db8-baec-2dcc1a2ec738",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You correctly identified and placed 'sin embargo' as the formal adversative connector in this sentence.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "100f71f7-d826-4504-b034-1f5a41ec348d",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You correctly filled in the gap with 'sin embargo' and demonstrated proper understanding of this formal adversative connector.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "b73ec185-d415-4473-ac71-4b4794b209a9",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You correctly filled in 'sin embargo' with proper spelling, accent, and placement.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "9b906f57-bc20-4384-b76e-b715dfd92e56",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You've correctly filled in the adversative connector with the right form, spelling, and placement.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "a52c7858-16c0-47da-8890-cb5ca3a5acee",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You've correctly filled the gap with 'sin embargo' and applied the formal adversative connector exactly as required.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "8e127d43-cab7-4da9-b1eb-e1b4f6f08d1c",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You've correctly filled the gap with 'sin embargo' in its proper position after the semicolon.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "b2120b93-7e73-47b4-a7a0-ee60d9d55896",
+      "exercise_type": "gap_fill",
+      "user_answer": "sin embargo",
+      "sonnet_score": 3,
+      "haiku_score": 3,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Perfect! You correctly identified and placed 'sin embargo' as the formal adversative connector in this sentence.",
+      "haiku_corrected_version": "sin embargo"
+    },
+    {
+      "attempt_id": "70e0c519-7026-4831-9ede-2cca916369d4",
+      "exercise_type": "transformation",
+      "user_answer": "aunque",
+      "sonnet_score": 0,
+      "haiku_score": 0,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "You wrote only the word 'aunque' but did not complete the sentence transformation.",
+      "haiku_corrected_version": "Aunque es muy tarde, iremos al cine."
+    },
+    {
+      "attempt_id": "6a3f0203-4c70-47a6-8991-680ef58e3345",
+      "exercise_type": "transformation",
+      "user_answer": "aunque",
+      "sonnet_score": 0,
+      "haiku_score": 0,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "You provided 'aunque' (although/even though), which is a concessive connector, but the exercise specifically required 'sin embargo' (however/nevertheless), a formal adversative connector that must follow punctuation.",
+      "haiku_corrected_version": "María estudió mucho para el examen; sin embargo, no obtuvo la calificación que esperaba."
+    },
+    {
+      "attempt_id": "d29d688d-6a83-4267-b27a-3c2288521784",
+      "exercise_type": "transformation",
+      "user_answer": "ee",
+      "sonnet_score": 0,
+      "haiku_score": 0,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Your response 'ee' is not a valid Spanish sentence and does not attempt to apply the tener que + infinitivo construction.",
+      "haiku_corrected_version": "Ana tiene que terminar el informe hoy."
+    },
+    {
+      "attempt_id": "1cd644ed-4bde-4caa-b7b8-7baa9f6f5776",
+      "exercise_type": "transformation",
+      "user_answer": "snjkfnlk",
+      "sonnet_score": 0,
+      "haiku_score": 0,
+      "score_delta": 0,
+      "exact_match": true,
+      "near_match": true,
+      "haiku_feedback": "Your response is not readable Spanish—it appears to be random characters with no recognizable words or structure.",
+      "haiku_corrected_version": "El clima estaba perfecto para el evento; sin embargo, al final tuvimos que cancelarlo."
+    }
+  ]
+}
