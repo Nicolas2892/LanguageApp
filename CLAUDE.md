@@ -249,11 +249,13 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1132 tests across 31 files — all passing.**
+**Test suite: 1162 tests across 34 files — all passing.**
 
 **E2E infrastructure: Playwright smoke tests live** (`pnpm test:e2e`) — 4 scenarios covering submit→feedback, done screen, drill mode, and multi-exercise sessions. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`. See `e2e/` directory.
 
-Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-02, ARCH-03)**, **Performance (PERF-01, PERF-02, PERF-03, PERF-04, PERF-05)**, **Perf-A #4 (prefetch next route + drill auto-generation during feedback — partial: race condition tracked in Fix-I)**.
+**CI: Fully green (TypeScript + lint + tests) as of 2026-03-08.**
+
+Completed: Phases 1–8 (auth, SRS, all exercise types, study session, tutor, progress analytics, curriculum, onboarding, PWA, drill mode), Phase 9 fixes (Fix-A–E, **Fix-I**), UX improvements (UX-A–C, UX-D, UX-E, UX-G, UX-H, UX-I through UX-S, UX-U, UX-V, UX-X, UX-AC–AE, UX-AF, UX-AG), Ped-A (multi-blank gap-fill), Ped-C (computed level), Ped-D (gap-fill same-concept redesign), Ped-E (grammatical highlighting), Ped-H (SRS interleaving), Feat-B (Sprint Mode), Feat-C (grammar focus chips), **Feat-E (content expansion — 85 concepts, 787 exercises live across 7 modules)**, **Feat-C (guided CEFR progression — B1→B2→C1 unlock in automatic queue)**, **Feat-H (Design & UX review)**, Copy-A–K (copy sprint), **Security sprint (SEC-01, SEC-03, SEC-04, SEC-05)**, **Architecture (ARCH-01, ARCH-02, ARCH-03)**, **Performance (PERF-01, PERF-02, PERF-03, PERF-04, PERF-05)**, **Perf-A #4 (prefetch next route + drill auto-generation during feedback)**, **UX-AB, UX-Y, UX-Z, UX-AA (session polish + dashboard weekly snapshot)**.
 
 → Full implementation details of all completed work: `docs/completed-features.md`
 
@@ -331,38 +333,26 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 #### Security
 
 **SEC-01: SSRF via unvalidated push subscription endpoint** ✅ *Complete — see `docs/completed-features.md`*
-
 **SEC-02: In-memory rate limiter is instance-scoped, not global** ✅ *Complete — see `docs/completed-features.md`*
-
 **SEC-03: No CSRF protection on state-mutating API routes** ✅ *Complete — see `docs/completed-features.md`*
-
 **SEC-04: Prompt injection via unescaped `user_answer` in grading prompt** ✅ *Complete — see `docs/completed-features.md`*
-
 **SEC-05: CSP missing `worker-src` and `manifest-src` directives** ✅ *Complete — see `docs/completed-features.md`*
 
 #### Performance (from audit)
 
 **PERF-01: Sequential DB writes block `/api/submit` response** ✅ *Complete — see `docs/completed-features.md`*
-
 **PERF-02: `updateComputedLevel` called on every exercise submission** ✅ *Complete — see `docs/completed-features.md`*
-
 **PERF-03: N+1 query pattern in `/api/push/send` cron** ✅ *Complete — see `docs/completed-features.md`*
-
 **PERF-04: Middleware DB query on every authenticated page navigation** ✅ *Complete — see `docs/completed-features.md`*
-
 **PERF-05: Claude prompt caching not used on grading system prompt** ✅ *Complete — see `docs/completed-features.md`*
 
 #### Architecture (from audit)
 
 **ARCH-01: No CI/CD pipeline — untested code ships directly to production** ✅ *Complete — see `docs/completed-features.md`*
 - **Note**: Vercel production gate must be configured manually in Project Settings → Git → Required checks.
-
 **ARCH-02: Single Claude model for all AI tasks — suboptimal cost/speed tradeoff** ✅ *Complete — see `docs/completed-features.md`*
-
 **ARCH-03: `alert()` used for production error handling** ✅ *Complete — see `docs/completed-features.md`*
-
 **Feat-H: Another Design & UX Review** ✅ *Complete — see `docs/completed-features.md`*
-
 **Feat-I: TTS audio for exercise prompts**
 - B2→C1 learners need listening exposure, but the app currently has zero audio. Even basic text-to-speech adds a listening dimension that is currently entirely absent.
 - The `useSpeech` hook already exists in the codebase (used by `IOSInstallPrompt`). Wire a speaker icon button to it in GapFill, TextAnswer, and ErrorCorrection — clicking reads the prompt text aloud in Spanish using the Web Speech API (`speechSynthesis`, es-ES voice).
@@ -381,7 +371,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
   1. **Stream the grading response** — Switch `/api/submit` to a streaming response. Send score + short label first (< 10 tokens), then stream the full feedback. Biggest UX win.
   2. ~~Prompt caching~~ ✅ *Done (PERF-05)*
   3. **Switch to Haiku for grading** — Requires offline quality validation (≥ 90% score agreement vs. Sonnet on 50 exercises) before switching. See ARCH-02.
-  4. ~~**Prefetch next exercise + drill auto-generation**~~ ✅ *Done (Perf-A #4, commit `8a5a20f`)* — implemented; race condition logged as Fix-I.
+  4. ~~**Prefetch next exercise + drill auto-generation**~~ ✅ *Done (Perf-A #4, commit `8a5a20f`; race condition fixed in Fix-I, commit `5797a5c`)*
   5. **Optimistic local score for gap_fill** — Client-side accent-normalised string match for single-blank gap_fill; show "Correct!" immediately, still send to Claude async for SM-2 scoring.
 - **Do not implement #3 (model switch) without an offline quality validation test.**
 
@@ -404,15 +394,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### Bugs / Layout Fixes
 
-**Fix-I: Drill auto-generation (Perf-A #4) not reliably producing a second exercise** *(confirmed broken in production smoke-test 2026-03-08)*
-- **Symptom**: In drill/practice mode, after submitting the first exercise and clicking Next →, the session ends immediately (done screen) instead of showing a newly generated exercise. The background `POST /api/exercises/generate` call either fails silently, completes too late, or the generated exercises are not being appended to `dynamicItems` before the user advances.
-- **Root cause (suspected)**: The auto-generation `useEffect` in `StudySession.tsx` fires during the feedback phase of the last loaded exercise. If the user clicks Next → before the generation API call resolves (Claude can take 3–6s), `dynamicItems.length` has not yet grown, so `handleNext` sees no more items and transitions to the done state. The race condition is particularly acute because feedback → Next is fast when the user is confident.
-- **Fix candidates**:
-  1. Disable the "Next →" button while generation is in-flight (show a subtle spinner on the button). Only re-enable once `dynamicItems.length > index + 1` OR generation has failed.
-  2. Optimistically show a loading skeleton exercise card while waiting, so the session doesn't end.
-  3. Pre-generate before the user even reaches the last exercise (trigger generation on the second-to-last exercise's feedback phase instead of the last).
-- **Acceptance criteria**: Clicking Next → on the last pre-loaded exercise in drill mode always leads to another exercise, never the done screen, unless the user has explicitly finished a capped session. Generation failure should show a graceful fallback (e.g. re-use an existing exercise) rather than silently ending the session.
-- **Do not implement without deciding on fix candidate above** — option 1 is the lowest risk.
+**Fix-I: Drill auto-generation race condition** ✅ *Complete — see `docs/completed-features.md`*
 
 **Fix-H: Curriculum "Practice" sessions too short — enforce minimum 5 exercises per concept**
 - **Problem**: Clicking "Practice" on a curriculum concept page links to `/study?concept=<id>`, which fetches all available exercises for that concept (up to SESSION_SIZE=10). If the concept has fewer than 5 exercises in the DB, the session ends almost immediately — causing user friction and a feeling of incompleteness.
@@ -435,7 +417,7 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - **Problem statement**: The app currently has too many overlapping ways to start practising, with no clear mental model for the user. A learner can enter exercises via: the dashboard "Start review" CTA, the "Practice anyway" fallback, the "Start learning" new-concepts flow, `/study/configure` (session configurator), the curriculum concept "Practice" button, the Free Write card, and the Sprint mode shortcut. Each of these lands on `/study` with different URL params (`mode=`, `practice=true`, `types=`, `size=`, `limitType=`, etc.) but the exercise screen looks identical regardless of which entry point was used. The user has no persistent awareness of which mode they are in or why.
 - **Specific issues observed**:
   1. **"Drill" vs "Practice" vs "Review" are not distinguished in the UI** — the session screen shows the same chrome for all three, even though they have meaningfully different purposes (SRS-due recall vs. free repetition vs. new learning).
-  2. **Auto-generation in drill mode is invisible** — when the app silently generates more exercises, the user has no indication this is happening. When generation fails or races with "Next →", the session abruptly ends (see Fix-I). There is no affordance like "Generating more exercises…" or a session length indicator that grows.
+  2. **Auto-generation in drill mode is partially invisible** — when the app generates more exercises, the Next button is now disabled with a spinner (Fix-I), but there is no session length indicator that grows or explicit "Generating more exercises…" label.
   3. **Session length is unpredictable** — in drill/practice mode the session can be 1 exercise or 20+ depending on auto-generation. Users cannot plan their time. Research (Duolingo, 2023 habit study) shows that time-bounded or count-bounded sessions significantly improve session completion rates.
   4. **Entry via `/study/configure`** adds configuration friction before every session, but the configurator UI is unfamiliar enough that most users likely skip it and just hit the dashboard CTA — meaning the configurator is mostly unused.
   5. **"Practice" button on curriculum concept pages** leads to an undefined-length auto-generating session with no explanation of what drill mode is or how it differs from the SRS review.
@@ -486,26 +468,13 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 **UX-X: Enter/Space to advance after feedback** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-Y: Weekly progress snapshot on dashboard**
-- Show a compact "This week" row on the dashboard: exercises completed, new concepts introduced, accuracy %, alongside a small sparkline trend vs. last week.
-- Research: Duolingo's weekly recap feature measurably improved W4 retention by closing the loop on longer-term progress without requiring a full progress page visit.
-- Implementation: aggregate query on `exercise_attempts` filtered to `created_at >= current_week_start`. Dashboard-only, client component. No new DB schema needed.
+**UX-Y: Weekly progress snapshot on dashboard** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-Z: Session time estimate**
-- Show "~N min remaining" in the study session header based on a rolling average of per-exercise submission times (client-side, reset each session).
-- Reduces mid-session abandonment: users who don't know how long it'll take quit early. Knowing "2 min left" creates commitment.
-- Pure client-side, no backend. Rolling average seeded with a 30-second default for the first exercise.
+**UX-Z: Session time estimate** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-AA: Concept mastery milestone moment**
-- When a concept's `interval_days` crosses the `MASTERY_THRESHOLD` (21 days) for the first time, show a brief congratulatory overlay (beyond the session-end confetti) that names the specific concept mastered: "You've mastered *El subjuntivo con ojalá*!"
-- Bridges the gap between short-term feedback (confetti on session end) and long-term identity ("I am mastering Spanish"). Research on intrinsic motivation shows named milestones build stronger long-term engagement than generic rewards.
-- Implementation: check in `/api/submit` response whether `interval_days` just crossed 21 (was < 21, now ≥ 21). Return a `mastered: true` flag. `StudySession.tsx` shows the milestone overlay before advancing.
+**UX-AA: Concept mastery milestone moment** ✅ *Complete — see `docs/completed-features.md`*
 
-**UX-AB: Concept explanation card — collapse on repeat exercises**
-- **Problem**: The "Concept" explanation card renders on every exercise, including the 5th time a user sees the same concept in a session. On mobile it pushes the exercise prompt below the fold.
-- **Solution**: Track the current concept ID across the session. Show the full card only on the **first exercise of each concept** per session. On subsequent exercises for the same concept, collapse to a single-line `"[Concept title]  ↓ remind me"` toggle that expands inline on tap.
-- **Implementation**: In `StudySession.tsx`, add a `seenConceptIds` ref (Set) that persists across renders. Before rendering the explanation card, check if `current.concept.id` is already in the set. Add it on first render. Collapse state drives a `max-height` transition (200ms ease-in) — no display:none.
-- **Acceptance criteria**: First exercise of each new concept → full card visible. Repeat concept → single-line collapsed toggle. Expand/collapse animates in 200ms. No layout shift.
+**UX-AB: Concept explanation card — collapsed by default** ✅ *Complete — see `docs/completed-features.md`*
 
 **UX-AC: Feedback panel — visual answer comparison blocks** ✅ *Complete — see `docs/completed-features.md`*
 
@@ -528,18 +497,13 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 ## Recommended Next Steps (priority order)
 
 ### Polish & effectiveness
-1. Fix-I — Drill auto-generation race condition (Next → fires before generation resolves)
-2. UX-AH — PM/UX review of exercise entry flows and drill/practice mode redesign (research first)
-3. Fix-H — Curriculum "Practice" minimum 5 exercises (pad queue if concept has fewer)
+1. UX-AH — PM/UX review of exercise entry flows and drill/practice mode redesign (research first)
+2. Fix-H — Curriculum "Practice" minimum 5 exercises (pad queue if concept has fewer)
 3. Ped-G — Mistake review mode (`exercise_attempts WHERE score <= 1`)
-5. UX-AB — Concept explanation collapse on repeat exercises
-6. UX-W — Exercise UI clarity audit (design review before implementing)
-7. Ped-I — Grammar cheat-sheet (`grammar_summary` column + collapsible card)
-8. Feat-I — TTS audio (wire `useSpeech` to exercise prompts)
-9. UX-AA — Concept mastery milestone overlay
-8. UX-Y — Weekly progress snapshot on dashboard
-9. UX-Z — Session time estimate
-10. Ped-J — "Hard" flag on a concept
+4. UX-W — Exercise UI clarity audit (design review before implementing)
+5. Ped-I — Grammar cheat-sheet (`grammar_summary` column + collapsible card)
+6. Feat-I — TTS audio (wire `useSpeech` to exercise prompts)
+7. Ped-J — "Hard" flag on a concept
 
 ### Growth features (deferred)
 - Strat-A — Conjugation mode (mirror Ella Verbs)

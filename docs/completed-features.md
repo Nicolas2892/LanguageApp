@@ -598,3 +598,87 @@ Drop-in string replacements, no logic or schema changes:
 - Test 4 (2-exercise session) made resilient to Fix-H backlog: handles "Finish session" gracefully if concept serves fewer exercises than `size=2`
 - `scripts/smoke-test.ts` (`pnpm exec tsx scripts/smoke-test.ts`) — post-deploy API-level smoke checks: RPC shape, Haiku grading (correct + wrong answer), hint generation
 - Result: **5/5 E2E tests passing** against production in ~32 seconds
+
+---
+
+## UX-AB, UX-Y, UX-Z, UX-AA — Session Polish + Dashboard Weekly Snapshot ✓ (2026-03-08)
+
+### UX-AB: Concept explanation — collapsed by default
+
+**Problem**: The explanation card rendered on every exercise taking up screen space, and when a concept appeared multiple times the title was duplicated (once in the headline, once in the toggle button).
+
+**Solution**: Always collapse by default. Toggle label is "Concept Notes ↓/↑" with no concept title (already prominent in the headline above). `isConceptExpanded` state resets to `false` in `handleNext` on every exercise advance.
+
+**Key files**: `src/app/study/StudySession.tsx`
+- Removed `seenConceptIdsRef` and `isFirstConceptEncounter` logic entirely
+- Single always-collapsed card with `max-height` CSS transition (inline `style` — Tailwind v4 JIT doesn't reliably generate dynamic max-height values)
+- Toggle: `aria-expanded`, text switches between "Concept Notes ↓" and "Concept Notes ↑"
+
+---
+
+### UX-Z: Session time estimate
+
+**What**: "~N min remaining" shown in the session header next to the exercise counter.
+
+**How**: Rolling average of actual submission times per session (seeded at 30s). `exerciseStartRef` is reset in `handleNext`. Elapsed captured in `handleSubmit` before the 300ms flash timer. `estimatedMinutes` is `null` (hidden) in sprint mode and when ≤1 exercise remains.
+
+**Key files**: `src/app/study/StudySession.tsx`
+- `exerciseStartRef = useRef<number>(Date.now())`
+- `submissionTimes` state array
+- Derived `avgSeconds`, `remainingCount`, `estimatedMinutes`
+
+---
+
+### UX-AA: Concept mastery milestone overlay
+
+**What**: 🏆 Dialog appears the first time a concept crosses the 21-day SRS interval (MASTERY_THRESHOLD). Shows concept name, auto-dismisses after 4s, fires confetti. Fires at most once per concept per session.
+
+**Backend** (`src/app/api/submit/route.ts`):
+- `prevIntervalDays = existingProgress?.interval_days ?? 0` captured before SM-2 call
+- `justMastered = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD`
+- Response includes `just_mastered: boolean` and `mastered_concept_title: string | null`
+- `justMastered` stays `false` when `skip_srs: true` (practice mode)
+
+**Frontend** (`src/app/study/StudySession.tsx`):
+- `masteredConceptIdsThisSession = useRef<Set<string>>(new Set())` — dedup guard
+- `useEffect([masteryOverlayOpen])` sets a 4000ms auto-dismiss setTimeout
+- Dynamic `import('canvas-confetti')` for confetti burst (scalar: 0.8, smaller than session-end confetti)
+
+---
+
+### UX-Y: Weekly progress snapshot on dashboard
+
+**What**: "This week" card on the dashboard showing exercises, accuracy %, and minutes with ▲/▼ deltas vs last week. Only rendered when `thisWeekExercises > 0`.
+
+**Key files**:
+- `src/app/dashboard/page.tsx` — 4 new Supabase queries added to `Promise.all`: `thisWeekAttempts`, `lastWeekAttempts`, `thisWeekSessions`, `lastWeekSessions`. Week boundary uses Monday as start of week (`dayOfWeek = now.getDay() === 0 ? 7 : now.getDay()`).
+- `src/components/WeeklySnapshot.tsx` — new pure presentational component. `DeltaBadge` helper renders ▲+N (green), ▼N (red), = (muted), or — (null baseline).
+
+**Accuracy definition**: attempts with `ai_score >= 2` / total attempts × 100.
+
+---
+
+## Fix-I: Drill Auto-Generation Race Condition ✓ (2026-03-08)
+
+**Problem**: In drill/practice mode, `StudySession.tsx` fires 3 concurrent `POST /api/exercises/generate` calls during the feedback phase. If the user clicked "Next →" before all Claude responses resolved (3–6s), `handleNext` saw no new items and ended the session prematurely.
+
+**Fix chosen**: Option 1 — disable Next button while generation is in-flight.
+
+**Changes**:
+- `src/components/exercises/FeedbackPanel.tsx`: added `isGenerating?: boolean` prop. When `true`, button is `disabled` and shows spinner + "Generating…" text.
+- `src/app/study/StudySession.tsx`: passes existing `generatingMore` state as `isGenerating` to `<FeedbackPanel>`. No new state needed — `generatingMore` is already reset to `false` in the `finally` block (covers both success and failure).
+- `src/app/study/__tests__/StudySession.test.tsx`: updated `FeedbackPanel` mock to forward `disabled`/`isGenerating`; added 3 tests (in-flight, success, failure paths).
+
+**Commit**: `5797a5c`
+
+---
+
+### CI fixes (2026-03-08)
+
+Cleared all pre-existing lint + TypeScript errors that had been failing CI on every push:
+
+- **SentenceBuilder.tsx**: Conditional `useState` (rules-of-hooks violation) — hoisted `fallbackValue` state to top of component, removed the conditional hook.
+- **react-hooks/purity** in `study/page.tsx` and `SentenceBuilder.tsx`: `Math.random()` in render context — added `// eslint-disable-next-line react-hooks/purity` comments.
+- **react-hooks/set-state-in-effect** in `IOSInstallCard.tsx`, `IOSInstallPrompt.tsx`, `OnboardingTour.tsx`, `auth/login/page.tsx`, `useSpeech.ts`: valid on-mount localStorage/platform detection patterns — added disable comments.
+- **api-utils.test.ts**: `process.env.NODE_ENV` is read-only — replaced direct assignment with `vi.stubEnv('NODE_ENV', value)` / `vi.unstubAllEnvs()`.
+- **vitest.config.ts**: Added `exclude: ['e2e/**']` to prevent Playwright spec (`e2e/smoke.spec.ts`) from being picked up by Vitest.
