@@ -10,9 +10,18 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!,
 )
 
+const BATCH_SIZE = 500
+
 type PushSubscription = {
   endpoint: string
   keys: { p256dh: string; auth: string }
+}
+
+type SubscriberRow = {
+  id: string
+  streak: number
+  push_subscription: PushSubscription
+  due_count: number
 }
 
 export async function POST(request: Request) {
@@ -24,55 +33,55 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient()
-
   const today = new Date().toISOString().split('T')[0]
 
-  // Fetch all subscribed users who have a streak > 0 and haven't studied today
-  const { data: profiles, error } = await supabase
-    .from('profiles')
-    .select('id, streak, push_subscription')
-    .not('push_subscription', 'is', null)
-    .gt('streak', 0)
-    .or(`last_studied_date.is.null,last_studied_date.lt.${today}`)
+  let sent = 0
+  let failed = 0
+  let offset = 0
 
-  if (error) return NextResponse.json({ error: 'DB error' }, { status: 500 })
-
-  // Count due reviews for each user
-  const results = await Promise.allSettled(
-    (profiles ?? []).map(async (profile) => {
-      const subscription = profile.push_subscription as PushSubscription
-
-      // Get due review count
-      const { count } = await supabase
-        .from('user_progress')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', profile.id)
-        .lte('due_date', today)
-
-      const dueCount = count ?? 0
-      const payload = JSON.stringify({
-        title: "Don't break your streak!",
-        body: `${dueCount > 0 ? `${dueCount} review${dueCount !== 1 ? 's' : ''} due` : 'Time to study'} — ${profile.streak}-day streak at risk.`,
-        url: '/study',
-      })
-
-      try {
-        await webpush.sendNotification(subscription, payload)
-      } catch (err: unknown) {
-        // 410 Gone = subscription expired; clean it up
-        if (err && typeof err === 'object' && 'statusCode' in err && (err as { statusCode: number }).statusCode === 410) {
-          await supabase
-            .from('profiles')
-            .update({ push_subscription: null })
-            .eq('id', profile.id)
-        }
-        throw err
-      }
+  // Process subscribers in batches — single JOIN query per batch, no per-user sub-queries
+  while (true) {
+    const { data, error } = await supabase.rpc('get_subscribers_with_due_counts', {
+      p_today: today,
+      p_limit: BATCH_SIZE,
+      p_offset: offset,
     })
-  )
 
-  const sent = results.filter((r) => r.status === 'fulfilled').length
-  const failed = results.filter((r) => r.status === 'rejected').length
+    if (error) return NextResponse.json({ error: 'DB error' }, { status: 500 })
+    if (!data || data.length === 0) break
+
+    const batch = data as SubscriberRow[]
+
+    const results = await Promise.allSettled(
+      batch.map(async (row) => {
+        const dueCount = Number(row.due_count)
+        const payload = JSON.stringify({
+          title: "Don't break your streak!",
+          body: `${dueCount > 0 ? `${dueCount} review${dueCount !== 1 ? 's' : ''} due` : 'Time to study'} — ${row.streak}-day streak at risk.`,
+          url: '/study',
+        })
+
+        try {
+          await webpush.sendNotification(row.push_subscription, payload)
+        } catch (err: unknown) {
+          // 410 Gone = subscription expired; clean it up
+          if (err && typeof err === 'object' && 'statusCode' in err && (err as { statusCode: number }).statusCode === 410) {
+            await supabase
+              .from('profiles')
+              .update({ push_subscription: null })
+              .eq('id', row.id)
+          }
+          throw err
+        }
+      })
+    )
+
+    sent += results.filter((r) => r.status === 'fulfilled').length
+    failed += results.filter((r) => r.status === 'rejected').length
+
+    if (batch.length < BATCH_SIZE) break
+    offset += BATCH_SIZE
+  }
 
   return NextResponse.json({ sent, failed })
 }

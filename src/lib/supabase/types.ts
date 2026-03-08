@@ -320,6 +320,15 @@ export interface Database {
         Args: { p_user_id: string }
         Returns: void
       }
+      get_subscribers_with_due_counts: {
+        Args: { p_today: string; p_limit: number; p_offset: number }
+        Returns: Array<{
+          id: string
+          streak: number
+          push_subscription: unknown
+          due_count: number
+        }>
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
