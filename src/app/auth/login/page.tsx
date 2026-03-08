@@ -29,6 +29,7 @@ export default function LoginPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.get('error') === 'auth_callback_failed') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setServerError('Sign-in failed. Please try again or use email and password.')
     }
   }, [])

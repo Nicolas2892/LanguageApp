@@ -18,6 +18,7 @@ export function IOSInstallCard() {
     const isStandalone =
       (navigator as Navigator & { standalone?: boolean }).standalone === true
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isIOS && isSafari && !isStandalone) setShow(true)
   }, [])
 

@@ -20,12 +20,14 @@ function parseWords(prompt: string): string[] {
 export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
   const words = useMemo(() => {
     const parsed = parseWords(exercise.prompt)
-    // Shuffle
+    // eslint-disable-next-line react-hooks/purity
     return [...parsed].sort(() => Math.random() - 0.5)
   }, [exercise.prompt])
 
   const [selected, setSelected] = useState<string[]>([])
   const [remaining, setRemaining] = useState<string[]>(words)
+  // Fallback state for when no bracket notation is found (must be declared unconditionally)
+  const [fallbackValue, setFallbackValue] = useState('')
 
   const sentence = selected.join(' ')
 
@@ -48,19 +50,18 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
 
   // Fallback: if no bracket notation found, show as plain text answer
   if (words.length === 0) {
-    const [value, setValue] = useState('')
     return (
-      <form onSubmit={(e) => { e.preventDefault(); onSubmit(value.trim()) }} className="space-y-4">
+      <form onSubmit={(e) => { e.preventDefault(); onSubmit(fallbackValue.trim()) }} className="space-y-4">
         <p className="text-xl leading-relaxed font-medium">{exercise.prompt}</p>
         <input
           className="w-full border rounded-md px-3 py-2 text-base"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
+          value={fallbackValue}
+          onChange={(e) => setFallbackValue(e.target.value)}
           placeholder="Build your sentence…"
           disabled={disabled}
           autoFocus
         />
-        <Button type="submit" disabled={disabled || !value.trim()} className="w-full">Submit</Button>
+        <Button type="submit" disabled={disabled || !fallbackValue.trim()} className="w-full">Submit</Button>
       </form>
     )
   }

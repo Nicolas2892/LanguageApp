@@ -71,16 +71,6 @@ const mockGradeResult = {
 }
 
 function setupMocks(prevIntervalDays: number, newIntervalDays: number) {
-  const mockSingle = vi.fn()
-  const mockEq = vi.fn()
-  const mockUpsert = vi.fn()
-  const mockInsert = vi.fn()
-
-  // Chain: from('exercises').select(...).eq(...).eq(...).single()
-  // from('concepts').select(...).eq(...).single()
-  // from('user_progress').select(...).eq(...).eq(...).single()
-  // from('user_progress').upsert(...)
-
   let callCount = 0
   const mockFrom = vi.fn().mockImplementation((table: string) => {
     if (table === 'exercises') {

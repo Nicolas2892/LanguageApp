@@ -10,6 +10,7 @@ export function useSpeech() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY)
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEnabled(stored === 'false' ? false : true)
     } catch {
       setEnabled(true)

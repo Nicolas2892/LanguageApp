@@ -26,6 +26,7 @@ export function IOSInstallPrompt() {
 
     const dismissed = localStorage.getItem('pwa_prompt_dismissed') === 'true'
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isIOS && isSafari && !isStandalone && !dismissed) setVisible(true)
   }, [pathname])
 

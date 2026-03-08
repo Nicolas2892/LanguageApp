@@ -295,12 +295,14 @@ export default async function StudyPage({
       }
     } else if (reviewExerciseByConceptId.size > 0) {
       // Review mode: use the specific failed exercise for this concept
+      // eslint-disable-next-line react-hooks/purity
+      const randomExercise = exArr[Math.floor(Math.random() * exArr.length)]
       const targetExId = reviewExerciseByConceptId.get(conceptId)
-      const exercise = (targetExId ? exArr.find((e) => e.id === targetExId) : undefined)
-        ?? exArr[Math.floor(Math.random() * exArr.length)]
+      const exercise = (targetExId ? exArr.find((e) => e.id === targetExId) : undefined) ?? randomExercise
       items.push({ concept, exercise })
     } else {
       // SRS mode: one random exercise per concept
+      // eslint-disable-next-line react-hooks/purity
       const exercise = exArr[Math.floor(Math.random() * exArr.length)]
       items.push({ concept, exercise })
     }
