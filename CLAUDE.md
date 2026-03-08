@@ -409,6 +409,22 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 #### Bugs / Layout Fixes
 
+**Fix-I: Drill auto-generation (Perf-A #4) not reliably producing a second exercise** *(confirmed broken in production smoke-test 2026-03-08)*
+- **Symptom**: In drill/practice mode, after submitting the first exercise and clicking Next →, the session ends immediately (done screen) instead of showing a newly generated exercise. The background `POST /api/exercises/generate` call either fails silently, completes too late, or the generated exercises are not being appended to `dynamicItems` before the user advances.
+- **Root cause (suspected)**: The auto-generation `useEffect` in `StudySession.tsx` fires during the feedback phase of the last loaded exercise. If the user clicks Next → before the generation API call resolves (Claude can take 3–6s), `dynamicItems.length` has not yet grown, so `handleNext` sees no more items and transitions to the done state. The race condition is particularly acute because feedback → Next is fast when the user is confident.
+- **Fix candidates**:
+  1. Disable the "Next →" button while generation is in-flight (show a subtle spinner on the button). Only re-enable once `dynamicItems.length > index + 1` OR generation has failed.
+  2. Optimistically show a loading skeleton exercise card while waiting, so the session doesn't end.
+  3. Pre-generate before the user even reaches the last exercise (trigger generation on the second-to-last exercise's feedback phase instead of the last).
+- **Acceptance criteria**: Clicking Next → on the last pre-loaded exercise in drill mode always leads to another exercise, never the done screen, unless the user has explicitly finished a capped session. Generation failure should show a graceful fallback (e.g. re-use an existing exercise) rather than silently ending the session.
+- **Do not implement without deciding on fix candidate above** — option 1 is the lowest risk.
+
+**Fix-H: Curriculum "Practice" sessions too short — enforce minimum 5 exercises per concept**
+- **Problem**: Clicking "Practice" on a curriculum concept page links to `/study?concept=<id>`, which fetches all available exercises for that concept (up to SESSION_SIZE=10). If the concept has fewer than 5 exercises in the DB, the session ends almost immediately — causing user friction and a feeling of incompleteness.
+- **Fix**: When building a concept-specific practice queue (`?concept=<id>`), enforce a minimum of 5 exercises. If fewer than 5 distinct exercises exist, repeat exercises (cycle through them) until the queue reaches 5. This ensures every concept practice session always feels like a real session.
+- **Implementation**: In the server-side queue-building logic for `/study` (concept mode), after fetching exercises, pad the array by cycling if `exercises.length < 5`. No DB change needed.
+- **Acceptance criteria**: `/study?concept=<id>` always delivers ≥ 5 exercises regardless of how many are seeded for that concept. Session counter shows correct count. No duplicate consecutive exercises if pool ≥ 2.
+
 **Fix-G: Review card has wrong background in dark mode** *(implemented — `dark:bg-card` override; root cause: opacity-modified Tailwind class specificity in Tailwind v4)*
 
 **Fix-F: Write page sticky footer misaligned on desktop (deferred)**
@@ -418,6 +434,24 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 - **Current state**: Footer is `left-0 right-0` (full width) — misaligned on desktop but functional. Mobile is unaffected.
 
 #### UX Audits & Polish
+
+**UX-AH: PM & UX review — exercise entry flows and drill/practice mode redesign** *(confirmed confusing in production smoke-test 2026-03-08 — research required before any implementation)*
+
+- **Problem statement**: The app currently has too many overlapping ways to start practising, with no clear mental model for the user. A learner can enter exercises via: the dashboard "Start review" CTA, the "Practice anyway" fallback, the "Start learning" new-concepts flow, `/study/configure` (session configurator), the curriculum concept "Practice" button, the Free Write card, and the Sprint mode shortcut. Each of these lands on `/study` with different URL params (`mode=`, `practice=true`, `types=`, `size=`, `limitType=`, etc.) but the exercise screen looks identical regardless of which entry point was used. The user has no persistent awareness of which mode they are in or why.
+- **Specific issues observed**:
+  1. **"Drill" vs "Practice" vs "Review" are not distinguished in the UI** — the session screen shows the same chrome for all three, even though they have meaningfully different purposes (SRS-due recall vs. free repetition vs. new learning).
+  2. **Auto-generation in drill mode is invisible** — when the app silently generates more exercises, the user has no indication this is happening. When generation fails or races with "Next →", the session abruptly ends (see Fix-I). There is no affordance like "Generating more exercises…" or a session length indicator that grows.
+  3. **Session length is unpredictable** — in drill/practice mode the session can be 1 exercise or 20+ depending on auto-generation. Users cannot plan their time. Research (Duolingo, 2023 habit study) shows that time-bounded or count-bounded sessions significantly improve session completion rates.
+  4. **Entry via `/study/configure`** adds configuration friction before every session, but the configurator UI is unfamiliar enough that most users likely skip it and just hit the dashboard CTA — meaning the configurator is mostly unused.
+  5. **"Practice" button on curriculum concept pages** leads to an undefined-length auto-generating session with no explanation of what drill mode is or how it differs from the SRS review.
+- **PM research questions to answer before implementing**:
+  - Should drill mode be a distinct, named product concept ("Drill") separate from the SRS "Review" — with its own visual identity (different header colour, icon, label)?
+  - What is the right session length for drill mode? Fixed count (e.g. always 10)? User-set? Or open-ended with an explicit "Stop" button?
+  - Does the user need to see the auto-generation happening, or should generation be pre-emptive enough that it's always invisible?
+  - Should `/study/configure` be removed entirely in favour of smarter defaults and in-session controls?
+  - How do Babbel and Clozemaster handle the distinction between spaced-repetition review and free-practice drilling? Are there patterns to borrow?
+- **Suggested next step**: Produce a flow diagram mapping every current entry point → URL params → session behaviour → exit state. Use it to identify redundancies, merge or remove entry points, and define a simplified 2-mode model (Review = SRS-due; Practice = free drill on any concept). Present the diagram as a PM artefact before writing any code.
+- **Do not implement any UI changes without the flow diagram and a written mode definition agreed with the user.**
 
 **UX-W: Exercise UI clarity audit**
 - **Problem**: The exercise screen currently renders a lot of simultaneous information: progress counter, concept name, unit breadcrumb, exercise type chip, grammar focus chip, level chip (B1/B2/C1), annotated prompt, input area, hint dots, and submit button. This is high cognitive overhead before the learner has even read the question.
@@ -505,12 +539,13 @@ Items are grouped by type and roughly ordered by priority within each group. Com
 
 ### Polish & effectiveness
 1. Perf-A #4 — Prefetch next exercise during feedback (pure frontend)
-2. Ped-G — Mistake review mode (`exercise_attempts WHERE score <= 1`)
-3. UX-AB — Concept explanation collapse on repeat exercises
-4. UX-W — Exercise UI clarity audit (design review before implementing)
-5. Ped-I — Grammar cheat-sheet (`grammar_summary` column + collapsible card)
-6. Feat-I — TTS audio (wire `useSpeech` to exercise prompts)
-7. UX-AA — Concept mastery milestone overlay
+2. Fix-H — Curriculum "Practice" minimum 5 exercises (pad queue if concept has fewer)
+3. Ped-G — Mistake review mode (`exercise_attempts WHERE score <= 1`)
+5. UX-AB — Concept explanation collapse on repeat exercises
+6. UX-W — Exercise UI clarity audit (design review before implementing)
+7. Ped-I — Grammar cheat-sheet (`grammar_summary` column + collapsible card)
+8. Feat-I — TTS audio (wire `useSpeech` to exercise prompts)
+9. UX-AA — Concept mastery milestone overlay
 8. UX-Y — Weekly progress snapshot on dashboard
 9. UX-Z — Session time estimate
 10. Ped-J — "Hard" flag on a concept
