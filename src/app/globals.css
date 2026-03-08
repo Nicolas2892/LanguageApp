@@ -147,6 +147,12 @@
 }
 .animate-page-in { animation: page-fade-in 150ms ease-out; }
 
+@keyframes exercise-fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-exercise-in { animation: exercise-fadein 180ms ease-out; }
+
 /* Fix-G + UX-T: Review card warm tint — reliable dark mode override via unlayered CSS */
 .review-card-warm {
   background-color: oklch(0.97 0.05 47 / 0.6); /* orange-50 at 60% opacity */

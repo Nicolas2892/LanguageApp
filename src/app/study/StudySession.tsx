@@ -89,6 +89,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const [flashClass, setFlashClass] = useState<string | null>(null)
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const confettiFired = useRef(false)
+  const autoGenerateTriggeredRef = useRef(false)
 
   // Sprint: time mode countdown
   const totalSeconds = sprintConfig?.limitType === 'time' ? sprintConfig.limit * 60 : 0
@@ -120,6 +121,47 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       }).catch(() => {})
     }
   }, [state])
+
+  // Prefetch next route while user reads their score
+  useEffect(() => {
+    if (state.phase !== 'done') return
+    router.prefetch(returnHref ?? '/study')
+  }, [state.phase, router, returnHref])
+
+  // Auto-generate drill exercises during feedback on last loaded exercise
+  useEffect(() => {
+    if (state.phase !== 'feedback') return
+    if (!practiceMode || !generateConfig) return
+    if (index + 1 < dynamicItems.length) return  // more items already available
+    if (generatingMore || autoGenerateTriggeredRef.current) return
+
+    autoGenerateTriggeredRef.current = true
+    setGeneratingMore(true)
+    setGenerateError(null)
+
+    const body = JSON.stringify({ concept_id: generateConfig.conceptId, type: generateConfig.exerciseType })
+    const headers = { 'Content-Type': 'application/json' }
+
+    Promise.all([
+      fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
+      fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
+      fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
+    ]).then(([r1, r2, r3]) => {
+      const exercises = [r1, r2, r3].filter((ex) => ex && typeof ex.id === 'string')
+      if (exercises.length === 0) {
+        setGenerateError('Failed to generate exercises. Please try again.')
+        return
+      }
+      setDynamicItems((prev) => [
+        ...prev,
+        ...exercises.map((ex) => ({ concept: generateConfig.concept, exercise: ex as Exercise })),
+      ])
+    }).catch(() => {
+      setGenerateError('Failed to generate exercises. Please try again.')
+    }).finally(() => {
+      setGeneratingMore(false)
+    })
+  }, [state.phase, index, practiceMode, generateConfig, dynamicItems.length, generatingMore])
 
   // Enter/Space to advance after feedback (UX-X)
   useEffect(() => {
@@ -251,6 +293,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       }).catch(() => {})
     } else {
       startTransition(() => {
+        autoGenerateTriggeredRef.current = false
         setIndex((i) => i + 1)
         setState({ phase: 'answering' })
         setWrongAttempts(0)
@@ -476,7 +519,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         </div>
 
         {/* Exercise */}
-        <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 ${flashClass ?? ''}`}>
+        <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 animate-exercise-in ${flashClass ?? ''}`}>
           {(state.phase === 'answering' || flashClass) && (
             <div className="animate-in slide-in-from-right-2 duration-200">
               <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
