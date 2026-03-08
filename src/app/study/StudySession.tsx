@@ -647,6 +647,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                 onNext={handleNext}
                 onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
                 isLast={isLast}
+                isGenerating={generatingMore}
               />
             </div>
           )}

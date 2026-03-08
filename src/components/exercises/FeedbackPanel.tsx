@@ -12,9 +12,10 @@ interface Props {
   onNext: () => void
   onTryAgain?: () => void
   isLast: boolean
+  isGenerating?: boolean
 }
 
-export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }: Props) {
+export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, isGenerating = false }: Props) {
   const config = SCORE_CONFIG[result.score]
   const isCorrect = result.is_correct
 
@@ -82,8 +83,17 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast }
               Try again
             </Button>
           )}
-          <Button onClick={onNext} className="flex-1 active:scale-95 transition-transform">
-            {isLast ? 'Finish session' : 'Next →'}
+          <Button
+            onClick={onNext}
+            disabled={isGenerating}
+            className="flex-1 active:scale-95 transition-transform"
+          >
+            {isGenerating ? (
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Generating…
+              </span>
+            ) : isLast ? 'Finish session' : 'Next →'}
           </Button>
         </div>
       </div>

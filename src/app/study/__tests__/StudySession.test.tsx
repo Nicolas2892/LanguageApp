@@ -21,9 +21,9 @@ vi.mock('@/components/exercises/ExerciseRenderer', () => ({
 }))
 
 vi.mock('@/components/exercises/FeedbackPanel', () => ({
-  FeedbackPanel: ({ onNext, isLast }: { onNext: () => void; isLast: boolean }) => (
-    <button data-testid="next-btn" onClick={onNext}>
-      {isLast ? 'Finish session' : 'Next →'}
+  FeedbackPanel: ({ onNext, isLast, isGenerating }: { onNext: () => void; isLast: boolean; isGenerating?: boolean }) => (
+    <button data-testid="next-btn" onClick={onNext} disabled={isGenerating}>
+      {isGenerating ? 'Generating…' : isLast ? 'Finish session' : 'Next →'}
     </button>
   ),
 }))
@@ -373,5 +373,70 @@ describe('StudySession — UX-AA mastery overlay', () => {
     await act(async () => { await new Promise((r) => setTimeout(r, 50)) })
     expect(callCount).toBeGreaterThanOrEqual(2)
     expect(screen.queryByText('Concept mastered!')).toBeNull()
+  })
+})
+
+// ── Fix-I: Drill auto-generation race condition ────────────────────────────────
+describe('StudySession — Fix-I drill generation disables Next button', () => {
+  const generateConfig = {
+    conceptId: 'concept-1',
+    concept: mockConcept,
+    exerciseType: 'gap_fill' as const,
+  }
+
+  it('disables Next button while generation is in-flight', async () => {
+    // Never resolve the generate call so generatingMore stays true
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/submit') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve(mockGradeResult) })
+      }
+      if (url === '/api/sessions/complete') {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+      }
+      if (url === '/api/exercises/generate') {
+        return new Promise(() => {}) // never resolves
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+
+    render(
+      <StudySession items={[makeItem()]} practiceMode generateConfig={generateConfig} />,
+    )
+    await submitAndWaitForFeedback()
+
+    // Wait for generation to start (button shows "Generating…" and is disabled)
+    await waitFor(() => {
+      const btn = screen.getByTestId('next-btn')
+      expect(btn).toBeDisabled()
+    })
+    expect(screen.getByTestId('next-btn').textContent).toBe('Generating…')
+  })
+
+  it('re-enables Next button when generation completes successfully', async () => {
+    render(
+      <StudySession items={[makeItem()]} practiceMode generateConfig={generateConfig} />,
+    )
+    await submitAndWaitForFeedback()
+
+    // Initially may be disabled (generation in-flight), then re-enables
+    await waitFor(() => {
+      const btn = screen.getByTestId('next-btn')
+      expect(btn).not.toBeDisabled()
+    })
+  })
+
+  it('re-enables Next button when generation fails', async () => {
+    global.fetch = makeFetch({ generateFails: true })
+
+    render(
+      <StudySession items={[makeItem()]} practiceMode generateConfig={generateConfig} />,
+    )
+    await submitAndWaitForFeedback()
+
+    // After failure, generatingMore = false → button re-enabled
+    await waitFor(() => {
+      const btn = screen.getByTestId('next-btn')
+      expect(btn).not.toBeDisabled()
+    })
   })
 })
