@@ -17,6 +17,7 @@ export async function gradeAnswer({
   prompt,
   expectedAnswer,
   userAnswer,
+  model = TUTOR_MODEL,
 }: {
   conceptTitle: string
   conceptExplanation: string
@@ -24,6 +25,7 @@ export async function gradeAnswer({
   prompt: string
   expectedAnswer: string | null
   userAnswer: string
+  model?: string
 }): Promise<GradeResult> {
   const systemPrompt = `You are a Spanish language tutor grading exercises for a B1→B2 learner.
 You are strict but fair. You evaluate correctness, naturalness, and whether the target concept was applied.
@@ -68,7 +70,7 @@ Respond with this exact JSON structure:
 }`
 
   const message = await anthropic.messages.create({
-    model: TUTOR_MODEL,
+    model,
     max_tokens: 512,
     system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: userPrompt }],
