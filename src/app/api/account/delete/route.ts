@@ -27,7 +27,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 })
     }
 
-    return NextResponse.json({ ok: true })
+    // Clear the onboarding cookie so middleware doesn't cache stale state for a new user on the same browser
+    const response = NextResponse.json({ ok: true })
+    response.cookies.delete('onboarding_done')
+    return response
   } catch (err) {
     console.error('[account/delete] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

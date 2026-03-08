@@ -44,16 +44,31 @@ export async function updateSession(request: NextRequest) {
   // Redirect authenticated users who haven't completed onboarding
   // Skip API routes — they must never be redirected to a page
   if (user && !isPublic && pathname !== '/onboarding' && !pathname.startsWith('/api/')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('onboarding_completed')
-      .eq('id', user.id)
-      .single()
+    // PERF-04: skip DB query when the onboarding cookie is present (set by /api/onboarding/complete)
+    const onboardingDone = request.cookies.get('onboarding_done')?.value === '1'
 
-    if (profile && !(profile as { onboarding_completed: boolean }).onboarding_completed) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/onboarding'
-      return NextResponse.redirect(url)
+    if (!onboardingDone) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .single()
+
+      if (profile && !(profile as { onboarding_completed: boolean }).onboarding_completed) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/onboarding'
+        return NextResponse.redirect(url)
+      }
+
+      // Onboarding confirmed — persist cookie so future requests skip this query
+      if (profile && (profile as { onboarding_completed: boolean }).onboarding_completed) {
+        supabaseResponse.cookies.set('onboarding_done', '1', {
+          httpOnly: true,
+          sameSite: 'lax',
+          maxAge: 60 * 60 * 24 * 365,
+          path: '/',
+        })
+      }
     }
   }
 

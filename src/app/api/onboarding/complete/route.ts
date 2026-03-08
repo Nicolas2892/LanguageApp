@@ -63,7 +63,16 @@ export async function POST(request: Request) {
       .update({ onboarding_completed: true })
       .eq('id', user.id)
 
-    return NextResponse.json({ ok: true })
+    // Set a long-lived HttpOnly cookie so middleware can skip the onboarding DB check
+    // on every subsequent page navigation (PERF-04)
+    const response = NextResponse.json({ ok: true })
+    response.cookies.set('onboarding_done', '1', {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+    })
+    return response
   } catch (err) {
     console.error('[onboarding/complete] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
