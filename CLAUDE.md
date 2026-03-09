@@ -126,7 +126,7 @@ ANTHROPIC_API_KEY
 | `?practice=true&concept=<id>&types=<type>` | Narrow drill mode — all exercises of type; enables AI generation |
 | `?practice=true&unit=<id>` | Open Practice for all concepts in a unit |
 | `?practice=true&module=<id>` | Open Practice for all concepts in a module |
-| `?concept=<id>` | (legacy) same as `practice=true&concept=<id>` for backwards compat |
+| `?concept=<id>` | Falls through to SRS default — use `practice=true&concept=<id>` for open practice |
 | `?unit=<id>` | All concepts in a unit (SRS path) |
 | `?module=<id>` | All concepts in a module (SRS path) |
 | `?types=gap_fill,translation,...` | Filter exercises by type (comma-separated) |

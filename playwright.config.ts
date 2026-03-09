@@ -7,21 +7,23 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: process.env.E2E_BASE_URL,
-    storageState: 'e2e/.auth/user.json',
     trace: 'on-first-retry',
   },
   projects: [
-    // Auth setup runs first, no storageState dependency
+    // Auth setup runs first — no storageState (file doesn't exist yet)
     {
       name: 'setup',
       testMatch: /auth\.setup\.ts/,
-      use: { ...devices['Desktop Chrome'], storageState: undefined },
+      use: { ...devices['Desktop Chrome'] },
     },
-    // All smoke tests depend on auth setup
+    // All smoke tests depend on auth setup and load the saved session
     {
       name: 'chromium',
       dependencies: ['setup'],
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'e2e/.auth/user.json',
+      },
     },
   ],
 })
