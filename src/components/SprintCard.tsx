@@ -41,7 +41,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
   }
 
   return (
-    <div className="border border-l-4 border-l-orange-500 rounded-xl bg-card overflow-hidden">
+    <div className="border border-l-4 border-l-green-700 rounded-xl bg-card overflow-hidden">
       <div className="p-6 space-y-3">
         {/* Header row */}
         <div className="flex items-center justify-between">
@@ -55,7 +55,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
               <X className="h-5 w-5" />
             </button>
           ) : (
-            <Zap className="h-5 w-5 text-orange-500" />
+            <Zap className="h-5 w-5 text-green-700" />
           )}
         </div>
 
@@ -105,7 +105,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
                   onClick={() => setModuleId('')}
                   className={`px-3 py-2.5 min-h-[44px] rounded-full text-xs font-semibold border transition-colors duration-200 ${
                     moduleId === ''
-                      ? 'bg-orange-500 text-white border-orange-500'
+                      ? 'bg-green-700 text-white border-green-700'
                       : 'border-border text-muted-foreground hover:bg-muted/50'
                   }`}
                 >
@@ -121,7 +121,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
                       onClick={() => !isEmpty && setModuleId(m.id)}
                       className={`px-3 py-2.5 min-h-[44px] rounded-full text-xs font-semibold border transition-colors duration-200 ${
                         isSelected
-                          ? 'bg-orange-500 text-white border-orange-500'
+                          ? 'bg-green-700 text-white border-green-700'
                           : isEmpty
                           ? 'border-border text-muted-foreground opacity-50 cursor-not-allowed'
                           : 'border-border text-muted-foreground hover:bg-muted/50'
@@ -142,7 +142,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
                   onClick={() => handleLimitTypeChange('time')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors duration-200 ${
                     limitType === 'time'
-                      ? 'bg-orange-500 text-white shadow-sm'
+                      ? 'bg-green-700 text-white shadow-sm'
                       : 'text-muted-foreground hover:bg-muted/50'
                   }`}
                 >
@@ -153,7 +153,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
                   onClick={() => handleLimitTypeChange('count')}
                   className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-colors duration-200 ${
                     limitType === 'count'
-                      ? 'bg-orange-500 text-white shadow-sm'
+                      ? 'bg-green-700 text-white shadow-sm'
                       : 'text-muted-foreground hover:bg-muted/50'
                   }`}
                 >
@@ -175,14 +175,14 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
                       onClick={() => setLimit(val)}
                       className={`px-4 py-2.5 min-h-[44px] rounded-full text-xs font-semibold border transition-colors duration-200 ${
                         limit === val
-                          ? 'bg-orange-500 text-white border-orange-500'
+                          ? 'bg-green-700 text-white border-green-700'
                           : 'border-border text-muted-foreground hover:bg-muted/50'
                       }`}
                     >
                       {limitType === 'time' ? `${val} min` : val}
                     </button>
                     {limitType === 'time' && val === 10 && (
-                      <span className="text-[10px] text-orange-500 dark:text-orange-400 font-semibold">Recommended</span>
+                      <span className="text-[10px] text-green-700 dark:text-green-400 font-semibold">Recommended</span>
                     )}
                   </div>
                 ))}

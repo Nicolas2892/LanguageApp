@@ -61,14 +61,14 @@ export function IOSInstallPrompt() {
 
       <ol className="space-y-2">
         <li className="flex items-center gap-3 text-sm">
-          <span className="w-7 h-7 rounded-full bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center shrink-0">
-            <Share2 className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" strokeWidth={1.5} />
+          <span className="w-7 h-7 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center shrink-0">
+            <Share2 className="h-3.5 w-3.5 text-green-700 dark:text-green-400" strokeWidth={1.5} />
           </span>
           Tap <strong>Share</strong> in Safari&apos;s toolbar
         </li>
         <li className="flex items-center gap-3 text-sm">
-          <span className="w-7 h-7 rounded-full bg-orange-100 dark:bg-orange-950/40 flex items-center justify-center shrink-0">
-            <PlusSquare className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" strokeWidth={1.5} />
+          <span className="w-7 h-7 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center shrink-0">
+            <PlusSquare className="h-3.5 w-3.5 text-green-700 dark:text-green-400" strokeWidth={1.5} />
           </span>
           Tap <strong>Add to Home Screen</strong>
         </li>

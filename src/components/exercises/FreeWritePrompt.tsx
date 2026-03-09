@@ -58,7 +58,7 @@ export function FreeWritePrompt({
         <p className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-1.5">
           Concept
         </p>
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-orange-100 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300 text-xs font-semibold">
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-green-100 dark:bg-green-950/40 text-green-800 dark:text-green-300 text-xs font-semibold">
           {conceptTitle}
         </span>
       </div>

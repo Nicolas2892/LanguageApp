@@ -1,33 +1,25 @@
-// Speech bubble mark with Ñ — server-compatible, no 'use client' needed.
-// viewBox: 36×34 — 36px wide bubble body, 10px tail below at y=24–32.
+// D4 "Senda" logomark — calligraphic S-path on forest green background.
+// Square viewBox 100×100, rendered at requested size.
 export function LogoMark({ size = 32 }: { size?: number }) {
-  const height = Math.round((size * 34) / 36)
+  const radius = Math.round(size * 0.22) // ~22% of size → proportional corner radius
   return (
     <svg
       width={size}
-      height={height}
-      viewBox="0 0 36 34"
+      height={size}
+      viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
+      style={{ borderRadius: radius, display: 'block' }}
     >
-      {/* Speech bubble path: rounded rect body + bottom-left tail */}
+      <rect width="100" height="100" fill="#2C5F2E" />
       <path
-        d="M5 0h26a5 5 0 0 1 5 5v14a5 5 0 0 1-5 5H15l-9 8v-8H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5z"
-        fill="#ea580c"
+        d="M 36 80 C 20 78, 12 64, 20 54 C 28 44, 50 46, 62 38 C 74 30, 78 18, 68 12"
+        stroke="#F7F3EC"
+        strokeWidth={12}
+        strokeLinecap="round"
+        fill="none"
       />
-      <text
-        x="18"
-        y="12"
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontFamily="sans-serif"
-        fontSize="13"
-        fontWeight="900"
-        fill="white"
-      >
-        Ñ
-      </text>
     </svg>
   )
 }

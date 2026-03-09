@@ -126,7 +126,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
             href={value === 'all' ? '/curriculum' : `/curriculum?filter=${value}`}
             className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
               filter === value
-                ? 'border-orange-500 text-foreground'
+                ? 'border-green-700 text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -226,7 +226,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                   <div className="pl-6">
                     <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-orange-500 rounded-full transition-all duration-500"
+                        className="h-full bg-green-700 rounded-full transition-all duration-500"
                         style={{ width: `${masteredPct}%` }}
                       />
                     </div>

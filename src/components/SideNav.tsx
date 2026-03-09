@@ -36,7 +36,12 @@ export function SideNav({ userInitials }: Props) {
         <span className="inline-flex transition-transform duration-200 group-hover:rotate-6">
           <LogoMark size={32} />
         </span>
-        <span className="font-bold text-sm">Español Avanzado</span>
+        <span
+          className="font-semibold text-sm tracking-tight"
+          style={{ fontFamily: 'var(--font-plus-jakarta), sans-serif' }}
+        >
+          Senda
+        </span>
       </Link>
 
       {/* Nav items */}
@@ -52,7 +57,7 @@ export function SideNav({ userInitials }: Props) {
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                 ${active
-                  ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400'
+                  ? 'bg-green-50 dark:bg-green-950/40 text-green-800 dark:text-green-400'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
             >
@@ -69,7 +74,7 @@ export function SideNav({ userInitials }: Props) {
           href="/account"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
             ${pathname.startsWith('/account')
-              ? 'bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400'
+              ? 'bg-green-50 dark:bg-green-950/40 text-green-800 dark:text-green-400'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
         >

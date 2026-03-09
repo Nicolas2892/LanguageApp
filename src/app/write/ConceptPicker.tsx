@@ -224,13 +224,13 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
                             key={concept.id}
                             className={`flex items-start gap-3 border rounded-xl p-3.5 cursor-pointer transition-colors ${
                               isChecked
-                                ? 'border-orange-400 bg-orange-50 dark:bg-orange-950/20'
+                                ? 'border-green-600 bg-green-50 dark:bg-green-950/20'
                                 : 'border-border bg-background hover:bg-muted/40'
                             }`}
                           >
                             <input
                               type="checkbox"
-                              className="mt-0.5 shrink-0 accent-orange-500"
+                              className="mt-0.5 shrink-0 accent-green-700"
                               checked={isChecked}
                               onChange={() => toggle(concept.id)}
                             />
@@ -268,7 +268,7 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
               <span className="text-muted-foreground">
                 {selectedCount} concept{selectedCount !== 1 ? 's' : ''} selected
               </span>
-              <span className="font-semibold text-orange-700">{getDifficultyLabel(selectedCount)}</span>
+              <span className="font-semibold text-green-800">{getDifficultyLabel(selectedCount)}</span>
             </div>
           )}
           <Button

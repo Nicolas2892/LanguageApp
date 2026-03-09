@@ -55,11 +55,11 @@ describe('SprintCard', () => {
     expect(screen.queryByRole('button', { name: 'Start Sprint →' })).toBeNull()
   })
 
-  it('shows "All" module chip selected by default (orange-500)', () => {
+  it('shows "All" module chip selected by default (green-700)', () => {
     render(<SprintCard dueCount={5} modules={mockModules} />)
     fireEvent.click(screen.getByRole('button', { name: /customise/i }))
     const allBtn = screen.getByRole('button', { name: 'All' })
-    expect(allBtn.className).toContain('bg-orange-500')
+    expect(allBtn.className).toContain('bg-green-700')
   })
 
   it('renders module chips for each module', () => {
@@ -69,14 +69,14 @@ describe('SprintCard', () => {
     expect(screen.getByRole('button', { name: 'Subjunctive Mastery' })).toBeTruthy()
   })
 
-  it('selecting a module chip activates it with orange-500', () => {
+  it('selecting a module chip activates it with green-700', () => {
     render(<SprintCard dueCount={5} modules={mockModules} />)
     fireEvent.click(screen.getByRole('button', { name: /customise/i }))
     fireEvent.click(screen.getByRole('button', { name: 'Connectors & Discourse' }))
     const modBtn = screen.getByRole('button', { name: 'Connectors & Discourse' })
-    expect(modBtn.className).toContain('bg-orange-500')
+    expect(modBtn.className).toContain('bg-green-700')
     const allBtn = screen.getByRole('button', { name: 'All' })
-    expect(allBtn.className).not.toContain('bg-orange-500')
+    expect(allBtn.className).not.toContain('bg-green-700')
   })
 
   it('shows 3 time options by default (5 min, 10 min, 15 min)', () => {
@@ -87,11 +87,11 @@ describe('SprintCard', () => {
     expect(screen.getByRole('button', { name: '15 min' })).toBeTruthy()
   })
 
-  it('10 min chip is selected by default (orange-500)', () => {
+  it('10 min chip is selected by default (green-700)', () => {
     render(<SprintCard dueCount={5} modules={mockModules} />)
     fireEvent.click(screen.getByRole('button', { name: /customise/i }))
     const tenMin = screen.getByRole('button', { name: '10 min' })
-    expect(tenMin.className).toContain('bg-orange-500')
+    expect(tenMin.className).toContain('bg-green-700')
   })
 
   it('switching to Exercises shows 4 count options (5, 10, 15, 20)', () => {
@@ -116,7 +116,7 @@ describe('SprintCard', () => {
     fireEvent.click(screen.getByRole('button', { name: /exercises/i }))
     // 10 should be selected (reset)
     const ten = screen.getByRole('button', { name: '10' })
-    expect(ten.className).toContain('bg-orange-500')
+    expect(ten.className).toContain('bg-green-700')
   })
 
   it('Start Sprint navigates with correct URL for time mode (no module)', () => {

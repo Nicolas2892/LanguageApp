@@ -90,7 +90,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
             key={i}
             type="button"
             onClick={() => !disabled && removeWord(i)}
-            className="px-3 py-1 bg-orange-500 dark:bg-orange-600 text-white rounded-full text-sm font-medium hover:bg-orange-600 dark:hover:bg-orange-700 disabled:opacity-50 active:scale-95 transition-transform"
+            className="px-3 py-1 bg-green-800 dark:bg-green-700 text-white rounded-full text-sm font-medium hover:bg-green-900 dark:hover:bg-green-600 disabled:opacity-50 active:scale-95 transition-transform"
             disabled={disabled}
           >
             {word}

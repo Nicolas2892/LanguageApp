@@ -200,7 +200,7 @@ export default async function DashboardPage() {
             ) : null
           })()}
         </div>
-        <div className="h-px w-16 bg-gradient-to-r from-orange-500 to-transparent mt-1" />
+        <div className="h-px w-16 bg-gradient-to-r from-green-700 to-transparent mt-1" />
         <p className="text-muted-foreground text-sm">
           {(() => {
             const streak = profile?.streak ?? 0
@@ -219,9 +219,9 @@ export default async function DashboardPage() {
         {/* Stats row */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <Flame className={`h-5 w-5 shrink-0 ${(profile?.streak ?? 0) >= 7 ? 'text-orange-500 animate-pulse' : 'text-orange-400'}`} strokeWidth={1.5} />
+            <Flame className={`h-5 w-5 shrink-0 ${(profile?.streak ?? 0) >= 7 ? 'text-green-700 animate-pulse' : 'text-green-600'}`} strokeWidth={1.5} />
             <div>
-              <p className="text-2xl font-extrabold text-orange-500 leading-none">{profile?.streak ?? 0}</p>
+              <p className="text-2xl font-extrabold text-green-800 leading-none">{profile?.streak ?? 0}</p>
               <p className="text-xs text-muted-foreground mt-0.5">day streak</p>
             </div>
           </div>
@@ -238,7 +238,7 @@ export default async function DashboardPage() {
         {!isNewUser && (
           <div className="space-y-1.5">
             <div className="flex h-2.5 rounded-full overflow-hidden bg-muted gap-0.5">
-              <AnimatedBar pct={masteredPct} className="bg-orange-500 rounded-l-full" />
+              <AnimatedBar pct={masteredPct} className="bg-green-700 rounded-l-full" />
               <AnimatedBar pct={learningPct} className="bg-amber-300" />
             </div>
             <p className="text-xs text-muted-foreground text-right">
@@ -259,7 +259,7 @@ export default async function DashboardPage() {
               </span>
             </div>
             <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-              <AnimatedBar pct={goalPct} className={goalMet ? 'bg-green-500' : 'bg-orange-500'} />
+              <AnimatedBar pct={goalPct} className={goalMet ? 'bg-green-500' : 'bg-green-700'} />
             </div>
           </div>
         )}
@@ -288,7 +288,7 @@ export default async function DashboardPage() {
                 ? 'bg-primary text-primary-foreground border-primary'
                 : studiedCount > 0 && dueCount === 0
                 ? 'border-l-4 border-l-green-500 border-green-200 dark:border-green-900 bg-card'
-                : 'border-l-4 border-l-orange-500 bg-card'
+                : 'border-l-4 border-l-green-700 bg-card'
             }`}>
               <div className="flex items-center justify-between">
                 <p className={`text-xs font-semibold uppercase tracking-widest ${reviewCardIsDue ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>Review</p>
@@ -330,7 +330,7 @@ export default async function DashboardPage() {
 
         {/* Learn new card */}
         {newConceptsCount > 0 && (
-          <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
+          <div className="border border-l-4 border-l-green-700 rounded-xl p-6 space-y-3 bg-card">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Learn new</p>
               <Sparkles className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
@@ -346,7 +346,7 @@ export default async function DashboardPage() {
 
         {/* Free write card */}
         {!isNewUser && writeConcept && (
-          <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
+          <div className="border border-l-4 border-l-green-700 rounded-xl p-6 space-y-3 bg-card">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Free write</p>
               <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
@@ -359,7 +359,7 @@ export default async function DashboardPage() {
           </div>
         )}
         {!isNewUser && !writeConcept && (
-          <div className="border border-l-4 border-l-orange-500 rounded-xl p-6 space-y-3 bg-card">
+          <div className="border border-l-4 border-l-green-700 rounded-xl p-6 space-y-3 bg-card">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Free write</p>
               <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />

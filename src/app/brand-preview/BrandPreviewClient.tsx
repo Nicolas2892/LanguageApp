@@ -145,24 +145,28 @@ function D3Icon() {
   return (
     <svg viewBox="0 0 100 100" width={128} height={128} style={{ display: 'block', borderRadius: 22, border: '1px solid #e5e7eb' }}>
       <rect width="100" height="100" fill={D3.paper} />
-      <path d="M 28 18  C 30 28, 38 50, 45 78 C 47 78, 51 78, 53 78 C 46 50, 40 28, 36 18 Z" fill={D3.ink} />
-      <path d="M 53 78  C 62 56, 68 36, 66 20" stroke={D3.ink} strokeWidth={1.5} fill="none" strokeLinecap="round" />
-      <path d="M 33 52  C 40 50, 50 50, 58 52" stroke={D3.ink} strokeWidth={1.2} fill="none" strokeLinecap="round" />
+      <path
+        d="M 32 83 C 14 81, 8 66, 18 54 C 28 42, 54 46, 66 36 C 78 26, 82 12, 70 8"
+        stroke={D3.ink}
+        strokeWidth={16}
+        strokeLinecap="round"
+        fill="none"
+      />
     </svg>
   )
 }
 
 function D4Icon() {
-  // The winding path: S-curve reading as both initial and a trail viewed from above.
-  // Two-layer render: dark gutter (depth) under parchment path.
-  const PATH = 'M 64 20 C 80 18, 84 34, 76 42 C 68 50, 38 52, 28 60 C 18 68, 20 82, 38 82'
   return (
     <svg viewBox="0 0 100 100" width={128} height={128} style={{ display: 'block', borderRadius: 22 }}>
       <rect width="100" height="100" fill={D4.forest} />
-      {/* Shadow/gutter layer — gives the path a subtle engraved depth */}
-      <path d={PATH} stroke="rgba(10,30,10,0.45)" strokeWidth={20} strokeLinecap="round" fill="none" />
-      {/* Main path in parchment */}
-      <path d={PATH} stroke={D4.parchment} strokeWidth={13} strokeLinecap="round" fill="none" />
+      <path
+        d="M 36 80 C 20 78, 12 64, 20 54 C 28 44, 50 46, 62 38 C 74 30, 78 18, 68 12"
+        stroke={D4.parchment}
+        strokeWidth={12}
+        strokeLinecap="round"
+        fill="none"
+      />
     </svg>
   )
 }

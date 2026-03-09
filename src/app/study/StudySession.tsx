@@ -500,7 +500,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                 <li key={c.id}>
                   <a
                     href={`/study?practice=true&concept=${c.id}`}
-                    className="text-sm text-orange-600 hover:underline"
+                    className="text-sm text-green-800 hover:underline"
                   >
                     Practice: {c.title} →
                   </a>

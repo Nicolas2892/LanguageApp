@@ -74,8 +74,8 @@ export function PushPermissionPrompt() {
   return (
     <div className="border rounded-xl p-4 bg-card text-left space-y-3">
       <div className="flex items-start gap-3">
-        <div className="rounded-lg bg-orange-100 dark:bg-orange-950/40 p-2 shrink-0">
-          <Bell className="h-4 w-4 text-orange-600 dark:text-orange-400" strokeWidth={1.5} />
+        <div className="rounded-lg bg-green-100 dark:bg-green-950/40 p-2 shrink-0">
+          <Bell className="h-4 w-4 text-green-700 dark:text-green-400" strokeWidth={1.5} />
         </div>
         <div>
           <p className="text-sm font-semibold">Never miss a review</p>

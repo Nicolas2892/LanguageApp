@@ -240,7 +240,7 @@ export default async function ProgressPage() {
 
       {!hasAnyData ? (
         <div className="text-center py-16 space-y-4">
-          <BarChart2 className="h-14 w-14 text-orange-300 mx-auto" strokeWidth={1.5} />
+          <BarChart2 className="h-14 w-14 text-green-300 mx-auto" strokeWidth={1.5} />
           <p className="text-xl font-bold">No data yet</p>
           <p className="text-muted-foreground text-sm">
             Complete some exercises to see your progress here.
@@ -259,8 +259,8 @@ export default async function ProgressPage() {
 
             {/* Streak */}
             <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
-              <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center">
-                <Flame className="h-4 w-4 text-orange-600 dark:text-orange-400" strokeWidth={1.5} />
+              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                <Flame className="h-4 w-4 text-green-700 dark:text-green-400" strokeWidth={1.5} />
               </div>
               <p className="text-2xl font-extrabold">{currentStreak}</p>
               <div>

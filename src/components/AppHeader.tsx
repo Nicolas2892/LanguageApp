@@ -20,7 +20,12 @@ export function AppHeader({ userInitials }: Props) {
       {/* Logo */}
       <Link href="/dashboard" className="flex items-center gap-2">
         <LogoMark size={32} />
-        <span className="font-bold text-sm hidden sm:block">Español Avanzado</span>
+        <span
+          className="font-semibold text-sm hidden sm:block tracking-tight"
+          style={{ fontFamily: 'var(--font-plus-jakarta), sans-serif' }}
+        >
+          Senda
+        </span>
       </Link>
 
       {/* Profile avatar → /account */}

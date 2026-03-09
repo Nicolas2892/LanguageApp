@@ -22,8 +22,8 @@ export function SpeakButton({ text, lang = 'es-ES' }: Props) {
       aria-label="Play audio"
       className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] sm:w-7 sm:h-7 sm:min-w-0 sm:min-h-0 rounded-full transition-colors shrink-0
         ${speaking
-          ? 'text-orange-500 bg-orange-100 dark:bg-orange-950/40'
-          : 'text-muted-foreground hover:text-orange-500 hover:bg-orange-100 dark:hover:bg-orange-950/40'
+          ? 'text-green-800 bg-green-100 dark:bg-green-950/40'
+          : 'text-muted-foreground hover:text-green-800 hover:bg-green-100 dark:hover:bg-green-950/40'
         }`}
     >
       <Volume2 className="h-3.5 w-3.5" />
