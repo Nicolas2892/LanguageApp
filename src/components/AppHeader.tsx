@@ -15,10 +15,7 @@ export function AppHeader({ userInitials }: Props) {
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
   return (
-    <header
-      className="sticky top-0 z-50 border-b bg-background lg:hidden"
-      style={{ paddingTop: 'env(safe-area-inset-top)' }}
-    >
+    <header className="sticky top-0 z-50 border-b bg-background lg:hidden">
       <div className="h-14 flex items-center justify-between px-5">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center gap-2">

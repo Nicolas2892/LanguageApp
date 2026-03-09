@@ -250,19 +250,21 @@ export default async function StudyPage({
     )
   }
 
-  // Fetch concepts
-  const { data: concepts } = await supabase
-    .from('concepts').select('*').in('id', conceptIds)
-  if (!concepts || concepts.length === 0) redirect('/dashboard')
-  const typedConcepts = concepts as Concept[]
-  const conceptMap = new Map(typedConcepts.map((c) => [c.id, c]))
-
-  // Fetch exercises — filter by type if specified
+  // Build exercise query (not yet awaited)
   let exerciseQuery = supabase.from('exercises').select('*').in('concept_id', conceptIds)
   if (filterTypes.length > 0) {
     exerciseQuery = exerciseQuery.in('type', filterTypes)
   }
-  const { data: exercises } = await exerciseQuery
+
+  // Fetch concepts + exercises in parallel
+  const [{ data: concepts }, { data: exercises }] = await Promise.all([
+    supabase.from('concepts').select('*').in('id', conceptIds),
+    exerciseQuery,
+  ])
+  if (!concepts || concepts.length === 0) redirect('/dashboard')
+  const typedConcepts = concepts as Concept[]
+  const conceptMap = new Map(typedConcepts.map((c) => [c.id, c]))
+
   if (!exercises || exercises.length === 0) {
     return (
       <main className="max-w-xl mx-auto p-8 text-center space-y-5">

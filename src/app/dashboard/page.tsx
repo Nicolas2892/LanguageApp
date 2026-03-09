@@ -1,16 +1,16 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { SprintCard } from '@/components/SprintCard'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { OnboardingTour } from '@/components/OnboardingTour'
-import type { Profile, Concept, Module } from '@/lib/supabase/types'
+import { DashboardDeferredSection, DashboardDeferredSkeleton } from '@/components/DashboardDeferredSection'
+import type { Profile, Module } from '@/lib/supabase/types'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import {
-  Flame, Trophy, BookOpen, Sparkles, PenLine, CheckCircle2, RotateCcw,
+  Flame, Trophy, BookOpen, Sparkles, CheckCircle2,
 } from 'lucide-react'
-import { WeeklySnapshot } from '@/components/WeeklySnapshot'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   const lastWeekStart = new Date(thisWeekStart)
   lastWeekStart.setDate(thisWeekStart.getDate() - 7)
 
-  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, weakestProgressRes, modulesRes, dueByModuleRes, todaySessionsRes, mistakeAttemptsRes, thisWeekAttemptsRes, lastWeekAttemptsRes, thisWeekSessionsRes, lastWeekSessionsRes] = await Promise.all([
+  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, modulesRes, todaySessionsRes] = await Promise.all([
     supabase.from('profiles').select('streak, computed_level, display_name, daily_goal_minutes, last_studied_date').eq('id', user.id).single(),
     supabase
       .from('user_progress')
@@ -49,101 +49,23 @@ export default async function DashboardPage() {
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .gte('interval_days', MASTERY_THRESHOLD),
-    supabase
-      .from('user_progress')
-      .select('concept_id, interval_days')
-      .eq('user_id', user.id)
-      .lt('interval_days', MASTERY_THRESHOLD)
-      .order('interval_days', { ascending: true })
-      .limit(1),
     supabase.from('modules').select('id, title').order('order_index'),
-    supabase
-      .from('user_progress')
-      .select('concept_id, concepts(unit_id, units(module_id))')
-      .eq('user_id', user.id)
-      .lte('due_date', today),
     supabase
       .from('study_sessions')
       .select('started_at, ended_at')
       .eq('user_id', user.id)
       .gte('started_at', todayStart.toISOString()),
-    supabase
-      .from('exercise_attempts')
-      .select('exercise_id')
-      .eq('user_id', user.id)
-      .lte('ai_score', 1)
-      .not('exercise_id', 'is', null)
-      .limit(100),
-    // UX-Y: weekly snapshot
-    supabase
-      .from('exercise_attempts')
-      .select('ai_score')
-      .eq('user_id', user.id)
-      .gte('created_at', thisWeekStart.toISOString()),
-    supabase
-      .from('exercise_attempts')
-      .select('ai_score')
-      .eq('user_id', user.id)
-      .gte('created_at', lastWeekStart.toISOString())
-      .lt('created_at', thisWeekStart.toISOString()),
-    supabase
-      .from('study_sessions')
-      .select('started_at, ended_at')
-      .eq('user_id', user.id)
-      .gte('started_at', thisWeekStart.toISOString()),
-    supabase
-      .from('study_sessions')
-      .select('started_at, ended_at')
-      .eq('user_id', user.id)
-      .gte('started_at', lastWeekStart.toISOString())
-      .lt('started_at', thisWeekStart.toISOString()),
   ])
 
   const profile = profileRes.data as Profile | null
   const dueCount = dueRes.count ?? 0
   const modules = (modulesRes.data ?? []) as Pick<Module, 'id' | 'title'>[]
-
-  type DueItem = { concept_id: string; concepts: { unit_id: string; units: { module_id: string } | null } | null }
-  const dueItems = (dueByModuleRes.data ?? []) as DueItem[]
-  const dueCountByModule: Record<string, number> = {}
-  for (const item of dueItems) {
-    const moduleId = item.concepts?.units?.module_id
-    if (moduleId) dueCountByModule[moduleId] = (dueCountByModule[moduleId] ?? 0) + 1
-  }
   const totalConcepts = totalConceptsRes.count ?? 0
   const studiedCount = studiedRes.count ?? 0
   const masteredCount = masteredRes.count ?? 0
   const newConceptsCount = totalConcepts - studiedCount
   const learningCount = studiedCount - masteredCount
   const isNewUser = studiedCount === 0
-
-  const weakestConceptId = (weakestProgressRes.data?.[0] as { concept_id: string } | undefined)?.concept_id ?? null
-  let writeConcept: Pick<Concept, 'id' | 'title'> | null = null
-  if (!isNewUser && weakestConceptId) {
-    const { data: conceptData } = await supabase
-      .from('concepts')
-      .select('id, title')
-      .eq('id', weakestConceptId)
-      .single()
-    writeConcept = conceptData as Pick<Concept, 'id' | 'title'> | null
-  }
-
-  // Compute distinct mistake concept count
-  const mistakeExerciseIds = [...new Set(
-    (mistakeAttemptsRes.data ?? [])
-      .map((a) => (a as { exercise_id: string | null }).exercise_id)
-      .filter((id): id is string => id !== null)
-  )]
-  let mistakeConceptCount = 0
-  if (!isNewUser && mistakeExerciseIds.length > 0) {
-    const { data: mistakeExercises } = await supabase
-      .from('exercises')
-      .select('concept_id')
-      .in('id', mistakeExerciseIds)
-    mistakeConceptCount = new Set(
-      (mistakeExercises ?? []).map((e) => (e as { concept_id: string }).concept_id)
-    ).size
-  }
 
   type SessionRow = { started_at: string; ended_at: string | null }
   const todayMinutes = (todaySessionsRes.data ?? [] as SessionRow[]).reduce((sum, s) => {
@@ -156,32 +78,6 @@ export default async function DashboardPage() {
 
   const masteredPct = totalConcepts > 0 ? (masteredCount / totalConcepts) * 100 : 0
   const learningPct = totalConcepts > 0 ? (learningCount / totalConcepts) * 100 : 0
-
-  // UX-Y: weekly snapshot stats
-  type AttemptRow = { ai_score: number | null }
-  type SessionRow2 = { started_at: string; ended_at: string | null }
-
-  const thisWeekAttempts = (thisWeekAttemptsRes.data ?? []) as AttemptRow[]
-  const lastWeekAttempts = (lastWeekAttemptsRes.data ?? []) as AttemptRow[]
-  const thisWeekExercises = thisWeekAttempts.length
-  const lastWeekExercises = lastWeekAttempts.length
-  const thisWeekAccuracy = thisWeekExercises > 0
-    ? Math.round(thisWeekAttempts.filter((a) => (a.ai_score ?? 0) >= 2).length / thisWeekExercises * 100)
-    : null
-  const lastWeekAccuracy = lastWeekExercises > 0
-    ? Math.round(lastWeekAttempts.filter((a) => (a.ai_score ?? 0) >= 2).length / lastWeekExercises * 100)
-    : null
-  const calcMinutes = (sessions: SessionRow2[]) =>
-    sessions.reduce((sum, s) => {
-      if (!s.ended_at) return sum
-      return sum + Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)
-    }, 0)
-  const thisWeekMinutes = calcMinutes((thisWeekSessionsRes.data ?? []) as SessionRow2[])
-  const lastWeekMinutes = calcMinutes((lastWeekSessionsRes.data ?? []) as SessionRow2[])
-  const exerciseDelta = lastWeekExercises > 0 ? thisWeekExercises - lastWeekExercises : null
-  const accuracyDelta = thisWeekAccuracy !== null && lastWeekAccuracy !== null
-    ? thisWeekAccuracy - lastWeekAccuracy : null
-  const minutesDelta = lastWeekMinutes > 0 ? thisWeekMinutes - lastWeekMinutes : null
 
   return (
     <main className="max-w-lg mx-auto p-6 md:p-8 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-8">
@@ -265,18 +161,6 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* UX-Y: Weekly snapshot — only shown after user has studied this week */}
-      {thisWeekExercises > 0 && (
-        <WeeklySnapshot
-          exercises={thisWeekExercises}
-          accuracy={thisWeekAccuracy}
-          minutes={thisWeekMinutes}
-          exerciseDelta={exerciseDelta}
-          accuracyDelta={accuracyDelta}
-          minutesDelta={minutesDelta}
-        />
-      )}
-
       {/* Mode cards */}
       <div className="space-y-3">
         {/* Review card — primary emphasis when action is needed */}
@@ -344,52 +228,17 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Free write card */}
-        {!isNewUser && writeConcept && (
-          <div className="border border-l-4 border-l-green-700 rounded-xl p-6 space-y-3 bg-card">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Free write</p>
-              <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-            </div>
-            <p className="text-xl font-bold">{writeConcept.title}</p>
-            <p className="text-xs text-muted-foreground -mt-1">Worth some extra time today</p>
-            <Button asChild variant="outline" className="w-full">
-              <Link href={`/write?suggested=${writeConcept.id}`}>Write about this →</Link>
-            </Button>
-          </div>
-        )}
-        {!isNewUser && !writeConcept && (
-          <div className="border border-l-4 border-l-green-700 rounded-xl p-6 space-y-3 bg-card">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Free write</p>
-              <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-            </div>
-            <p className="text-xl font-bold">Practice your writing</p>
-            <p className="text-muted-foreground text-sm">Pick any concept to write about freely.</p>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/write">Browse concepts →</Link>
-            </Button>
-          </div>
-        )}
-
-        {/* Sprint card — hidden for brand-new users */}
-        {!isNewUser && <SprintCard dueCount={dueCount} modules={modules} dueCountByModule={dueCountByModule} />}
-
-        {/* Review mistakes card — shown when user has failed attempts */}
-        {!isNewUser && mistakeConceptCount > 0 && (
-          <div className="border border-l-4 border-l-amber-500 rounded-xl p-6 space-y-3 bg-card">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Review mistakes</p>
-              <RotateCcw className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-            </div>
-            <p className="text-xl font-bold">
-              {mistakeConceptCount} concept{mistakeConceptCount !== 1 ? 's' : ''} to revisit
-            </p>
-            <Button asChild variant="outline" className="w-full">
-              <Link href="/study?mode=review">Review now →</Link>
-            </Button>
-          </div>
-        )}
+        {/* Deferred section — streams in after primary cards */}
+        <Suspense fallback={<DashboardDeferredSkeleton />}>
+          <DashboardDeferredSection
+            userId={user.id}
+            dueCount={dueCount}
+            isNewUser={isNewUser}
+            modules={modules}
+            thisWeekStart={thisWeekStart.toISOString()}
+            lastWeekStart={lastWeekStart.toISOString()}
+          />
+        </Suspense>
       </div>
 
       <OnboardingTour />
