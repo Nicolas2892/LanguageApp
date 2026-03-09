@@ -829,3 +829,71 @@ SpeakButton (existing `src/components/SpeakButton.tsx` + `src/lib/hooks/useSpeec
 - `sm2()` stays pure; multiplier applied in route after call
 - Flag only affects *future* SM-2 outputs — does not immediately reschedule existing due dates
 - Toggled from curriculum pages only (not exercise UI)
+
+---
+
+## Strat-A: Verb Conjugation Mode ✓ (2026-03)
+
+Full in-sentence conjugation drill feature. Migrations 014 + 015 applied; all seed data live in DB.
+
+### Routes
+- `/verbs` — directory: 50 verbs, search, mastery dots, favorite toggle
+- `/verbs/[infinitive]` — conjugation tables per tense + mastery bars + colour-endings toggle (persisted to localStorage)
+- `/verbs/configure` — drill config: tenses, verb set (favorites/top25/top50/single), length, hint toggle
+- `/verbs/session` — in-sentence conjugation session; local grading; no Claude cost
+
+### Key files
+- `src/lib/verbs/constants.ts` — `TENSES`, `TENSE_LABELS`, `TENSE_DESCRIPTIONS`, `VerbTense` type
+- `src/lib/verbs/grader.ts` — `normalizeSpanish()` + `gradeConjugation()` → `VerbGradeResult` (correct / accent_error / incorrect); pure functions, zero network
+- `src/lib/curriculum/run-seed-verbs.ts` — seeds 100 verbs + 2,700 verb_sentences rows
+- `src/components/verbs/` — `VerbCard`, `VerbFavoriteButton`, `VerbFeedbackPanel`, `VerbSummary`, `VerbTenseMastery`
+- `POST /api/verbs/grade` — records attempt via `increment_verb_progress` RPC; Zod + rate-limit (120/10 min)
+- `POST /api/verbs/favorite` — toggles `user_verb_favorites`; returns `{ favorited: boolean }`
+
+### Database
+- Migration 014: `verbs`, `verb_sentences`, `user_verb_favorites`, `verb_progress` + `increment_verb_progress` RPC
+- Migration 015: `verb_conjugations` table (full 6-pronoun paradigm + stem; PK verb_id+tense)
+- Seed: 100 verbs, 9 tenses × 100 verbs × 3 sentences = 2,700 `verb_sentences` rows, 900 `verb_conjugations` rows
+
+### Session mechanics
+- State machine: `answering → feedback → [try again | next] → done`
+- Correct: auto-advance after 1.5s (green flash); accent error: orange flash + manual Next; incorrect: red flash + Try Again or Next
+- Done screen: overall % + per-tense breakdown sorted worst-first
+- `HIDDEN_ROUTES` includes `/verbs/session` so BottomNav hides during session
+
+### Key decisions
+- Do NOT use join syntax (e.g. `verbs(id, infinitive)`) in `.select()` — `Relationships: []` causes `SelectQueryError`. Fetch sentences + verbs in separate queries and join via TypeScript Map.
+- `pnpm seed:conjugations:apply` is **idempotent** (ON CONFLICT DO UPDATE); `pnpm seed:verbs:apply` is **not** — running twice duplicates rows.
+
+---
+
+## Strat-B: Admin Content Panel ✓ (2026-03)
+
+`/admin` route family gated by `is_admin boolean` on `profiles`. Entry point: conditional button on `/account` page only (never in SideNav/BottomNav).
+
+### Routes
+- `/admin` — Overview: content counts (fast, anon client) + cross-user usage stats (Suspense, service-role client)
+- `/admin/curriculum` — module→unit→concept tree + per-concept stats table (exercises, attempts, avg score, mastered users) deferred behind Suspense
+- `/admin/exercises` — filterable exercise list (concept + type; no-JS GET form); up to 100 results
+- `/admin/exercises/[id]` — inline edit form for prompt, expected_answer, hint_1, hint_2
+
+### Key files
+- `src/lib/supabase/service.ts` — service-role client; bypasses RLS for cross-user aggregate queries; server-only
+- `src/components/admin/AdminStatCard.tsx` — reusable stat card
+- `src/components/admin/AdminTabNav.tsx` — client tab nav (Overview / Curriculum / Exercises)
+- `src/app/admin/layout.tsx` — `is_admin` guard (redirects non-admins to `/dashboard`); applies `lg:-ml-[220px] lg:w-screen` to counteract root layout's sidebar offset
+- `src/app/admin/AdminOverviewDeferred.tsx` — async Server Component; service-role queries for total users, active today, attempts today
+- `src/app/admin/curriculum/AdminCurriculumDeferred.tsx` — service-role stats per concept via TypeScript Map joins
+- `src/app/admin/exercises/[id]/ExerciseEditForm.tsx` — client form; PATCH to `/api/admin/exercises/[id]`
+- `POST /api/admin/exercises/[id]` (PATCH) — is_admin check + `validateOrigin` + Zod schema
+
+### Database
+- Migration 016: `ALTER TABLE profiles ADD COLUMN is_admin boolean NOT NULL DEFAULT false`
+- Grant admin: `UPDATE profiles SET is_admin = true WHERE id = '<uuid>'`
+
+### Key decisions
+- Auth guard lives in `admin/layout.tsx`, not middleware — keeps middleware lightweight
+- Service role client is a separate module (`service.ts`) to prevent accidental browser import
+- `/admin` hidden from SideNav + BottomNav via `HIDDEN_ROUTES` for **all** users including admins
+- Admin layout uses `return null` after `redirect()` calls to prevent null-dereference in tests (where `redirect` is mocked as `vi.fn()` and doesn't throw)
+- Stats joined in TypeScript (not Postgres RPCs) — acceptable at current scale

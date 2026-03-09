@@ -402,8 +402,6 @@ Items are ordered by priority within each group. Full details of completed work 
 - SRS updates queued in IndexedDB, flushed when `navigator.onLine` is true; conflict resolution strategy needed.
 - **Do not implement without a written PM decision on conflict resolution and sync UI.**
 
-**Feat-A: Daily email reminders** *(deferred — not wanted)*
-
 ### Bugs / Layout Fixes
 
 **Fix-L: Verb tense mastery chart on progress page** *(medium priority)*
@@ -445,20 +443,7 @@ All three items below should be shipped together in a single PR:
 
 ### Strategic / Long-term
 
-**Strat-A: Conjugation mode** ✅ **COMPLETE** — see `/verbs` route family above.
-
-**Strat-B: Admin content panel** ✅ **COMPLETE**
-
-- `/admin` route family gated by `is_admin boolean` on `profiles` (migration 016)
-- Overview: content counts (fast) + cross-user usage stats (Suspense/service role)
-- Curriculum: module→unit→concept tree + per-concept stats table (deferred)
-- Exercises: filterable list (concept + type filters, no-JS GET form) + inline edit (STRETCH)
-- Edit page: `PATCH /api/admin/exercises/[id]` — is_admin check + Zod validation
-- Admin link surfaced on `/account` page only when `is_admin = true`
-- SideNav + BottomNav hidden on `/admin` routes; admin layout has its own tab nav
-- Service role client: `src/lib/supabase/service.ts` (server-only)
-
-**1Strat-C: Evaluate Claude API audio for pronunciation exercises** *(future research only)*
+**Strat-C: Evaluate Claude API audio for pronunciation exercises** *(future research only)*
 
 - Current STT (Web Speech API) is optimised for fluent native speech. For a future pronunciation exercise type, evaluate `claude-sonnet-4-6` native audio input (MP3/WAV/WebM) for combined transcription + accuracy scoring.
 - Trade-offs: higher accuracy on learner speech; +1–3s latency; per-call cost; needs `/api/transcribe` + `MediaRecorder`.
@@ -471,6 +456,5 @@ All three items below should be shipped together in a single PR:
 1. **Fix-J** — STT replacement for iOS Safari (PM decision on vendor first)
 2. **Fix-L** — Verb tense mastery chart on progress page
 3. **Fix-K** — PWA performance improvements (batch: pre-cache shell + stale-while-revalidate + fonts)
-4. ~~**Strat-B**~~ — Admin content panel ✅ done
-5. **Feat-F** — Offline exercise packs (PM decision on conflict resolution first)
+4. **Feat-F** — Offline exercise packs (PM decision on conflict resolution first)
 
