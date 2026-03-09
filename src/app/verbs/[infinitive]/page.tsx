@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { VerbDetailClient } from './VerbDetailClient'
-import type { Verb, VerbSentence, VerbProgress } from '@/lib/supabase/types'
+import type { Verb, VerbConjugation, VerbProgress } from '@/lib/supabase/types'
 
 interface Props {
   params: Promise<{ infinitive: string }>
@@ -24,15 +24,15 @@ export default async function VerbDetailPage({ params }: Props) {
   if (!verbData) notFound()
   const verb = verbData as Verb
 
-  // Fetch sentences + favorites + progress in parallel
+  // Fetch conjugations + favorites + progress in parallel
   const [
-    { data: sentenceRows },
+    { data: conjugationRows },
     { data: favoriteRow },
     { data: progressRows },
   ] = await Promise.all([
     supabase
-      .from('verb_sentences')
-      .select('tense, pronoun, correct_form, tense_rule')
+      .from('verb_conjugations')
+      .select('tense, stem, yo, tu, el, nosotros, vosotros, ellos')
       .eq('verb_id', verb.id),
     supabase
       .from('user_verb_favorites')
@@ -47,25 +47,27 @@ export default async function VerbDetailPage({ params }: Props) {
       .eq('verb_id', verb.id),
   ])
 
-  const sentences = sentenceRows as Pick<VerbSentence, 'tense' | 'pronoun' | 'correct_form' | 'tense_rule'>[] ?? []
+  const conjugations = conjugationRows as Pick<VerbConjugation, 'tense' | 'stem' | 'yo' | 'tu' | 'el' | 'nosotros' | 'vosotros' | 'ellos'>[] ?? []
   const favorited = !!favoriteRow
   const progress = progressRows as Pick<VerbProgress, 'tense' | 'attempt_count' | 'correct_count'>[] ?? []
 
   // Build a tense → progress map
   const progressMap = new Map(progress.map((p) => [p.tense, p]))
 
-  // Build tenseData: conjugation table rows + mastery per tense
+  // Build tenseData: all 6 conjugation rows + mastery per tense
   const tenseData = ['present_indicative','preterite','imperfect','future','conditional','present_subjunctive','imperfect_subjunctive'].map((tense) => {
-    const tenseSentences = sentences.filter((s) => s.tense === tense)
-    // Deduplicate pronouns (keep first occurrence per pronoun)
-    const seen = new Set<string>()
-    const rows = tenseSentences
-      .filter((s) => {
-        if (seen.has(s.pronoun)) return false
-        seen.add(s.pronoun)
-        return true
-      })
-      .map((s) => ({ pronoun: s.pronoun, correct_form: s.correct_form }))
+    const conj = conjugations.find((c) => c.tense === tense)
+
+    const rows = conj
+      ? [
+          { pronoun: 'yo',       form: conj.yo,       stem: conj.stem },
+          { pronoun: 'tu',       form: conj.tu,        stem: conj.stem },
+          { pronoun: 'el',       form: conj.el,        stem: conj.stem },
+          { pronoun: 'nosotros', form: conj.nosotros,  stem: conj.stem },
+          { pronoun: 'vosotros', form: conj.vosotros,  stem: conj.stem },
+          { pronoun: 'ellos',    form: conj.ellos,     stem: conj.stem },
+        ]
+      : []
 
     const prog = progressMap.get(tense)
     const masteryPct = prog && prog.attempt_count > 0

@@ -30,6 +30,8 @@ pnpm seed                 # Seed curriculum data into Supabase (requires env var
 pnpm annotate             # Annotate exercises with grammatical spans via Claude (requires env vars)
 pnpm seed:ai              # Generate new concepts + top-up existing → docs/curriculum-review-YYYY-MM-DD.json
 pnpm seed:ai:apply        # Apply approved entries from review JSON to Supabase
+pnpm seed:verbs           # Generate verb sentences via Claude Haiku → docs/verb-sentences-YYYY-MM-DD.json
+pnpm seed:verbs:apply     # Insert verb_sentences rows from review JSON
 pnpm validate:grading     # ARCH-02 offline validation: grade 50 attempts with Haiku vs Sonnet baseline
 ```
 
@@ -56,6 +58,12 @@ NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=...
 ```
 Queries DB for existing exercise counts; generates missing exercises for new and existing concepts; writes review JSON to `docs/`. Set `_approved: true` on entries, then run `pnpm seed:ai:apply [--dry-run] <file>`.
 
+Seed:verbs command requires env vars:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm seed:verbs
+```
+Inserts 50 verbs into `verbs` table, then generates 3 sentences per verb × tense (350 combos) via Claude Haiku. Resume-safe — skips combos already written. Then run `pnpm seed:verbs:apply [--dry-run] <file>`. ⚠️ No idempotency guard on apply — running twice duplicates rows.
+
 ## Git / GitHub Workflow
 
 After every meaningful change or completed work step:
@@ -79,6 +87,7 @@ Remote: `https://github.com/Nicolas2892/LanguageApp.git`
 ### Key Dependency Constraints
 - `zod` pinned to **v3** — do NOT upgrade; v4 breaks `@hookform/resolvers@4`
 - Supabase types are hand-written in `src/lib/supabase/types.ts` (not CLI-generated). Every table must have a `Relationships: []` array or the SDK types all columns as `never`. After any `.select()` / `.single()`, always cast: `data as MyType`.
+- Do NOT use join syntax (e.g. `verbs(id, infinitive)`) in `.select()` calls for tables with `Relationships: []` — the SDK returns `SelectQueryError`. Fetch related data in a separate query and join in TypeScript.
 
 ### Environment Variables (`.env.local`)
 ```
@@ -99,8 +108,12 @@ ANTHROPIC_API_KEY
 | `/study` | Server + Client | Study session — queue fetched server-side, state machine client-side |
 | `/study/configure` | Server + Client | Session config — pick module + exercise types before starting |
 | `/curriculum` | Server | Full concept tree with mastery badges; all concepts/units/modules are clickable |
-| `/progress` | Server | 4-card stats, CEFR level progress bars, horizontal AccuracyChart, ActivityHeatmap |
+| `/progress` | Server | 4-card stats, CEFR level progress bars, AccuracyChart, ActivityHeatmap, VerbTenseMastery |
 | `/tutor` | Server + Client | Streaming AI chat; accepts `?concept=<id>` for context |
+| `/verbs` | Server + Client | Verb directory — 50 verbs, search, mastery dots, favorite toggle |
+| `/verbs/[infinitive]` | Server + Client | Conjugation tables per tense + mastery bars + favorite toggle |
+| `/verbs/configure` | Server + Client | Verb drill config — tenses, verb set, length, hint toggle |
+| `/verbs/session` | Server + Client | In-sentence conjugation session; local grading; no Claude cost |
 | `POST /api/submit` | Route handler | Grade answer → SM-2 → upsert `user_progress` → insert `exercise_attempts` → update streak |
 | `POST /api/hint` | Route handler | Claude-generated worked example for stuck users |
 | `POST /api/chat` | Route handler | Streaming tutor chat (plain text ReadableStream) |
@@ -110,6 +123,8 @@ ANTHROPIC_API_KEY
 | `POST /api/topic` | Route handler | Claude generates a writing prompt for a given concept (non-streaming) |
 | `POST /api/grade` | Route handler | Grade free-write answer (no exercise DB row); SM-2 + streak; `exercise_id: null` |
 | `POST /api/concepts/[id]/hard` | Route handler | Toggle `is_hard` flag on `user_progress`; update-then-insert pattern |
+| `POST /api/verbs/grade` | Route handler | Record verb conjugation attempt → `increment_verb_progress` RPC; Zod + rate-limit |
+| `POST /api/verbs/favorite` | Route handler | Toggle `user_verb_favorites` row; returns `{ favorited: boolean }` |
 
 ### Middleware Rules (`src/lib/supabase/middleware.ts`)
 - Unauthenticated → redirect to `/auth/login` (except `/auth/*`)
@@ -136,6 +151,15 @@ ANTHROPIC_API_KEY
 
 Session configure page (`/study/configure`) builds these params via a UI before redirecting to `/study`. Three modes: **SRS Review**, **Open Practice**, **Review mistakes**. Pre-selects Open Practice when `?mode=practice` is in the configure URL (e.g. from "Practice anyway" on dashboard).
 
+### Verb Session Query Params (`/verbs/session`)
+| Param | Values | Effect |
+|---|---|---|
+| `tenses` | comma-separated tense keys | Which tenses to drill |
+| `verbSet` | `favorites` \| `top25` \| `top50` \| `single` | Which verbs to draw sentences from |
+| `verb` | infinitive string | Used when `verbSet=single` |
+| `length` | `10` \| `20` \| `30` | Max sentences per session |
+| `hint` | `1` | Show `[infinitive]` hint next to blank |
+
 ### Exercise Types & Components
 | Type | Component | Notes |
 |---|---|---|
@@ -153,6 +177,13 @@ All routed through shared `ExerciseRenderer` in `src/components/exercises/Exerci
 3. `POST /api/sessions/complete` — fired (fire-and-forget) when session ends; writes `study_sessions` row
 4. `src/lib/srs/index.ts` — pure `sm2(progress, score)` function; scores 0–3 from Claude only
 5. New users auto-bootstrapped with 5 easiest concepts on first visit (unless onboarding seeded SRS)
+
+### Verb Conjugation Loop
+1. `VerbSession.tsx` state: `answering → feedback → [try again | next] → done`
+2. Grading is **local** — `gradeConjugation()` in `src/lib/verbs/grader.ts`; zero Claude cost
+3. Three outcomes: `correct` (auto-advance 1.5s, green flash) · `accent_error` (orange flash, manual Next) · `incorrect` (red flash, Try Again or Next)
+4. Fire-and-forget `POST /api/verbs/grade` records attempt in `verb_progress` via `increment_verb_progress` RPC
+5. Session done screen shows overall % + per-tense breakdown sorted worst-first
 
 ### Streak Logic
 - Updated in `POST /api/submit` on the **first submission of each calendar day**
@@ -184,6 +215,11 @@ All routes except `/auth/*` redirect unauthenticated users to `/auth/login`. Pro
 | `user_progress` | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`, `production_mastered`, `is_hard`) |
 | `exercise_attempts` | Full attempt history with AI score + feedback |
 | `study_sessions` | Session analytics — written by `/api/sessions/complete` |
+| `verbs` | 50 high-frequency verbs; `infinitive`, `english`, `frequency_rank`, `verb_group` |
+| `verb_sentences` | 3 sentences per verb × tense (≥1,050 rows); `sentence` contains `_____` blank token |
+| `user_verb_favorites` | User ↔ verb many-to-many favorites; unique (user_id, verb_id) |
+| `verb_progress` | Per-user accuracy per verb × tense; `attempt_count`, `correct_count`; upserted via RPC |
+| `verb_conjugations` | Full 6-pronoun paradigm per verb × tense; `stem` = invariant prefix ('' = fully irregular); PK (verb_id, tense) |
 
 Migrations (run once in Supabase SQL editor):
 - `001–009`: initial schema, onboarding flag, indexes, exercise_id nullable, Google OAuth trigger fix, computed_level, grammar_focus, exercise annotations, push_subscription
@@ -191,6 +227,8 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/011_streak_rpc.sql` — `increment_streak_if_new_day(p_user_id uuid)` atomic RPC
 - `supabase/migrations/012_push_due_count_rpc.sql` — `get_subscribers_with_due_counts(...)` RPC
 - `supabase/migrations/013_hard_flag.sql` — `user_progress.is_hard boolean NOT NULL DEFAULT false`
+- `supabase/migrations/014_verb_conjugation.sql` — `verbs`, `verb_sentences`, `user_verb_favorites`, `verb_progress` tables + `increment_verb_progress(p_user_id, p_verb_id, p_tense, p_correct)` RPC ⚠️ **pending — must be run before verb feature is usable**
+- `supabase/migrations/015_verb_conjugations.sql` — `verb_conjugations` table (full 6-pronoun paradigm + stem per verb × tense) ⚠️ **pending — run after 014**
 
 ### Dashboard Stats
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
@@ -211,10 +249,21 @@ Migrations (run once in Supabase SQL editor):
 - Full plan: `src/lib/curriculum/curriculum-plan.ts`; design reference: `docs/curriculum-design.md`
 - ⚠️ Do NOT re-run `pnpm seed:ai:apply` on an existing review file — no idempotency guard, will create duplicate concept rows. See `docs/completed-features.md` Feat-E for cleanup procedure.
 
+### Verb Seed Content
+**Status: code complete, DB migration + seed pending**
+- 50 verbs hard-coded in `src/lib/curriculum/run-seed-verbs.ts`
+- 7 tenses × 50 verbs × 3 sentences = 1,050 minimum sentences to generate
+- Tenses (Spanish names): Presente de Indicativo, Pretérito Indefinido, Pretérito Imperfecto, Futuro Simple, Condicional Simple, Presente de Subjuntivo, Pretérito Imperfecto de Subjuntivo
+- To activate: (1) run migration 014 in Supabase SQL editor, (2) run migration 015, (3) `pnpm seed:verbs`, (4) `pnpm seed:verbs:apply docs/verb-sentences-YYYY-MM-DD.json`, (5) `pnpm seed:conjugations`, (6) `pnpm seed:conjugations:apply docs/verb-conjugations-YYYY-MM-DD.json`
+- `pnpm seed:conjugations` — generates full 6-pronoun paradigm + stem per verb × tense (350 combos) via Claude Haiku → `docs/verb-conjugations-YYYY-MM-DD.json`; resume-safe
+- `pnpm seed:conjugations:apply <file>` — upserts `verb_conjugations` rows; idempotent (ON CONFLICT DO UPDATE)
+
 ### Key Shared Components & Utilities
 - `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
 - `src/lib/practiceUtils.ts` — `cycleToMinimum(items, min)` pads Open Practice sessions to at least MIN_PRACTICE_SIZE; avoids consecutive duplicates when pool ≥ 2
 - `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map)
+- `src/lib/verbs/constants.ts` — `TENSES`, `TENSE_LABELS` (Spanish names), `TENSE_DESCRIPTIONS`, `VerbTense` type
+- `src/lib/verbs/grader.ts` — `normalizeSpanish(s)` + `gradeConjugation(userAnswer, correctForm, tenseRule)` → `VerbGradeResult`; pure functions, no network calls
 - `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
 - `src/lib/hooks/useSpeech.ts` — TTS hook; `src/components/SpeakButton.tsx` — speaker button (wired in all 5 exercise types)
 - `src/lib/hooks/useSpeechRecognition.ts` — STT hook (Web Speech API, es-ES, SSR-safe); `src/components/MicButton.tsx` — mic button used in FreeWritePrompt
@@ -224,6 +273,23 @@ Migrations (run once in Supabase SQL editor):
 - `src/components/HardFlagButton.tsx` — orange Flag icon; optimistic toggle with revert on failure; rate-limited via `/api/concepts/[id]/hard`
 - `src/lib/rate-limit.ts` — `checkRateLimit(userId, routeKey, opts)` sliding-window (backed by @vercel/kv)
 - `src/lib/api-utils.ts` — `updateStreakIfNeeded` + `updateComputedLevel` shared by submit + grade
+- `src/components/verbs/VerbCard.tsx` — verb grid card with mastery dots + favorite button
+- `src/components/verbs/VerbFavoriteButton.tsx` — optimistic heart toggle → `POST /api/verbs/favorite`
+- `src/components/verbs/VerbFeedbackPanel.tsx` — correct / accent_error / incorrect feedback UI
+- `src/components/verbs/VerbSummary.tsx` — session done screen with per-tense breakdown
+- `src/components/verbs/VerbTenseMastery.tsx` — progress page section; accuracy bars per tense sorted worst-first
+
+### Navigation
+- **SideNav** (`src/components/SideNav.tsx`) — desktop sidebar; 6 items: Dashboard → Study → Curriculum → **Verbs** → Progress → Tutor; hidden on `/auth`, `/onboarding`, `/brand-preview`
+- **BottomNav** (`src/components/BottomNav.tsx`) — mobile 6-tab bar; same order; `HIDDEN_ROUTES` includes `/verbs/session` (session hides nav like study session)
+- **AppHeader** (`src/components/AppHeader.tsx`) — sticky mobile header; hidden on `/auth`, `/study`, `/tutor`, `/onboarding`
+
+### CSS Animations
+- `animate-flash-green` — correct answer flash (green-50 wash, 400ms)
+- `animate-flash-red` — incorrect answer flash (red-50 wash, 400ms)
+- `animate-flash-orange` — accent error flash (amber-50 wash, 400ms) — added for verb session
+- `animate-page-in` — route transition fade+slide (150ms)
+- `animate-exercise-in` — exercise card entrance (180ms)
 
 ### API Security
 - All POST routes validated with Zod v3 schemas
@@ -240,11 +306,13 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1255 tests across 44 files — all passing.**
+**Test suite: 1299 tests across 51 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
 **CI: Fully green (TypeScript + lint + tests).**
+
+⚠️ **Verb feature pending activation**: migration 014 + `pnpm seed:verbs` + `pnpm seed:verbs:apply` must be run before `/verbs` is usable.
 
 → Full implementation history: `docs/completed-features.md`
 
@@ -253,6 +321,16 @@ Migrations (run once in Supabase SQL editor):
 ## Backlog
 
 Items are ordered by priority within each group. Full details of completed work in `docs/completed-features.md`.
+
+### Verb Feature — Activation Required
+
+**Verb-Activate: Run migrations + seeds before the verb feature is live**
+1. Paste `supabase/migrations/014_verb_conjugation.sql` into Supabase SQL editor and run
+2. Paste `supabase/migrations/015_verb_conjugations.sql` into Supabase SQL editor and run
+3. `NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm seed:verbs`
+4. `pnpm seed:verbs:apply docs/verb-sentences-YYYY-MM-DD.json`
+5. `NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm seed:conjugations`
+6. `pnpm seed:conjugations:apply docs/verb-conjugations-YYYY-MM-DD.json`
 
 ### Pedagogical / Learning Quality
 
@@ -279,6 +357,16 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Bugs / Layout Fixes
 
+**Fix-J: STT (speech-to-text) broken on free-write page — investigate and replace Web Speech API** *(high priority — iOS is primary target)*
+- Current implementation uses the Web Speech API (`useSpeechRecognition.ts` / `MicButton.tsx`) which is Chromium-only (Chrome, Edge, Arc). Not supported on Safari or Firefox.
+- iPhone users (Safari) cannot use dictation at all — this is a critical gap given iOS is a primary target platform.
+- **Replacement candidates to evaluate**:
+  1. **OpenAI Whisper API** — high accuracy on learner speech; `MediaRecorder` pattern; $0.006/min
+  2. **Google Cloud Speech-to-Text API** — broad support; ~$0.006/15s; requires `GOOGLE_STT_API_KEY`
+  3. **Claude API audio input** — see Strat-C; higher latency but no extra vendor
+- **Acceptance criteria**: STT works on iOS Safari + Chrome + Edge; graceful fallback (hidden mic button) on unsupported environments.
+- **Do not implement without a PM decision on vendor and cost model.**
+
 **Fix-F: Write page sticky footer misaligned on desktop** *(deferred)*
 - Footer uses `position: fixed; left: 0; right: 0`, ignoring the `lg:ml-[220px]` sidebar layout wrapper.
 - Proper fix: restructure footer to render inside the layout wrapper using `sticky`, or read sidebar width at runtime via JS.
@@ -286,9 +374,7 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Strategic / Long-term
 
-**Strat-A: Conjugation mode (mirror Ella Verbs)**
-- Conjugation drills in sentence context; dictionary of 50/100/250 most-frequent verbs with conjugation table subpages; favourite verbs list; pre-generated sentences mixing subjunctive/indicative triggers for cross-learning; local grading (no Claude); tense mastery model independent of SRS.
-- Research needed: deep PM/UX audit of Ella Verbs feature set before implementation.
+**Strat-A: Conjugation mode** ✅ **COMPLETE** — see `/verbs` route family above.
 
 **Strat-B: Admin content panel** *(deferred — implement when content iteration becomes a bottleneck)*
 - `/admin` route gated by `is_admin boolean` on `profiles`; read-only v1 (concept/exercise list with attempt counts); stretch: inline edit.
@@ -298,22 +384,11 @@ Items are ordered by priority within each group. Full details of completed work 
 - Trade-offs: higher accuracy on learner speech; +1–3s latency; per-call cost; needs `/api/transcribe` + `MediaRecorder`.
 - **Do not implement without a defined pronunciation exercise type and PM decision on accuracy requirements.**
 
-**Fix-J: STT (speech-to-text) broken on free-write page — investigate and replace Web Speech API** *(bug + research)*
-- Current implementation uses the Web Speech API (`useSpeechRecognition.ts` / `MicButton.tsx`) which is Chromium-only (Chrome, Edge, Arc). Not supported on Safari or Firefox.
-- iPhone users (Safari) cannot use dictation at all — this is a critical gap given iOS is a primary target platform.
-- **Investigation needed**: reproduce the Edge bug (mic icon present but STT produces no transcript); confirm whether it's a permissions issue, CSP header conflict, or API availability.
-- **Replacement candidates to evaluate**:
-  1. **Google Cloud Speech-to-Text API** — broad browser/device support via `MediaRecorder` + server-side `/api/transcribe`; cost ~$0.006/15s; requires `GOOGLE_STT_API_KEY` env var.
-  2. **OpenAI Whisper API** — high accuracy on learner speech; similar `MediaRecorder` pattern; $0.006/min; already in Vercel infra pattern.
-  3. **Claude API audio input** — see Strat-C; higher latency but no extra vendor.
-- **Acceptance criteria**: STT works on iOS Safari + Chrome + Edge; graceful fallback (hidden mic button) on unsupported environments.
-- **Do not implement without a PM decision on vendor, cost model, and whether to keep Web Speech API as a fast-path for Chrome.**
-
 ---
 
 ## Recommended Next Steps (priority order)
 
-- Strat-A — Conjugation mode (deep PM/UX research first)
-- Strat-B — Admin content panel (deferred until content iteration is a bottleneck)
-- Feat-F — Offline exercise packs (PM decision on conflict resolution first)
-- Feat-A — Daily email reminders *(not wanted — deferred indefinitely)*
+1. **Verb-Activate** — run migration 014 + seed verbs to make the verb feature live
+2. **Fix-J** — STT replacement for iOS Safari (PM decision on vendor first)
+3. **Strat-B** — Admin content panel (when content iteration becomes a bottleneck)
+4. **Feat-F** — Offline exercise packs (PM decision on conflict resolution first)

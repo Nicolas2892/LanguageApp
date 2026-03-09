@@ -427,6 +427,42 @@ export interface Database {
         }
         Relationships: []
       }
+      verb_conjugations: {
+        Row: {
+          verb_id:  string
+          tense:    string
+          stem:     string
+          yo:       string
+          tu:       string
+          el:       string
+          nosotros: string
+          vosotros: string
+          ellos:    string
+        }
+        Insert: {
+          verb_id:  string
+          tense:    string
+          stem?:    string
+          yo:       string
+          tu:       string
+          el:       string
+          nosotros: string
+          vosotros: string
+          ellos:    string
+        }
+        Update: {
+          verb_id?:  string
+          tense?:    string
+          stem?:     string
+          yo?:       string
+          tu?:       string
+          el?:       string
+          nosotros?: string
+          vosotros?: string
+          ellos?:    string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -466,3 +502,4 @@ export type Verb = Database['public']['Tables']['verbs']['Row']
 export type VerbSentence = Database['public']['Tables']['verb_sentences']['Row']
 export type UserVerbFavorite = Database['public']['Tables']['user_verb_favorites']['Row']
 export type VerbProgress = Database['public']['Tables']['verb_progress']['Row']
+export type VerbConjugation = Database['public']['Tables']['verb_conjugations']['Row']
