@@ -91,7 +91,57 @@ const VERB_DATA: VerbData[] = [
   { infinitive: 'entender',  english: 'to understand',       frequency_rank: 47, verb_group: 'er' },
   { infinitive: 'pedir',     english: 'to ask for / request',frequency_rank: 48, verb_group: 'irregular' },
   { infinitive: 'recibir',   english: 'to receive',          frequency_rank: 49, verb_group: 'ir' },
-  { infinitive: 'recordar',  english: 'to remember',         frequency_rank: 50, verb_group: 'ar' },
+  { infinitive: 'recordar',  english: 'to remember',         frequency_rank: 50,  verb_group: 'ar' },
+  { infinitive: 'abrir',     english: 'to open',             frequency_rank: 51,  verb_group: 'ir' },
+  { infinitive: 'leer',      english: 'to read',             frequency_rank: 52,  verb_group: 'er' },
+  { infinitive: 'correr',    english: 'to run',              frequency_rank: 53,  verb_group: 'er' },
+  { infinitive: 'subir',     english: 'to go up / rise',     frequency_rank: 54,  verb_group: 'ir' },
+  { infinitive: 'acabar',    english: 'to finish / end up',  frequency_rank: 55,  verb_group: 'ar' },
+  { infinitive: 'mostrar',   english: 'to show',             frequency_rank: 56,  verb_group: 'ar' },
+  { infinitive: 'pagar',     english: 'to pay',              frequency_rank: 57,  verb_group: 'ar' },
+  { infinitive: 'aprender',  english: 'to learn',            frequency_rank: 58,  verb_group: 'er' },
+  { infinitive: 'servir',    english: 'to serve',            frequency_rank: 59,  verb_group: 'irregular' },
+  { infinitive: 'cerrar',    english: 'to close',            frequency_rank: 60,  verb_group: 'ar' },
+  { infinitive: 'ayudar',    english: 'to help',             frequency_rank: 61,  verb_group: 'ar' },
+  { infinitive: 'escuchar',  english: 'to listen to',        frequency_rank: 62,  verb_group: 'ar' },
+  { infinitive: 'comprar',   english: 'to buy',              frequency_rank: 63,  verb_group: 'ar' },
+  { infinitive: 'ganar',     english: 'to win / earn',       frequency_rank: 64,  verb_group: 'ar' },
+  { infinitive: 'caer',      english: 'to fall',             frequency_rank: 65,  verb_group: 'irregular' },
+  { infinitive: 'romper',    english: 'to break',            frequency_rank: 66,  verb_group: 'er' },
+  { infinitive: 'permitir',  english: 'to allow / permit',   frequency_rank: 67,  verb_group: 'ir' },
+  { infinitive: 'ofrecer',   english: 'to offer',            frequency_rank: 68,  verb_group: 'er' },
+  { infinitive: 'mantener',  english: 'to maintain / keep',  frequency_rank: 69,  verb_group: 'irregular' },
+  { infinitive: 'suponer',   english: 'to suppose / assume', frequency_rank: 70,  verb_group: 'irregular' },
+  { infinitive: 'nacer',     english: 'to be born',          frequency_rank: 71,  verb_group: 'er' },
+  { infinitive: 'morir',     english: 'to die',              frequency_rank: 72,  verb_group: 'irregular' },
+  { infinitive: 'necesitar', english: 'to need',             frequency_rank: 73,  verb_group: 'ar' },
+  { infinitive: 'cambiar',   english: 'to change',           frequency_rank: 74,  verb_group: 'ar' },
+  { infinitive: 'crear',     english: 'to create',           frequency_rank: 75,  verb_group: 'ar' },
+  { infinitive: 'conseguir', english: 'to achieve / get',    frequency_rank: 76,  verb_group: 'irregular' },
+  { infinitive: 'presentar', english: 'to present / introduce', frequency_rank: 77, verb_group: 'ar' },
+  { infinitive: 'preguntar', english: 'to ask',              frequency_rank: 78,  verb_group: 'ar' },
+  { infinitive: 'terminar',  english: 'to finish / end',     frequency_rank: 79,  verb_group: 'ar' },
+  { infinitive: 'lograr',    english: 'to achieve / manage to', frequency_rank: 80, verb_group: 'ar' },
+  { infinitive: 'levantar',  english: 'to lift / raise',     frequency_rank: 81,  verb_group: 'ar' },
+  { infinitive: 'realizar',  english: 'to carry out / achieve', frequency_rank: 82, verb_group: 'ar' },
+  { infinitive: 'añadir',    english: 'to add',              frequency_rank: 83,  verb_group: 'ir' },
+  { infinitive: 'cumplir',   english: 'to fulfill / complete', frequency_rank: 84, verb_group: 'ir' },
+  { infinitive: 'explicar',  english: 'to explain',          frequency_rank: 85,  verb_group: 'ar' },
+  { infinitive: 'guardar',   english: 'to keep / save',      frequency_rank: 86,  verb_group: 'ar' },
+  { infinitive: 'bajar',     english: 'to go down / lower',  frequency_rank: 87,  verb_group: 'ar' },
+  { infinitive: 'sufrir',    english: 'to suffer',           frequency_rank: 88,  verb_group: 'ir' },
+  { infinitive: 'meter',     english: 'to put / insert',     frequency_rank: 89,  verb_group: 'er' },
+  { infinitive: 'repetir',   english: 'to repeat',           frequency_rank: 90,  verb_group: 'irregular' },
+  { infinitive: 'convertir', english: 'to convert / turn into', frequency_rank: 91, verb_group: 'irregular' },
+  { infinitive: 'sacar',     english: 'to take out / get',   frequency_rank: 92,  verb_group: 'ar' },
+  { infinitive: 'comer',     english: 'to eat',              frequency_rank: 93,  verb_group: 'er' },
+  { infinitive: 'beber',     english: 'to drink',            frequency_rank: 94,  verb_group: 'er' },
+  { infinitive: 'dormir',    english: 'to sleep',            frequency_rank: 95,  verb_group: 'irregular' },
+  { infinitive: 'jugar',     english: 'to play',             frequency_rank: 96,  verb_group: 'ar' },
+  { infinitive: 'traer',     english: 'to bring',            frequency_rank: 97,  verb_group: 'irregular' },
+  { infinitive: 'limpiar',   english: 'to clean',            frequency_rank: 98,  verb_group: 'ar' },
+  { infinitive: 'lanzar',    english: 'to launch / throw',   frequency_rank: 99,  verb_group: 'ar' },
+  { infinitive: 'construir', english: 'to build / construct', frequency_rank: 100, verb_group: 'irregular' },
 ]
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -283,7 +333,7 @@ async function main() {
   const done = new Set(output.combos.map((c) => `${c.verb_infinitive}:${c.tense}`))
 
   console.log(`Output: ${outputPath}`)
-  console.log(`Already done: ${done.size} / ${VERB_DATA.length * TENSES.length} combos`)
+  console.log(`Already done: ${done.size} / ${VERB_DATA.length * TENSES.length} combos (${VERB_DATA.length} verbs × ${TENSES.length} tenses)`)
 
   // Step 1: Upsert verbs and get their IDs
   console.log('\n── Upserting verbs table ──')
