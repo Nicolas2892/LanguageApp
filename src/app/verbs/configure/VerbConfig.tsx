@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TENSE_LABELS } from '@/lib/verbs/constants'
+import { Button } from '@/components/ui/button'
 
 interface Props {
   favoriteCount: number
@@ -107,17 +108,14 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Length</p>
         <div className="flex gap-3">
           {LENGTHS.map((l) => (
-            <button
+            <Button
               key={l}
               onClick={() => setLength(l)}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
-                length === l
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-background hover:bg-muted border-border'
-              }`}
+              variant={length === l ? 'default' : 'outline'}
+              className="flex-1 rounded-full"
             >
               {l}
-            </button>
+            </Button>
           ))}
         </div>
       </section>
@@ -139,12 +137,9 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
       </section>
 
       {/* Start button */}
-      <button
-        onClick={handleStart}
-        className="w-full rounded-xl bg-primary text-primary-foreground py-3.5 text-sm font-semibold hover:bg-primary/90 transition-colors"
-      >
+      <Button onClick={handleStart} className="w-full rounded-full" size="lg">
         Start Practice
-      </button>
+      </Button>
     </div>
   )
 }
