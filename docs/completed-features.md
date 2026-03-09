@@ -4,6 +4,26 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Perf-A: Stream Grading Response ✓ (2026-03)
+
+1255 tests across 44 files, all passing.
+
+**Protocol:** NDJSON (`application/x-ndjson`) — two newline-delimited JSON objects streamed in order. Score+SRS data first (< 500ms), feedback text second.
+
+**`src/lib/claude/grader.ts`** — Added `gradeAnswerStream()` async generator alongside existing `gradeAnswer()` (which is still used by `/api/grade`). Exports `ScoreChunk` and `DetailsChunk` types. Asks Claude for two JSON lines; buffers token stream; yields `ScoreChunk` on first `\n`, `DetailsChunk` after stream ends. Full fallback for malformed JSON or API errors.
+
+**`src/app/api/submit/route.ts`** — Replaced `gradeAnswer()` + `NextResponse.json()` with `ReadableStream` NDJSON response. SM-2 upsert happens before chunk 1 is enqueued. Fire-and-forget ops (attempt record, streak, computed level) run after `controller.close()`. Error paths before streaming still use `NextResponse.json()`.
+
+**`src/app/study/StudySession.tsx`** — `handleSubmit()` reads NDJSON via `res.body.getReader()`. Added `streamingDetails` state and `pendingDetailsRef` (guards race where chunk 2 arrives before the 300ms flash timer fires). `FeedbackPanel` receives `isGenerating={generatingMore || streamingDetails}`.
+
+**`src/components/exercises/FeedbackPanel.tsx`** — Animated `animate-pulse` skeleton shown for feedback and explanation while `result.feedback === ''`; disappears when chunk 2 populates the text.
+
+**Note:** Browser DevTools may show `Content-Type: application/json` (Next.js sniffs first bytes). This is cosmetic — the client reads raw bytes via `ReadableStream` and is unaffected.
+
+**New tests:** `src/lib/claude/__tests__/grader.stream.test.ts` (7 cases), `src/app/api/submit/__tests__/route.stream.test.ts` (7 cases). Updated: `route.mastery.test.ts` and `StudySession.test.tsx` use streaming mocks (`makeStreamingSubmitResponse()`).
+
+---
+
 ## UX-W: Exercise UI Clarity Audit ✓ (2026-03)
 
 1239 tests across 42 files, all passing.

@@ -240,7 +240,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1239 tests across 42 files — all passing.**
+**Test suite: 1255 tests across 44 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -284,12 +284,6 @@ Items are ordered by priority within each group. Full details of completed work 
 - Proper fix: restructure footer to render inside the layout wrapper using `sticky`, or read sidebar width at runtime via JS.
 - Do not attempt again without a clear plan — previous fixes introduced regressions.
 
-### Performance
-
-**Perf-A: Stream grading response** *(remaining item)*
-- Switch `/api/submit` to streaming: send score + label first (< 10 tokens), then stream full feedback. Biggest latency UX win remaining.
-- Also consider: optimistic local score for single-blank `gap_fill` (client-side accent-normalised match → show "Correct!" immediately, submit to Claude async for SM-2).
-
 ### Strategic / Long-term
 
 **Strat-A: Conjugation mode (mirror Ella Verbs)**
@@ -319,11 +313,7 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ## Recommended Next Steps (priority order)
 
-### Polish & effectiveness
-1. Perf-A — Stream grading response
-
-### Growth features (deferred)
 - Strat-A — Conjugation mode (deep PM/UX research first)
-- Strat-B — Admin content panel
+- Strat-B — Admin content panel (deferred until content iteration is a bottleneck)
 - Feat-F — Offline exercise packs (PM decision on conflict resolution first)
 - Feat-A — Daily email reminders *(not wanted — deferred indefinitely)*
