@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import { UserAvatar } from '@/components/UserAvatar'
 import { LogoMark } from '@/components/LogoMark'
 
-const HIDDEN_ROUTES = ['/auth', '/study', '/tutor', '/onboarding']
+const HIDDEN_ROUTES = ['/auth', '/study', '/tutor', '/onboarding', '/brand-preview']
 
 interface Props {
   userInitials: string
