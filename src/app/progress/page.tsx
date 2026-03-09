@@ -5,11 +5,13 @@ import { AccuracyChart } from './AccuracyChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { ExerciseTypeChart } from '@/components/ExerciseTypeChart'
+import { VerbTenseMastery } from '@/components/verbs/VerbTenseMastery'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import { Flame, CheckCircle, Zap, Target, BarChart2, ListChecks, Clock } from 'lucide-react'
 import type { ExerciseAccuracy } from './AccuracyChart'
 import type { DayActivity } from './ActivityHeatmap'
 import type { ExerciseTypeCount } from '@/components/ExerciseTypeChart'
+import type { TenseSummary } from '@/components/verbs/VerbTenseMastery'
 
 const TYPE_LABELS: Record<string, string> = {
   gap_fill: 'Gap fill',
@@ -205,6 +207,31 @@ export default async function ProgressPage() {
     .sort((a, b) => b.count - a.count)
 
   const hasAnyData = totalAttempts > 0
+
+  // ── 7. Verb conjugation mastery ────────────────────────────────────────────
+  const { data: verbProgressRows } = await supabase
+    .from('verb_progress')
+    .select('tense, attempt_count, correct_count')
+    .eq('user_id', user.id)
+    .gt('attempt_count', 0)
+
+  type VerbProgressRow = { tense: string; attempt_count: number; correct_count: number }
+  const verbTenseMap = new Map<string, { correct: number; attempts: number }>()
+  for (const row of (verbProgressRows as VerbProgressRow[] ?? [])) {
+    const entry = verbTenseMap.get(row.tense) ?? { correct: 0, attempts: 0 }
+    entry.attempts += row.attempt_count
+    entry.correct  += row.correct_count
+    verbTenseMap.set(row.tense, entry)
+  }
+
+  const verbTenseSummaries: TenseSummary[] = Array.from(verbTenseMap.entries())
+    .map(([tense, { correct, attempts }]) => ({
+      tense,
+      correct,
+      attempts,
+      pct: attempts > 0 ? Math.round((correct / attempts) * 100) : 0,
+    }))
+    .sort((a, b) => a.pct - b.pct)  // worst first
 
   // Page meta
   const now = new Date()
@@ -452,6 +479,9 @@ export default async function ProgressPage() {
               <ActivityHeatmap data={activityData} weeks={14} />
             </div>
           </section>
+
+          {/* Verb conjugation mastery */}
+          <VerbTenseMastery summaries={verbTenseSummaries} />
         </>
       )}
     </main>

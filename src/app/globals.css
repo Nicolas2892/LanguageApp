@@ -138,8 +138,14 @@
   0%, 100% { background-color: transparent; }
   50% { background-color: oklch(0.97 0.05 20); }
 }
-.animate-flash-green { animation: flash-green 400ms ease-out; }
-.animate-flash-red   { animation: flash-red 400ms ease-out; }
+.animate-flash-green  { animation: flash-green 400ms ease-out; }
+.animate-flash-red    { animation: flash-red 400ms ease-out; }
+
+@keyframes flash-orange {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: oklch(0.97 0.05 75); }
+}
+.animate-flash-orange { animation: flash-orange 400ms ease-out; }
 
 @keyframes page-fade-in {
   from { opacity: 0; transform: translateY(4px); }

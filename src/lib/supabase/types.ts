@@ -316,6 +316,117 @@ export interface Database {
         }
         Relationships: []
       }
+      verbs: {
+        Row: {
+          id: string
+          infinitive: string
+          english: string
+          frequency_rank: number
+          verb_group: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          infinitive: string
+          english: string
+          frequency_rank: number
+          verb_group: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          infinitive?: string
+          english?: string
+          frequency_rank?: number
+          verb_group?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      verb_sentences: {
+        Row: {
+          id: string
+          verb_id: string
+          tense: string
+          pronoun: string
+          sentence: string
+          correct_form: string
+          tense_rule: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          verb_id: string
+          tense: string
+          pronoun: string
+          sentence: string
+          correct_form: string
+          tense_rule: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          verb_id?: string
+          tense?: string
+          pronoun?: string
+          sentence?: string
+          correct_form?: string
+          tense_rule?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      user_verb_favorites: {
+        Row: {
+          id: string
+          user_id: string
+          verb_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          verb_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          verb_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      verb_progress: {
+        Row: {
+          id: string
+          user_id: string
+          verb_id: string
+          tense: string
+          attempt_count: number
+          correct_count: number
+          last_practiced: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          verb_id: string
+          tense: string
+          attempt_count?: number
+          correct_count?: number
+          last_practiced?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          verb_id?: string
+          tense?: string
+          attempt_count?: number
+          correct_count?: number
+          last_practiced?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -332,6 +443,10 @@ export interface Database {
           due_count: number
         }>
       }
+      increment_verb_progress: {
+        Args: { p_user_id: string; p_verb_id: string; p_tense: string; p_correct: boolean }
+        Returns: void
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
@@ -347,3 +462,7 @@ export type Exercise = Database['public']['Tables']['exercises']['Row']
 export type UserProgress = Database['public']['Tables']['user_progress']['Row']
 export type ExerciseAttempt = Database['public']['Tables']['exercise_attempts']['Row']
 export type StudySession = Database['public']['Tables']['study_sessions']['Row']
+export type Verb = Database['public']['Tables']['verbs']['Row']
+export type VerbSentence = Database['public']['Tables']['verb_sentences']['Row']
+export type UserVerbFavorite = Database['public']['Tables']['user_verb_favorites']['Row']
+export type VerbProgress = Database['public']['Tables']['verb_progress']['Row']

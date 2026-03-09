@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, BookOpen, Bot,
-  BarChart2, LayoutList,
+  BarChart2, LayoutList, BookMarked,
 } from 'lucide-react'
 import { UserAvatar } from '@/components/UserAvatar'
 import { LogoMark } from '@/components/LogoMark'
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: '/dashboard',       label: 'Home',       Icon: LayoutDashboard },
   { href: '/study/configure', label: 'Study',      Icon: BookOpen        },
   { href: '/curriculum',      label: 'Curriculum', Icon: LayoutList      },
+  { href: '/verbs',           label: 'Verbs',      Icon: BookMarked      },
   { href: '/progress',        label: 'Progress',   Icon: BarChart2       },
   { href: '/tutor',           label: 'Tutor',      Icon: Bot             },
 ]
