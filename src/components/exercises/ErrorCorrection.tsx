@@ -65,7 +65,7 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-start gap-2">
-        <p className="text-lg leading-relaxed flex-1">{exercise.prompt}</p>
+        <p className="text-xl leading-relaxed flex-1">{exercise.prompt}</p>
         <SpeakButton text={exercise.prompt} />
       </div>
 

@@ -21,15 +21,18 @@ vi.mock('@/components/exercises/ExerciseRenderer', () => ({
 }))
 
 vi.mock('@/components/exercises/FeedbackPanel', () => ({
-  FeedbackPanel: ({ onNext, isLast, isGenerating }: { onNext: () => void; isLast: boolean; isGenerating?: boolean }) => (
-    <button data-testid="next-btn" onClick={onNext} disabled={isGenerating}>
-      {isGenerating ? 'Generating…' : isLast ? 'Finish session' : 'Next →'}
-    </button>
+  FeedbackPanel: ({ onNext, onTryAgain, isLast, isGenerating }: { onNext: () => void; onTryAgain?: () => void; isLast: boolean; isGenerating?: boolean }) => (
+    <div>
+      <button data-testid="next-btn" onClick={onNext} disabled={isGenerating}>
+        {isGenerating ? 'Generating…' : isLast ? 'Finish session' : 'Next →'}
+      </button>
+      {onTryAgain && <button data-testid="try-again-btn" onClick={onTryAgain}>Try again</button>}
+    </div>
   ),
 }))
 
 vi.mock('@/components/exercises/HintPanel', () => ({
-  HintPanel: () => null,
+  HintPanel: () => <div data-testid="hint-panel" />,
 }))
 
 vi.mock('@/components/PushPermissionPrompt', () => ({
@@ -209,62 +212,34 @@ describe('StudySession — Perf-A #4 prefetch & auto-generation', () => {
   })
 })
 
-// ── UX-Z: Time estimate ───────────────────────────────────────────────────────
-describe('StudySession — UX-Z time estimate', () => {
-  it('does not show time estimate in sprint mode', async () => {
-    render(
-      <StudySession
-        items={[makeItem('e1'), makeItem('e2'), makeItem('e3')]}
-        sprintConfig={{ limitType: 'count', limit: 3 }}
-      />,
-    )
-    await submitAndWaitForFeedback()
-    expect(screen.queryByText(/min/)).toBeNull()
-  })
-
-  it('does not show time estimate when only 1 exercise remains', async () => {
-    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
-    await submitAndWaitForFeedback()
-    // After first submit, 1 exercise remains — no estimate shown
-    expect(screen.queryByText(/min/)).toBeNull()
-  })
-
-  it('shows "~N min" estimate after first submission in multi-exercise session', async () => {
-    render(<StudySession items={[makeItem('e1'), makeItem('e2'), makeItem('e3')]} />)
-    await submitAndWaitForFeedback()
-    // 2 remaining exercises — estimate should appear
-    expect(screen.getByText(/~\d+ min/)).toBeTruthy()
-  })
-})
-
 // ── UX-AB: Concept collapse ───────────────────────────────────────────────────
 describe('StudySession — UX-AB concept collapse', () => {
-  it('shows "Concept Notes ↓" toggle collapsed by default on every exercise', () => {
+  it('shows "Notes ↓" toggle collapsed by default on every exercise', () => {
     render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
-    const toggle = screen.getByRole('button', { name: /Concept Notes/i })
-    expect(toggle.textContent).toContain('Concept Notes ↓')
+    const toggle = screen.getByRole('button', { name: /Notes/i })
+    expect(toggle.textContent).toContain('Notes ↓')
     // Collapsed: aria-expanded is false
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
   })
 
-  it('clicking toggle expands explanation and changes label to "Concept Notes ↑"', async () => {
+  it('clicking toggle expands explanation and changes label to "Notes ↑"', async () => {
     render(<StudySession items={[makeItem()]} />)
-    const toggle = screen.getByRole('button', { name: /Concept Notes/i })
+    const toggle = screen.getByRole('button', { name: /Notes/i })
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
     await userEvent.click(toggle)
-    expect(screen.getByText('Concept Notes ↑')).toBeTruthy()
+    expect(screen.getByText('Notes ↑')).toBeTruthy()
   })
 
   it('collapses again after moving to the next exercise', async () => {
     render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
     // Expand on exercise 1
-    await userEvent.click(screen.getByRole('button', { name: /Concept Notes/i }))
-    expect(screen.getByText('Concept Notes ↑')).toBeTruthy()
+    await userEvent.click(screen.getByRole('button', { name: /Notes/i }))
+    expect(screen.getByText('Notes ↑')).toBeTruthy()
     // Submit and advance
     await submitAndWaitForFeedback()
     await userEvent.click(screen.getByTestId('next-btn'))
     // Exercise 2 should be collapsed again
-    await waitFor(() => expect(screen.getByText('Concept Notes ↓')).toBeTruthy())
+    await waitFor(() => expect(screen.getByText('Notes ↓')).toBeTruthy())
   })
 })
 
@@ -441,16 +416,46 @@ describe('StudySession — Fix-I drill generation disables Next button', () => {
   })
 })
 
-// ── sessionLabel badge ─────────────────────────────────────────────────────────
-describe('StudySession — sessionLabel badge', () => {
-  it('renders the sessionLabel badge when provided', () => {
-    render(<StudySession items={[makeItem()]} sessionLabel="Open Practice" />)
-    expect(screen.getByText('Open Practice')).toBeTruthy()
+// ── UX-W: HintPanel progressive disclosure ────────────────────────────────────
+describe('StudySession — UX-W hint panel gating', () => {
+  function makeItemWithHint(exerciseId = 'exercise-hint'): StudyItem {
+    return {
+      concept: mockConcept,
+      exercise: { ...makeExercise(exerciseId), hint_1: 'Try using a connector.' },
+    }
+  }
+
+  it('does not render HintPanel before any wrong attempt', () => {
+    render(<StudySession items={[makeItemWithHint()]} />)
+    expect(screen.queryByTestId('hint-panel')).toBeNull()
   })
 
-  it('falls back to concept type badge when sessionLabel is omitted', () => {
-    render(<StudySession items={[makeItem()]} />)
-    // mockConcept.type = 'grammar', so badge should read "grammar practice"
-    expect(screen.getByText(/grammar practice/i)).toBeTruthy()
+  it('renders HintPanel in answering phase after clicking Try again following a wrong answer', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ ...mockGradeResult, score: 0, is_correct: false }),
+    })
+    render(<StudySession items={[makeItemWithHint(), makeItemWithHint('e2')]} />)
+    expect(screen.queryByTestId('hint-panel')).toBeNull()
+    // Submit wrong answer → feedback phase shows Try again button
+    await userEvent.click(screen.getByTestId('submit-exercise'))
+    await waitFor(() => screen.getByTestId('try-again-btn'))
+    // Click Try again → back to answering phase with wrongAttempts=1
+    await userEvent.click(screen.getByTestId('try-again-btn'))
+    // Now in answering phase with wrongAttempts > 0 → hint-panel shown
+    await waitFor(() => expect(screen.getByTestId('hint-panel')).toBeTruthy())
+  })
+
+  it('hint panel is hidden again after advancing to next exercise (wrongAttempts resets)', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ ...mockGradeResult, score: 0, is_correct: false }),
+    })
+    render(<StudySession items={[makeItemWithHint(), makeItemWithHint('e2')]} />)
+    await userEvent.click(screen.getByTestId('submit-exercise'))
+    await waitFor(() => screen.getByTestId('next-btn'))
+    await userEvent.click(screen.getByTestId('next-btn'))
+    // Exercise 2: wrongAttempts reset to 0 — hint-panel hidden
+    await waitFor(() => expect(screen.queryByTestId('hint-panel')).toBeNull())
   })
 })

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -91,10 +90,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const confettiFired = useRef(false)
   const autoGenerateTriggeredRef = useRef(false)
-
-  // UX-Z: per-exercise timing for "~N min remaining"
-  const exerciseStartRef = useRef<number>(Date.now())
-  const [submissionTimes, setSubmissionTimes] = useState<number[]>([])
 
   // UX-AB: concept explanation collapsed by default
   const [isConceptExpanded, setIsConceptExpanded] = useState(false)
@@ -221,15 +216,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
 
   const current = dynamicItems[index]
 
-  // UX-Z: estimated minutes remaining
-  const avgSeconds = submissionTimes.length > 0
-    ? submissionTimes.reduce((a, b) => a + b, 0) / submissionTimes.length
-    : 30
-  const remainingCount = effectiveLength - (index + 1)
-  const estimatedMinutes = !sprintConfig && remainingCount > 1
-    ? Math.max(1, Math.round((remainingCount * avgSeconds) / 60))
-    : null
-
   // Progress bar values
   const progressPct = sprintConfig?.limitType === 'time'
     ? totalSeconds > 0 ? (secondsLeft / totalSeconds) * 100 : 0
@@ -286,10 +272,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         }).catch(() => {})
       }
 
-      // UX-Z: record time taken for this exercise
-      const elapsedSec = Math.max(1, Math.round((Date.now() - exerciseStartRef.current) / 1000))
-      setSubmissionTimes((prev) => [...prev, elapsedSec])
-
       if (!gradeResult.is_correct) setWrongAttempts((n) => n + 1)
       const fc = gradeResult.score >= 2 ? 'animate-flash-green' : 'animate-flash-red'
       setFlashClass(fc)
@@ -345,8 +327,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     } else {
       // UX-AB: collapse concept note on each new exercise
       setIsConceptExpanded(false)
-      // UX-Z: reset exercise start time
-      exerciseStartRef.current = Date.now()
       startTransition(() => {
         autoGenerateTriggeredRef.current = false
         setIndex((i) => i + 1)
@@ -545,39 +525,10 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         </DialogContent>
       </Dialog>
 
-      <div className="space-y-5">
-        {/* Progress bar */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            {sprintConfig?.limitType === 'time' ? (
-              <span className={`font-mono font-semibold flex items-center gap-1 ${isTimeLow ? 'text-amber-500 dark:text-amber-400' : ''}`}>
-                <Timer className="h-3.5 w-3.5" />
-                {formatTime(secondsLeft)}
-              </span>
-            ) : (
-              <span className="font-medium">
-              {index + 1} / {effectiveLength}
-              {estimatedMinutes !== null && (
-                <span className="text-muted-foreground font-normal ml-1.5">
-                  · ~{estimatedMinutes} min
-                </span>
-              )}
-            </span>
-            )}
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="capitalize text-xs">
-                {sessionLabel ?? `${current.concept.type} practice`}
-              </Badge>
-              <button
-                onClick={() => setShowExitDialog(true)}
-                aria-label="Exit session"
-                className="text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <X className="h-4 w-4" strokeWidth={1.5} />
-              </button>
-            </div>
-          </div>
-          <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+      <div className="space-y-4">
+        {/* Row 1: thin progress bar + X exit button */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-1000 ${
                 isTimeLow ? 'bg-amber-500 animate-pulse' : 'bg-primary'
@@ -585,35 +536,46 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
               style={{ width: `${progressPct}%` }}
             />
           </div>
+          <button
+            onClick={() => setShowExitDialog(true)}
+            aria-label="Exit session"
+            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          >
+            <X className="h-4 w-4" strokeWidth={1.5} />
+          </button>
         </div>
 
-        {/* Concept title + exercise type badge */}
-        <div className="space-y-2">
-          <p className="text-xl font-bold tracking-tight">{current.concept.title}</p>
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium">
-            <TypeIcon className="h-3.5 w-3.5" />
-            {typeMeta.label}
-          </span>
-        </div>
-
-        {/* Concept explanation — collapsed by default */}
-        <div className="bg-muted/50 rounded-lg text-sm overflow-hidden">
+        {/* Row 2: concept title · exercise type · counter/timer · Notes toggle */}
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
+          <span className="text-sm font-medium text-foreground">{current.concept.title}</span>
+          <span aria-hidden>·</span>
+          <span>{typeMeta.label}</span>
+          <span aria-hidden>·</span>
+          {sprintConfig?.limitType === 'time' ? (
+            <span className={`font-mono font-semibold flex items-center gap-0.5 ${isTimeLow ? 'text-amber-500 dark:text-amber-400' : ''}`}>
+              <Timer className="h-3 w-3" />
+              {formatTime(secondsLeft)}
+            </span>
+          ) : (
+            <span>{index + 1}/{effectiveLength}</span>
+          )}
+          <span aria-hidden>·</span>
           <button
             onClick={() => setIsConceptExpanded((e) => !e)}
-            className="w-full flex items-center justify-between px-4 py-2.5 text-left"
             aria-expanded={isConceptExpanded}
+            className="hover:text-foreground transition-colors"
           >
-            <span className="text-xs font-semibold text-muted-foreground">
-              {isConceptExpanded ? 'Concept Notes ↑' : 'Concept Notes ↓'}
-            </span>
+            Notes {isConceptExpanded ? '↑' : '↓'}
           </button>
-          <div
-            className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
-            style={{ maxHeight: isConceptExpanded ? '16rem' : '0' }}
-          >
-            <div className="px-4 pb-4">
-              <p>{current.concept.explanation}</p>
-            </div>
+        </div>
+
+        {/* Concept notes panel — inline below metadata row */}
+        <div
+          className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
+          style={{ maxHeight: isConceptExpanded ? '16rem' : '0' }}
+        >
+          <div className="bg-muted/50 rounded-lg text-sm px-4 py-3">
+            <p>{current.concept.explanation}</p>
           </div>
         </div>
 
@@ -631,14 +593,18 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
               {submitError && (
                 <p className="text-sm text-destructive mt-2">{submitError}</p>
               )}
-              <HintPanel
-                hint1={current.exercise.hint_1}
-                hint2={current.exercise.hint_2}
-                claudeHint={claudeHint}
-                wrongAttempts={wrongAttempts}
-                loadingHint={loadingHint}
-                onRequestHint={handleRequestClaudeHint}
-              />
+              {wrongAttempts > 0 && (
+                <div className="animate-in fade-in duration-300">
+                  <HintPanel
+                    hint1={current.exercise.hint_1}
+                    hint2={current.exercise.hint_2}
+                    claudeHint={claudeHint}
+                    wrongAttempts={wrongAttempts}
+                    loadingHint={loadingHint}
+                    onRequestHint={handleRequestClaudeHint}
+                  />
+                </div>
+              )}
             </div>
           )}
 
