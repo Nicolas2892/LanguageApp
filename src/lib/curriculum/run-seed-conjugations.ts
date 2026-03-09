@@ -85,10 +85,57 @@ function saveOutput(outputPath: string, data: OutputFile) {
 
 // ── Claude generation ─────────────────────────────────────────────────────────
 
-async function generateConjugations(infinitive: string, tense: string): Promise<ConjugationEntry> {
+function buildConjugationPrompt(infinitive: string, tense: string): string {
   const tenseLabel = TENSE_LABELS[tense as keyof typeof TENSE_LABELS] ?? tense
 
-  const prompt = `Provide the complete conjugation of the Spanish verb "${infinitive}" in the ${tenseLabel} tense for all 6 pronouns (yo, tú, él/ella, nosotros, vosotros, ellos/ellas).
+  if (tense === 'imperative_affirmative') {
+    return `Provide the Imperativo Afirmativo conjugation of the Spanish verb "${infinitive}" for the 5 applicable pronouns.
+The imperative has NO yo form — set yo to an empty string "".
+Use "el" for the usted form and "ellos" for the ustedes form.
+
+Also provide the "stem": the longest prefix shared by ALL non-empty forms (tu, el, nosotros, vosotros, ellos). Set stem to "" if no common prefix.
+
+Examples for hablar:
+- tu=habla, el=hable, nosotros=hablemos, vosotros=hablad, ellos=hablen → stem="habl"
+
+Return ONLY a JSON object, no other text:
+{
+  "stem": "habl",
+  "yo": "",
+  "tu": "habla",
+  "el": "hable",
+  "nosotros": "hablemos",
+  "vosotros": "hablad",
+  "ellos": "hablen"
+}`
+  }
+
+  if (tense === 'imperative_negative') {
+    return `Provide the Imperativo Negativo conjugation of the Spanish verb "${infinitive}" for the 5 applicable pronouns.
+The imperative has NO yo form — set yo to an empty string "".
+Use "el" for the usted form and "ellos" for the ustedes form.
+Store ONLY the verb form (without "no") — e.g. "hables" not "no hables".
+The negative imperative uses present subjunctive forms.
+
+Also provide the "stem": the longest prefix shared by ALL non-empty forms. Set stem to "" if no common prefix.
+
+Examples for hablar:
+- tu=hables, el=hable, nosotros=hablemos, vosotros=habléis, ellos=hablen → stem="habl"
+
+Return ONLY a JSON object, no other text:
+{
+  "stem": "habl",
+  "yo": "",
+  "tu": "hables",
+  "el": "hable",
+  "nosotros": "hablemos",
+  "vosotros": "habléis",
+  "ellos": "hablen"
+}`
+  }
+
+  // Default: all 6 pronouns
+  return `Provide the complete conjugation of the Spanish verb "${infinitive}" in the ${tenseLabel} tense for all 6 pronouns (yo, tú, él/ella, nosotros, vosotros, ellos/ellas).
 
 Also provide the "stem": the longest prefix shared by ALL 6 forms. If the forms have no common prefix (fully irregular), set stem to an empty string "".
 
@@ -107,6 +154,10 @@ Return ONLY a JSON object, no other text:
   "vosotros": "habláis",
   "ellos": "hablan"
 }`
+}
+
+async function generateConjugations(infinitive: string, tense: string): Promise<ConjugationEntry> {
+  const prompt = buildConjugationPrompt(infinitive, tense)
 
   const message = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',

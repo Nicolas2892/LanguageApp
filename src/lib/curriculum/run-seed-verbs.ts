@@ -142,10 +142,74 @@ function saveOutput(outputPath: string, data: OutputFile) {
 
 // ── Claude generation ─────────────────────────────────────────────────────────
 
-async function generateSentences(infinitive: string, tense: string): Promise<SentenceEntry[]> {
+const IMPERATIVE_TENSES = new Set(['imperative_affirmative', 'imperative_negative'])
+
+function buildSentencePrompt(infinitive: string, tense: string): string {
   const tenseLabel = TENSE_LABELS[tense as keyof typeof TENSE_LABELS] ?? tense
 
-  const prompt = `Generate exactly 3 natural Spanish sentences using the verb "${infinitive}" in the ${tenseLabel} tense.
+  if (tense === 'imperative_affirmative') {
+    return `Generate exactly 3 natural Spanish sentences using the verb "${infinitive}" in the Imperativo Afirmativo.
+The imperative has no yo form. Use these 3 pronouns: tú, usted (use pronoun key "el"), nosotros.
+Each sentence must contain exactly one blank (written as "_____") where the conjugated verb goes.
+The sentences should be natural commands or instructions, appropriate for advanced Spanish learners (B1-B2 level).
+
+Return a JSON array of exactly 3 objects:
+[
+  {
+    "pronoun": "tu",
+    "sentence": "_____ los documentos antes de salir.",
+    "correct_form": "Firma",
+    "tense_rule": "Imperativo afirmativo tú: uses 3rd person singular of present indicative (regular verbs)"
+  },
+  {
+    "pronoun": "el",
+    "sentence": "_____ usted un momento, por favor.",
+    "correct_form": "Espere",
+    "tense_rule": "Imperativo afirmativo usted: uses present subjunctive form"
+  },
+  {
+    "pronoun": "nosotros",
+    "sentence": "_____ juntos esta tarde.",
+    "correct_form": "Estudiemos",
+    "tense_rule": "Imperativo afirmativo nosotros: uses present subjunctive nosotros form"
+  }
+]
+Only return the JSON array. No other text. The tense_rule should be a short, helpful rule (max 15 words).`
+  }
+
+  if (tense === 'imperative_negative') {
+    return `Generate exactly 3 natural Spanish sentences using the verb "${infinitive}" in the Imperativo Negativo.
+The imperative has no yo form. Use these 3 pronouns: tú, usted (use pronoun key "el"), nosotros.
+Each sentence must start with "No" and contain exactly one blank (written as "_____") where the conjugated verb goes.
+The correct_form should be ONLY the conjugated verb form (without "no").
+The sentences should be natural prohibitions, appropriate for advanced Spanish learners (B1-B2 level).
+
+Return a JSON array of exactly 3 objects:
+[
+  {
+    "pronoun": "tu",
+    "sentence": "No _____ el teléfono durante la reunión.",
+    "correct_form": "uses",
+    "tense_rule": "Imperativo negativo tú: no + present subjunctive tú form"
+  },
+  {
+    "pronoun": "el",
+    "sentence": "No _____ usted sin permiso.",
+    "correct_form": "salga",
+    "tense_rule": "Imperativo negativo usted: no + present subjunctive usted form"
+  },
+  {
+    "pronoun": "nosotros",
+    "sentence": "No _____ el tiempo en cosas sin importancia.",
+    "correct_form": "perdamos",
+    "tense_rule": "Imperativo negativo nosotros: no + present subjunctive nosotros form"
+  }
+]
+Only return the JSON array. No other text. The tense_rule should be a short, helpful rule (max 15 words).`
+  }
+
+  // Default: non-imperative tenses use yo / tú / él
+  return `Generate exactly 3 natural Spanish sentences using the verb "${infinitive}" in the ${tenseLabel} tense.
 Use 3 different subject pronouns: yo, tú, él/ella.
 Each sentence must contain exactly one blank (written as "_____") where the conjugated verb goes.
 The sentences should be natural, varied, and appropriate for advanced Spanish learners (B1-B2 level).
@@ -172,6 +236,10 @@ Return a JSON array of exactly 3 objects:
   }
 ]
 Only return the JSON array. No other text. The tense_rule should be a short, helpful rule (max 15 words).`
+}
+
+async function generateSentences(infinitive: string, tense: string): Promise<SentenceEntry[]> {
+  const prompt = buildSentencePrompt(infinitive, tense)
 
   const message = await anthropic.messages.create({
     model: 'claude-haiku-4-5-20251001',
@@ -192,6 +260,16 @@ Only return the JSON array. No other text. The tense_rule should be a short, hel
   if (!Array.isArray(parsed) || parsed.length !== 3) {
     throw new Error(`Expected 3 sentences, got ${Array.isArray(parsed) ? parsed.length : 'non-array'}`)
   }
+
+  // Validate imperative sentences don't use yo
+  if (IMPERATIVE_TENSES.has(tense)) {
+    for (const s of parsed) {
+      if (s.pronoun === 'yo') {
+        throw new Error(`Imperative sentence incorrectly uses pronoun "yo"`)
+      }
+    }
+  }
+
   return parsed
 }
 

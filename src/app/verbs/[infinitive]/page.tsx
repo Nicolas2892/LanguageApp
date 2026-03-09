@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { VerbDetailClient } from './VerbDetailClient'
 import type { Verb, VerbConjugation, VerbProgress } from '@/lib/supabase/types'
+import { TENSES } from '@/lib/verbs/constants'
 
 interface Props {
   params: Promise<{ infinitive: string }>
@@ -55,7 +56,7 @@ export default async function VerbDetailPage({ params }: Props) {
   const progressMap = new Map(progress.map((p) => [p.tense, p]))
 
   // Build tenseData: all 6 conjugation rows + mastery per tense
-  const tenseData = ['present_indicative','preterite','imperfect','future','conditional','present_subjunctive','imperfect_subjunctive'].map((tense) => {
+  const tenseData = TENSES.map((tense) => {
     const conj = conjugations.find((c) => c.tense === tense)
 
     const rows = conj

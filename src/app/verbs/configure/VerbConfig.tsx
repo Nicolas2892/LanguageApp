@@ -12,6 +12,7 @@ interface Props {
 
 const INDICATIVE_TENSES = ['present_indicative', 'preterite', 'imperfect', 'future', 'conditional'] as const
 const SUBJUNCTIVE_TENSES = ['present_subjunctive', 'imperfect_subjunctive'] as const
+const IMPERATIVE_TENSES = ['imperative_affirmative', 'imperative_negative'] as const
 const LENGTHS = [10, 20, 30] as const
 
 type VerbSet = 'favorites' | 'top25' | 'top50' | 'single'
@@ -69,6 +70,17 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
           <p className="text-xs font-medium text-muted-foreground pt-1">Subjunctive</p>
           <div className="flex flex-wrap gap-2">
             {SUBJUNCTIVE_TENSES.map((tense) => (
+              <TenseChip
+                key={tense}
+                label={TENSE_LABELS[tense]}
+                selected={selectedTenses.has(tense)}
+                onToggle={() => toggleTense(tense)}
+              />
+            ))}
+          </div>
+          <p className="text-xs font-medium text-muted-foreground pt-1">Imperative</p>
+          <div className="flex flex-wrap gap-2">
+            {IMPERATIVE_TENSES.map((tense) => (
               <TenseChip
                 key={tense}
                 label={TENSE_LABELS[tense]}
