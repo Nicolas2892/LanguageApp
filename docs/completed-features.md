@@ -724,3 +724,26 @@ SpeakButton (existing `src/components/SpeakButton.tsx` + `src/lib/hooks/useSpeec
 - `src/components/exercises/__tests__/ErrorCorrection.test.tsx` — 7 tests; `useSpeech` mocked with `enabled: true` to render SpeakButton
 - `src/components/exercises/__tests__/SentenceBuilder.test.tsx` — 8 tests; covers main path, fallback path, SpeakButton render, chip interaction
 - `src/components/exercises/__tests__/FreeWritePrompt.test.tsx` — updated; `useSpeechRecognition` mocked via `vi.fn()` to allow per-test state overrides; +10 new tests covering TTS render, STT supported/denied/listening/loading states
+
+---
+
+## Ped-J: "Hard" Flag on a Concept ✓ (2026-03-09)
+
+**Commit**: `4471ae1`
+**Tests**: 1226 passing across 40 files
+
+### What was built
+- `supabase/migrations/013_hard_flag.sql` — `ALTER TABLE user_progress ADD COLUMN is_hard boolean NOT NULL DEFAULT false` (⚠️ run in Supabase SQL editor)
+- `src/lib/supabase/types.ts` — `is_hard` added to `user_progress` Row/Insert/Update
+- `src/lib/constants.ts` — `HARD_INTERVAL_MULTIPLIER = 0.6`
+- `src/app/api/submit/route.ts` — fetches `is_hard`; after SM-2, if `is_hard && score >= 2`: `interval_days = max(1, round(interval_days × 0.6))`; recalculates `due_date`. Upsert does NOT write `is_hard`.
+- `src/app/api/concepts/[id]/hard/route.ts` — POST; Zod `{ is_hard: boolean }`; update-then-insert pattern (avoids clobbering SRS data); rate-limited 30 req/10 min
+- `src/components/HardFlagButton.tsx` — `'use client'`; Flag icon (filled orange when hard); optimistic toggle with revert on fetch failure; `useTransition`; same touch-target sizing as SpeakButton
+- `src/app/curriculum/[id]/page.tsx` — HardFlagButton in concept header chip row (after mastery badge)
+- `src/app/curriculum/page.tsx` — HardFlagButton per concept row (z-10 wrapper); `progressMap` now stores full object (not just `interval_days`)
+
+### Key design decisions
+- Multiplier applied **only on correct answers** (score ≥ 2) — wrong answers already reset to 1–3 days
+- `sm2()` stays pure; multiplier applied in route after call
+- Flag only affects *future* SM-2 outputs — does not immediately reschedule existing due dates
+- Toggled from curriculum pages only (not exercise UI)

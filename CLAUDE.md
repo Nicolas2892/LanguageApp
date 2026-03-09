@@ -109,6 +109,7 @@ ANTHROPIC_API_KEY
 | `/write` | Server + Client | AI-generated free-write prompt for a concept; `?concept=<id>` required |
 | `POST /api/topic` | Route handler | Claude generates a writing prompt for a given concept (non-streaming) |
 | `POST /api/grade` | Route handler | Grade free-write answer (no exercise DB row); SM-2 + streak; `exercise_id: null` |
+| `POST /api/concepts/[id]/hard` | Route handler | Toggle `is_hard` flag on `user_progress`; update-then-insert pattern |
 
 ### Middleware Rules (`src/lib/supabase/middleware.ts`)
 - Unauthenticated → redirect to `/auth/login` (except `/auth/*`)
@@ -173,23 +174,16 @@ All routes except `/auth/*` redirect unauthenticated users to `/auth/login`. Pro
 |---|---|
 | `profiles` | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level` |
 | `modules / units / concepts / exercises` | Curriculum hierarchy (publicly readable); `concepts.level` = B1/B2/C1 |
-| `user_progress` | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`, `production_mastered`) |
+| `user_progress` | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`, `production_mastered`, `is_hard`) |
 | `exercise_attempts` | Full attempt history with AI score + feedback |
 | `study_sessions` | Session analytics — written by `/api/sessions/complete` |
 
 Migrations (run once in Supabase SQL editor):
-- `supabase/migrations/001_initial_schema.sql`
-- `supabase/migrations/002_onboarding_flag.sql`
-- `supabase/migrations/003_indexes.sql` — study_sessions index
-- inline (applied) — `ALTER TABLE exercise_attempts ALTER COLUMN exercise_id DROP NOT NULL;`
-- `supabase/migrations/005_fix_google_oauth_trigger.sql` — fixed handle_new_user trigger for Google OAuth
-- `supabase/migrations/006_computed_level.sql` — `concepts.level`, `user_progress.production_mastered`, `profiles.computed_level`
-- `supabase/migrations/007_grammar_focus.sql` — `concepts.grammar_focus text CHECK ('indicative'|'subjunctive'|'both')`
-- `supabase/migrations/008_exercise_annotations.sql` — `exercises.annotations jsonb NULL`
-- `supabase/migrations/009_push_subscription.sql` — `profiles.push_subscription jsonb NULL`
+- `001–009`: initial schema, onboarding flag, indexes, exercise_id nullable, Google OAuth trigger fix, computed_level, grammar_focus, exercise annotations, push_subscription
 - `supabase/migrations/010_theme_preference.sql` — `profiles.theme_preference text DEFAULT 'system'`
 - `supabase/migrations/011_streak_rpc.sql` — `increment_streak_if_new_day(p_user_id uuid)` atomic RPC
 - `supabase/migrations/012_push_due_count_rpc.sql` — `get_subscribers_with_due_counts(...)` RPC
+- `supabase/migrations/013_hard_flag.sql` — `user_progress.is_hard boolean NOT NULL DEFAULT false`
 
 ### Dashboard Stats
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
@@ -211,7 +205,7 @@ Migrations (run once in Supabase SQL editor):
 - ⚠️ Do NOT re-run `pnpm seed:ai:apply` on an existing review file — no idempotency guard, will create duplicate concept rows. See `docs/completed-features.md` Feat-E for cleanup procedure.
 
 ### Key Shared Components & Utilities
-- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, LEVEL_CHIP
+- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
 - `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map)
 - `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
 - `src/lib/hooks/useSpeech.ts` — TTS hook; `src/components/SpeakButton.tsx` — speaker button (wired in all 5 exercise types)
@@ -219,6 +213,7 @@ Migrations (run once in Supabase SQL editor):
 - `src/components/exercises/ExerciseRenderer.tsx` — shared exercise switch
 - `src/components/exercises/FreeWritePrompt.tsx` — AI prompt + textarea + SpeakButton + MicButton; used by WriteSession
 - `src/components/ErrorBoundary.tsx` — wraps StudySession, DiagnosticSession, WriteSession
+- `src/components/HardFlagButton.tsx` — orange Flag icon; optimistic toggle with revert on failure; rate-limited via `/api/concepts/[id]/hard`
 - `src/lib/rate-limit.ts` — `checkRateLimit(userId, routeKey, opts)` sliding-window (backed by @vercel/kv)
 - `src/lib/api-utils.ts` — `updateStreakIfNeeded` + `updateComputedLevel` shared by submit + grade
 
