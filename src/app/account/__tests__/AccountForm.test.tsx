@@ -17,6 +17,7 @@ const baseProfile: Profile = {
   onboarding_completed: true,
   push_subscription: null,
   theme_preference: 'system',
+  is_admin: false,
 }
 
 function renderWithTheme(ui: React.ReactElement) {

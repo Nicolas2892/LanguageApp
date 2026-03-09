@@ -267,6 +267,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/013_hard_flag.sql` — `user_progress.is_hard boolean NOT NULL DEFAULT false`
 - `supabase/migrations/014_verb_conjugation.sql` — `verbs`, `verb_sentences`, `user_verb_favorites`, `verb_progress` tables + `increment_verb_progress(p_user_id, p_verb_id, p_tense, p_correct)` RPC
 - `supabase/migrations/015_verb_conjugations.sql` — `verb_conjugations` table (full 6-pronoun paradigm + stem per verb × tense)
+- `supabase/migrations/016_is_admin.sql` — `profiles.is_admin boolean NOT NULL DEFAULT false`; run `UPDATE profiles SET is_admin = true WHERE id = '<uuid>'` after applying
 
 ### Dashboard Stats
 
@@ -370,6 +371,15 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Pedagogical / Learning Quality
 
+**Ped-J: New curriculum module — Conversational / Pragmatic Markers** *(content + seed work required)*
+
+- Add a new module covering colloquial spoken discourse markers (*marcadores conversacionales* / *muletillas*) — distinct from Module 1 which covers formal written connectors (*sin embargo*, *por tanto*, etc.).
+- Target concepts (indicative, ~10–15): *o sea*, *entonces*, *bueno*, *pues*, *es que*, *a ver*, *o sea que*, *vamos*, *hombre/mujer*, *venga*, *eso sí*, *de hecho* (spoken register), *en plan*, *tipo* (colloquial hedges).
+- Key distinction to encode in exercises: register awareness — knowing *when* these are appropriate (spoken vs. written, formal vs. casual) is as important as knowing the meaning.
+- Suggested exercise types: gap_fill (insert the right marker in a dialogue), transformation (rewrite formal sentence using colloquial marker), error_correction (inappropriate register), translation (capture pragmatic nuance in English).
+- Implementation: add concepts to `src/lib/curriculum/curriculum-plan.ts`, then run `pnpm seed:ai` + `pnpm seed:ai:apply` to generate exercises.
+- **Content design required first** — map the ~10–15 concepts and their register rules before seeding. Do not seed without a reviewed concept list.
+
 **Ped-F: Shared AI-generated exercise pool + adaptive grading strategy** *(PM research required before implementation)*
 
 - Currently, drill mode generates exercises per-user on demand, wasting tokens. AI-generated exercises should insert into the shared `exercises` table and be served to all users.
@@ -396,6 +406,26 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Bugs / Layout Fixes
 
+**Fix-L: Verb tense mastery chart on progress page** *(medium priority)*
+
+- Add a dedicated chart to `/progress` showing accuracy per tense across all verb conjugation drills, as a visual complement to the existing `VerbTenseMastery` accuracy bars.
+- Suggested format: horizontal bar chart (matching `ExerciseTypeChart` style) with one bar per tense, coloured by mastery tier (e.g. red < 60%, amber 60–80%, green > 80%).
+- Data source: `verb_progress` table — aggregate `correct_count / attempt_count` per tense for the logged-in user.
+- Place the chart in its own card section below the existing `VerbTenseMastery` bars, or replace/extend that component.
+- Use recharts (already a dependency) consistent with existing progress page charts.
+
+**Fix-K: PWA performance improvements — implement as one batch** *(medium priority)*
+
+All three items below should be shipped together in a single PR:
+
+1. **App shell pre-caching** — pre-cache key routes (`/dashboard`, `/study`, `/verbs`, etc.) at SW install time so navigation is instant even on slow connections. Update `public/sw.js` install handler to populate cache with shell assets.
+2. **Stale-while-revalidate for page navigation** — serve cached page HTML instantly, revalidate in background. Improves perceived speed on repeat visits; auth-gated pages need care (serve skeleton, not stale data).
+3. **Font + icon pre-caching** — add fonts and PWA icons to the SW pre-cache manifest so they never block first render.
+
+- Current SW (`public/sw.js`) already handles `/_next/static/` cache-first — this covers ~80% of the gain. Items above cover the remaining 20%.
+- iOS PWA cache limit: 50MB per origin — not a concern at current asset sizes.
+- **Do not implement as separate PRs** — batch all three SW changes together to avoid multiple cache version bumps.
+
 **Fix-J: STT (speech-to-text) broken on free-write page — investigate and replace Web Speech API** *(high priority — iOS is primary target)*
 
 - Current implementation uses the Web Speech API (`useSpeechRecognition.ts` / `MicButton.tsx`) which is Chromium-only (Chrome, Edge, Arc). Not supported on Safari or Firefox.
@@ -417,9 +447,16 @@ Items are ordered by priority within each group. Full details of completed work 
 
 **Strat-A: Conjugation mode** ✅ **COMPLETE** — see `/verbs` route family above.
 
-**Strat-B: Admin content panel** *(deferred — implement when content iteration becomes a bottleneck)*
+**Strat-B: Admin content panel** ✅ **COMPLETE**
 
-- `/admin` route gated by `is_admin boolean` on `profiles`; read-only v1 (concept/exercise list with attempt counts); stretch: inline edit.
+- `/admin` route family gated by `is_admin boolean` on `profiles` (migration 016)
+- Overview: content counts (fast) + cross-user usage stats (Suspense/service role)
+- Curriculum: module→unit→concept tree + per-concept stats table (deferred)
+- Exercises: filterable list (concept + type filters, no-JS GET form) + inline edit (STRETCH)
+- Edit page: `PATCH /api/admin/exercises/[id]` — is_admin check + Zod validation
+- Admin link surfaced on `/account` page only when `is_admin = true`
+- SideNav + BottomNav hidden on `/admin` routes; admin layout has its own tab nav
+- Service role client: `src/lib/supabase/service.ts` (server-only)
 
 **1Strat-C: Evaluate Claude API audio for pronunciation exercises** *(future research only)*
 
@@ -432,6 +469,8 @@ Items are ordered by priority within each group. Full details of completed work 
 ## Recommended Next Steps (priority order)
 
 1. **Fix-J** — STT replacement for iOS Safari (PM decision on vendor first)
-3. **Strat-B** — Admin content panel (when content iteration becomes a bottleneck)
-4. **Feat-F** — Offline exercise packs (PM decision on conflict resolution first)
+2. **Fix-L** — Verb tense mastery chart on progress page
+3. **Fix-K** — PWA performance improvements (batch: pre-cache shell + stale-while-revalidate + fonts)
+4. ~~**Strat-B**~~ — Admin content panel ✅ done
+5. **Feat-F** — Offline exercise packs (PM decision on conflict resolution first)
 

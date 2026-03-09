@@ -27,6 +27,7 @@ export interface Database {
           onboarding_completed: boolean
           push_subscription: Json | null
           theme_preference: 'light' | 'dark' | 'system'
+          is_admin: boolean
         }
         Insert: {
           id: string
@@ -40,6 +41,7 @@ export interface Database {
           onboarding_completed?: boolean
           push_subscription?: Json | null
           theme_preference?: 'light' | 'dark' | 'system'
+          is_admin?: boolean
         }
         Update: {
           id?: string
@@ -53,6 +55,7 @@ export interface Database {
           onboarding_completed?: boolean
           push_subscription?: Json | null
           theme_preference?: 'light' | 'dark' | 'system'
+          is_admin?: boolean
         }
         Relationships: []
       }

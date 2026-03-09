@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   { href: '/tutor',           label: 'Tutor',      Icon: Bot             },
 ]
 
-const HIDDEN_ROUTES = ['/auth', '/onboarding', '/brand-preview']
+const HIDDEN_ROUTES = ['/auth', '/onboarding', '/brand-preview', '/admin']
 
 interface Props {
   userInitials: string

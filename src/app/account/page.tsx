@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getInitials } from '@/lib/utils'
 import { UserAvatar } from '@/components/UserAvatar'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { Button } from '@/components/ui/button'
 import { AccountForm } from './AccountForm'
 import { SecurityForm } from './SecurityForm'
 import { DangerZone } from './DangerZone'
@@ -66,6 +68,18 @@ export default async function AccountPage() {
       <div className="bg-card rounded-xl border p-5">
         <DangerZone />
       </div>
+
+      {profile.is_admin && (
+        <div className="bg-card rounded-xl border p-5 flex items-center justify-between">
+          <div>
+            <p className="font-semibold text-sm">Admin Panel</p>
+            <p className="text-xs text-muted-foreground">Content management</p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link href="/admin">Open →</Link>
+          </Button>
+        </div>
+      )}
 
       <IOSInstallCard />
     </main>
