@@ -278,7 +278,7 @@ function D1CurriculumContent() {
 
 function D1ExerciseContext() {
   return (
-    <div style={{ background: D1.surface, padding: '22px 18px', borderRadius: 14, border: `1px solid #e5d5c5` }}>
+    <div style={{ background: '#ffffff', padding: '22px 18px', borderRadius: 14, border: '1px solid #e5e7eb' }}>
       {/* Session header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <div style={{ fontSize: 12, color: D1.muted, fontWeight: 600 }}>aunque + subjunctive</div>
@@ -474,7 +474,7 @@ function D2CurriculumContent() {
 
 function D2ExerciseContext() {
   return (
-    <div style={{ background: D2.cream, padding: '22px 18px', borderRadius: 14, border: '1px solid #d1c8b0' }}>
+    <div style={{ background: '#ffffff', padding: '22px 18px', borderRadius: 14, border: '1px solid #e5e7eb' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <div style={{ fontSize: 14, color: D2.primary, fontWeight: 600, fontFamily: 'var(--font-cormorant), serif' } as React.CSSProperties}>aunque + subjunctive</div>
         <div style={{ display: 'flex', gap: 3 }}>
@@ -664,7 +664,7 @@ function D3CurriculumContent() {
 
 function D3ExerciseContext() {
   return (
-    <div style={{ background: D3.paper, padding: '22px 18px', borderRadius: 14, border: '1px solid #d4c9b8' }}>
+    <div style={{ background: '#ffffff', padding: '22px 18px', borderRadius: 14, border: '1px solid #e5e7eb' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <div style={{ fontSize: 12, color: D3.mid, fontWeight: 600 }}>aunque + subjunctive</div>
         <div style={{ display: 'flex', gap: 3 }}>
@@ -777,13 +777,13 @@ function Direction1Panel() {
       </Section>
 
       <Section label="Dashboard Page">
-        <PhoneFrame bg={D1.surface} bottomNav={<D1BottomNav active="home" />}>
+        <PhoneFrame bg="#ffffff" bottomNav={<D1BottomNav active="home" />}>
           <D1DashboardContent />
         </PhoneFrame>
       </Section>
 
       <Section label="Curriculum Page">
-        <PhoneFrame bg={D1.surface} bottomNav={<D1BottomNav active="list" />}>
+        <PhoneFrame bg="#ffffff" bottomNav={<D1BottomNav active="list" />}>
           <D1CurriculumContent />
         </PhoneFrame>
       </Section>
@@ -825,13 +825,13 @@ function Direction2Panel() {
       </Section>
 
       <Section label="Dashboard Page">
-        <PhoneFrame bg={D2.cream} bottomNav={<D2BottomNav active="home" />}>
+        <PhoneFrame bg="#ffffff" bottomNav={<D2BottomNav active="home" />}>
           <D2DashboardContent />
         </PhoneFrame>
       </Section>
 
       <Section label="Curriculum Page">
-        <PhoneFrame bg={D2.cream} bottomNav={<D2BottomNav active="list" />}>
+        <PhoneFrame bg="#ffffff" bottomNav={<D2BottomNav active="list" />}>
           <D2CurriculumContent />
         </PhoneFrame>
       </Section>
@@ -871,13 +871,13 @@ function Direction3Panel() {
       </Section>
 
       <Section label="Dashboard Page">
-        <PhoneFrame bg={D3.paper} bottomNav={<D3BottomNav active="home" />}>
+        <PhoneFrame bg="#ffffff" bottomNav={<D3BottomNav active="home" />}>
           <D3DashboardContent />
         </PhoneFrame>
       </Section>
 
       <Section label="Curriculum Page">
-        <PhoneFrame bg={D3.paper} bottomNav={<D3BottomNav active="list" />}>
+        <PhoneFrame bg="#ffffff" bottomNav={<D3BottomNav active="list" />}>
           <D3CurriculumContent />
         </PhoneFrame>
       </Section>
