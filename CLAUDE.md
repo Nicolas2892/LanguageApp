@@ -237,7 +237,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1199 tests across 37 files — all passing.**
+**Test suite: 1226 tests across 40 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -264,14 +264,11 @@ Items are ordered by priority within each group. Full details of completed work 
 - Surface as a card on dashboard (when mistake count > 0) and as an option in `/study/configure`.
 - No new DB schema needed. Dedup: one concept per session (most-recent failed attempt).
 
-**Ped-I: Concept grammar cheat-sheet**
-- Before the first exercise of a concept in a session, show a collapsible accordion with a 2–3 sentence grammar rule summary.
-- Requires `grammar_summary text` column on `concepts` (migration + seed script similar to `pnpm annotate`).
-- Collapsed by default after first concept in session.
-
-**Ped-J: "Hard" flag on a concept**
-- `is_hard boolean DEFAULT false` on `user_progress`. Toggle via flag icon in feedback panel and curriculum row.
-- Weight rule: if `is_hard = true`, treat due_date as always today (or halve interval multiplier). No new API route needed.
+**Ped-I: Concept explanation content audit** *(very low priority — content only, no code)*
+- A "Concept Notes" collapsible already exists in `StudySession.tsx` showing `concept.explanation`. No new column or UI needed.
+- Audit whether existing `explanation` values are concise and rule-focused enough to be useful at exercise time, or whether they are too wordy/vague.
+- If poor quality: rewrite via a Claude batch script (similar to `pnpm annotate`) — no DB schema change required.
+- **Do not implement until the core learning loop is stable and content quality becomes a measurable problem.**
 
 ### New Features
 
@@ -326,6 +323,17 @@ Items are ordered by priority within each group. Full details of completed work 
 - Trade-offs: higher accuracy on learner speech; +1–3s latency; per-call cost; needs `/api/transcribe` + `MediaRecorder`.
 - **Do not implement without a defined pronunciation exercise type and PM decision on accuracy requirements.**
 
+**Fix-J: STT (speech-to-text) broken on free-write page — investigate and replace Web Speech API** *(bug + research)*
+- Current implementation uses the Web Speech API (`useSpeechRecognition.ts` / `MicButton.tsx`) which is Chromium-only (Chrome, Edge, Arc). Not supported on Safari or Firefox.
+- iPhone users (Safari) cannot use dictation at all — this is a critical gap given iOS is a primary target platform.
+- **Investigation needed**: reproduce the Edge bug (mic icon present but STT produces no transcript); confirm whether it's a permissions issue, CSP header conflict, or API availability.
+- **Replacement candidates to evaluate**:
+  1. **Google Cloud Speech-to-Text API** — broad browser/device support via `MediaRecorder` + server-side `/api/transcribe`; cost ~$0.006/15s; requires `GOOGLE_STT_API_KEY` env var.
+  2. **OpenAI Whisper API** — high accuracy on learner speech; similar `MediaRecorder` pattern; $0.006/min; already in Vercel infra pattern.
+  3. **Claude API audio input** — see Strat-C; higher latency but no extra vendor.
+- **Acceptance criteria**: STT works on iOS Safari + Chrome + Edge; graceful fallback (hidden mic button) on unsupported environments.
+- **Do not implement without a PM decision on vendor, cost model, and whether to keep Web Speech API as a fast-path for Chrome.**
+
 ---
 
 ## Recommended Next Steps (priority order)
@@ -335,8 +343,6 @@ Items are ordered by priority within each group. Full details of completed work 
 2. Fix-H — Curriculum "Practice" minimum 5 exercises
 3. Ped-G — Mistake review mode
 4. UX-W — Exercise UI clarity audit (design review before implementing)
-5. Ped-I — Grammar cheat-sheet (`grammar_summary` column + collapsible card)
-6. Ped-J — "Hard" flag on a concept
 
 ### Growth features (deferred)
 - Strat-A — Conjugation mode (deep PM/UX research first)
