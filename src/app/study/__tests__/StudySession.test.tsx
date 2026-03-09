@@ -70,15 +70,48 @@ function makeExercise(id: string): Exercise {
   }
 }
 
-const mockGradeResult = {
+const mockScoreChunk = {
   score: 3,
   is_correct: true,
-  feedback: 'Great job!',
-  corrected_version: '',
-  explanation: 'Well done.',
   next_review_in_days: 7,
   just_mastered: false,
   mastered_concept_title: null,
+}
+const mockDetailsChunk = {
+  feedback: 'Great job!',
+  corrected_version: '',
+  explanation: 'Well done.',
+}
+const mockGradeResult = { ...mockScoreChunk, ...mockDetailsChunk }
+
+/** Build a streaming NDJSON Response for /api/submit */
+function makeStreamingSubmitResponse(overrides: {
+  score?: number; is_correct?: boolean; next_review_in_days?: number
+  just_mastered?: boolean; mastered_concept_title?: string | null
+  feedback?: string; corrected_version?: string; explanation?: string
+} = {}) {
+  const combined = { ...mockGradeResult, ...overrides }
+  const scoreChunk = {
+    score: combined.score,
+    is_correct: combined.is_correct,
+    next_review_in_days: combined.next_review_in_days,
+    just_mastered: combined.just_mastered,
+    mastered_concept_title: combined.mastered_concept_title,
+  }
+  const detailsChunk = {
+    feedback: combined.feedback,
+    corrected_version: combined.corrected_version,
+    explanation: combined.explanation,
+  }
+  const encoder = new TextEncoder()
+  const body = new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(JSON.stringify(scoreChunk) + '\n'))
+      controller.enqueue(encoder.encode(JSON.stringify(detailsChunk) + '\n'))
+      controller.close()
+    },
+  })
+  return new Response(body, { status: 200, headers: { 'Content-Type': 'application/x-ndjson' } })
 }
 
 function makeItem(exerciseId = 'exercise-1'): StudyItem {
@@ -88,7 +121,7 @@ function makeItem(exerciseId = 'exercise-1'): StudyItem {
 function makeFetch(opts: { generateFails?: boolean } = {}) {
   return vi.fn().mockImplementation((url: string) => {
     if (url === '/api/submit') {
-      return Promise.resolve({ ok: true, json: () => Promise.resolve(mockGradeResult) })
+      return Promise.resolve(makeStreamingSubmitResponse())
     }
     if (url === '/api/sessions/complete') {
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
@@ -254,14 +287,7 @@ describe('StudySession — UX-AA mastery overlay', () => {
   it('shows overlay with concept title when just_mastered is true', async () => {
     global.fetch = vi.fn().mockImplementation((url: string) => {
       if (url === '/api/submit') {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({
-            ...mockGradeResult,
-            just_mastered: true,
-            mastered_concept_title: 'El Subjuntivo',
-          }),
-        })
+        return Promise.resolve(makeStreamingSubmitResponse({ just_mastered: true, mastered_concept_title: 'El Subjuntivo' }))
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
     })
@@ -275,14 +301,7 @@ describe('StudySession — UX-AA mastery overlay', () => {
   it('"Continue" button closes the overlay', async () => {
     global.fetch = vi.fn().mockImplementation((url: string) => {
       if (url === '/api/submit') {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({
-            ...mockGradeResult,
-            just_mastered: true,
-            mastered_concept_title: 'Test Concept',
-          }),
-        })
+        return Promise.resolve(makeStreamingSubmitResponse({ just_mastered: true, mastered_concept_title: 'Test Concept' }))
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
     })
@@ -297,14 +316,7 @@ describe('StudySession — UX-AA mastery overlay', () => {
     const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout')
     global.fetch = vi.fn().mockImplementation((url: string) => {
       if (url === '/api/submit') {
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({
-            ...mockGradeResult,
-            just_mastered: true,
-            mastered_concept_title: 'El Subjuntivo',
-          }),
-        })
+        return Promise.resolve(makeStreamingSubmitResponse({ just_mastered: true, mastered_concept_title: 'El Subjuntivo' }))
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
     })
@@ -321,14 +333,7 @@ describe('StudySession — UX-AA mastery overlay', () => {
     global.fetch = vi.fn().mockImplementation((url: string) => {
       if (url === '/api/submit') {
         callCount++
-        return Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({
-            ...mockGradeResult,
-            just_mastered: true,
-            mastered_concept_title: 'El Subjuntivo',
-          }),
-        })
+        return Promise.resolve(makeStreamingSubmitResponse({ just_mastered: true, mastered_concept_title: 'El Subjuntivo' }))
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
     })
@@ -363,7 +368,7 @@ describe('StudySession — Fix-I drill generation disables Next button', () => {
     // Never resolve the generate call so generatingMore stays true
     global.fetch = vi.fn().mockImplementation((url: string) => {
       if (url === '/api/submit') {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve(mockGradeResult) })
+        return Promise.resolve(makeStreamingSubmitResponse())
       }
       if (url === '/api/sessions/complete') {
         return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
@@ -431,10 +436,7 @@ describe('StudySession — UX-W hint panel gating', () => {
   })
 
   it('renders HintPanel in answering phase after clicking Try again following a wrong answer', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ ...mockGradeResult, score: 0, is_correct: false }),
-    })
+    global.fetch = vi.fn().mockResolvedValue(makeStreamingSubmitResponse({ score: 0, is_correct: false }))
     render(<StudySession items={[makeItemWithHint(), makeItemWithHint('e2')]} />)
     expect(screen.queryByTestId('hint-panel')).toBeNull()
     // Submit wrong answer → feedback phase shows Try again button
@@ -447,10 +449,7 @@ describe('StudySession — UX-W hint panel gating', () => {
   })
 
   it('hint panel is hidden again after advancing to next exercise (wrongAttempts resets)', async () => {
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ ...mockGradeResult, score: 0, is_correct: false }),
-    })
+    global.fetch = vi.fn().mockResolvedValue(makeStreamingSubmitResponse({ score: 0, is_correct: false }))
     render(<StudySession items={[makeItemWithHint(), makeItemWithHint('e2')]} />)
     await userEvent.click(screen.getByTestId('submit-exercise'))
     await waitFor(() => screen.getByTestId('next-btn'))

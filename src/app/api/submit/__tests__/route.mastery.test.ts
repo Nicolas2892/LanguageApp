@@ -6,7 +6,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { POST } from '../route'
 import { createClient } from '@/lib/supabase/server'
-import { gradeAnswer } from '@/lib/claude/grader'
+import { gradeAnswerStream } from '@/lib/claude/grader'
+import type { ScoreChunk, DetailsChunk } from '@/lib/claude/grader'
 
 vi.mock('@/lib/supabase/server')
 vi.mock('@/lib/claude/client', () => ({
@@ -62,12 +63,31 @@ const mockConcept = {
   examples: [],
 }
 
-const mockGradeResult = {
+const mockScoreChunk: ScoreChunk = {
+  type: 'score',
   score: 3 as SRSScore,
   is_correct: true,
+}
+
+const mockDetailsChunk: DetailsChunk = {
+  type: 'details',
   feedback: 'Perfecto!',
   corrected_version: '',
   explanation: 'Great.',
+}
+
+/** Read a streaming Response body and return the merged object from both NDJSON lines */
+async function readNDJSONMerged(res: Response): Promise<Record<string, unknown>> {
+  const text = await res.text()
+  const lines = text.split('\n').filter((l) => l.trim())
+  return Object.assign({}, ...lines.map((l) => JSON.parse(l) as object)) as Record<string, unknown>
+}
+
+function makeStreamGen(scoreChunk = mockScoreChunk, detailsChunk = mockDetailsChunk) {
+  return (async function* () {
+    yield scoreChunk
+    yield detailsChunk
+  })()
 }
 
 function setupMocks(prevIntervalDays: number, newIntervalDays: number) {
@@ -102,7 +122,7 @@ function setupMocks(prevIntervalDays: number, newIntervalDays: number) {
             eq: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
                 single: vi.fn().mockResolvedValue({
-                  data: { ease_factor: 2.5, interval_days: prevIntervalDays, repetitions: 3, due_date: '2026-01-01', production_mastered: false },
+                  data: { ease_factor: 2.5, interval_days: prevIntervalDays, repetitions: 3, due_date: '2026-01-01', production_mastered: false, is_hard: false },
                   error: null,
                 }),
               }),
@@ -133,7 +153,7 @@ function setupMocks(prevIntervalDays: number, newIntervalDays: number) {
     due_date: '2026-06-01',
   })
 
-  vi.mocked(gradeAnswer).mockResolvedValue(mockGradeResult)
+  vi.mocked(gradeAnswerStream).mockImplementation(() => makeStreamGen())
 
   vi.mocked(createClient).mockResolvedValue({
     auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-1' } } }) },
@@ -158,7 +178,7 @@ describe('POST /api/submit — UX-AA just_mastered flag', () => {
     setupMocks(MASTERY_THRESHOLD, MASTERY_THRESHOLD + 10)
     const res = await POST(makeRequest())
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await readNDJSONMerged(res)
     expect(body.just_mastered).toBe(false)
     expect(body.mastered_concept_title).toBeNull()
   })
@@ -167,7 +187,7 @@ describe('POST /api/submit — UX-AA just_mastered flag', () => {
     setupMocks(5, 10)
     const res = await POST(makeRequest())
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await readNDJSONMerged(res)
     expect(body.just_mastered).toBe(false)
   })
 
@@ -175,7 +195,7 @@ describe('POST /api/submit — UX-AA just_mastered flag', () => {
     setupMocks(15, MASTERY_THRESHOLD)
     const res = await POST(makeRequest())
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await readNDJSONMerged(res)
     expect(body.just_mastered).toBe(true)
     expect(body.mastered_concept_title).toBe('El Subjuntivo')
   })
@@ -184,7 +204,7 @@ describe('POST /api/submit — UX-AA just_mastered flag', () => {
     setupMocks(15, MASTERY_THRESHOLD)
     const res = await POST(makeRequest({ skip_srs: true }))
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = await readNDJSONMerged(res)
     expect(body.just_mastered).toBe(false)
     expect(body.mastered_concept_title).toBeNull()
   })

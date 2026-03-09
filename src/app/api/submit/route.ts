@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-import { gradeAnswer } from '@/lib/claude/grader'
+import { gradeAnswerStream } from '@/lib/claude/grader'
+import type { ScoreChunk, DetailsChunk } from '@/lib/claude/grader'
 import { sm2, DEFAULT_PROGRESS } from '@/lib/srs'
 import type { SRSScore } from '@/lib/srs'
 import type { Concept, Exercise, UserProgress } from '@/lib/supabase/types'
@@ -61,8 +62,8 @@ export async function POST(request: Request) {
     const typedExercise = exercise as Exercise
     const typedConcept = concept as Concept
 
-    // 2. Grade with Claude
-    const gradeResult = await gradeAnswer({
+    // 2. Start streaming grade response
+    const gradeGen = gradeAnswerStream({
       conceptTitle: typedConcept.title,
       conceptExplanation: typedConcept.explanation,
       exerciseType: typedExercise.type,
@@ -71,87 +72,117 @@ export async function POST(request: Request) {
       userAnswer: user_answer,
     })
 
-    let nextReviewInDays = 0
-    let justMastered = false
-
-    if (!skip_srs) {
-      // 3. Fetch current user_progress (or use defaults if first time)
-      const { data: existingProgress } = await supabase
-        .from('user_progress')
-        .select('ease_factor, interval_days, repetitions, due_date, production_mastered, is_hard')
-        .eq('user_id', user.id)
-        .eq('concept_id', concept_id)
-        .single()
-
-      const prevIntervalDays = existingProgress?.interval_days ?? 0
-
-      const currentProgress = existingProgress ?? {
-        ...DEFAULT_PROGRESS,
-        user_id: user.id,
-        concept_id,
-      }
-
-      // 4. Calculate new SRS values
-      const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore)
-
-      // Apply hard-flag multiplier on correct answers to schedule ~40% more frequently
-      if (existingProgress?.is_hard && gradeResult.score >= 2) {
-        newSRS.interval_days = Math.max(1, Math.round(newSRS.interval_days * HARD_INTERVAL_MULTIPLIER))
-        const due = new Date()
-        due.setDate(due.getDate() + newSRS.interval_days)
-        newSRS.due_date = due.toISOString().split('T')[0]
-      }
-
-      nextReviewInDays = newSRS.interval_days
-      justMastered = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD
-
-      // 5. Upsert user_progress
-      await supabase
-        .from('user_progress')
-        .upsert({
-          user_id: user.id,
-          concept_id,
-          ease_factor: newSRS.ease_factor,
-          interval_days: newSRS.interval_days,
-          due_date: newSRS.due_date,
-          repetitions: newSRS.repetitions,
-          last_reviewed_at: new Date().toISOString(),
-        }, { onConflict: 'user_id,concept_id' })
-
-    }
-
-    // Fire-and-forget: record attempt + streak + production_mastered + computed level
+    const encoder = new TextEncoder()
     const isProductionType = (PRODUCTION_TYPES as readonly string[]).includes(typedExercise.type)
-    const bgOps: PromiseLike<unknown>[] = [
-      supabase.from('exercise_attempts').insert({
-        user_id: user.id,
-        exercise_id,
-        user_answer,
-        is_correct: gradeResult.is_correct,
-        ai_score: gradeResult.score,
-        ai_feedback: gradeResult.feedback,
-      }),
-      updateStreakIfNeeded(supabase, user.id),
-    ]
-    if (!skip_srs) {
-      if (isProductionType && gradeResult.score >= 2) {
-        bgOps.push(
-          supabase
-            .from('user_progress')
-            .update({ production_mastered: true })
-            .eq('user_id', user.id)
-            .eq('concept_id', concept_id),
-        )
-      }
-      bgOps.push(updateComputedLevel(supabase, user.id))
-    }
-    Promise.all(bgOps).catch(console.error)
 
-    return NextResponse.json({
-      ...gradeResult,
-      next_review_in_days: nextReviewInDays,
-      just_mastered: justMastered,
-      mastered_concept_title: justMastered ? typedConcept.title : null,
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          // --- Chunk 1: score + SRS ---
+          const scoreResult = await gradeGen.next()
+          const { score, is_correct } = scoreResult.value as ScoreChunk
+
+          let nextReviewInDays = 0
+          let justMastered = false
+
+          if (!skip_srs) {
+            // Fetch current user_progress (or use defaults if first time)
+            const { data: existingProgress } = await supabase
+              .from('user_progress')
+              .select('ease_factor, interval_days, repetitions, due_date, production_mastered, is_hard')
+              .eq('user_id', user.id)
+              .eq('concept_id', concept_id)
+              .single()
+
+            const prevIntervalDays = existingProgress?.interval_days ?? 0
+
+            const currentProgress = existingProgress ?? {
+              ...DEFAULT_PROGRESS,
+              user_id: user.id,
+              concept_id,
+            }
+
+            // Calculate new SRS values
+            const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, score as SRSScore)
+
+            // Apply hard-flag multiplier on correct answers to schedule ~40% more frequently
+            if (existingProgress?.is_hard && score >= 2) {
+              newSRS.interval_days = Math.max(1, Math.round(newSRS.interval_days * HARD_INTERVAL_MULTIPLIER))
+              const due = new Date()
+              due.setDate(due.getDate() + newSRS.interval_days)
+              newSRS.due_date = due.toISOString().split('T')[0]
+            }
+
+            nextReviewInDays = newSRS.interval_days
+            justMastered = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD
+
+            // Upsert user_progress before emitting chunk 1
+            await supabase
+              .from('user_progress')
+              .upsert({
+                user_id: user.id,
+                concept_id,
+                ease_factor: newSRS.ease_factor,
+                interval_days: newSRS.interval_days,
+                due_date: newSRS.due_date,
+                repetitions: newSRS.repetitions,
+                last_reviewed_at: new Date().toISOString(),
+              }, { onConflict: 'user_id,concept_id' })
+          }
+
+          controller.enqueue(encoder.encode(JSON.stringify({
+            score,
+            is_correct,
+            next_review_in_days: nextReviewInDays,
+            just_mastered: justMastered,
+            mastered_concept_title: justMastered ? typedConcept.title : null,
+          }) + '\n'))
+
+          // --- Chunk 2: feedback details ---
+          const detailsResult = await gradeGen.next()
+          const { feedback, corrected_version, explanation } = detailsResult.value as DetailsChunk
+
+          controller.enqueue(encoder.encode(JSON.stringify({ feedback, corrected_version, explanation }) + '\n'))
+
+          controller.close()
+
+          // Fire-and-forget: record attempt + streak + production_mastered + computed level
+          const bgOps: PromiseLike<unknown>[] = [
+            supabase.from('exercise_attempts').insert({
+              user_id: user.id,
+              exercise_id,
+              user_answer,
+              is_correct,
+              ai_score: score,
+              ai_feedback: feedback,
+            }),
+            updateStreakIfNeeded(supabase, user.id),
+          ]
+          if (!skip_srs) {
+            if (isProductionType && score >= 2) {
+              bgOps.push(
+                supabase
+                  .from('user_progress')
+                  .update({ production_mastered: true })
+                  .eq('user_id', user.id)
+                  .eq('concept_id', concept_id),
+              )
+            }
+            bgOps.push(updateComputedLevel(supabase, user.id))
+          }
+          Promise.all(bgOps).catch(console.error)
+        } catch (err) {
+          console.error('[submit] stream error:', err)
+          controller.error(err)
+        }
+      },
+    })
+
+    return new Response(readable, {
+      headers: {
+        'Content-Type': 'application/x-ndjson',
+        'X-Content-Type-Options': 'nosniff',
+      },
     })
   } catch (err) {
     console.error('[submit] error:', err)

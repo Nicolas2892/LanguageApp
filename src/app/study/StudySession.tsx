@@ -87,8 +87,11 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [generatingMore, setGeneratingMore] = useState(false)
   const [generateError, setGenerateError] = useState<string | null>(null)
+  const [streamingDetails, setStreamingDetails] = useState(false)
   const [flashClass, setFlashClass] = useState<string | null>(null)
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Holds details chunk that arrived before the 300ms flash timer fires
+  const pendingDetailsRef = useRef<{ feedback: string; corrected_version: string; explanation: string } | null>(null)
   const confettiFired = useRef(false)
   const autoGenerateTriggeredRef = useRef(false)
 
@@ -238,49 +241,112 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           ...(practiceMode && { skip_srs: true }),
         }),
       })
-      const result = await res.json()
-      if (!res.ok) {
+
+      if (!res.ok || !res.body) {
         setSubmitError('Something went wrong. Please try again.')
         setSubmitting(false)
         return
       }
-      const gradeResult = result as GradeResult & {
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      let scoreChunk: {
+        score: number
+        is_correct: boolean
         next_review_in_days: number
         just_mastered: boolean
         mastered_concept_title: string | null
-      }
-      setScores((s) => [...s, gradeResult.score])
+      } | null = null
 
-      // Track missed concepts (score < 2)
-      if (gradeResult.score < 2) {
-        setMissedConcepts((prev) => {
-          if (prev.some((c) => c.id === current.concept.id)) return prev
-          return [...prev, { id: current.concept.id, title: current.concept.title }]
-        })
-      }
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        buffer += decoder.decode(value, { stream: true })
 
-      // UX-AA: show mastery milestone overlay (once per concept per session)
-      if (
-        gradeResult.just_mastered &&
-        gradeResult.mastered_concept_title &&
-        !masteredConceptIdsThisSession.current.has(current.concept.id)
-      ) {
-        masteredConceptIdsThisSession.current.add(current.concept.id)
-        setMasteredConceptTitle(gradeResult.mastered_concept_title)
-        setMasteryOverlayOpen(true)
-        import('canvas-confetti').then(({ default: confetti }) => {
-          confetti({ particleCount: 60, spread: 50, origin: { y: 0.5 }, scalar: 0.8 })
-        }).catch(() => {})
-      }
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
 
-      if (!gradeResult.is_correct) setWrongAttempts((n) => n + 1)
-      const fc = gradeResult.score >= 2 ? 'animate-flash-green' : 'animate-flash-red'
-      setFlashClass(fc)
-      setSubmitting(false)
-      flashTimerRef.current = setTimeout(() => {
-        setState({ phase: 'feedback', result: gradeResult, userAnswer: answer })
-        setFlashClass(null)
-      }, 300)
+        for (const line of lines) {
+          if (!line.trim()) continue
+          const parsed = JSON.parse(line) as Record<string, unknown>
+
+          if ('score' in parsed && !scoreChunk) {
+            // Chunk 1: score + SRS data
+            scoreChunk = parsed as unknown as typeof scoreChunk
+
+            setScores((s) => [...s, parsed.score as number])
+
+            // Track missed concepts (score < 2)
+            if ((parsed.score as number) < 2) {
+              setMissedConcepts((prev) => {
+                if (prev.some((c) => c.id === current.concept.id)) return prev
+                return [...prev, { id: current.concept.id, title: current.concept.title }]
+              })
+            }
+
+            // UX-AA: show mastery milestone overlay (once per concept per session)
+            if (
+              parsed.just_mastered &&
+              parsed.mastered_concept_title &&
+              !masteredConceptIdsThisSession.current.has(current.concept.id)
+            ) {
+              masteredConceptIdsThisSession.current.add(current.concept.id)
+              setMasteredConceptTitle(parsed.mastered_concept_title as string)
+              setMasteryOverlayOpen(true)
+              import('canvas-confetti').then(({ default: confetti }) => {
+                confetti({ particleCount: 60, spread: 50, origin: { y: 0.5 }, scalar: 0.8 })
+              }).catch(() => {})
+            }
+
+            if (!parsed.is_correct) setWrongAttempts((n) => n + 1)
+            const fc = (parsed.score as number) >= 2 ? 'animate-flash-green' : 'animate-flash-red'
+            setFlashClass(fc)
+            setSubmitting(false)
+            setStreamingDetails(true)
+            pendingDetailsRef.current = null
+
+            const initialResult = {
+              score: parsed.score as GradeResult['score'],
+              is_correct: parsed.is_correct as boolean,
+              next_review_in_days: parsed.next_review_in_days as number,
+              just_mastered: parsed.just_mastered as boolean,
+              mastered_concept_title: parsed.mastered_concept_title as string | null,
+              feedback: '',
+              corrected_version: '',
+              explanation: '',
+            }
+
+            flashTimerRef.current = setTimeout(() => {
+              const details = pendingDetailsRef.current
+              setState({
+                phase: 'feedback',
+                result: details ? { ...initialResult, ...details } : initialResult,
+                userAnswer: answer,
+              })
+              setFlashClass(null)
+              if (details) {
+                setStreamingDetails(false)
+                pendingDetailsRef.current = null
+              }
+            }, 300)
+          } else if ('feedback' in parsed && scoreChunk) {
+            // Chunk 2: feedback details — may arrive before or after the flash timer fires
+            const details = {
+              feedback: parsed.feedback as string,
+              corrected_version: parsed.corrected_version as string,
+              explanation: parsed.explanation as string,
+            }
+            pendingDetailsRef.current = details
+            setState((prev) =>
+              prev.phase === 'feedback'
+                ? { ...prev, result: { ...prev.result, ...details } }
+                : prev,
+            )
+            setStreamingDetails(false)
+          }
+        }
+      }
     } catch {
       setSubmitError('Something went wrong. Please try again.')
       setSubmitting(false)
@@ -623,7 +689,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                 onNext={handleNext}
                 onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
                 isLast={isLast}
-                isGenerating={generatingMore}
+                isGenerating={generatingMore || streamingDetails}
               />
             </div>
           )}

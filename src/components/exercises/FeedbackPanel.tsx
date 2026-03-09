@@ -46,8 +46,12 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, 
           </div>
         </div>
 
-        {/* Feedback text */}
-        <p className="text-base">{result.feedback}</p>
+        {/* Feedback text — skeleton while streaming */}
+        {result.feedback === '' ? (
+          <div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
+        ) : (
+          <p className="text-base">{result.feedback}</p>
+        )}
 
         {/* Your answer vs correct */}
         <div className="space-y-2 text-sm">
@@ -70,12 +74,14 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, 
           )}
         </div>
 
-        {/* Explanation */}
-        {result.explanation && (
+        {/* Explanation — skeleton while streaming */}
+        {result.explanation === '' && result.feedback === '' ? (
+          <div className="h-4 w-1/2 bg-muted animate-pulse rounded" />
+        ) : result.explanation ? (
           <p className="text-sm text-muted-foreground border-l-2 border-muted-foreground/30 pl-3 italic">
             {result.explanation}
           </p>
-        )}
+        ) : null}
 
         <div className="flex flex-col sm:flex-row gap-2">
           {onTryAgain && (
