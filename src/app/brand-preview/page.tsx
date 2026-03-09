@@ -1,4 +1,4 @@
-import { Cormorant_Garamond, DM_Serif_Display } from 'next/font/google'
+import { Cormorant_Garamond, DM_Serif_Display, Plus_Jakarta_Sans } from 'next/font/google'
 import { BrandPreviewClient } from './BrandPreviewClient'
 
 const cormorant = Cormorant_Garamond({
@@ -14,9 +14,15 @@ const dmSerif = DM_Serif_Display({
   variable: '--font-dm-serif',
 })
 
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plus-jakarta',
+})
+
 export default function BrandPreviewPage() {
   return (
-    <div className={`${cormorant.variable} ${dmSerif.variable}`}>
+    <div className={`${cormorant.variable} ${dmSerif.variable} ${plusJakarta.variable}`}>
       <BrandPreviewClient />
     </div>
   )
