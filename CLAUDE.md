@@ -265,8 +265,8 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/011_streak_rpc.sql` — `increment_streak_if_new_day(p_user_id uuid)` atomic RPC
 - `supabase/migrations/012_push_due_count_rpc.sql` — `get_subscribers_with_due_counts(...)` RPC
 - `supabase/migrations/013_hard_flag.sql` — `user_progress.is_hard boolean NOT NULL DEFAULT false`
-- `supabase/migrations/014_verb_conjugation.sql` — `verbs`, `verb_sentences`, `user_verb_favorites`, `verb_progress` tables + `increment_verb_progress(p_user_id, p_verb_id, p_tense, p_correct)` RPC ⚠️ **pending — must be run before verb feature is usable**
-- `supabase/migrations/015_verb_conjugations.sql` — `verb_conjugations` table (full 6-pronoun paradigm + stem per verb × tense) ⚠️ **pending — run after 014**
+- `supabase/migrations/014_verb_conjugation.sql` — `verbs`, `verb_sentences`, `user_verb_favorites`, `verb_progress` tables + `increment_verb_progress(p_user_id, p_verb_id, p_tense, p_correct)` RPC
+- `supabase/migrations/015_verb_conjugations.sql` — `verb_conjugations` table (full 6-pronoun paradigm + stem per verb × tense)
 
 ### Dashboard Stats
 
@@ -292,13 +292,12 @@ Migrations (run once in Supabase SQL editor):
 
 ### Verb Seed Content
 
-**Status: code complete, DB migration + seed pending**
+**Status: LIVE — migrations 014 + 015 applied, all seed data in DB**
 
 - 100 verbs hard-coded in `src/lib/curriculum/run-seed-verbs.ts` (ranks 1–100)
-- 9 tenses × 100 verbs × 3 sentences = 2,700 minimum sentences to generate
-- Tenses (Spanish names): Presente de Indicativo, Pretérito Indefinido, Pretérito Imperfecto, Futuro Simple, Condicional Simple, Presente de Subjuntivo, Pretérito Imperfecto de Subjuntivo
-- To activate: (1) run migration 014 in Supabase SQL editor, (2) run migration 015, (3) `pnpm seed:verbs`, (4) `pnpm seed:verbs:apply docs/verb-sentences-YYYY-MM-DD.json`, (5) `pnpm seed:conjugations`, (6) `pnpm seed:conjugations:apply docs/verb-conjugations-YYYY-MM-DD.json`
-- `pnpm seed:conjugations` — generates full 6-pronoun paradigm + stem per verb × tense (350 combos) via Claude Haiku → `docs/verb-conjugations-YYYY-MM-DD.json`; resume-safe
+- 9 tenses × 100 verbs × 3 sentences = 2,700 `verb_sentences` rows in DB
+- 9 tenses × 100 verbs = 900 `verb_conjugations` rows in DB
+- `pnpm seed:conjugations` — generates full 6-pronoun paradigm + stem per verb × tense via Claude Haiku → `docs/verb-conjugations-YYYY-MM-DD.json`; resume-safe
 - `pnpm seed:conjugations:apply <file>` — upserts `verb_conjugations` rows; idempotent (ON CONFLICT DO UPDATE)
 
 ### Key Shared Components & Utilities
@@ -360,8 +359,6 @@ Migrations (run once in Supabase SQL editor):
 
 **CI: Fully green (TypeScript + lint + tests).**
 
-⚠️ **Verb feature pending activation**: migration 014 + `pnpm seed:verbs` + `pnpm seed:verbs:apply` must be run before `/verbs` is usable.
-
 → Full implementation history: `docs/completed-features.md`
 
 ---
@@ -370,16 +367,6 @@ Migrations (run once in Supabase SQL editor):
 
 Items are ordered by priority within each group. Full details of completed work in `docs/completed-features.md`.
 
-### Verb Feature — Activation Required
-
-**Verb-Activate: Run migrations + seeds before the verb feature is live**
-
-1. Paste `supabase/migrations/014_verb_conjugation.sql` into Supabase SQL editor and run
-2. Paste `supabase/migrations/015_verb_conjugations.sql` into Supabase SQL editor and run
-3. `NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm seed:verbs`
-4. `pnpm seed:verbs:apply docs/verb-sentences-YYYY-MM-DD.json`
-5. `NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm seed:conjugations`
-6. `pnpm seed:conjugations:apply docs/verb-conjugations-YYYY-MM-DD.json`
 
 ### Pedagogical / Learning Quality
 
@@ -444,8 +431,7 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ## Recommended Next Steps (priority order)
 
-1. **Verb-Activate** — run migration 014 + seed verbs to make the verb feature live
-2. **Fix-J** — STT replacement for iOS Safari (PM decision on vendor first)
+1. **Fix-J** — STT replacement for iOS Safari (PM decision on vendor first)
 3. **Strat-B** — Admin content panel (when content iteration becomes a bottleneck)
 4. **Feat-F** — Offline exercise packs (PM decision on conflict resolution first)
 
