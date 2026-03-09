@@ -20,14 +20,15 @@ interface Props {
 
 export function VerbDirectory({ verbs }: Props) {
   const [query, setQuery] = useState('')
+  const [irregularOnly, setIrregularOnly] = useState(false)
 
-  const filtered = query.trim()
-    ? verbs.filter(
-        (v) =>
-          v.infinitive.toLowerCase().includes(query.toLowerCase()) ||
-          v.english.toLowerCase().includes(query.toLowerCase()),
-      )
-    : verbs
+  const filtered = verbs
+    .filter((v) => !irregularOnly || v.verb_group === 'irregular')
+    .filter((v) =>
+      !query.trim() ||
+      v.infinitive.toLowerCase().includes(query.toLowerCase()) ||
+      v.english.toLowerCase().includes(query.toLowerCase()),
+    )
 
   return (
     <div className="space-y-4">
@@ -41,6 +42,20 @@ export function VerbDirectory({ verbs }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           className="w-full pl-9 pr-4 py-2.5 rounded-xl border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setIrregularOnly((v) => !v)}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+            irregularOnly
+              ? 'bg-primary/10 border-primary/30 text-primary'
+              : 'bg-background border-border text-muted-foreground hover:bg-muted'
+          }`}
+        >
+          Irregular only
+        </button>
       </div>
 
       {/* Grid */}
