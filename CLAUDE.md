@@ -162,7 +162,7 @@ All routed through shared `ExerciseRenderer` in `src/components/exercises/Exerci
 - Stored in `profiles.streak` and `profiles.last_studied_date`
 
 ### Hint System
-Wrong attempt 1 → shows `hint_1`. Wrong attempt 2 → shows `hint_2`. Wrong attempt 3+ → "Show worked example" button → calls `POST /api/hint` → Claude generates a fresh example. Resets on each new exercise.
+`HintPanel` is gated behind `wrongAttempts > 0` — not rendered on first attempt (progressive disclosure). Wrong attempt 1 → shows `hint_1`. Wrong attempt 2 → shows `hint_2`. Wrong attempt 3+ → "Show worked example" button → calls `POST /api/hint` → Claude generates a fresh example. Resets on each new exercise.
 
 ### AI Tutor
 - `src/lib/claude/tutor.ts` — `buildTutorSystemPrompt(ctx)` injects user name, level, current concept, up to 5 recent error feedbacks
@@ -240,7 +240,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1241 tests across 42 files — all passing.**
+**Test suite: 1239 tests across 42 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -261,11 +261,6 @@ Items are ordered by priority within each group. Full details of completed work 
 - Define a per-concept exercise cap (e.g. 10–15). If `COUNT >= cap`, return existing exercises randomly rather than generating new ones.
 - Open questions: deduplication strategy, whether stratified sampling by exercise type is needed, admin tooling (Strat-B) for curation.
 - **Do not implement without a written PM decision on cap, dedup, and grading model.**
-
-**Ped-G: Mistake review mode**
-- Pull from `exercise_attempts WHERE score <= 1` for the current user, re-queue as a dedicated "Review mistakes" session.
-- Surface as a card on dashboard (when mistake count > 0) and as an option in `/study/configure`.
-- No new DB schema needed. Dedup: one concept per session (most-recent failed attempt).
 
 **Ped-I: Concept explanation content audit** *(very low priority — content only, no code)*
 - A "Concept Notes" collapsible already exists in `StudySession.tsx` showing `concept.explanation`. No new column or UI needed.
@@ -288,13 +283,6 @@ Items are ordered by priority within each group. Full details of completed work 
 - Footer uses `position: fixed; left: 0; right: 0`, ignoring the `lg:ml-[220px]` sidebar layout wrapper.
 - Proper fix: restructure footer to render inside the layout wrapper using `sticky`, or read sidebar width at runtime via JS.
 - Do not attempt again without a clear plan — previous fixes introduced regressions.
-
-### UX Audits & Polish
-
-**UX-W: Exercise UI clarity audit** *(design review required before implementing)*
-- Exercise screen has too many simultaneous elements (progress counter, concept name, breadcrumb, 3 chips, prompt, input, hint dots, submit).
-- Principles: progressive disclosure, single focal point, collapse 3 chips into one muted metadata row, hide hint dots until first wrong attempt.
-- Audit tasks: inventory all elements in GapFill/TextAnswer/ErrorCorrection/SentenceBuilder/StudySession; produce before/after element count; prototype in StudySession header first.
 
 ### Performance
 
@@ -332,9 +320,7 @@ Items are ordered by priority within each group. Full details of completed work 
 ## Recommended Next Steps (priority order)
 
 ### Polish & effectiveness
-1. Ped-G — Mistake review mode (now surfaced in SessionConfig; backend already in `/study?mode=review`)
-2. UX-W — Exercise UI clarity audit (design review before implementing)
-3. Perf-A — Stream grading response
+1. Perf-A — Stream grading response
 
 ### Growth features (deferred)
 - Strat-A — Conjugation mode (deep PM/UX research first)

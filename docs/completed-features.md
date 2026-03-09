@@ -4,6 +4,31 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## UX-W: Exercise UI Clarity Audit ✓ (2026-03)
+
+1239 tests across 42 files, all passing.
+
+**Header compressed from 5 rows to 2 rows:**
+- Row 1: thin `h-1` progress bar + X exit button inline on the right
+- Row 2: `ConceptTitle · ExerciseType · [GrammarFocusChip] · N/Total · Notes ↓` — all `text-xs text-muted-foreground`
+
+**Removed from header:** session label badge, time estimate (`~N min`), and all supporting state (`submissionTimes`, `exerciseStartRef`). These were noise that didn't help mid-exercise.
+
+**Progressive disclosure — HintPanel gated:** `<HintPanel>` now only renders when `wrongAttempts > 0`, with a `fade-in duration-300` animation on first appearance. Previously hint dots were shown from attempt #1.
+
+**GrammarFocusChip added to header:** `GrammarFocusChip` (violet=Subjunctive, sky=Indicative, amber=Both) is now inline in the metadata row between exercise type and counter. Hidden when `grammar_focus` is null.
+
+**Concept Notes folded into metadata row:** was a full-width `bg-muted/50` button row (~40px); now an inline `Notes ↓/↑` toggle in the metadata line. Same expand/collapse logic and panel.
+
+**ErrorCorrection.tsx:** prompt `text-lg` → `text-xl` for consistency with all other exercise types.
+
+**Files changed:** `StudySession.tsx`, `ErrorCorrection.tsx`, `StudySession.test.tsx`
+**Tests:** removed 5 stale tests (badge, UX-Z time estimate); updated 3 UX-AB tests for new "Notes" label; added 3 new UX-W progressive-disclosure tests.
+
+**FeedbackPanel mock** in `StudySession.test.tsx` now exposes `onTryAgain?: () => void` as `data-testid="try-again-btn"` — needed for hint-panel gating tests.
+
+---
+
 ## UX-AH + Fix-H: Decouple SRS Review from Open Practice ✓ (2026-03)
 
 1241 tests across 42 files, all passing.
