@@ -93,10 +93,10 @@ function buildConjugationPrompt(infinitive: string, tense: string): string {
 The imperative has NO yo form — set yo to an empty string "".
 Use "el" for the usted form and "ellos" for the ustedes form.
 
-Also provide the "stem": the longest prefix shared by ALL non-empty forms (tu, el, nosotros, vosotros, ellos). Set stem to "" if no common prefix.
-
-Examples for hablar:
-- tu=habla, el=hable, nosotros=hablemos, vosotros=hablad, ellos=hablen → stem="habl"
+Also provide the "stem": the INFINITIVE STEM (verb root after removing -ar/-er/-ir).
+- hablar → "habl", comer → "com", vivir → "viv", encontrar → "encontr"
+- ser/ir → "" (fully suppletive)
+Do NOT use the common prefix of the conjugated forms.
 
 Return ONLY a JSON object, no other text:
 {
@@ -117,10 +117,10 @@ Use "el" for the usted form and "ellos" for the ustedes form.
 Store ONLY the verb form (without "no") — e.g. "hables" not "no hables".
 The negative imperative uses present subjunctive forms.
 
-Also provide the "stem": the longest prefix shared by ALL non-empty forms. Set stem to "" if no common prefix.
-
-Examples for hablar:
-- tu=hables, el=hable, nosotros=hablemos, vosotros=habléis, ellos=hablen → stem="habl"
+Also provide the "stem": the INFINITIVE STEM (verb root after removing -ar/-er/-ir).
+- hablar → "habl", comer → "com", vivir → "viv", encontrar → "encontr"
+- ser/ir → "" (fully suppletive)
+Do NOT use the common prefix of the conjugated forms.
 
 Return ONLY a JSON object, no other text:
 {
@@ -137,12 +137,17 @@ Return ONLY a JSON object, no other text:
   // Default: all 6 pronouns
   return `Provide the complete conjugation of the Spanish verb "${infinitive}" in the ${tenseLabel} tense for all 6 pronouns (yo, tú, él/ella, nosotros, vosotros, ellos/ellas).
 
-Also provide the "stem": the longest prefix shared by ALL 6 forms. If the forms have no common prefix (fully irregular), set stem to an empty string "".
+Also provide the "stem": the INFINITIVE STEM of the verb — the verb root obtained by removing the infinitive ending (-ar, -er, -ir).
+- hablar → stem "habl"
+- comer → stem "com"
+- vivir → stem "viv"
+- encontrar → stem "encontr" (even though boot forms change the stem vowel: encuentro, encuentras…)
+- tener → stem "ten" (even though yo=tengo is irregular)
+- ser → stem "" (no consistent root at all — fully suppletive)
+- ir → stem "" (fully suppletive: voy/vas/va…)
 
-Examples:
-- hablar, presente: yo=hablo, tú=hablas, él=habla, nosotros=hablamos, vosotros=habláis, ellos=hablan → stem="habl"
-- ser, presente: yo=soy, tú=eres, él=es, nosotros=somos, vosotros=sois, ellos=son → stem="" (fully irregular)
-- comer, presente: yo=como, tú=comes, él=come, nosotros=comemos, vosotros=coméis, ellos=comen → stem="com"
+Do NOT use the longest common prefix of the conjugated forms — use the infinitive root.
+Set stem to "" only when the verb is fully suppletive with no recoverable infinitive root.
 
 Return ONLY a JSON object, no other text:
 {

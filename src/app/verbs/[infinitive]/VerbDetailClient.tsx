@@ -42,15 +42,21 @@ interface Props {
   tenseData: TenseData[]
 }
 
+function stripAccents(s: string) {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
 function ColouredForm({ form, stem }: { form: string; stem: string }) {
-  if (stem === '' || !form.startsWith(stem)) {
-    // Fully irregular or stem mismatch — colour the whole form
+  // Colour the whole form if fully irregular or if stem doesn't match
+  // (accent-normalised comparison handles nosotros imperfecto: hablábamos vs stem "habl")
+  if (stem === '' || !stripAccents(form).startsWith(stripAccents(stem))) {
     return <span className="text-primary font-semibold">{form}</span>
   }
+  const stemPart = form.substring(0, stem.length)
   const ending = form.substring(stem.length)
   return (
     <>
-      <span className="text-muted-foreground">{stem}</span>
+      <span className="text-muted-foreground">{stemPart}</span>
       <span className="text-primary font-semibold">{ending}</span>
     </>
   )
