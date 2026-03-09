@@ -4,6 +4,43 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## UX-AH + Fix-H: Decouple SRS Review from Open Practice ✓ (2026-03)
+
+1241 tests across 42 files, all passing.
+
+**Two-mode mental model implemented:**
+- **SRS Review** — `due_date <= today` gate; entry via Dashboard Review card, Sprint, Mistake review, Learn new
+- **Open Practice** — no SRS gate; entry via Configure page (new mode button), all Curriculum Practice buttons, "Practice anyway"
+
+**`study/page.tsx` — core logic refactor:**
+- `isOpenPractice = params.practice === 'true'` — broad flag (replaces narrow `isPracticeMode`)
+- `isDrillMode = isOpenPractice && !!params.concept && filterTypes.length > 0` — narrow drill enabling AI generation
+- New query branch: unscoped Open Practice fetches whole catalog with no due-date filter
+- Open Practice item assembly: all exercises per concept (not 1 random)
+- `cycleToMinimum()` applied to all Open Practice paths → guarantees ≥ MIN_PRACTICE_SIZE=5 exercises (Fix-H)
+- `shouldInterleave` and `cappedItems` updated to use new flags
+- `sessionLabel` string computed and passed as prop to `StudySession`
+
+**`src/lib/practiceUtils.ts`** — new file: pure `cycleToMinimum(items, min)` helper; avoids consecutive duplicates when pool ≥ 2.
+
+**`src/lib/constants.ts`** — added `MIN_PRACTICE_SIZE = 5`.
+
+**`StudySession.tsx`** — `sessionLabel?: string` prop; renders in session header badge replacing generic `{type} practice` text.
+
+**`SessionConfig.tsx`** — three mode buttons (SRS Review / Open Practice / Review mistakes); `useSearchParams` for `?mode=practice` pre-selection; module picker label changes per mode ("whole catalog" vs "SRS due queue"); `handleStart` sets `practice=true` for Open Practice.
+
+**Curriculum hrefs** — all Practice buttons now carry `practice=true`:
+- `curriculum/page.tsx`: module, unit, concept Practice links
+- `curriculum/[id]/page.tsx`: "Practice all" button
+
+**`SprintCard.tsx`** — copy: label "Sprint" → "SRS Sprint"; headings clarified; module filter relabelled "Filter by module (SRS due only)".
+
+**`dashboard/page.tsx`** — "Practice anyway" → `/study/configure?mode=practice`.
+
+**New test files:** `SessionConfig.test.tsx` (7 tests), `practiceUtils.test.ts` (6 tests). Updated: `StudySession.test.tsx` (+2 sessionLabel tests), `SprintCard.test.tsx` (2 copy assertions).
+
+---
+
 ## Feat-H: Design & UX Review ✓ (2026-03)
 
 Full design polish pass. 1120 tests passing across 29 files.

@@ -121,13 +121,20 @@ ANTHROPIC_API_KEY
 | Param | Effect |
 |---|---|
 | _(none)_ | Default SRS due queue for today |
-| `?concept=<id>` | Practice a single concept (ignores due date) |
-| `?unit=<id>` | All concepts in a unit |
-| `?module=<id>` | All concepts in a module |
+| `?practice=true` | **Open Practice** — full catalog, no SRS due-date gate; guarantees ≥ MIN_PRACTICE_SIZE exercises via cycling |
+| `?practice=true&concept=<id>` | Open Practice for a single concept (≥ 5 exercises, cycling) |
+| `?practice=true&concept=<id>&types=<type>` | Narrow drill mode — all exercises of type; enables AI generation |
+| `?practice=true&unit=<id>` | Open Practice for all concepts in a unit |
+| `?practice=true&module=<id>` | Open Practice for all concepts in a module |
+| `?concept=<id>` | (legacy) same as `practice=true&concept=<id>` for backwards compat |
+| `?unit=<id>` | All concepts in a unit (SRS path) |
+| `?module=<id>` | All concepts in a module (SRS path) |
 | `?types=gap_fill,translation,...` | Filter exercises by type (comma-separated) |
 | `?mode=new` | Unlearned concepts queue (not in `user_progress`), ordered by difficulty; redirects `/dashboard` if none remain |
+| `?mode=review` | Mistake review — most-recent failed attempt per concept (score ≤ 1) |
+| `?mode=sprint` | Sprint mode — SRS due queue with time or count cap; see `limitType` + `limit` params |
 
-Session configure page (`/study/configure`) builds these params via a UI before redirecting to `/study`.
+Session configure page (`/study/configure`) builds these params via a UI before redirecting to `/study`. Three modes: **SRS Review**, **Open Practice**, **Review mistakes**. Pre-selects Open Practice when `?mode=practice` is in the configure URL (e.g. from "Practice anyway" on dashboard).
 
 ### Exercise Types & Components
 | Type | Component | Notes |
@@ -205,7 +212,8 @@ Migrations (run once in Supabase SQL editor):
 - ⚠️ Do NOT re-run `pnpm seed:ai:apply` on an existing review file — no idempotency guard, will create duplicate concept rows. See `docs/completed-features.md` Feat-E for cleanup procedure.
 
 ### Key Shared Components & Utilities
-- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
+- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
+- `src/lib/practiceUtils.ts` — `cycleToMinimum(items, min)` pads Open Practice sessions to at least MIN_PRACTICE_SIZE; avoids consecutive duplicates when pool ≥ 2
 - `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map)
 - `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
 - `src/lib/hooks/useSpeech.ts` — TTS hook; `src/components/SpeakButton.tsx` — speaker button (wired in all 5 exercise types)
@@ -232,7 +240,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1226 tests across 40 files — all passing.**
+**Test suite: 1241 tests across 42 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -276,22 +284,12 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Bugs / Layout Fixes
 
-**Fix-H: Curriculum "Practice" sessions too short — enforce minimum 5 exercises**
-- `/study?concept=<id>` can return < 5 exercises if concept has few seeded rows, ending sessions prematurely.
-- Fix: after fetching exercises for concept mode, pad by cycling if `exercises.length < 5`. No DB change needed.
-- Acceptance criteria: always ≥ 5 exercises, no duplicate consecutive exercises if pool ≥ 2.
-
 **Fix-F: Write page sticky footer misaligned on desktop** *(deferred)*
 - Footer uses `position: fixed; left: 0; right: 0`, ignoring the `lg:ml-[220px]` sidebar layout wrapper.
 - Proper fix: restructure footer to render inside the layout wrapper using `sticky`, or read sidebar width at runtime via JS.
 - Do not attempt again without a clear plan — previous fixes introduced regressions.
 
 ### UX Audits & Polish
-
-**UX-AH: PM & UX review — exercise entry flows and drill/practice mode redesign** *(research required before any implementation)*
-- Too many overlapping entry points (`/study`, `/study/configure`, curriculum "Practice" button, dashboard CTAs, Sprint, Free Write) all landing on identical-looking sessions with no mode indicator.
-- Key issues: Drill/Practice/Review not distinguished in UI; auto-generation invisible; session length unpredictable; configurator mostly unused.
-- **Suggested next step**: flow diagram of all entry points → URL params → behaviour → exit states; define a simplified 2-mode model (Review = SRS-due; Practice = free drill). **No UI changes without the diagram and agreed mode definition.**
 
 **UX-W: Exercise UI clarity audit** *(design review required before implementing)*
 - Exercise screen has too many simultaneous elements (progress counter, concept name, breadcrumb, 3 chips, prompt, input, hint dots, submit).
@@ -334,10 +332,9 @@ Items are ordered by priority within each group. Full details of completed work 
 ## Recommended Next Steps (priority order)
 
 ### Polish & effectiveness
-1. UX-AH — PM/UX review of exercise entry flows (flow diagram first, no code)
-2. Fix-H — Curriculum "Practice" minimum 5 exercises
-3. Ped-G — Mistake review mode
-4. UX-W — Exercise UI clarity audit (design review before implementing)
+1. Ped-G — Mistake review mode (now surfaced in SessionConfig; backend already in `/study?mode=review`)
+2. UX-W — Exercise UI clarity audit (design review before implementing)
+3. Perf-A — Stream grading response
 
 ### Growth features (deferred)
 - Strat-A — Conjugation mode (deep PM/UX research first)
