@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
+import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -550,6 +551,12 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           <span className="text-sm font-medium text-foreground">{current.concept.title}</span>
           <span aria-hidden>·</span>
           <span>{typeMeta.label}</span>
+          {current.concept.grammar_focus && (
+            <>
+              <span aria-hidden>·</span>
+              <GrammarFocusChip focus={current.concept.grammar_focus} />
+            </>
+          )}
           <span aria-hidden>·</span>
           {sprintConfig?.limitType === 'time' ? (
             <span className={`font-mono font-semibold flex items-center gap-0.5 ${isTimeLow ? 'text-amber-500 dark:text-amber-400' : ''}`}>
