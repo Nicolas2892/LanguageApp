@@ -7,6 +7,7 @@ import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { ChevronLeft, BookOpen, PenLine, MessageSquare, CheckCircle2 } from 'lucide-react'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { LevelChip } from '@/components/LevelChip'
+import { HardFlagButton } from '@/components/HardFlagButton'
 import type { Concept } from '@/lib/supabase/types'
 
 type Example = { es: string; en: string }
@@ -61,14 +62,14 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
     supabase.from('exercises').select('id, type').eq('concept_id', id),
     supabase
       .from('user_progress')
-      .select('interval_days, due_date, repetitions')
+      .select('interval_days, due_date, repetitions, is_hard')
       .eq('user_id', user.id)
       .eq('concept_id', id)
       .maybeSingle(),
   ])
 
   type UnitRow     = { id: string; title: string; module_id: string }
-  type ProgressRow = { interval_days: number; due_date: string; repetitions: number }
+  type ProgressRow = { interval_days: number; due_date: string; repetitions: number; is_hard: boolean }
   type ExerciseRow = { id: string; type: string }
 
   const unit     = unitRes.data     as UnitRow     | null
@@ -98,6 +99,8 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
       .single()
     moduleName = (moduleData as { title: string } | null)?.title ?? null
   }
+
+  const isHard = progress?.is_hard ?? false
 
   // Mastery state
   const masteryState = getMasteryState(progress?.interval_days)
@@ -157,6 +160,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
             <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${badge.className}`}>
               {badge.label}
             </span>
+            <HardFlagButton conceptId={id} initialIsHard={isHard} />
           </div>
         </div>
         {attemptCount > 0 && (

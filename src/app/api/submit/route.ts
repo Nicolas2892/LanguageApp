@@ -8,7 +8,7 @@ import type { Concept, Exercise, UserProgress } from '@/lib/supabase/types'
 import { PRODUCTION_TYPES } from '@/lib/mastery/computeLevel'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib/api-utils'
-import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { MASTERY_THRESHOLD, HARD_INTERVAL_MULTIPLIER } from '@/lib/constants'
 
 const SubmitSchema = z.object({
   exercise_id: z.string().uuid(),
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
       // 3. Fetch current user_progress (or use defaults if first time)
       const { data: existingProgress } = await supabase
         .from('user_progress')
-        .select('ease_factor, interval_days, repetitions, due_date, production_mastered')
+        .select('ease_factor, interval_days, repetitions, due_date, production_mastered, is_hard')
         .eq('user_id', user.id)
         .eq('concept_id', concept_id)
         .single()
@@ -93,6 +93,15 @@ export async function POST(request: Request) {
 
       // 4. Calculate new SRS values
       const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore)
+
+      // Apply hard-flag multiplier on correct answers to schedule ~40% more frequently
+      if (existingProgress?.is_hard && gradeResult.score >= 2) {
+        newSRS.interval_days = Math.max(1, Math.round(newSRS.interval_days * HARD_INTERVAL_MULTIPLIER))
+        const due = new Date()
+        due.setDate(due.getDate() + newSRS.interval_days)
+        newSRS.due_date = due.toISOString().split('T')[0]
+      }
+
       nextReviewInDays = newSRS.interval_days
       justMastered = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD
 

@@ -214,6 +214,7 @@ export interface Database {
           repetitions: number
           last_reviewed_at: string | null
           production_mastered: boolean
+          is_hard: boolean
         }
         Insert: {
           id?: string
@@ -225,6 +226,7 @@ export interface Database {
           repetitions?: number
           last_reviewed_at?: string | null
           production_mastered?: boolean
+          is_hard?: boolean
         }
         Update: {
           id?: string
@@ -236,6 +238,7 @@ export interface Database {
           repetitions?: number
           last_reviewed_at?: string | null
           production_mastered?: boolean
+          is_hard?: boolean
         }
         Relationships: [
           {

@@ -8,6 +8,7 @@ import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import { computeUnlockedLevels, computeUnlockProgress } from '@/lib/curriculum/prerequisites'
 import type { CefrLevel } from '@/lib/curriculum/prerequisites'
 import { Trophy, ChevronRight, Lock } from 'lucide-react'
+import { HardFlagButton } from '@/components/HardFlagButton'
 
 type MasteryState = 'mastered' | 'learning' | 'new'
 type FilterTab = 'all' | 'new' | 'learning' | 'mastered'
@@ -59,19 +60,19 @@ export default async function CurriculumPage({ searchParams }: Props) {
     supabase.from('modules').select('id, title, order_index').order('order_index'),
     supabase.from('units').select('id, module_id, title, order_index').order('order_index'),
     supabase.from('concepts').select('id, unit_id, title, difficulty, level, grammar_focus').order('difficulty'),
-    supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', user.id),
+    supabase.from('user_progress').select('concept_id, interval_days, is_hard').eq('user_id', user.id),
     computeUnlockedLevels(supabase, user.id),
   ])
 
   type ModuleRow  = { id: string; title: string; order_index: number }
   type UnitRow    = { id: string; module_id: string; title: string; order_index: number }
   type ConceptRow = { id: string; unit_id: string; title: string; difficulty: number; level: string | null; grammar_focus: string | null }
-  type ProgressRow = { concept_id: string; interval_days: number }
+  type ProgressRow = { concept_id: string; interval_days: number; is_hard: boolean }
 
   const typedModules  = (modulesRes.data  ?? []) as ModuleRow[]
   const typedUnits    = (unitsRes.data    ?? []) as UnitRow[]
   const typedConcepts = (conceptsRes.data ?? []) as ConceptRow[]
-  const progressMap   = new Map(((progressRes.data ?? []) as ProgressRow[]).map((p) => [p.concept_id, p.interval_days]))
+  const progressMap   = new Map(((progressRes.data ?? []) as ProgressRow[]).map((p) => [p.concept_id, p]))
   const attemptedIds  = new Set((progressRes.data ?? []).map((p) => (p as ProgressRow).concept_id))
   const unlockProgress = computeUnlockProgress(typedConcepts, attemptedIds)
 
@@ -89,7 +90,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
   }
 
   function matchesFilter(conceptId: string): boolean {
-    const intervalDays = progressMap.get(conceptId)
+    const intervalDays = progressMap.get(conceptId)?.interval_days
     if (filter === 'all')      return true
     if (filter === 'new')      return intervalDays === undefined
     if (filter === 'learning') return intervalDays !== undefined && intervalDays < MASTERY_THRESHOLD
@@ -194,7 +195,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
             const allModConcepts = modUnits.flatMap((u) => conceptsByUnit.get(u.id) ?? [])
             const matchingCount  = allModConcepts.filter((c) => matchesFilter(c.id) && matchesLevel(c)).length
             const masteredCount  = allModConcepts.filter(
-              (c) => (progressMap.get(c.id) ?? -1) >= MASTERY_THRESHOLD
+              (c) => (progressMap.get(c.id)?.interval_days ?? -1) >= MASTERY_THRESHOLD
             ).length
             const masteredPct = allModConcepts.length > 0 ? (masteredCount / allModConcepts.length) * 100 : 0
 
@@ -238,7 +239,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                     const allUnitConcepts = conceptsByUnit.get(unit.id) ?? []
                     const unitConcepts    = allUnitConcepts.filter((c) => matchesFilter(c.id) && matchesLevel(c))
                     const unitMastered    = allUnitConcepts.filter(
-                      (c) => (progressMap.get(c.id) ?? -1) >= MASTERY_THRESHOLD
+                      (c) => (progressMap.get(c.id)?.interval_days ?? -1) >= MASTERY_THRESHOLD
                     ).length
 
                     if (unitConcepts.length === 0) return null
@@ -263,7 +264,8 @@ export default async function CurriculumPage({ searchParams }: Props) {
                         {/* Concept rows */}
                         <div className="space-y-1">
                           {unitConcepts.map((concept) => {
-                            const intervalDays = progressMap.get(concept.id)
+                            const intervalDays = progressMap.get(concept.id)?.interval_days
+                            const isHard = progressMap.get(concept.id)?.is_hard ?? false
                             const state = getMasteryState(intervalDays)
                             const cfg   = MASTERY_BADGE[state]
 
@@ -297,6 +299,9 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                     <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${cfg.className}`}>
                                       {cfg.label}
                                     </span>
+                                    <div className="relative z-10">
+                                      <HardFlagButton conceptId={concept.id} initialIsHard={isHard} />
+                                    </div>
                                     <div className="relative z-10">
                                       <Button asChild variant="ghost" size="sm" className="h-7 text-xs px-2">
                                         <Link href={`/study?concept=${concept.id}`}>Practice →</Link>
