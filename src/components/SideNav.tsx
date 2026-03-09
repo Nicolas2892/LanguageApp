@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { href: '/dashboard',       label: 'Home',       Icon: LayoutDashboard },
   { href: '/study/configure', label: 'Study',      Icon: BookOpen        },
   { href: '/curriculum',      label: 'Curriculum', Icon: LayoutList      },
-  { href: '/verbs',           label: 'Verbs',      Icon: BookMarked      },
+  { href: '/verbs',           label: 'Conjugation', Icon: BookMarked      },
   { href: '/progress',        label: 'Progress',   Icon: BarChart2       },
   { href: '/tutor',           label: 'Tutor',      Icon: Bot             },
 ]

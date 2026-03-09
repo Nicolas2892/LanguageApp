@@ -29,17 +29,14 @@ export function WeeklySnapshot({
         <div>
           <p className="text-2xl font-extrabold">{exercises}</p>
           <p className="text-xs text-muted-foreground mt-0.5">exercises</p>
-          <DeltaBadge delta={exerciseDelta} />
         </div>
         <div>
           <p className="text-2xl font-extrabold">{accuracy !== null ? `${accuracy}%` : '—%'}</p>
           <p className="text-xs text-muted-foreground mt-0.5">accuracy</p>
-          <DeltaBadge delta={accuracyDelta} />
         </div>
         <div>
           <p className="text-2xl font-extrabold">{minutes}</p>
           <p className="text-xs text-muted-foreground mt-0.5">minutes</p>
-          <DeltaBadge delta={minutesDelta} />
         </div>
       </div>
     </div>
