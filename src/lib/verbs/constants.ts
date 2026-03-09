@@ -11,13 +11,13 @@ export const TENSES = [
 export type VerbTense = typeof TENSES[number]
 
 export const TENSE_LABELS: Record<VerbTense, string> = {
-  present_indicative:   'Present Indicative',
-  preterite:            'Preterite',
-  imperfect:            'Imperfect',
-  future:               'Future',
-  conditional:          'Conditional',
-  present_subjunctive:  'Present Subjunctive',
-  imperfect_subjunctive: 'Imperfect Subjunctive',
+  present_indicative:    'Presente de Indicativo',
+  preterite:             'Pretérito Indefinido',
+  imperfect:             'Pretérito Imperfecto',
+  future:                'Futuro Simple',
+  conditional:           'Condicional Simple',
+  present_subjunctive:   'Presente de Subjuntivo',
+  imperfect_subjunctive: 'Pretérito Imperfecto de Subjuntivo',
 }
 
 export const TENSE_DESCRIPTIONS: Record<VerbTense, string> = {

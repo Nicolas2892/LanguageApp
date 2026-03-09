@@ -15,8 +15,8 @@ describe('VerbTenseMastery', () => {
     ]
     render(<VerbTenseMastery summaries={summaries} />)
 
-    expect(screen.getByText('Present Indicative')).toBeInTheDocument()
-    expect(screen.getByText('Preterite')).toBeInTheDocument()
+    expect(screen.getByText('Presente de Indicativo')).toBeInTheDocument()
+    expect(screen.getByText('Pretérito Indefinido')).toBeInTheDocument()
     expect(screen.getByText('80/100 · 80%')).toBeInTheDocument()
     expect(screen.getByText('30/50 · 60%')).toBeInTheDocument()
   })
