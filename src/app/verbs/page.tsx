@@ -15,7 +15,7 @@ export default async function VerbsPage() {
     { data: favoriteRows },
     { data: progressRows },
   ] = await Promise.all([
-    supabase.from('verbs').select('*').order('frequency_rank'),
+    supabase.from('verbs').select('*').order('infinitive'),
     supabase.from('user_verb_favorites').select('verb_id').eq('user_id', user.id),
     supabase.from('verb_progress').select('verb_id, tense, attempt_count, correct_count').eq('user_id', user.id),
   ])

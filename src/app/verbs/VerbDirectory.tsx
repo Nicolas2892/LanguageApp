@@ -47,25 +47,40 @@ export function VerbDirectory({ verbs }: Props) {
       {filtered.length === 0 ? (
         <p className="text-center text-muted-foreground py-10 text-sm">No verbs match your search.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {filtered.map((v) => {
-            const masteryDots = TENSES.map((tense) => {
-              const m = v.masteryByTense[tense]
-              const pct = m && m.attempts > 0 ? Math.round((m.correct / m.attempts) * 100) : 0
-              return { tense, pct }
-            })
-            return (
-              <VerbCard
-                key={v.id}
-                id={v.id}
-                infinitive={v.infinitive}
-                english={v.english}
-                verbGroup={v.verb_group}
-                favorited={v.favorited}
-                masteryDots={masteryDots}
-              />
-            )
-          })}
+        <div className="space-y-6">
+          {Object.entries(
+            filtered.reduce<Record<string, VerbItem[]>>((acc, v) => {
+              const letter = v.infinitive[0].toUpperCase()
+              ;(acc[letter] ??= []).push(v)
+              return acc
+            }, {})
+          )
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([letter, group]) => (
+              <div key={letter}>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">{letter}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {group.map((v) => {
+                    const masteryDots = TENSES.map((tense) => {
+                      const m = v.masteryByTense[tense]
+                      const pct = m && m.attempts > 0 ? Math.round((m.correct / m.attempts) * 100) : 0
+                      return { tense, pct }
+                    })
+                    return (
+                      <VerbCard
+                        key={v.id}
+                        id={v.id}
+                        infinitive={v.infinitive}
+                        english={v.english}
+                        verbGroup={v.verb_group}
+                        favorited={v.favorited}
+                        masteryDots={masteryDots}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
         </div>
       )}
     </div>
