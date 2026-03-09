@@ -440,3 +440,17 @@ describe('StudySession — Fix-I drill generation disables Next button', () => {
     })
   })
 })
+
+// ── sessionLabel badge ─────────────────────────────────────────────────────────
+describe('StudySession — sessionLabel badge', () => {
+  it('renders the sessionLabel badge when provided', () => {
+    render(<StudySession items={[makeItem()]} sessionLabel="Open Practice" />)
+    expect(screen.getByText('Open Practice')).toBeTruthy()
+  })
+
+  it('falls back to concept type badge when sessionLabel is omitted', () => {
+    render(<StudySession items={[makeItem()]} />)
+    // mockConcept.type = 'grammar', so badge should read "grammar practice"
+    expect(screen.getByText(/grammar practice/i)).toBeTruthy()
+  })
+})

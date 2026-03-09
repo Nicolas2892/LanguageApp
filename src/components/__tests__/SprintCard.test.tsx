@@ -25,14 +25,14 @@ describe('SprintCard', () => {
     expect(screen.queryByRole('button', { name: 'Start Sprint →' })).toBeNull()
   })
 
-  it('shows timed review heading when dueCount > 0', () => {
+  it('shows SRS Sprint heading when dueCount > 0', () => {
     render(<SprintCard dueCount={8} modules={mockModules} />)
-    expect(screen.getByText(/timed review/i)).toBeTruthy()
+    expect(screen.getByText(/srs sprint · push through your review queue/i)).toBeTruthy()
   })
 
   it('shows fallback text when dueCount is 0', () => {
     render(<SprintCard dueCount={0} modules={mockModules} />)
-    expect(screen.getByText(/focus in a fixed time slot/i)).toBeTruthy()
+    expect(screen.getByText(/timed srs sprint · from your full queue/i)).toBeTruthy()
   })
 
   it('quick-start button navigates directly with default 10 min', () => {

@@ -227,7 +227,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Practice</h2>
 
         <Button asChild className="w-full rounded-full active:scale-95 transition-transform">
-          <Link href={`/study?concept=${id}`}>
+          <Link href={`/study?practice=true&concept=${id}`}>
             <BookOpen className="h-4 w-4 mr-2" strokeWidth={1.5} />
             Practice all
           </Link>

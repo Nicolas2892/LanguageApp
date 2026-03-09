@@ -320,7 +320,7 @@ export default async function DashboardPage() {
                   <p className="text-xl font-bold">All caught up!</p>
                   <p className="text-muted-foreground text-sm">You&apos;re clear for today. Use the time to push ahead.</p>
                   <Button asChild variant="outline" className="w-full">
-                    <Link href="/study/configure">Practice anyway →</Link>
+                    <Link href="/study/configure?mode=practice">Practice anyway →</Link>
                   </Button>
                 </>
               )}

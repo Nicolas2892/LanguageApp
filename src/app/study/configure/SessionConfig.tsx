@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 const EXERCISE_TYPES = [
@@ -16,7 +16,7 @@ const EXERCISE_TYPES = [
 const SESSION_SIZES = [5, 10, 15, 20, 25] as const
 const DEFAULT_SIZE = 10
 
-type SessionMode = 'srs' | 'review'
+type SessionMode = 'srs' | 'review' | 'practice'
 
 interface Module {
   id: string
@@ -32,7 +32,9 @@ interface Props {
 
 export function SessionConfig({ modules, mistakeConceptCount }: Props) {
   const router = useRouter()
-  const [sessionMode, setSessionMode] = useState<SessionMode>('srs')
+  const searchParams = useSearchParams()
+  const initialMode: SessionMode = searchParams.get('mode') === 'practice' ? 'practice' : 'srs'
+  const [sessionMode, setSessionMode] = useState<SessionMode>(initialMode)
   const [selectedModule, setSelectedModule] = useState<string>('all')
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [sessionSize, setSessionSize] = useState(DEFAULT_SIZE)
@@ -49,30 +51,44 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
       return
     }
     const params = new URLSearchParams()
+    if (sessionMode === 'practice') params.set('practice', 'true')
     if (selectedModule !== 'all') params.set('module', selectedModule)
     if (selectedTypes.length > 0) params.set('types', selectedTypes.join(','))
     if (sessionSize !== DEFAULT_SIZE) params.set('size', String(sessionSize))
     router.push(`/study?${params.toString()}`)
   }
 
+  const isPractice = sessionMode === 'practice'
+
   return (
     <div className="space-y-8">
-      {/* Session mode picker — only shown when mistakes exist */}
-      {mistakeConceptCount > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Mode</h2>
-          <div className="grid grid-cols-1 gap-2">
-            <button
-              onClick={() => setSessionMode('srs')}
-              className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
-                sessionMode === 'srs'
-                  ? 'border-primary bg-primary/5 font-medium'
-                  : 'hover:bg-muted'
-              }`}
-            >
-              <span className="font-medium">SRS review</span>
-              <span className="text-muted-foreground ml-2">(due queue)</span>
-            </button>
+      {/* Mode picker — always shown */}
+      <section className="space-y-3">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Mode</h2>
+        <div className="grid grid-cols-1 gap-2">
+          <button
+            onClick={() => setSessionMode('srs')}
+            className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
+              sessionMode === 'srs'
+                ? 'border-primary bg-primary/5 font-medium'
+                : 'hover:bg-muted'
+            }`}
+          >
+            <span className="font-medium">SRS Review</span>
+            <p className="text-xs text-muted-foreground mt-0.5">Work through today&apos;s due queue</p>
+          </button>
+          <button
+            onClick={() => setSessionMode('practice')}
+            className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
+              sessionMode === 'practice'
+                ? 'border-primary bg-primary/5 font-medium'
+                : 'hover:bg-muted'
+            }`}
+          >
+            <span className="font-medium">Open Practice</span>
+            <p className="text-xs text-muted-foreground mt-0.5">Drill any topic freely, no schedule</p>
+          </button>
+          {mistakeConceptCount > 0 && (
             <button
               onClick={() => setSessionMode('review')}
               className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
@@ -88,16 +104,18 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
                 </span>
               </div>
             </button>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
+      </section>
 
-      {/* SRS-only options — hidden in review mode */}
+      {/* Options — hidden in review mode */}
       {sessionMode !== 'review' && (
         <>
           {/* Module picker */}
           <section className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Module</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              {isPractice ? 'Choose a topic (optional)' : 'Module'}
+            </h2>
             <div className="grid grid-cols-1 gap-2">
               <button
                 onClick={() => setSelectedModule('all')}
@@ -108,7 +126,9 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
                 }`}
               >
                 <span className="font-medium">All modules</span>
-                <span className="text-muted-foreground ml-2">(SRS due queue)</span>
+                <span className="text-muted-foreground ml-2">
+                  {isPractice ? '(whole catalog)' : '(SRS due queue)'}
+                </span>
               </button>
               {modules.map((mod) => (
                 <button
@@ -122,7 +142,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className={selectedModule === mod.id ? 'font-medium' : ''}>{mod.title}</span>
-                    {mod.total > 0 && (
+                    {mod.total > 0 && !isPractice && (
                       <span className="text-xs text-muted-foreground shrink-0">
                         {mod.mastered}/{mod.total} mastered
                       </span>

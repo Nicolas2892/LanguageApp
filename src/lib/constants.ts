@@ -4,6 +4,9 @@ export const SESSION_SIZE = 10
 /** Number of easiest concepts bootstrapped for brand-new users */
 export const BOOTSTRAP_SIZE = 5
 
+/** Minimum number of exercises guaranteed in any Open Practice session */
+export const MIN_PRACTICE_SIZE = 5
+
 /** interval_days threshold above which a concept is considered mastered */
 export const MASTERY_THRESHOLD = 21
 

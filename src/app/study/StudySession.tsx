@@ -45,6 +45,7 @@ interface Props {
   returnHref?: string
   sprintConfig?: SprintConfig
   freeWriteConceptId?: string
+  sessionLabel?: string
 }
 
 type SessionState =
@@ -67,7 +68,7 @@ function formatTime(totalSeconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-export function StudySession({ items: initialItems, practiceMode, generateConfig, returnHref, sprintConfig, freeWriteConceptId }: Props) {
+export function StudySession({ items: initialItems, practiceMode, generateConfig, returnHref, sprintConfig, freeWriteConceptId, sessionLabel }: Props) {
   const router = useRouter()
   const startedAt = useRef(new Date().toISOString())
   const [dynamicItems, setDynamicItems] = useState<StudyItem[]>(initialItems)
@@ -564,7 +565,9 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             </span>
             )}
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="capitalize text-xs">{current.concept.type} practice</Badge>
+              <Badge variant="outline" className="capitalize text-xs">
+                {sessionLabel ?? `${current.concept.type} practice`}
+              </Badge>
               <button
                 onClick={() => setShowExitDialog(true)}
                 aria-label="Exit session"

@@ -45,7 +45,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
       <div className="p-6 space-y-3">
         {/* Header row */}
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Sprint</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">SRS Sprint</p>
           {open ? (
             <button
               onClick={() => setOpen(false)}
@@ -68,8 +68,8 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
         >
           <p className="text-xl font-bold mb-3">
             {dueCount > 0
-              ? 'Timed review · push through your queue'
-              : 'Focus in a fixed time slot'}
+              ? 'SRS Sprint · push through your review queue'
+              : 'Timed SRS sprint · from your full queue'}
           </p>
           <div className="flex gap-2">
             <button
@@ -98,7 +98,7 @@ export function SprintCard({ dueCount, modules, dueCountByModule = {} }: Props) 
             {/* Module filter */}
             <div className="space-y-2">
               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                Module (optional)
+                Filter by module (SRS due only)
               </p>
               <div className="flex gap-2 flex-wrap">
                 <button

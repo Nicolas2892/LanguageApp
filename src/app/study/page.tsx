@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { StudySession } from './StudySession'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { SESSION_SIZE, BOOTSTRAP_SIZE } from '@/lib/constants'
+import { SESSION_SIZE, BOOTSTRAP_SIZE, MIN_PRACTICE_SIZE } from '@/lib/constants'
+import { cycleToMinimum } from '@/lib/practiceUtils'
 import { computeUnlockedLevels } from '@/lib/curriculum/prerequisites'
 import type { CefrLevel } from '@/lib/curriculum/prerequisites'
 import type { StudyItem } from './StudySession'
@@ -37,7 +38,7 @@ export default async function StudyPage({
     module?: string
     types?: string        // comma-separated exercise types
     mode?: string         // 'new' = unlearned concepts queue | 'sprint' = time/count-capped SRS
-    practice?: string     // 'true' = drill mode (all exercises, skip SRS)
+    practice?: string     // 'true' = open practice mode (no SRS gate)
     limitType?: string    // 'time' | 'count' (sprint mode)
     limit?: string        // minutes or exercise count (sprint mode)
     size?: string         // session size override (default: SESSION_SIZE)
@@ -51,7 +52,12 @@ export default async function StudyPage({
   const sessionSize = params.size ? Math.min(Math.max(parseInt(params.size, 10) || SESSION_SIZE, 1), 50) : SESSION_SIZE
   const filterTypes = params.types ? params.types.split(',').filter(Boolean) : []
   const GENERATABLE_TYPES = new Set(['gap_fill', 'translation', 'transformation', 'error_correction'])
-  const isPracticeMode = params.practice === 'true' && !!params.concept && filterTypes.length > 0
+
+  // isOpenPractice: any session with practice=true (no SRS gate)
+  const isOpenPractice = params.practice === 'true'
+  // isDrillMode: narrow drill — practice=true with a specific concept + type filter (enables AI generation)
+  const isDrillMode = isOpenPractice && !!params.concept && filterTypes.length > 0
+
   const isSprint = params.mode === 'sprint'
   const sprintLimitType = params.limitType === 'count' ? 'count' : 'time'
   const sprintLimit = Math.min(Math.max(parseInt(params.limit ?? '10', 10) || 10, 1), 60)
@@ -61,16 +67,16 @@ export default async function StudyPage({
   // Review mode: maps conceptId → specific exerciseId to replay
   const reviewExerciseByConceptId = new Map<string, string>()
 
-  if (params.concept) {
-    // Single concept — always practice regardless of due date
+  if (isOpenPractice && params.concept) {
+    // Open Practice — single concept
     conceptIds = [params.concept]
-  } else if (params.unit) {
-    // All concepts in a unit
+  } else if (isOpenPractice && params.unit) {
+    // Open Practice — all concepts in a unit
     const { data } = await supabase
       .from('concepts').select('id').eq('unit_id', params.unit)
     conceptIds = (data ?? []).map((c) => (c as { id: string }).id)
-  } else if (params.module) {
-    // All concepts in a module (via units)
+  } else if (isOpenPractice && params.module) {
+    // Open Practice — all concepts in a module
     const { data: units } = await supabase
       .from('units').select('id').eq('module_id', params.module)
     const unitIds = (units ?? []).map((u) => (u as { id: string }).id)
@@ -79,6 +85,11 @@ export default async function StudyPage({
         .from('concepts').select('id').in('unit_id', unitIds)
       conceptIds = (data ?? []).map((c) => (c as { id: string }).id)
     }
+  } else if (isOpenPractice) {
+    // Open Practice — whole catalog, no SRS gate
+    const { data } = await supabase
+      .from('concepts').select('id').limit(sessionSize)
+    conceptIds = (data ?? []).map((c) => (c as { id: string }).id)
   } else if (isSprint) {
     // Sprint: SRS due queue, optionally filtered by module
     if (params.module) {
@@ -230,7 +241,7 @@ export default async function StudyPage({
           <p className="text-muted-foreground mt-1.5 text-sm">No concepts are due for review today. Great work!</p>
         </div>
         <Link
-          href="/study/configure"
+          href="/study/configure?mode=practice"
           className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
         >
           Practice anyway →
@@ -288,8 +299,13 @@ export default async function StudyPage({
     const concept = conceptMap.get(conceptId)
     const exArr = exercisesByConceptId.get(conceptId)
     if (!concept || !exArr || exArr.length === 0) continue
-    if (isPracticeMode) {
-      // Drill mode: include all exercises of the requested type
+    if (isDrillMode) {
+      // Narrow drill: all exercises of the requested type (enables AI generation)
+      for (const ex of exArr) {
+        items.push({ concept, exercise: ex })
+      }
+    } else if (isOpenPractice) {
+      // Open Practice: all exercises for the concept (no type filter at assembly level)
       for (const ex of exArr) {
         items.push({ concept, exercise: ex })
       }
@@ -308,14 +324,34 @@ export default async function StudyPage({
     }
   }
 
+  // Apply minimum cycling for Open Practice sessions (Fix-H)
+  const paddedItems = isOpenPractice ? cycleToMinimum(items, MIN_PRACTICE_SIZE) : items
+
   // Interleave by unit in SRS/sprint modes so each session mixes grammar areas (Ped-H)
-  const shouldInterleave = !params.concept && !params.unit && !params.module && !isPracticeMode && params.mode !== 'review'
-  const orderedItems = shouldInterleave ? interleaveByUnit(items) : items
+  const shouldInterleave = !isOpenPractice && !isSprint && !params.concept && !params.unit && !params.module && params.mode !== 'review'
+  const orderedItems = shouldInterleave ? interleaveByUnit(paddedItems) : paddedItems
 
   // Cap items to sessionSize (only in non-sprint, non-drill modes)
-  const cappedItems = (!isSprint && !isPracticeMode) ? orderedItems.slice(0, sessionSize) : orderedItems
+  const cappedItems = (!isSprint && !isDrillMode) ? orderedItems.slice(0, sessionSize) : orderedItems
 
   if (cappedItems.length === 0) redirect('/dashboard')
+
+  // Build a human-readable session label for the session header badge
+  const sessionLabel = isOpenPractice
+    ? (params.concept
+        ? `Practice: ${conceptMap.get(params.concept)?.title ?? 'Concept'}`
+        : params.module
+        ? 'Module practice'
+        : params.unit
+        ? 'Unit practice'
+        : 'Open Practice')
+    : isSprint
+    ? 'SRS Sprint'
+    : params.mode === 'new'
+    ? 'New concepts'
+    : params.mode === 'review'
+    ? 'Mistake review'
+    : 'Review session'
 
   return (
     <main className="max-w-xl mx-auto p-6 md:p-10 pb-24 lg:pb-10">
@@ -325,9 +361,9 @@ export default async function StudyPage({
       <ErrorBoundary>
         <StudySession
           items={cappedItems}
-          practiceMode={isPracticeMode}
+          practiceMode={isDrillMode}
           generateConfig={
-            isPracticeMode && params.concept && filterTypes[0] && GENERATABLE_TYPES.has(filterTypes[0])
+            isDrillMode && params.concept && filterTypes[0] && GENERATABLE_TYPES.has(filterTypes[0])
               ? {
                   conceptId: params.concept,
                   concept: conceptMap.get(params.concept)!,
@@ -335,9 +371,10 @@ export default async function StudyPage({
                 }
               : undefined
           }
-          returnHref={isPracticeMode && params.concept ? `/curriculum/${params.concept}` : undefined}
+          returnHref={isDrillMode && params.concept ? `/curriculum/${params.concept}` : undefined}
           sprintConfig={isSprint ? { limitType: sprintLimitType, limit: sprintLimit } : undefined}
           freeWriteConceptId={params.concept && !isSprint ? params.concept : undefined}
+          sessionLabel={sessionLabel}
         />
       </ErrorBoundary>
     </main>

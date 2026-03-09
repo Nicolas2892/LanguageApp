@@ -219,7 +219,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                       </div>
                     </div>
                     <Button asChild variant="outline" size="sm" className="shrink-0 h-8 text-xs">
-                      <Link href={`/study?module=${mod.id}`}>Practice module →</Link>
+                      <Link href={`/study?practice=true&module=${mod.id}`}>Practice module →</Link>
                     </Button>
                   </div>
                   {/* Module progress bar */}
@@ -257,7 +257,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                             </span>
                           </div>
                           <Button asChild variant="ghost" size="sm" className="h-6 text-xs px-2">
-                            <Link href={`/study?unit=${unit.id}`}>Practice unit →</Link>
+                            <Link href={`/study?practice=true&unit=${unit.id}`}>Practice unit →</Link>
                           </Button>
                         </div>
 
@@ -304,7 +304,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                     </div>
                                     <div className="relative z-10">
                                       <Button asChild variant="ghost" size="sm" className="h-7 text-xs px-2">
-                                        <Link href={`/study?concept=${concept.id}`}>Practice →</Link>
+                                        <Link href={`/study?practice=true&concept=${concept.id}`}>Practice →</Link>
                                       </Button>
                                     </div>
                                   </div>
