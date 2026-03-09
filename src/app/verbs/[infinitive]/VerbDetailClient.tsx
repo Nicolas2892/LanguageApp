@@ -57,12 +57,13 @@ function ColouredForm({ form, stem }: { form: string; stem: string }) {
 }
 
 export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favorited, tenseData }: Props) {
-  const [colourEndings, setColourEndings] = useState(false)
+  const [colourEndings, setColourEndings] = useState(true)
 
-  // Read persisted preference on mount
+  // Read persisted preference on mount (default true if never set)
   useEffect(() => {
     try {
-      setColourEndings(localStorage.getItem(COLOUR_ENDINGS_KEY) === 'true')
+      const stored = localStorage.getItem(COLOUR_ENDINGS_KEY)
+      if (stored !== null) setColourEndings(stored === 'true')
     } catch {
       // localStorage unavailable (e.g. private browsing restrictions)
     }
