@@ -404,26 +404,6 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Bugs / Layout Fixes
 
-**Fix-L: Verb tense mastery chart on progress page** *(medium priority)*
-
-- Add a dedicated chart to `/progress` showing accuracy per tense across all verb conjugation drills, as a visual complement to the existing `VerbTenseMastery` accuracy bars.
-- Suggested format: horizontal bar chart (matching `ExerciseTypeChart` style) with one bar per tense, coloured by mastery tier (e.g. red < 60%, amber 60–80%, green > 80%).
-- Data source: `verb_progress` table — aggregate `correct_count / attempt_count` per tense for the logged-in user.
-- Place the chart in its own card section below the existing `VerbTenseMastery` bars, or replace/extend that component.
-- Use recharts (already a dependency) consistent with existing progress page charts.
-
-**Fix-K: PWA performance improvements — implement as one batch** *(medium priority)*
-
-All three items below should be shipped together in a single PR:
-
-1. **App shell pre-caching** — pre-cache key routes (`/dashboard`, `/study`, `/verbs`, etc.) at SW install time so navigation is instant even on slow connections. Update `public/sw.js` install handler to populate cache with shell assets.
-2. **Stale-while-revalidate for page navigation** — serve cached page HTML instantly, revalidate in background. Improves perceived speed on repeat visits; auth-gated pages need care (serve skeleton, not stale data).
-3. **Font + icon pre-caching** — add fonts and PWA icons to the SW pre-cache manifest so they never block first render.
-
-- Current SW (`public/sw.js`) already handles `/_next/static/` cache-first — this covers ~80% of the gain. Items above cover the remaining 20%.
-- iOS PWA cache limit: 50MB per origin — not a concern at current asset sizes.
-- **Do not implement as separate PRs** — batch all three SW changes together to avoid multiple cache version bumps.
-
 **Fix-J: STT (speech-to-text) broken on free-write page — investigate and replace Web Speech API** *(high priority — iOS is primary target)*
 
 - Current implementation uses the Web Speech API (`useSpeechRecognition.ts` / `MicButton.tsx`) which is Chromium-only (Chrome, Edge, Arc). Not supported on Safari or Firefox.
@@ -434,12 +414,6 @@ All three items below should be shipped together in a single PR:
   3. **Claude API audio input** — see Strat-C; higher latency but no extra vendor
 - **Acceptance criteria**: STT works on iOS Safari + Chrome + Edge; graceful fallback (hidden mic button) on unsupported environments.
 - **Do not implement without a PM decision on vendor and cost model.**
-
-**Fix-F: Write page sticky footer misaligned on desktop** *(deferred)*
-
-- Footer uses `position: fixed; left: 0; right: 0`, ignoring the `lg:ml-[220px]` sidebar layout wrapper.
-- Proper fix: restructure footer to render inside the layout wrapper using `sticky`, or read sidebar width at runtime via JS.
-- Do not attempt again without a clear plan — previous fixes introduced regressions.
 
 ### Strategic / Long-term
 
@@ -454,7 +428,5 @@ All three items below should be shipped together in a single PR:
 ## Recommended Next Steps (priority order)
 
 1. **Fix-J** — STT replacement for iOS Safari (PM decision on vendor first)
-2. **Fix-L** — Verb tense mastery chart on progress page
-3. **Fix-K** — PWA performance improvements (batch: pre-cache shell + stale-while-revalidate + fonts)
-4. **Feat-F** — Offline exercise packs (PM decision on conflict resolution first)
+2. **Feat-F** — Offline exercise packs (PM decision on conflict resolution first)
 

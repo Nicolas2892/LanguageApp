@@ -4,6 +4,21 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Fix-K: PWA Performance Improvements ✓ (2026-03)
+
+Updated `public/sw.js` (bumped to `spanish-app-v2`):
+- **App shell pre-cache** — `SHELL_URLS` list pre-cached at SW install time (`Promise.allSettled` so a single failure doesn't block install).
+- **Stale-while-revalidate for navigation** — `navigate` requests served from cache immediately, revalidated in background. Skips `/api/*` and `/auth/*`.
+- **Icon + manifest cache-first** — `/icon`, `/apple-icon`, `/manifest.webmanifest` added to pre-cache and served cache-first.
+
+---
+
+## Fix-F: Write Page Sticky Footer Desktop Alignment ✓ (2026-03)
+
+Added `lg:left-[220px]` to the fixed footer div in `src/app/write/ConceptPicker.tsx`. Shifts the footer's left edge to match the 220px sidebar on desktop; mobile unchanged (`left-0`).
+
+---
+
 ## Perf-A: Stream Grading Response ✓ (2026-03)
 
 1255 tests across 44 files, all passing.
