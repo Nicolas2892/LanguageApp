@@ -69,7 +69,7 @@ export default async function DashboardPage() {
         {profile?.computed_level && (() => {
           const chip = LEVEL_CHIP[profile.computed_level]
           return chip ? (
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${chip.className}`}>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${chip.className}`}>
               Nivel {chip.label}
             </span>
           ) : null

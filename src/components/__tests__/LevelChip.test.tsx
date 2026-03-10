@@ -17,11 +17,11 @@ describe('LevelChip', () => {
     expect(chip.className).toContain('amber')
   })
 
-  it('renders "C1" chip with purple class', () => {
+  it('renders "C1" chip with violet class', () => {
     render(<LevelChip level="C1" />)
     const chip = screen.getByText('C1')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('purple')
+    expect(chip.className).toContain('violet')
   })
 
   it('renders nothing when level is null', () => {

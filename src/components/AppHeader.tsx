@@ -18,19 +18,8 @@ export function AppHeader({ userInitials }: Props) {
     <header className="sticky top-0 z-50 bg-background lg:hidden">
       <div className="h-14 flex items-center justify-between px-5">
         {/* Logo */}
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <SvgSendaPath size={22} strokeWidth={3.5} />
-          <span
-            style={{
-              fontFamily: 'var(--font-dm-serif), serif',
-              fontStyle: 'italic',
-              fontSize: 20,
-              lineHeight: 1,
-              color: 'var(--d5-ink)',
-            }}
-          >
-            Senda
-          </span>
+        <Link href="/dashboard" aria-label="Senda home">
+          <SvgSendaPath size={26} strokeWidth={3.5} />
         </Link>
 
         {/* Profile avatar → /account */}

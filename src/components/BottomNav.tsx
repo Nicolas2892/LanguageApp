@@ -1,13 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, BookOpen, Bot, BarChart2, LayoutList, BookMarked } from 'lucide-react'
+import { Home, Book, ClipboardCheck, BookMarked, BarChart2, Bot } from 'lucide-react'
 
 const TABS = [
-  { href: '/dashboard',       label: 'Home',       Icon: LayoutDashboard },
-  { href: '/study/configure', label: 'Study',      Icon: BookOpen        },
-  { href: '/curriculum',      label: 'Curriculum', Icon: LayoutList      },
-  { href: '/verbs',           label: 'Verbs',       Icon: BookMarked      },
+  { href: '/dashboard',       label: 'Home',       Icon: Home            },
+  { href: '/study/configure', label: 'Study',      Icon: Book            },
+  { href: '/curriculum',      label: 'Curriculum', Icon: ClipboardCheck  },
+  { href: '/verbs',           label: 'Verbs',      Icon: BookMarked      },
   { href: '/progress',        label: 'Progress',   Icon: BarChart2       },
   { href: '/tutor',           label: 'Tutor',      Icon: Bot             },
 ]
@@ -21,7 +21,7 @@ export function BottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-40
                  bg-background backdrop-blur-xl lg:hidden select-none
-                 border-t border-border/30"
+                 border-t border-[rgba(184,170,153,0.50)]"
       style={{
         // iOS tab bar: 49pt interactive area + safe-area-inset-bottom additive on top.
         // Do NOT use a fixed h-* class — that collapses content when safe area is non-zero.
