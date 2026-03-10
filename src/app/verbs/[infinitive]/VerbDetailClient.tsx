@@ -97,13 +97,17 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">{infinitive}</h1>
-            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1
+              style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 26, lineHeight: 1.15, color: 'var(--d5-ink)' }}
+            >
+              {infinitive}
+            </h1>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'rgba(184,170,153,0.25)', color: 'var(--d5-warm)' }}>
               -{verbGroup}
             </span>
           </div>
-          <p className="text-sm text-muted-foreground">{english}</p>
+          <p className="text-sm" style={{ color: 'var(--d5-warm)' }}>{english}</p>
         </div>
         <VerbFavoriteButton verbId={verbId} initialFavorited={favorited} size="md" />
       </div>
@@ -112,9 +116,10 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
       <div className="flex gap-3">
         <Link
           href={`/verbs/configure?verb=${infinitive}`}
-          className="flex flex-1 items-center justify-center rounded-xl bg-primary text-primary-foreground px-5 py-3 text-sm font-semibold hover:bg-primary/90 transition-colors"
+          className="flex flex-1 items-center justify-center rounded-full px-5 py-3 text-sm font-bold transition-colors hover:opacity-90"
+          style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)' }}
         >
-          Practice this verb →
+          Practicar este verbo →
         </Link>
         <button
           onClick={toggleColourEndings}
@@ -141,13 +146,13 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
           const attempts = data?.attempts ?? 0
 
           return (
-            <section key={tense} className="bg-card rounded-xl border shadow-sm overflow-hidden">
+            <section key={tense} className="senda-card overflow-hidden" style={{ padding: 0 }}>
               {/* Tense header */}
-              <div className="px-5 py-3 border-b bg-muted/30">
+              <div className="px-5 py-3" style={{ borderBottom: '1px solid rgba(184,170,153,0.25)' }}>
                 <div className="flex items-center justify-between gap-4">
                   <div>
-                    <p className="font-semibold text-sm">{TENSE_LABELS[tense]}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{TENSE_DESCRIPTIONS[tense]}</p>
+                    <p className="senda-eyebrow mb-1">{TENSE_LABELS[tense]}</p>
+                    <p className="text-[11px]" style={{ color: 'var(--d5-muted)' }}>{TENSE_DESCRIPTIONS[tense]}</p>
                   </div>
                   {masteryPct !== null && (
                     <div className="text-right shrink-0">
@@ -176,7 +181,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
                       const row = rows.find((r) => r.pronoun === pronoun)
                       return (
                         <tr key={pronoun} className="border-b last:border-0">
-                          <td className="px-5 py-2.5 text-muted-foreground w-28 font-medium">
+                          <td className="px-5 py-2.5 w-28 font-medium" style={{ color: 'var(--d5-muted)' }}>
                             {PRONOUN_LABELS[pronoun] ?? pronoun}
                           </td>
                           <td className="px-5 py-2.5 font-medium break-words">

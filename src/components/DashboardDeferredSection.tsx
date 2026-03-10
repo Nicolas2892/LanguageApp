@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { WeeklySnapshot } from '@/components/WeeklySnapshot'
+import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
-import { PenLine, RotateCcw } from 'lucide-react'
 import type { Concept } from '@/lib/supabase/types'
 
 interface Props {
@@ -134,67 +134,87 @@ export async function DashboardDeferredSection({
     <>
       {/* Weekly snapshot — only shown after user has studied this week */}
       {thisWeekExercises > 0 && (
-        <WeeklySnapshot
-          exercises={thisWeekExercises}
-          accuracy={thisWeekAccuracy}
-          minutes={thisWeekMinutes}
-          exerciseDelta={exerciseDelta}
-          accuracyDelta={accuracyDelta}
-          minutesDelta={minutesDelta}
-        />
+        <>
+          <WeeklySnapshot
+            exercises={thisWeekExercises}
+            accuracy={thisWeekAccuracy}
+            minutes={thisWeekMinutes}
+            exerciseDelta={exerciseDelta}
+            accuracyDelta={accuracyDelta}
+            minutesDelta={minutesDelta}
+          />
+          <WindingPathSeparator />
+        </>
       )}
 
       {/* Escritura Libre card */}
       {!isNewUser && writeConcept && (
-        <div className="border border-l-4 border-l-primary rounded-xl p-6 space-y-3 bg-card">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Escritura Libre
-            </p>
-            <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-          </div>
-          <p className="text-xl font-bold">{writeConcept.title}</p>
-          <p className="text-xs text-muted-foreground -mt-1">Vale La Pena Tomarse Un Momento</p>
-          <Button asChild variant="outline" className="w-full">
+        <div className="senda-card space-y-3">
+          <p className="senda-eyebrow">Escritura Libre</p>
+          <p
+            style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
+          >
+            {writeConcept.title}
+          </p>
+          <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
+            Consolida tu comprensión escribiendo libremente.
+          </p>
+          <Button
+            asChild
+            variant="outline"
+            className="w-full rounded-full"
+            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
+          >
             <Link href={`/write?suggested=${writeConcept.id}`}>Escribir Ahora →</Link>
           </Button>
-          <Button asChild variant="ghost" className="w-full text-xs text-muted-foreground h-8">
+          <Button asChild variant="ghost" className="w-full text-xs h-8" style={{ color: 'var(--d5-muted)' }}>
             <Link href="/write">Cambiar Concepto →</Link>
           </Button>
         </div>
       )}
       {!isNewUser && !writeConcept && (
-        <div className="border border-l-4 border-l-primary rounded-xl p-6 space-y-3 bg-card">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Escritura Libre
-            </p>
-            <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-          </div>
-          <p className="text-xl font-bold">Practica Tu Escritura</p>
-          <p className="text-muted-foreground text-sm">Elige Un Concepto Y Escribe Libremente.</p>
-          <Button asChild variant="outline" className="w-full">
+        <div className="senda-card space-y-3">
+          <p className="senda-eyebrow">Escritura Libre</p>
+          <p
+            style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
+          >
+            Practica tu escritura
+          </p>
+          <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
+            Elige un concepto y escribe libremente.
+          </p>
+          <Button
+            asChild
+            variant="outline"
+            className="w-full rounded-full"
+            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
+          >
             <Link href="/write">Explorar Conceptos →</Link>
           </Button>
         </div>
       )}
 
-      {/* Revisar Errores card — shown when user has failed attempts */}
+      {/* Revisar Errores card — separator only rendered when this card is present */}
       {!isNewUser && mistakeConceptCount > 0 && (
-        <div className="border border-l-4 border-l-amber-500 rounded-xl p-6 space-y-3 bg-card">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Revisar Errores
-            </p>
-            <RotateCcw className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
-          </div>
-          <p className="text-xl font-bold">
-            {mistakeConceptCount} Concepto{mistakeConceptCount !== 1 ? 's' : ''} Para Revisar
+        <>
+          <WindingPathSeparator />
+          <div className="senda-card space-y-3">
+          <p className="senda-eyebrow">Revisar Errores</p>
+          <p
+            style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
+          >
+            {mistakeConceptCount} Concepto{mistakeConceptCount !== 1 ? 's' : ''} para revisar
           </p>
-          <Button asChild variant="outline" className="w-full">
+          <Button
+            asChild
+            variant="outline"
+            className="w-full rounded-full"
+            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
+          >
             <Link href="/study?mode=review">Repasar Ahora →</Link>
           </Button>
         </div>
+        </>
       )}
     </>
   )
@@ -203,9 +223,11 @@ export async function DashboardDeferredSection({
 export function DashboardDeferredSkeleton() {
   return (
     <>
-      <div className="animate-senda-pulse senda-skeleton-fill rounded-xl h-24" />
-      <div className="animate-senda-pulse senda-skeleton-fill rounded-xl h-36" />
-      <div className="animate-senda-pulse senda-skeleton-fill rounded-xl h-36" />
+      <div className="animate-senda-pulse senda-skeleton-fill rounded-[20px] h-24" />
+      <WindingPathSeparator />
+      <div className="animate-senda-pulse senda-skeleton-fill rounded-[20px] h-36" />
+      <WindingPathSeparator />
+      <div className="animate-senda-pulse senda-skeleton-fill rounded-[20px] h-36" />
     </>
   )
 }
