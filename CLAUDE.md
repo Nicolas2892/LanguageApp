@@ -275,6 +275,8 @@ Migrations (run once in Supabase SQL editor):
 - **Mastered**: `user_progress` rows where `interval_days >= 21` (matches curriculum mastery threshold)
 - **Curriculum progress bar**: mastered / total concepts × 100%
 - `isNewUser` flag uses `studiedCount` (any `user_progress` row), not `masteredCount`
+- **Sprint card removed** — Escritura Libre card is the primary deferred action on the dashboard
+- Deferred section (`DashboardDeferredSection`) runs 6 queries in two parallelised batches; wrapped in `<Suspense>` with `DashboardDeferredSkeleton`; `WindingPathSeparator` only renders before Revisar Errores when that card is actually present
 
 ### Curriculum Seed Content
 
@@ -301,6 +303,34 @@ Migrations (run once in Supabase SQL editor):
 - `pnpm seed:conjugations` — generates full 6-pronoun paradigm + stem per verb × tense via Claude Haiku → `docs/verb-conjugations-YYYY-MM-DD.json`; resume-safe
 - `pnpm seed:conjugations:apply <file>` — upserts `verb_conjugations` rows; idempotent (ON CONFLICT DO UPDATE)
 
+### D5 Design System
+
+Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src/app/globals.css`:
+
+**Semantic palette tokens** (`:root`):
+- `--d5-ink: #1A1108` — near-black heading colour
+- `--d5-terracotta: #C4522E` — primary/CTA colour (maps to `--primary`)
+- `--d5-warm: #8C6A3F` — mid-tone; body labels, nav inactive (light)
+- `--d5-muted: #B8AA99` — muted; nav inactive (dark), pronoun cells
+- `--d5-paper: #FDFCF9` — background / button foreground
+
+**Adaptive tokens** (auto-swap in `.dark`):
+- `--d5-eyebrow` — warm in light, muted in dark
+- `--d5-separator` — warm in light, muted in dark (WindingPathSeparator stroke)
+- `--d5-nav-inactive` — warm in light, muted in dark
+
+**CSS utility classes**:
+- `.senda-eyebrow` — 9px, bold, tracking 0.12em, uppercase, `var(--d5-eyebrow)`; font: Plus Jakarta
+- `.senda-card` — warm tint fill `rgba(140,106,63,0.07)`, 20px radius, soft box-shadow, 16px 18px padding; dark override auto via `.dark .senda-card`
+- `.senda-heading` — DM Serif Display italic, `var(--d5-ink)` / `var(--d5-paper)` in dark
+
+**Rule:** Never hardcode `text-green-*` / `bg-green-*` for brand. Use `text-primary` / `bg-primary` / `border-primary` (all resolve to terracotta). Flash animations keep green/red/orange — they are semantic feedback signals.
+
+**D5 shared SVG atoms**:
+- `src/components/SvgSendaPath.tsx` — inline terracotta S-path; props: `size?` (default 20); used in SideNav + AppHeader wordmarks
+- `src/components/WindingPathSeparator.tsx` — calligraphic SVG divider; uses `--d5-separator`; place between dashboard sections
+- `src/components/BackgroundMagicS.tsx` — large watermark S-path (absolute positioned); parent must be `relative overflow-hidden`; props: `opacity?` (default 0.07)
+
 ### Key Shared Components & Utilities
 
 - `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
@@ -325,17 +355,18 @@ Migrations (run once in Supabase SQL editor):
 
 ### Navigation
 
-- **SideNav** (`src/components/SideNav.tsx`) — desktop sidebar; 6 items: Dashboard → Study → Curriculum → **Verbs** → Progress → Tutor; hidden on `/auth`, `/onboarding`, `/brand-preview`
-- **BottomNav** (`src/components/BottomNav.tsx`) — mobile 6-tab bar; same order; `HIDDEN_ROUTES` includes `/verbs/session` (session hides nav like study session)
-- **AppHeader** (`src/components/AppHeader.tsx`) — sticky mobile header; hidden on `/auth`, `/study`, `/tutor`, `/onboarding`
+- **SideNav** (`src/components/SideNav.tsx`) — desktop sidebar (`hidden lg:flex`); D5 design: `SvgSendaPath` + DM Serif italic wordmark, left 3px terracotta accent bar per active item (no icons), `--d5-nav-inactive` for inactive items; 6 items: Dashboard → Study → Curriculum → Verbs → Progress → Tutor; hidden on `/auth`, `/onboarding`, `/brand-preview`, `/admin`
+- **BottomNav** (`src/components/BottomNav.tsx`) — mobile 6-tab bar (`lg:hidden`); same order; active pill uses inline `rgba(184,170,153,0.28)` bg; `HIDDEN_ROUTES` includes `/verbs/session`
+- **AppHeader** (`src/components/AppHeader.tsx`) — sticky mobile header (`lg:hidden`); `SvgSendaPath size={22}` + DM Serif italic "Senda" wordmark; hidden on `/auth`, `/study`, `/tutor`, `/onboarding`, `/brand-preview`
 
-### CSS Animations
+### CSS Animations & Skeleton
 
-- `animate-flash-green` — correct answer flash (green-50 wash, 400ms)
-- `animate-flash-red` — incorrect answer flash (red-50 wash, 400ms)
-- `animate-flash-orange` — accent error flash (amber-50 wash, 400ms) — added for verb session
-- `animate-page-in` — route transition fade+slide (150ms)
-- `animate-exercise-in` — exercise card entrance (180ms)
+- `animate-flash-green` — correct answer flash (green-50 wash, 200ms)
+- `animate-flash-red` — incorrect answer flash (red-50 wash, 200ms)
+- `animate-flash-orange` — accent error flash (amber-50 wash, 200ms) — verb session
+- `animate-page-in` — route transition fade+slide (200ms)
+- `animate-exercise-in` — exercise card entrance (200ms)
+- `animate-senda-pulse` — skeleton loading opacity pulse (1.4s, no scale); used with `senda-skeleton-fill` class (`oklch(0.145 0 0 / 0.05)` light, `oklch(0.985 0 0 / 0.07)` dark)
 
 ### API Security
 
@@ -359,6 +390,8 @@ Migrations (run once in Supabase SQL editor):
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
 **CI: Fully green (TypeScript + lint + tests).**
+
+**D5 brand direction applied** across all production pages and components (dashboard, progress, study configure, verbs detail, nav). CSS utility classes (`.senda-card`, `.senda-eyebrow`, `.senda-heading`) + adaptive tokens (`--d5-*`) defined in `globals.css`.
 
 → Full implementation history: `docs/completed-features.md`
 
