@@ -15,7 +15,7 @@ const SUBJUNCTIVE_TENSES = ['present_subjunctive', 'imperfect_subjunctive'] as c
 const IMPERATIVE_TENSES = ['imperative_affirmative', 'imperative_negative'] as const
 const LENGTHS = [10, 20, 30] as const
 
-type VerbSet = 'favorites' | 'top25' | 'top50' | 'single'
+type VerbSet = 'favorites' | 'top25' | 'top50' | 'top100' | 'single'
 
 export function VerbConfig({ favoriteCount, singleVerb }: Props) {
   const router = useRouter()
@@ -105,6 +105,7 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
           )}
           <RadioOption selected={verbSet === 'top25'}  onSelect={() => setVerbSet('top25')}  label="Top 25 most common" />
           <RadioOption selected={verbSet === 'top50'}  onSelect={() => setVerbSet('top50')}  label="Top 50 most common" />
+          <RadioOption selected={verbSet === 'top100'} onSelect={() => setVerbSet('top100')} label="Top 100 most common" />
           {singleVerb && (
             <RadioOption
               selected={verbSet === 'single'}

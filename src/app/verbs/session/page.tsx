@@ -62,8 +62,8 @@ export default async function VerbSessionPage({ searchParams }: Props) {
     if (verbRow) verbIds = [(verbRow as Pick<Verb, 'id'>).id]
     if (verbIds.length === 0) redirect('/verbs/configure')
   } else {
-    // top25 or top50
-    const limit = verbSet === 'top50' ? 50 : 25
+    // top25, top50, or top100
+    const limit = verbSet === 'top100' ? 100 : verbSet === 'top50' ? 50 : 25
     const { data: verbRows } = await supabase
       .from('verbs')
       .select('id')

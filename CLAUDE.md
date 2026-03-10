@@ -179,7 +179,7 @@ Session configure page (`/study/configure`) builds these params via a UI before 
 | Param     | Values                                     | Effect                                 |
 | --------- | ------------------------------------------ | -------------------------------------- |
 | `tenses`  | comma-separated tense keys                 | Which tenses to drill                  |
-| `verbSet` | `favorites` | `top25` | `top50` | `single` | Which verbs to draw sentences from     |
+| `verbSet` | `favorites` | `top25` | `top50` | `top100` | `single` | Which verbs to draw sentences from     |
 | `verb`    | infinitive string                          | Used when `verbSet=single`             |
 | `length`  | `10` | `20` | `30`                         | Max sentences per session              |
 | `hint`    | `1`                                        | Show `[infinitive]` hint next to blank |
