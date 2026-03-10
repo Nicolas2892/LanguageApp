@@ -76,9 +76,10 @@ export default async function StudyPage({
       .from('concepts').select('id').eq('unit_id', params.unit)
     conceptIds = (data ?? []).map((c) => (c as { id: string }).id)
   } else if (isOpenPractice && params.module) {
-    // Open Practice — all concepts in a module
+    // Open Practice — one or more modules (comma-separated)
+    const moduleIds = params.module.split(',').filter(Boolean)
     const { data: units } = await supabase
-      .from('units').select('id').eq('module_id', params.module)
+      .from('units').select('id').in('module_id', moduleIds)
     const unitIds = (units ?? []).map((u) => (u as { id: string }).id)
     if (unitIds.length > 0) {
       const { data } = await supabase
@@ -91,10 +92,11 @@ export default async function StudyPage({
       .from('concepts').select('id').limit(sessionSize)
     conceptIds = (data ?? []).map((c) => (c as { id: string }).id)
   } else if (isSprint) {
-    // Sprint: SRS due queue, optionally filtered by module
+    // Sprint: SRS due queue, optionally filtered by one or more modules (comma-separated)
     if (params.module) {
+      const moduleIds = params.module.split(',').filter(Boolean)
       const { data: units } = await supabase
-        .from('units').select('id').eq('module_id', params.module)
+        .from('units').select('id').in('module_id', moduleIds)
       const unitIds = (units ?? []).map((u) => (u as { id: string }).id)
       if (unitIds.length > 0) {
         const { data: moduleConceptsData } = await supabase

@@ -16,6 +16,14 @@ const EXERCISE_TYPES = [
 const SESSION_SIZES = [5, 10, 15, 20, 25] as const
 const DEFAULT_SIZE = 10
 
+// Shared eyebrow style — uses D5.muted (lighter than dashboard warm eyebrows)
+const EYEBROW: React.CSSProperties = {
+  fontSize: 9, fontWeight: 700, letterSpacing: '0.12em',
+  textTransform: 'uppercase', color: 'var(--d5-muted)',
+  marginBottom: 10,
+  fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+}
+
 type SessionMode = 'srs' | 'review' | 'practice'
 
 interface Module {
@@ -36,9 +44,15 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
   const searchParams = useSearchParams()
   const initialMode: SessionMode = searchParams.get('mode') === 'practice' ? 'practice' : 'srs'
   const [sessionMode, setSessionMode] = useState<SessionMode>(initialMode)
-  const [selectedModule, setSelectedModule] = useState<string>('all')
+  const [selectedModules, setSelectedModules] = useState<string[]>([])
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [sessionSize, setSessionSize] = useState(DEFAULT_SIZE)
+
+  function toggleModule(id: string) {
+    setSelectedModules((prev) =>
+      prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
+    )
+  }
 
   function toggleType(value: string) {
     setSelectedTypes((prev) =>
@@ -53,7 +67,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
     }
     const params = new URLSearchParams()
     if (sessionMode === 'practice') params.set('practice', 'true')
-    if (selectedModule !== 'all') params.set('module', selectedModule)
+    if (selectedModules.length > 0) params.set('module', selectedModules.join(','))
     if (selectedTypes.length > 0) params.set('types', selectedTypes.join(','))
     if (sessionSize !== DEFAULT_SIZE) params.set('size', String(sessionSize))
     router.push(`/study?${params.toString()}`)
@@ -71,13 +85,14 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
     borderRadius: 99, border: 'none', cursor: 'pointer',
     fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
     whiteSpace: 'nowrap', flexShrink: 0,
+    minHeight: 44, display: 'flex', alignItems: 'center',
   }
 
   return (
     <div>
       {/* ── Mode section ─────────────────────────────────────────────────── */}
       <div className="px-[18px]">
-        <p className="senda-eyebrow mb-2">Modo de estudio</p>
+        <p style={EYEBROW}>Modo de estudio</p>
         <div className="flex flex-col gap-2">
           {modes.map((mode) => (
             <button
@@ -123,43 +138,46 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
       {/* ── Options — hidden in review mode ──────────────────────────────── */}
       {sessionMode !== 'review' && (
         <>
-          {/* Module pills */}
+          {/* Module pills — multi-select; empty = all modules */}
           <div className="px-[18px]">
-            <p className="senda-eyebrow mb-2">Módulo</p>
-            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+            <p style={EYEBROW}>Módulo</p>
+            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
               <button
-                onClick={() => setSelectedModule('all')}
+                onClick={() => setSelectedModules([])}
                 style={{
                   ...pillBase,
-                  padding: '5px 12px',
-                  background: selectedModule === 'all' ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
-                  color: selectedModule === 'all' ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
-                  fontSize: 10, fontWeight: 700,
+                  padding: '0 16px',
+                  background: selectedModules.length === 0 ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
+                  color: selectedModules.length === 0 ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
+                  fontSize: 12, fontWeight: 700,
                 }}
               >
                 Todos
               </button>
-              {modules.map((mod) => (
-                <button
-                  key={mod.id}
-                  onClick={() => setSelectedModule(mod.id)}
-                  style={{
-                    ...pillBase,
-                    padding: '5px 10px',
-                    background: selectedModule === mod.id ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
-                    color: selectedModule === mod.id ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
-                    fontSize: 10, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis',
-                  }}
-                >
-                  {mod.title.split(':')[0].trim()}
-                </button>
-              ))}
+              {modules.map((mod) => {
+                const active = selectedModules.includes(mod.id)
+                return (
+                  <button
+                    key={mod.id}
+                    onClick={() => toggleModule(mod.id)}
+                    style={{
+                      ...pillBase,
+                      padding: '0 14px',
+                      background: active ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
+                      color: active ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
+                      fontSize: 12, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {mod.title.split(':')[0].trim()}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
           {/* Session size pills */}
           <div className="px-[18px] mt-4">
-            <p className="senda-eyebrow mb-2">¿Cuántos ejercicios?</p>
+            <p style={EYEBROW}>¿Cuántos ejercicios?</p>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {SESSION_SIZES.map((size) => (
                 <button
@@ -167,10 +185,10 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
                   onClick={() => setSessionSize(size)}
                   style={{
                     ...pillBase,
-                    padding: '5px 14px',
+                    padding: '0 18px',
                     background: sessionSize === size ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
                     color: sessionSize === size ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
-                    fontSize: 10, fontWeight: sessionSize === size ? 700 : 400,
+                    fontSize: 12, fontWeight: sessionSize === size ? 700 : 400,
                   }}
                 >
                   {size}
@@ -181,7 +199,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
 
           {/* Exercise type grid */}
           <div className="px-[18px] mt-4">
-            <p className="senda-eyebrow mb-2">Tipos de ejercicio</p>
+            <p style={EYEBROW}>Tipos de ejercicio</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
               {EXERCISE_TYPES.map((type) => {
                 const active = selectedTypes.includes(type.value)
@@ -190,9 +208,10 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
                     key={type.value}
                     onClick={() => toggleType(type.value)}
                     style={{
-                      padding: '7px 8px', borderRadius: 8, textAlign: 'center', border: 'none', cursor: 'pointer',
+                      padding: '12px 8px', borderRadius: 8, textAlign: 'center',
+                      border: 'none', cursor: 'pointer', minHeight: 44,
                       fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
-                      fontSize: 9,
+                      fontSize: 11,
                       background: active ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
                       fontWeight: active ? 700 : 400,
                       color: active ? 'var(--d5-paper)' : 'rgba(26,17,8,0.4)',
@@ -210,7 +229,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
       <WindingPathSeparator />
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <div className="px-[18px] pb-5">
+      <div className="px-[18px] pt-2 pb-5">
         <button
           onClick={handleStart}
           style={{

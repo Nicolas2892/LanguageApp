@@ -35,14 +35,14 @@ describe('SessionConfig', () => {
     expect(screen.queryByRole('button', { name: /revisar errores/i })).toBeNull()
   })
 
-  it('Open Practice mode sets practice=true in URL (all modules)', () => {
+  it('Open Practice mode sets practice=true in URL (no module selected = all)', () => {
     render(<SessionConfig modules={mockModules} mistakeConceptCount={0} dueCount={3} />)
     fireEvent.click(screen.getByRole('button', { name: /práctica abierta/i }))
     fireEvent.click(screen.getByRole('button', { name: /empezar sesión/i }))
     expect(mockPush).toHaveBeenCalledWith('/study?practice=true')
   })
 
-  it('Open Practice mode with module appends module param', () => {
+  it('Open Practice mode with single module appends module param', () => {
     render(<SessionConfig modules={mockModules} mistakeConceptCount={0} dueCount={3} />)
     fireEvent.click(screen.getByRole('button', { name: /práctica abierta/i }))
     fireEvent.click(screen.getByRole('button', { name: /connectors & discourse/i }))
@@ -50,21 +50,43 @@ describe('SessionConfig', () => {
     expect(mockPush).toHaveBeenCalledWith('/study?practice=true&module=mod-1')
   })
 
-  it('pre-selects practice mode when ?mode=practice is in query params', () => {
-    mockSearchParams = new URLSearchParams('mode=practice')
+  it('Open Practice mode with multiple modules passes comma-separated module param', () => {
     render(<SessionConfig modules={mockModules} mistakeConceptCount={0} dueCount={3} />)
-    // Open Practice should be visually active — verify clicking Start Session sends practice=true
+    fireEvent.click(screen.getByRole('button', { name: /práctica abierta/i }))
+    fireEvent.click(screen.getByRole('button', { name: /connectors & discourse/i }))
+    fireEvent.click(screen.getByRole('button', { name: /subjunctive mastery/i }))
+    fireEvent.click(screen.getByRole('button', { name: /empezar sesión/i }))
+    // URLSearchParams encodes commas as %2C; Next.js decodes back to mod-1,mod-2 on the server
+    expect(mockPush).toHaveBeenCalledWith('/study?practice=true&module=mod-1%2Cmod-2')
+  })
+
+  it('clicking a selected module deselects it', () => {
+    render(<SessionConfig modules={mockModules} mistakeConceptCount={0} dueCount={3} />)
+    fireEvent.click(screen.getByRole('button', { name: /práctica abierta/i }))
+    fireEvent.click(screen.getByRole('button', { name: /connectors & discourse/i }))
+    fireEvent.click(screen.getByRole('button', { name: /connectors & discourse/i }))
+    fireEvent.click(screen.getByRole('button', { name: /empezar sesión/i }))
+    // module deselected — back to all modules
+    expect(mockPush).toHaveBeenCalledWith('/study?practice=true')
+  })
+
+  it('clicking Todos clears all selected modules', () => {
+    render(<SessionConfig modules={mockModules} mistakeConceptCount={0} dueCount={3} />)
+    fireEvent.click(screen.getByRole('button', { name: /práctica abierta/i }))
+    fireEvent.click(screen.getByRole('button', { name: /connectors & discourse/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'Todos' }))
     fireEvent.click(screen.getByRole('button', { name: /empezar sesión/i }))
     expect(mockPush).toHaveBeenCalledWith('/study?practice=true')
   })
 
-  it('renders Todos module pill in practice mode', () => {
+  it('pre-selects practice mode when ?mode=practice is in query params', () => {
+    mockSearchParams = new URLSearchParams('mode=practice')
     render(<SessionConfig modules={mockModules} mistakeConceptCount={0} dueCount={3} />)
-    fireEvent.click(screen.getByRole('button', { name: /práctica abierta/i }))
-    expect(screen.getByRole('button', { name: 'Todos' })).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: /empezar sesión/i }))
+    expect(mockPush).toHaveBeenCalledWith('/study?practice=true')
   })
 
-  it('renders Todos module pill in SRS mode', () => {
+  it('renders Todos module pill always visible in non-review modes', () => {
     render(<SessionConfig modules={mockModules} mistakeConceptCount={0} dueCount={3} />)
     expect(screen.getByRole('button', { name: 'Todos' })).toBeTruthy()
   })

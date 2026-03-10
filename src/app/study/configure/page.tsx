@@ -98,12 +98,12 @@ export default async function ConfigurePage() {
         >
           ← Inicio
         </Link>
-        <SvgSendaPath size={22} />
+        <SvgSendaPath size={22} strokeWidth={3.5} />
         <div style={{ width: 22 }} />
       </div>
 
       {/* Title */}
-      <div className="px-[18px] py-1">
+      <div className="px-[18px] pt-1 pb-[10px]">
         <h1
           style={{
             fontFamily: 'var(--font-dm-serif), serif',
