@@ -1,6 +1,9 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { SessionConfig } from './SessionConfig'
+import { WindingPathSeparator } from '@/components/WindingPathSeparator'
+import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 
 export default async function ConfigurePage() {
@@ -8,7 +11,9 @@ export default async function ConfigurePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [{ data: modules }, { data: concepts }, { data: progress }, { data: mistakeAttempts }] = await Promise.all([
+  const today = new Date().toISOString().split('T')[0]
+
+  const [{ data: modules }, { data: concepts }, { data: progress }, { data: mistakeAttempts }, { count: rawDueCount }] = await Promise.all([
     supabase.from('modules').select('id, title').order('order_index'),
     supabase.from('concepts').select('id, unit_id, units(module_id)'),
     supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', user.id),
@@ -19,7 +24,14 @@ export default async function ConfigurePage() {
       .lte('ai_score', 1)
       .not('exercise_id', 'is', null)
       .limit(100),
+    supabase
+      .from('user_progress')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .lte('due_date', today),
   ])
+
+  const dueCount = rawDueCount ?? 0
 
   type ConceptRow = { id: string; unit_id: string; units: { module_id: string } | null }
   type ProgressRow = { concept_id: string; interval_days: number }
@@ -76,16 +88,42 @@ export default async function ConfigurePage() {
   }
 
   return (
-    <main className="max-w-md mx-auto p-6 md:p-10">
-      <div className="mb-8">
-        <h1
-          style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
+    <main className="max-w-md mx-auto pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-8">
+      {/* Compact header */}
+      <div className="flex items-center justify-between px-[18px] pt-4 pb-2">
+        <Link
+          href="/dashboard"
+          className="text-[11px] font-semibold"
+          style={{ color: 'var(--d5-warm)' }}
         >
-          Nueva Sesión
-        </h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--d5-warm)' }}>Personaliza Tu Estudio</p>
+          ← Inicio
+        </Link>
+        <SvgSendaPath size={22} />
+        <div style={{ width: 22 }} />
       </div>
-      <SessionConfig modules={modulesWithMastery} mistakeConceptCount={mistakeConceptCount} />
+
+      {/* Title */}
+      <div className="px-[18px] py-1">
+        <h1
+          style={{
+            fontFamily: 'var(--font-dm-serif), serif',
+            fontStyle: 'italic',
+            fontSize: 22,
+            lineHeight: 1.2,
+            color: 'var(--d5-ink)',
+          }}
+        >
+          Configura tu Sesión
+        </h1>
+      </div>
+
+      <WindingPathSeparator />
+
+      <SessionConfig
+        modules={modulesWithMastery}
+        mistakeConceptCount={mistakeConceptCount}
+        dueCount={dueCount}
+      />
     </main>
   )
 }

@@ -2,15 +2,15 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 
 const EXERCISE_TYPES = [
-  { value: 'gap_fill',          label: 'Completar Hueco',        desc: 'Rellena La Palabra O Conector' },
-  { value: 'transformation',    label: 'Transformación',         desc: 'Reescribe Con La Estructura Objetivo' },
-  { value: 'translation',       label: 'Traducción',             desc: 'Traduce Del Inglés Al Español' },
-  { value: 'error_correction',  label: 'Corrección De Errores',  desc: 'Detecta Y Corrige El Error Gramatical' },
-  { value: 'sentence_builder',  label: 'Constructor De Frases',  desc: 'Ordena Las Palabras Correctamente' },
-  { value: 'free_write',        label: 'Escritura Libre',        desc: 'Escribe Libremente Con La Estructura Objetivo' },
+  { value: 'gap_fill',         label: 'Completar'      },
+  { value: 'transformation',   label: 'Transformación' },
+  { value: 'translation',      label: 'Traducción'     },
+  { value: 'error_correction', label: 'Errores'        },
+  { value: 'sentence_builder', label: 'Constructor'    },
+  { value: 'free_write',       label: 'Escritura'      },
 ]
 
 const SESSION_SIZES = [5, 10, 15, 20, 25] as const
@@ -28,9 +28,10 @@ interface Module {
 interface Props {
   modules: Module[]
   mistakeConceptCount: number
+  dueCount: number
 }
 
-export function SessionConfig({ modules, mistakeConceptCount }: Props) {
+export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialMode: SessionMode = searchParams.get('mode') === 'practice' ? 'practice' : 'srs'
@@ -58,161 +59,170 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
     router.push(`/study?${params.toString()}`)
   }
 
-  const isPractice = sessionMode === 'practice'
+  const modes: Array<{ id: SessionMode; title: string; subtitle: string }> = [
+    { id: 'srs',      title: 'Repaso Diario',    subtitle: `${dueCount} concepto${dueCount !== 1 ? 's' : ''} pendientes hoy` },
+    { id: 'practice', title: 'Práctica Abierta', subtitle: 'Todo el catálogo · sin límite SRS' },
+    ...(mistakeConceptCount > 0
+      ? [{ id: 'review' as SessionMode, title: 'Revisar Errores', subtitle: 'Conceptos donde fallaste' }]
+      : []),
+  ]
+
+  const pillBase: React.CSSProperties = {
+    borderRadius: 99, border: 'none', cursor: 'pointer',
+    fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+    whiteSpace: 'nowrap', flexShrink: 0,
+  }
 
   return (
-    <div className="space-y-8">
-      {/* Mode picker — always shown */}
-      <section className="space-y-3">
-        <h2 className="senda-eyebrow">Modo</h2>
-        <div className="grid grid-cols-1 gap-2">
-          <button
-            onClick={() => setSessionMode('srs')}
-            className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
-              sessionMode === 'srs'
-                ? 'border-primary bg-primary/5 font-medium'
-                : 'hover:bg-muted'
-            }`}
-          >
-            <span className="font-medium">Repaso Diario</span>
-            <p className="text-xs text-muted-foreground mt-0.5">Trabaja Con Tu Cola De Hoy</p>
-          </button>
-          <button
-            onClick={() => setSessionMode('practice')}
-            className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
-              sessionMode === 'practice'
-                ? 'border-primary bg-primary/5 font-medium'
-                : 'hover:bg-muted'
-            }`}
-          >
-            <span className="font-medium">Práctica Abierta</span>
-            <p className="text-xs text-muted-foreground mt-0.5">Practica Cualquier Tema Libremente</p>
-          </button>
-          {mistakeConceptCount > 0 && (
+    <div>
+      {/* ── Mode section ─────────────────────────────────────────────────── */}
+      <div className="px-[18px]">
+        <p className="senda-eyebrow mb-2">Modo de estudio</p>
+        <div className="flex flex-col gap-2">
+          {modes.map((mode) => (
             <button
-              onClick={() => setSessionMode('review')}
-              className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
-                sessionMode === 'review'
-                  ? 'border-primary bg-primary/5 font-medium'
-                  : 'hover:bg-muted'
-              }`}
+              key={mode.id}
+              onClick={() => setSessionMode(mode.id)}
+              style={{
+                position: 'relative', textAlign: 'left',
+                borderRadius: 12, padding: '10px 14px', border: 'none', cursor: 'pointer',
+                background: sessionMode === mode.id ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.02)',
+              }}
             >
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Revisar Errores</span>
-                <span className="text-xs text-muted-foreground shrink-0">
-                  {mistakeConceptCount} concept{mistakeConceptCount !== 1 ? 's' : ''}
-                </span>
+              {sessionMode === mode.id && (
+                <div style={{ position: 'absolute', top: 10, right: 12 }}>
+                  <svg viewBox="0 0 18 8" width={13} height={6}>
+                    <path
+                      d="M 1 5 C 4 2, 7 6, 11 4 C 14 2, 17 4, 17 4"
+                      stroke="var(--d5-paper)" strokeWidth={2} strokeLinecap="round" fill="none"
+                    />
+                  </svg>
+                </div>
+              )}
+              <div style={{
+                fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 14,
+                color: sessionMode === mode.id ? 'var(--d5-paper)' : 'var(--d5-ink)',
+                marginBottom: 2,
+              }}>
+                {mode.title}
+              </div>
+              <div style={{
+                fontSize: 10,
+                color: sessionMode === mode.id ? 'rgba(253,252,249,0.75)' : 'var(--d5-muted)',
+                fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+              }}>
+                {mode.subtitle}
               </div>
             </button>
-          )}
+          ))}
         </div>
-      </section>
+      </div>
 
-      {/* Options — hidden in review mode */}
+      <WindingPathSeparator />
+
+      {/* ── Options — hidden in review mode ──────────────────────────────── */}
       {sessionMode !== 'review' && (
         <>
-          {/* Module picker */}
-          <section className="space-y-3">
-            <h2 className="senda-eyebrow">
-              {isPractice ? 'Elegir Un Tema (Opcional)' : 'Módulo'}
-            </h2>
-            <div className="grid grid-cols-1 gap-2">
+          {/* Module pills */}
+          <div className="px-[18px]">
+            <p className="senda-eyebrow mb-2">Módulo</p>
+            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
               <button
                 onClick={() => setSelectedModule('all')}
-                className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
-                  selectedModule === 'all'
-                    ? 'border-primary bg-primary/5 font-medium'
-                    : 'hover:bg-muted'
-                }`}
+                style={{
+                  ...pillBase,
+                  padding: '5px 12px',
+                  background: selectedModule === 'all' ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
+                  color: selectedModule === 'all' ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
+                  fontSize: 10, fontWeight: 700,
+                }}
               >
-                <span className="font-medium">Todos Los Módulos</span>
-                <span className="text-muted-foreground ml-2">
-                  {isPractice ? '(Catálogo Completo)' : '(Cola SRS Del Día)'}
-                </span>
+                Todos
               </button>
               {modules.map((mod) => (
                 <button
                   key={mod.id}
                   onClick={() => setSelectedModule(mod.id)}
-                  className={`text-left border rounded-xl px-4 py-3 text-sm transition-colors ${
-                    selectedModule === mod.id
-                      ? 'border-primary bg-primary/5 font-medium'
-                      : 'hover:bg-muted'
-                  }`}
+                  style={{
+                    ...pillBase,
+                    padding: '5px 10px',
+                    background: selectedModule === mod.id ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
+                    color: selectedModule === mod.id ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
+                    fontSize: 10, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className={selectedModule === mod.id ? 'font-medium' : ''}>{mod.title}</span>
-                    {mod.total > 0 && !isPractice && (
-                      <span className="text-xs text-muted-foreground shrink-0">
-                        {mod.mastered}/{mod.total} Dominados
-                      </span>
-                    )}
-                  </div>
+                  {mod.title.split(':')[0].trim()}
                 </button>
               ))}
             </div>
-          </section>
+          </div>
 
-          {/* Session size picker */}
-          <section className="space-y-3">
-            <h2 className="senda-eyebrow">¿Cuántos Ejercicios?</h2>
-            <div className="flex gap-2 flex-wrap">
+          {/* Session size pills */}
+          <div className="px-[18px] mt-4">
+            <p className="senda-eyebrow mb-2">¿Cuántos ejercicios?</p>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {SESSION_SIZES.map((size) => (
                 <button
                   key={size}
                   onClick={() => setSessionSize(size)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
-                    sessionSize === size
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'border-border text-muted-foreground hover:bg-muted'
-                  }`}
+                  style={{
+                    ...pillBase,
+                    padding: '5px 14px',
+                    background: sessionSize === size ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
+                    color: sessionSize === size ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
+                    fontSize: 10, fontWeight: sessionSize === size ? 700 : 400,
+                  }}
                 >
                   {size}
                 </button>
               ))}
             </div>
-          </section>
+          </div>
 
-          {/* Exercise type picker */}
-          <section className="space-y-3">
-            <div className="flex items-baseline justify-between">
-              <h2 className="senda-eyebrow">Tipos De Ejercicio</h2>
-              <span className="text-xs text-muted-foreground">
-                {selectedTypes.length === 0 ? 'Todos Los Tipos' : `${selectedTypes.length} Seleccionados`}
-              </span>
-            </div>
-            <div className="grid grid-cols-1 gap-2">
+          {/* Exercise type grid */}
+          <div className="px-[18px] mt-4">
+            <p className="senda-eyebrow mb-2">Tipos de ejercicio</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
               {EXERCISE_TYPES.map((type) => {
                 const active = selectedTypes.includes(type.value)
                 return (
                   <button
                     key={type.value}
                     onClick={() => toggleType(type.value)}
-                    className={`text-left border rounded-xl px-4 py-3 transition-colors ${
-                      active ? 'border-primary bg-primary/5' : 'hover:bg-muted'
-                    }`}
+                    style={{
+                      padding: '7px 8px', borderRadius: 8, textAlign: 'center', border: 'none', cursor: 'pointer',
+                      fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+                      fontSize: 9,
+                      background: active ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
+                      fontWeight: active ? 700 : 400,
+                      color: active ? 'var(--d5-paper)' : 'rgba(26,17,8,0.4)',
+                    }}
                   >
-                    <span className="text-sm font-medium">{type.label}</span>
-                    <p className="text-xs text-muted-foreground mt-0.5">{type.desc}</p>
+                    {type.label}
                   </button>
                 )
               })}
             </div>
-            {selectedTypes.length > 0 && (
-              <button
-                onClick={() => setSelectedTypes([])}
-                className="text-xs text-muted-foreground underline"
-              >
-                Limpiar Selección (Usar Todos Los Tipos)
-              </button>
-            )}
-          </section>
+          </div>
         </>
       )}
 
-      <Button onClick={handleStart} className="w-full rounded-full" size="lg">
-        Empezar Sesión →
-      </Button>
+      <WindingPathSeparator />
+
+      {/* ── CTA ──────────────────────────────────────────────────────────── */}
+      <div className="px-[18px] pb-5">
+        <button
+          onClick={handleStart}
+          style={{
+            background: 'var(--d5-terracotta)', color: 'var(--d5-paper)',
+            border: 'none', borderRadius: 99, padding: '13px 0', width: '100%',
+            fontWeight: 700, fontSize: 14, cursor: 'pointer',
+            fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+          }}
+        >
+          Empezar Sesión →
+        </button>
+      </div>
     </div>
   )
 }
