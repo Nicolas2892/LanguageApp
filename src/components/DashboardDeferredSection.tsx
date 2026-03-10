@@ -13,6 +13,17 @@ interface Props {
   lastWeekStart: string // ISO string
 }
 
+type ModuleRow   = { id: string; title: string; order_index: number }
+type UnitRow     = { id: string; module_id: string }
+type ConceptRow  = { id: string; unit_id: string }
+type ProgressRow = { concept_id: string; interval_days: number }
+type ModuleState = 'mastered' | 'active' | 'upcoming'
+
+interface ModuleSummary {
+  title: string
+  state: ModuleState
+}
+
 export async function DashboardDeferredSection({
   userId,
   isNewUser,
@@ -130,6 +141,59 @@ export async function DashboardDeferredSection({
       : null
   const minutesDelta = lastWeekMinutes > 0 ? thisWeekMinutes - lastWeekMinutes : null
 
+  // Batch 3 — curriculum state (3 public reads + 1 user read, all parallel)
+  const [modulesRes, unitsRes, conceptsRes, allProgressRes] = await Promise.all([
+    supabase.from('modules').select('id, title, order_index').order('order_index', { ascending: true }),
+    supabase.from('units').select('id, module_id'),
+    supabase.from('concepts').select('id, unit_id'),
+    supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', userId),
+  ])
+
+  const allModules   = (modulesRes.data   ?? []) as ModuleRow[]
+  const allUnits     = (unitsRes.data     ?? []) as UnitRow[]
+  const allConcepts  = (conceptsRes.data  ?? []) as ConceptRow[]
+  const allProgress  = (allProgressRes.data ?? []) as ProgressRow[]
+
+  // Build lookup maps (no join syntax)
+  const unitsByModule = new Map<string, string[]>()
+  for (const u of allUnits) {
+    const arr = unitsByModule.get(u.module_id) ?? []
+    arr.push(u.id)
+    unitsByModule.set(u.module_id, arr)
+  }
+
+  const conceptsByUnit = new Map<string, string[]>()
+  for (const c of allConcepts) {
+    const arr = conceptsByUnit.get(c.unit_id) ?? []
+    arr.push(c.id)
+    conceptsByUnit.set(c.unit_id, arr)
+  }
+
+  const progressMap = new Map<string, number>()
+  for (const p of allProgress) {
+    progressMap.set(p.concept_id, p.interval_days)
+  }
+
+  const moduleSummaries: ModuleSummary[] = allModules.map((mod) => {
+    const unitIds = unitsByModule.get(mod.id) ?? []
+    const conceptIds = unitIds.flatMap((uid) => conceptsByUnit.get(uid) ?? [])
+    let mastered = 0
+    let studied = 0
+    for (const cid of conceptIds) {
+      const days = progressMap.get(cid)
+      if (days !== undefined) {
+        studied++
+        if (days >= MASTERY_THRESHOLD) mastered++
+      }
+    }
+    const total = conceptIds.length
+    const state: ModuleState =
+      total > 0 && mastered === total ? 'mastered'
+      : studied > 0 ? 'active'
+      : 'upcoming'
+    return { title: mod.title, state }
+  })
+
   return (
     <>
       {/* Weekly snapshot — only shown after user has studied this week */}
@@ -165,10 +229,10 @@ export async function DashboardDeferredSection({
             className="w-full rounded-full"
             style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
           >
-            <Link href={`/write?suggested=${writeConcept.id}`}>Escribir Ahora →</Link>
+            <Link href={`/write?suggested=${writeConcept.id}`}>Escribir Ahora</Link>
           </Button>
           <Button asChild variant="ghost" className="w-full text-xs h-8" style={{ color: 'var(--d5-muted)' }}>
-            <Link href="/write">Cambiar Concepto →</Link>
+            <Link href="/write">Cambiar Concepto</Link>
           </Button>
         </div>
       )}
@@ -189,7 +253,7 @@ export async function DashboardDeferredSection({
             className="w-full rounded-full"
             style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
           >
-            <Link href="/write">Explorar Conceptos →</Link>
+            <Link href="/write">Explorar Conceptos</Link>
           </Button>
         </div>
       )}
@@ -199,21 +263,72 @@ export async function DashboardDeferredSection({
         <>
           <WindingPathSeparator />
           <div className="senda-card space-y-3">
-          <p className="senda-eyebrow">Revisar Errores</p>
-          <p
-            style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
-          >
-            {mistakeConceptCount} Concepto{mistakeConceptCount !== 1 ? 's' : ''} para revisar
-          </p>
-          <Button
-            asChild
-            variant="outline"
-            className="w-full rounded-full"
-            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
-          >
-            <Link href="/study?mode=review">Repasar Ahora →</Link>
-          </Button>
-        </div>
+            <p className="senda-eyebrow">Revisar Errores</p>
+            <p
+              style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
+            >
+              {mistakeConceptCount} Concepto{mistakeConceptCount !== 1 ? 's' : ''} para revisar
+            </p>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full rounded-full"
+              style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
+            >
+              <Link href="/study?mode=review">Repasar Ahora</Link>
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* Tu Currículo — module progress list */}
+      {moduleSummaries.length > 0 && (
+        <>
+          <WindingPathSeparator />
+          <div>
+            <p className="senda-eyebrow mb-2.5">Tu Currículo</p>
+            {moduleSummaries.map((mod, i) => {
+              const isUpcoming = mod.state === 'upcoming'
+              const stateLabel =
+                mod.state === 'mastered' ? 'Completado'
+                : mod.state === 'active' ? 'En Progreso'
+                : 'Próximamente'
+              return (
+                <div
+                  key={mod.title}
+                  className="flex items-center justify-between py-2.5"
+                  style={{
+                    borderBottom:
+                      i < moduleSummaries.length - 1
+                        ? '1px solid rgba(184,170,153,0.25)'
+                        : 'none',
+                  }}
+                >
+                  <span
+                    className="flex-1 mr-2 text-[12px] truncate"
+                    style={{ color: isUpcoming ? 'rgba(26,17,8,0.45)' : 'var(--d5-ink)' }}
+                  >
+                    {mod.title}
+                  </span>
+                  <span
+                    className="text-[9px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap"
+                    style={{
+                      background:
+                        mod.state === 'mastered' ? 'rgba(184,170,153,0.3)'
+                        : mod.state === 'active' ? 'var(--d5-terracotta)'
+                        : 'transparent',
+                      color:
+                        mod.state === 'mastered' ? 'var(--d5-warm)'
+                        : mod.state === 'active' ? 'var(--d5-paper)'
+                        : 'rgba(26,17,8,0.35)',
+                    }}
+                  >
+                    {stateLabel}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
         </>
       )}
     </>

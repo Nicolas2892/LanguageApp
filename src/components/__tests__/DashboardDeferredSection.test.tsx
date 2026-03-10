@@ -123,6 +123,8 @@ function makeSupabaseMock({
     exercises: makeQuery(
       mistakeExerciseIds.map((id) => ({ id, concept_id: 'concept-mistake-1' }))
     ),
+    modules: makeQuery([{ id: 'mod-1', title: 'Conectores del Discurso', order_index: 1 }]),
+    units: makeQuery([{ id: 'unit-1', module_id: 'mod-1' }]),
   }
 
   return {
@@ -212,6 +214,15 @@ describe('DashboardDeferredSection', () => {
     render(el)
     expect(screen.queryByText('Escritura Libre')).toBeNull()
     expect(screen.queryByText(/para revisar/i)).toBeNull()
+  })
+
+  it('renders Tu Currículo section with module states', async () => {
+    const el = await DashboardDeferredSection(defaultProps)
+    render(el)
+    expect(screen.getByText('Tu Currículo')).toBeTruthy()
+    expect(screen.getByText('Conectores del Discurso')).toBeTruthy()
+    // No user_progress for the concept → state is Próximamente
+    expect(screen.getByText('Próximamente')).toBeTruthy()
   })
 })
 
