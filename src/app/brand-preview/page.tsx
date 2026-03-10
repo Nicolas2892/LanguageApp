@@ -291,6 +291,7 @@ export default async function BrandPreviewPage() {
               rows,
               masteryPct,
               attempts:   vp?.attempt_count ?? 0,
+              stem:       conj?.stem ?? '',
             }
           }),
         }

@@ -163,6 +163,7 @@ export interface D5VerbData {
     rows: Array<{ pronoun: string; form: string }>
     masteryPct: number | null
     attempts: number
+    stem?: string   // invariant prefix — used for colour-ending highlight
   }>
 }
 
@@ -1066,7 +1067,18 @@ function D5CurriculumTimeline({ data }: { data?: D5Data | null }) {
                     }}>
                       {mod.title}
                     </div>
-                    <div style={{ fontSize: 10, color: isFuture ? `${D5.ink}30` : D5.warm, fontFamily: grot }}>{mod.meta}</div>
+                    <div style={{ marginTop: 3 }}>
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        padding: '2px 7px', borderRadius: 9999,
+                        background: D5.paper,
+                        border: `1px solid rgba(26,17,8,${isFuture ? '0.08' : '0.15'})`,
+                        opacity: isFuture ? 0.5 : 1,
+                      }}>
+                        <span style={{ width: 4, height: 4, borderRadius: '50%', background: D5.terracotta, flexShrink: 0 }} />
+                        <span style={{ fontSize: 9, color: D5.ink, fontFamily: grot, lineHeight: 1 }}>{mod.meta}</span>
+                      </span>
+                    </div>
                   </div>
                   {/* Status chips — all vertically centered with alignItems: center on parent */}
                   {isMastered && (
@@ -1290,20 +1302,19 @@ function D5StudyConfigurePage({ data }: { data?: D5Data | null }) {
           {modes.map(mode => (
             <div key={mode.id} style={{
               borderRadius: 12, padding: '10px 14px',
-              background: mode.selected ? `rgba(26,17,8,0.05)` : `rgba(26,17,8,0.02)`,
-              borderLeft: mode.selected ? `3px solid ${D5.terracotta}` : '3px solid transparent',
+              background: mode.selected ? D5.terracotta : `rgba(26,17,8,0.02)`,
               position: 'relative',
             }}>
               {mode.selected && (
                 <div style={{ position: 'absolute', top: 10, right: 12 }}>
                   <svg viewBox="0 0 18 8" width={13} height={6}>
                     <path d="M 1 5 C 4 2, 7 6, 11 4 C 14 2, 17 4, 17 4"
-                      stroke={D5.terracotta} strokeWidth={2} strokeLinecap="round" fill="none" />
+                      stroke={D5.paper} strokeWidth={2} strokeLinecap="round" fill="none" />
                   </svg>
                 </div>
               )}
-              <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 14, color: D5.ink, fontWeight: mode.selected ? 600 : 400, marginBottom: 2 }}>{mode.title}</div>
-              <div style={{ fontSize: 10, color: mode.selected ? `${D5.ink}60` : D5.muted, fontFamily: grot }}>{mode.subtitle}</div>
+              <div style={{ fontFamily: serif, fontStyle: 'italic', fontSize: 14, color: mode.selected ? D5.paper : D5.ink, fontWeight: mode.selected ? 600 : 400, marginBottom: 2 }}>{mode.title}</div>
+              <div style={{ fontSize: 10, color: mode.selected ? `rgba(253,252,249,0.75)` : D5.muted, fontFamily: grot }}>{mode.subtitle}</div>
             </div>
           ))}
         </div>
@@ -1315,7 +1326,7 @@ function D5StudyConfigurePage({ data }: { data?: D5Data | null }) {
       <div style={{ padding: '4px 18px 8px' }}>
         <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: D5.muted, marginBottom: 8, fontFamily: grot }}>Módulo</div>
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
-          <div style={{ padding: '5px 12px', borderRadius: 99, background: `rgba(26,17,8,0.08)`, color: D5.ink, fontSize: 10, fontWeight: 700, fontFamily: grot, whiteSpace: 'nowrap', flexShrink: 0 }}>Todos</div>
+          <div style={{ padding: '5px 12px', borderRadius: 99, background: D5.terracotta, color: D5.paper, fontSize: 10, fontWeight: 700, fontFamily: grot, whiteSpace: 'nowrap', flexShrink: 0 }}>Todos</div>
           {modules.slice(0, 3).map((mod, i) => (
             <div key={i} style={{ padding: '5px 10px', borderRadius: 99, background: `rgba(26,17,8,0.03)`, color: `${D5.ink}60`, fontSize: 10, fontFamily: grot, whiteSpace: 'nowrap', flexShrink: 0, maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {mod.title.split(':')[0].trim()}
@@ -1331,10 +1342,9 @@ function D5StudyConfigurePage({ data }: { data?: D5Data | null }) {
           {typeLabels.map((label, i) => (
             <div key={i} style={{
               padding: '7px 8px', borderRadius: 8, textAlign: 'center', fontFamily: grot, fontSize: 9,
-              background: activeTypes.includes(i) ? `rgba(26,17,8,0.07)` : `rgba(26,17,8,0.03)`,
+              background: activeTypes.includes(i) ? D5.terracotta : `rgba(26,17,8,0.03)`,
               fontWeight: activeTypes.includes(i) ? 700 : 400,
-              color: activeTypes.includes(i) ? D5.ink : `${D5.ink}40`,
-              borderLeft: activeTypes.includes(i) ? `2px solid ${D5.warm}` : '2px solid transparent',
+              color: activeTypes.includes(i) ? D5.paper : `${D5.ink}40`,
             }}>
               {label}
             </div>
@@ -1448,21 +1458,23 @@ function D5VerbDetailPage({ data }: { data?: D5VerbData | null }) {
   const serif = 'var(--font-dm-serif), serif'
 
   const FALLBACK_ROWS = [
-    { pronoun: 'yo',       form: 'soy'    },
-    { pronoun: 'tú',       form: 'eres'   },
-    { pronoun: 'él/ella',  form: 'es'     },
-    { pronoun: 'nosotros', form: 'somos'  },
-    { pronoun: 'vosotros', form: 'sois'   },
-    { pronoun: 'ellos',    form: 'son'    },
+    { pronoun: 'yo',       form: 'hablo'   },
+    { pronoun: 'tú',       form: 'hablas'  },
+    { pronoun: 'él/ella',  form: 'habla'   },
+    { pronoun: 'nosotros', form: 'hablamos'},
+    { pronoun: 'vosotros', form: 'habláis' },
+    { pronoun: 'ellos',    form: 'hablan'  },
   ]
+  const FALLBACK_STEM = 'habl'
 
-  const infinitive = data?.infinitive ?? 'ser'
-  const english    = data?.english    ?? 'to be'
-  const firstTense = data?.tenseData?.[0]
-  const tenseLabel = firstTense?.label ?? 'Presente de Indicativo'
-  const rows       = (firstTense?.rows?.length ? firstTense.rows : FALLBACK_ROWS)
-  const masteryPct = firstTense?.masteryPct ?? null
+  const infinitive   = data?.infinitive ?? 'hablar'
+  const english      = data?.english    ?? 'to speak'
+  const firstTense   = data?.tenseData?.[0]
+  const tenseLabel   = firstTense?.label ?? 'Presente de Indicativo'
+  const rows         = (firstTense?.rows?.length ? firstTense.rows : FALLBACK_ROWS)
+  const masteryPct   = firstTense?.masteryPct ?? null
   const attemptCount = firstTense?.attempts ?? 0
+  const stem         = firstTense?.stem ?? FALLBACK_STEM
 
   const tenseTabs = data?.tenseData?.slice(0, 5).map(t =>
     t.label.length > 14 ? t.label.slice(0, 13) + '…' : t.label
@@ -1520,8 +1532,15 @@ function D5VerbDetailPage({ data }: { data?: D5VerbData | null }) {
             <div style={{ width: 82, fontSize: 11, color: D5.muted, fontFamily: grot, flexShrink: 0 }}>
               {pronounDisplay[row.pronoun] ?? row.pronoun}
             </div>
-            <div style={{ fontSize: 14, fontFamily: serif, fontStyle: 'italic', color: D5.ink, flex: 1 }}>
-              {row.form || '—'}
+            <div style={{ fontSize: 14, fontFamily: serif, fontStyle: 'italic', flex: 1 }}>
+              {stem && row.form.startsWith(stem) && row.form.length > stem.length ? (
+                <>
+                  <span style={{ color: `${D5.ink}75` }}>{stem}</span>
+                  <span style={{ color: D5.terracotta, fontWeight: 600 }}>{row.form.slice(stem.length)}</span>
+                </>
+              ) : (
+                <span style={{ color: D5.ink }}>{row.form || '—'}</span>
+              )}
             </div>
           </div>
         ))}
@@ -1663,9 +1682,7 @@ function D5AccountPage() {
   const serif = 'var(--font-dm-serif), serif'
 
   return (
-    <div style={{ position: 'relative', padding: 0, background: D5.paper, minHeight: '100%', fontFamily: grot, overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', top: '5%', right: -20, opacity: 0.025, pointerEvents: 'none', zIndex: 0 }}><BackgroundMagicS opacity={1} /></div>
-      <div style={{ position: 'relative', zIndex: 1 }}>
+    <div style={{ padding: 0, background: D5.paper, minHeight: '100%', fontFamily: grot }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 18px 8px' }}>
@@ -1746,7 +1763,6 @@ function D5AccountPage() {
           <span style={{ fontSize: 10, color: `${D5.ink}25`, fontFamily: grot, cursor: 'pointer' }}>Eliminar cuenta</span>
         </div>
 
-      </div>
     </div>
   )
 }
