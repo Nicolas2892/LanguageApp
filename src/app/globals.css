@@ -131,6 +131,12 @@
   }
 }
 
+/* Senda motion tempo — snappy academic easing */
+:root {
+  --ease-senda: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-senda: 200ms;
+}
+
 @keyframes flash-green {
   0%, 100% { background-color: transparent; }
   50% { background-color: oklch(0.97 0.05 145); }
@@ -139,26 +145,26 @@
   0%, 100% { background-color: transparent; }
   50% { background-color: oklch(0.97 0.05 20); }
 }
-.animate-flash-green  { animation: flash-green 400ms ease-out; }
-.animate-flash-red    { animation: flash-red 400ms ease-out; }
+.animate-flash-green  { animation: flash-green  var(--duration-senda) var(--ease-senda); }
+.animate-flash-red    { animation: flash-red    var(--duration-senda) var(--ease-senda); }
 
 @keyframes flash-orange {
   0%, 100% { background-color: transparent; }
   50% { background-color: oklch(0.97 0.05 75); }
 }
-.animate-flash-orange { animation: flash-orange 400ms ease-out; }
+.animate-flash-orange { animation: flash-orange var(--duration-senda) var(--ease-senda); }
 
 @keyframes page-fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.animate-page-in { animation: page-fade-in 150ms ease-out; }
+.animate-page-in { animation: page-fade-in var(--duration-senda) var(--ease-senda); }
 
 @keyframes exercise-fadein {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.animate-exercise-in { animation: exercise-fadein 180ms ease-out; }
+.animate-exercise-in { animation: exercise-fadein var(--duration-senda) var(--ease-senda); }
 
 /* Fix-G + UX-T: Review card tint — reliable dark mode override via unlayered CSS */
 .review-card-warm {

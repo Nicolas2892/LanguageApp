@@ -5,7 +5,7 @@
 //   - Stale-while-revalidate for page navigation (non-auth, non-API)
 //   - Network-only for API calls and auth routes
 
-const CACHE = 'spanish-app-v2'
+const CACHE = 'senda-v1'
 
 const SHELL_URLS = [
   '/',
@@ -15,6 +15,7 @@ const SHELL_URLS = [
   '/verbs',
   '/progress',
   '/curriculum',
+  '/offline',
   '/manifest.webmanifest',
   '/icon',
   '/apple-icon',
@@ -83,14 +84,19 @@ self.addEventListener('fetch', (e) => {
   // ── 3. Stale-while-revalidate for page navigation ─────────────────────────
   // Serve cached shell immediately; revalidate in background.
   // Auth-gated data comes from fresh Supabase API calls, so stale HTML is safe.
+  // Falls back to /offline page when both cache and network are unavailable.
   if (request.mode === 'navigate') {
     e.respondWith(
       caches.open(CACHE).then((cache) =>
         cache.match(request).then((cached) => {
-          const networkFetch = fetch(request).then((res) => {
-            if (res.ok) cache.put(request, res.clone())
-            return res
-          })
+          const networkFetch = fetch(request)
+            .then((res) => {
+              if (res.ok) cache.put(request, res.clone())
+              return res
+            })
+            .catch(() =>
+              caches.match('/offline').then((offlinePage) => offlinePage ?? Response.error())
+            )
           return cached ?? networkFetch
         })
       )
@@ -123,7 +129,7 @@ self.addEventListener('fetch', (e) => {
 // Push notification received
 self.addEventListener('push', (event) => {
   const data = event.data?.json() ?? {}
-  const title = data.title ?? 'Español Avanzado'
+  const title = data.title ?? 'Senda'
   const options = {
     body: data.body ?? 'You have reviews due today.',
     icon: '/icon',

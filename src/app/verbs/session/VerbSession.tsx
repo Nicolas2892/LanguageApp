@@ -9,6 +9,7 @@ import { TENSE_LABELS } from '@/lib/verbs/constants'
 import type { VerbTense } from '@/lib/verbs/constants'
 import { VerbFeedbackPanel } from '@/components/verbs/VerbFeedbackPanel'
 import { VerbSummary } from '@/components/verbs/VerbSummary'
+import { useHaptics } from '@/lib/hooks/useHaptics'
 
 const PRONOUN_LABELS: Record<string, string> = {
   yo:       'yo',
@@ -48,6 +49,7 @@ interface Props {
 
 export function VerbSession({ items, showHint, sessionUrl }: Props) {
   const router = useRouter()
+  const { triggerSuccess, triggerError, triggerWarning } = useHaptics()
   const [index, setIndex] = useState(0)
   const [answer, setAnswer] = useState('')
   const [phase, setPhase] = useState<Phase>({ kind: 'answering' })
@@ -123,7 +125,10 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
     const result = gradeConjugation(answer, current.correctForm, current.tenseRule)
     const isCorrect = result.outcome === 'correct'
 
-    // Flash animation
+    // Haptic + flash feedback
+    if (isCorrect) triggerSuccess()
+    else if (result.outcome === 'accent_error') triggerWarning()
+    else triggerError()
     const cls = isCorrect ? 'animate-flash-green' : result.outcome === 'accent_error' ? 'animate-flash-orange' : 'animate-flash-red'
     setFlashClass(cls)
     setTimeout(() => setFlashClass(''), 400)

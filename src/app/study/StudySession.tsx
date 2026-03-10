@@ -19,6 +19,7 @@ import {
   Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles, Timer, X, Loader2,
 } from 'lucide-react'
 import { PushPermissionPrompt } from '@/components/PushPermissionPrompt'
+import { useHaptics } from '@/lib/hooks/useHaptics'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
 
@@ -70,6 +71,7 @@ function formatTime(totalSeconds: number): string {
 
 export function StudySession({ items: initialItems, practiceMode, generateConfig, returnHref, sprintConfig, freeWriteConceptId, sessionLabel }: Props) {
   const router = useRouter()
+  const { triggerSuccess, triggerError } = useHaptics()
   const startedAt = useRef(new Date().toISOString())
   const [dynamicItems, setDynamicItems] = useState<StudyItem[]>(initialItems)
   const [index, setIndex] = useState(0)
@@ -300,7 +302,9 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             }
 
             if (!parsed.is_correct) setWrongAttempts((n) => n + 1)
-            const fc = (parsed.score as number) >= 2 ? 'animate-flash-green' : 'animate-flash-red'
+            const isGood = (parsed.score as number) >= 2
+            if (isGood) triggerSuccess(); else triggerError()
+            const fc = isGood ? 'animate-flash-green' : 'animate-flash-red'
             setFlashClass(fc)
             setSubmitting(false)
             setStreamingDetails(true)
