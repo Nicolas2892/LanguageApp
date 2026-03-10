@@ -354,7 +354,7 @@ Migrations (run once in Supabase SQL editor):
 
 ## Current Status
 
-**Test suite: 1299 tests across 51 files — all passing.**
+**Test suite: 1327 tests across 55 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
