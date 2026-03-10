@@ -6,7 +6,6 @@ import { ActivityHeatmap } from './ActivityHeatmap'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { ExerciseTypeChart } from '@/components/ExerciseTypeChart'
 import { VerbTenseMastery } from '@/components/verbs/VerbTenseMastery'
-import { VerbTenseChart } from '@/components/verbs/VerbTenseChart'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import { Flame, CheckCircle, Zap, Target, BarChart2, ListChecks, Clock } from 'lucide-react'
 import type { ExerciseAccuracy } from './AccuracyChart'
@@ -483,16 +482,6 @@ export default async function ProgressPage() {
 
           {/* Verb conjugation mastery */}
           <VerbTenseMastery summaries={verbTenseSummaries} />
-
-          {/* Verb conjugation accuracy chart */}
-          {verbTenseSummaries.length > 0 && (
-            <section className="space-y-3">
-              <h2 className="font-bold text-base">Verb accuracy by tense</h2>
-              <div className="bg-card rounded-xl border p-5 shadow-sm">
-                <VerbTenseChart summaries={verbTenseSummaries} />
-              </div>
-            </section>
-          )}
         </>
       )}
     </main>
