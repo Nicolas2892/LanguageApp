@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { OnboardingTour } from '@/components/OnboardingTour'
 import { DashboardDeferredSection, DashboardDeferredSkeleton } from '@/components/DashboardDeferredSection'
-import type { Profile, Module } from '@/lib/supabase/types'
+import type { Profile } from '@/lib/supabase/types'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
 import {
   Flame, Trophy, BookOpen, Sparkles, CheckCircle2,
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   const lastWeekStart = new Date(thisWeekStart)
   lastWeekStart.setDate(thisWeekStart.getDate() - 7)
 
-  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, modulesRes, todaySessionsRes] = await Promise.all([
+  const [profileRes, dueRes, totalConceptsRes, studiedRes, masteredRes, todaySessionsRes] = await Promise.all([
     supabase.from('profiles').select('streak, computed_level, display_name, daily_goal_minutes, last_studied_date').eq('id', user.id).single(),
     supabase
       .from('user_progress')
@@ -49,7 +49,6 @@ export default async function DashboardPage() {
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id)
       .gte('interval_days', MASTERY_THRESHOLD),
-    supabase.from('modules').select('id, title').order('order_index'),
     supabase
       .from('study_sessions')
       .select('started_at, ended_at')
@@ -59,7 +58,6 @@ export default async function DashboardPage() {
 
   const profile = profileRes.data as Profile | null
   const dueCount = dueRes.count ?? 0
-  const modules = (modulesRes.data ?? []) as Pick<Module, 'id' | 'title'>[]
   const totalConcepts = totalConceptsRes.count ?? 0
   const studiedCount = studiedRes.count ?? 0
   const masteredCount = masteredRes.count ?? 0
@@ -96,16 +94,16 @@ export default async function DashboardPage() {
             ) : null
           })()}
         </div>
-        <div className="h-px w-16 bg-gradient-to-r from-green-700 to-transparent mt-1" />
+        <div className="h-px w-16 bg-gradient-to-r from-primary to-transparent mt-1" />
         <p className="text-muted-foreground text-sm">
           {(() => {
             const streak = profile?.streak ?? 0
-            if (dueCount === 0 && studiedCount > 0) return "You're all caught up — perfect time to learn something new."
-            if (streak >= 30) return "30 days strong — you're unstoppable."
-            if (streak >= 7) return "7 days strong — you're building a real habit."
-            if (streak === 1) return "Day 1 — the hardest step is done."
-            if (streak === 0) return "Ready to start your streak?"
-            return new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
+            if (dueCount === 0 && studiedCount > 0) return 'Todo Al Día — Buen Momento Para Aprender Algo Nuevo.'
+            if (streak >= 30) return '30 Días Seguidos — Eres Imparable.'
+            if (streak >= 7) return '7 Días Seguidos — Estás Creando Un Hábito Real.'
+            if (streak === 1) return 'Día 1 — El Paso Más Difícil Ya Está Hecho.'
+            if (streak === 0) return '¿Listo Para Empezar Tu Racha?'
+            return new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })
           })()}
         </p>
       </div>
@@ -115,17 +113,17 @@ export default async function DashboardPage() {
         {/* Stats row */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <Flame className={`h-5 w-5 shrink-0 ${(profile?.streak ?? 0) >= 7 ? 'text-green-700 animate-pulse' : 'text-green-600'}`} strokeWidth={1.5} />
+            <Flame className={`h-5 w-5 shrink-0 ${(profile?.streak ?? 0) >= 7 ? 'text-primary animate-pulse' : 'text-primary'}`} strokeWidth={1.5} />
             <div>
-              <p className="text-2xl font-extrabold text-green-800 leading-none">{profile?.streak ?? 0}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">day streak</p>
+              <p className="text-2xl font-extrabold text-primary leading-none">{profile?.streak ?? 0}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Días Seguidos</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-500 shrink-0" strokeWidth={1.5} />
             <div>
               <p className="text-2xl font-extrabold leading-none">{masteredCount}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">of {totalConcepts} mastered</p>
+              <p className="text-xs text-muted-foreground mt-0.5">De {totalConcepts} Dominados</p>
             </div>
           </div>
         </div>
@@ -134,11 +132,11 @@ export default async function DashboardPage() {
         {!isNewUser && (
           <div className="space-y-1.5">
             <div className="flex h-2.5 rounded-full overflow-hidden bg-muted gap-0.5">
-              <AnimatedBar pct={masteredPct} className="bg-green-700 rounded-l-full" />
+              <AnimatedBar pct={masteredPct} className="bg-primary rounded-l-full" />
               <AnimatedBar pct={learningPct} className="bg-amber-300" />
             </div>
             <p className="text-xs text-muted-foreground text-right">
-              {masteredCount} mastered · {learningCount} in progress · {newConceptsCount} to start
+              {masteredCount} Dominados · {learningCount} En Progreso · {newConceptsCount} Por Empezar
             </p>
           </div>
         )}
@@ -148,14 +146,14 @@ export default async function DashboardPage() {
           <div className="space-y-1 pt-1 border-t border-border/40">
             <div className="flex justify-between items-center text-xs">
               <span className="text-muted-foreground">
-                {goalMet ? '✓ Daily goal met!' : 'Daily goal'}
+                {goalMet ? '✓ ¡Meta Diaria Cumplida!' : 'Meta Diaria'}
               </span>
-              <span className={`font-medium ${goalMet ? 'text-green-600 dark:text-green-400' : 'text-foreground'}`}>
+              <span className={`font-medium ${goalMet ? 'text-primary' : 'text-foreground'}`}>
                 {todayMinutes} / {dailyGoalMinutes} min
               </span>
             </div>
             <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-              <AnimatedBar pct={goalPct} className={goalMet ? 'bg-green-500' : 'bg-green-700'} />
+              <AnimatedBar pct={goalPct} className="bg-primary" />
             </div>
           </div>
         )}
@@ -171,40 +169,40 @@ export default async function DashboardPage() {
               reviewCardIsDue
                 ? 'bg-primary text-primary-foreground border-primary'
                 : studiedCount > 0 && dueCount === 0
-                ? 'border-l-4 border-l-green-500 border-green-200 dark:border-green-900 bg-card'
-                : 'border-l-4 border-l-green-700 bg-card'
+                ? 'border-l-4 border-l-primary/50 border-primary/20 bg-card'
+                : 'border-l-4 border-l-primary bg-card'
             }`}>
               <div className="flex items-center justify-between">
-                <p className={`text-xs font-semibold uppercase tracking-widest ${reviewCardIsDue ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>Review</p>
+                <p className={`text-xs font-semibold uppercase tracking-widest ${reviewCardIsDue ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>Tu Senda Diaria</p>
                 {studiedCount > 0 && dueCount === 0 ? (
-                  <CheckCircle2 className="h-5 w-5 text-green-500" strokeWidth={1.5} />
+                  <CheckCircle2 className="h-5 w-5 text-primary" strokeWidth={1.5} />
                 ) : (
                   <BookOpen className={`h-5 w-5 ${reviewCardIsDue ? 'text-primary-foreground/70' : 'text-muted-foreground'}`} strokeWidth={1.5} />
                 )}
               </div>
               {studiedCount === 0 ? (
                 <>
-                  <p className="text-xl font-bold">No reviews yet</p>
-                  <p className="text-muted-foreground text-sm">Finish your first session and we&apos;ll take it from there.</p>
+                  <p className="text-xl font-bold">Sin Repasos Aún</p>
+                  <p className="text-muted-foreground text-sm">Completa Tu Primera Sesión Y Lo Seguiremos Desde Aquí.</p>
                 </>
               ) : dueCount > 0 ? (
                 <>
                   <p className="text-xl font-bold flex items-center gap-2">
-                    {dueCount} concept{dueCount !== 1 ? 's' : ''} due today
+                    {dueCount} Concepto{dueCount !== 1 ? 's' : ''} Esperan Tu Repaso
                     {dueCount >= 10 && (
                       <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                     )}
                   </p>
                   <Button asChild variant={reviewCardIsDue ? 'secondary' : 'default'} className="w-full rounded-full active:scale-95 transition-transform">
-                    <Link href="/study">Start review →</Link>
+                    <Link href="/study">Empezar Repaso →</Link>
                   </Button>
                 </>
               ) : (
                 <>
-                  <p className="text-xl font-bold">All caught up!</p>
-                  <p className="text-muted-foreground text-sm">You&apos;re clear for today. Use the time to push ahead.</p>
+                  <p className="text-xl font-bold">Todo Al Día En Tu Senda Hoy</p>
+                  <p className="text-muted-foreground text-sm">Perfecto — Vuelve Mañana O Explora A Tu Ritmo.</p>
                   <Button asChild variant="outline" className="w-full">
-                    <Link href="/study/configure?mode=practice">Practice anyway →</Link>
+                    <Link href="/study/configure?mode=practice">Practicar De Todos Modos →</Link>
                   </Button>
                 </>
               )}
@@ -214,16 +212,16 @@ export default async function DashboardPage() {
 
         {/* Learn new card */}
         {newConceptsCount > 0 && (
-          <div className="border border-l-4 border-l-green-700 rounded-xl p-6 space-y-3 bg-card">
+          <div className="border border-l-4 border-l-primary rounded-xl p-6 space-y-3 bg-card">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Learn new</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Aprender Nuevo</p>
               <Sparkles className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
             </div>
             <p className="text-xl font-bold">
-              {newConceptsCount} concept{newConceptsCount !== 1 ? 's' : ''} waiting
+              {newConceptsCount} Concepto{newConceptsCount !== 1 ? 's' : ''} Esperando
             </p>
             <Button asChild className="w-full rounded-full active:scale-95 transition-transform">
-              <Link href="/study?mode=new">Start learning →</Link>
+              <Link href="/study?mode=new">Empezar A Aprender →</Link>
             </Button>
           </div>
         )}
@@ -232,9 +230,7 @@ export default async function DashboardPage() {
         <Suspense fallback={<DashboardDeferredSkeleton />}>
           <DashboardDeferredSection
             userId={user.id}
-            dueCount={dueCount}
             isNewUser={isNewUser}
-            modules={modules}
             thisWeekStart={thisWeekStart.toISOString()}
             lastWeekStart={lastWeekStart.toISOString()}
           />

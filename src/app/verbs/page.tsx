@@ -47,9 +47,9 @@ export default async function VerbsPage() {
     <main className="max-w-3xl mx-auto p-6 md:p-10 space-y-6 pb-24 lg:pb-10">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Verb Conjugation</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Verbos</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {verbs.length} high-frequency verbs · type the conjugated form in context
+            {verbs.length} Verbos De Alta Frecuencia · Escribe La Forma Conjugada En Contexto
           </p>
         </div>
         <Link

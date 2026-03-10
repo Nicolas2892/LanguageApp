@@ -22,16 +22,16 @@ function getMasteryState(intervalDays: number | undefined): MasteryState {
 }
 
 const MASTERY_BADGE: Record<MasteryState, { label: string; className: string }> = {
-  mastered: { label: 'Mastered', className: 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border-green-100 dark:border-green-800' },
-  learning: { label: 'Learning', className: 'bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 border-blue-100 dark:border-blue-800' },
-  new:      { label: 'New',      className: 'bg-transparent text-muted-foreground border-border' },
+  mastered: { label: 'Dominado',     className: 'bg-primary/10 text-primary border-primary/20' },
+  learning: { label: 'Aprendiendo',  className: 'bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 border-blue-100 dark:border-blue-800' },
+  new:      { label: 'Nuevo',        className: 'bg-transparent text-muted-foreground border-border' },
 }
 
 const FILTER_TABS: { value: FilterTab; label: string }[] = [
-  { value: 'all',      label: 'All' },
-  { value: 'new',      label: 'New' },
-  { value: 'learning', label: 'Learning' },
-  { value: 'mastered', label: 'Mastered' },
+  { value: 'all',      label: 'Todos' },
+  { value: 'new',      label: 'Nuevo' },
+  { value: 'learning', label: 'Aprendiendo' },
+  { value: 'mastered', label: 'Dominados' },
 ]
 
 const EMPTY_STATE: Record<Exclude<FilterTab, 'all'>, string> = {
@@ -115,8 +115,8 @@ export default async function CurriculumPage({ searchParams }: Props) {
     <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Curriculum</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">B1 → B2 Spanish</p>
+        <h1 className="text-2xl font-bold tracking-tight">Currículo</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">B1 → B2 Español</p>
       </div>
 
       {/* Filter tabs */}
@@ -127,7 +127,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
             href={value === 'all' ? '/curriculum' : `/curriculum?filter=${value}`}
             className={`px-3 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
               filter === value
-                ? 'border-green-700 text-foreground'
+                ? 'border-primary text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -159,7 +159,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                   : 'bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground'
               }`}
             >
-              {lvl === 'all' ? 'All levels' : lvl}
+              {lvl === 'all' ? 'Todos Los Niveles' : lvl}
             </Link>
           )
         })}
@@ -170,10 +170,10 @@ export default async function CurriculumPage({ searchParams }: Props) {
         <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm flex items-center gap-3">
           <Lock className="h-4 w-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
           <span>
-            <span className="font-medium">{unlockProgress.nextLevel} content</span> is queued for when you&apos;re ready —{' '}
-            study <span className="font-medium">{unlockProgress.threshold - unlockProgress.attempted} more {unlockProgress.nextLevel === 'C1' ? 'B2' : 'B1'} concepts</span> to
-            add it to your automatic queue.{' '}
-            <span className="text-muted-foreground">({unlockProgress.attempted}/{unlockProgress.total} done)</span>
+            <span className="font-medium">Contenido {unlockProgress.nextLevel}</span> está preparado para cuando estés listo —{' '}
+            estudia <span className="font-medium">{unlockProgress.threshold - unlockProgress.attempted} conceptos {unlockProgress.nextLevel === 'C1' ? 'B2' : 'B1'} más</span> para
+            desbloquearlo en tu cola automática.{' '}
+            <span className="text-muted-foreground">({unlockProgress.attempted}/{unlockProgress.total} completados)</span>
           </span>
         </div>
       )}
@@ -181,15 +181,15 @@ export default async function CurriculumPage({ searchParams }: Props) {
       {/* Global empty state */}
       {!anyMatch && (filter !== 'all' || levelFilter !== 'all') && (
         <EmptyState
-          heading="Nothing here yet."
+          heading="Nada Aquí Todavía."
           subtext={
             filter === 'mastered'
-              ? "Master your first concept and it will appear here."
+              ? 'Domina Tu Primer Concepto Y Aparecerá Aquí.'
               : filter === 'learning'
-              ? "Start a session to move concepts into progress."
-              : `No ${levelFilter} concepts match the current filters.`
+              ? 'Empieza Una Sesión Para Ver Conceptos En Progreso.'
+              : `Ningún Concepto ${levelFilter} Coincide Con Los Filtros.`
           }
-          ctaLabel="See all concepts"
+          ctaLabel="Ver Todos Los Conceptos"
           ctaHref="/curriculum"
         />
       )}
@@ -221,19 +221,19 @@ export default async function CurriculumPage({ searchParams }: Props) {
                         <h2 className="text-base font-bold leading-snug">{mod.title}</h2>
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
                           <Trophy className="h-3 w-3 text-amber-500" strokeWidth={1.5} />
-                          {masteredCount}/{allModConcepts.length} mastered
+                          {masteredCount}/{allModConcepts.length} Dominados
                         </p>
                       </div>
                     </div>
                     <Button asChild variant="outline" size="sm" className="shrink-0 h-8 text-xs">
-                      <Link href={`/study?practice=true&module=${mod.id}`}>Practice module →</Link>
+                      <Link href={`/study?practice=true&module=${mod.id}`}>Practicar Módulo →</Link>
                     </Button>
                   </div>
                   {/* Module progress bar */}
                   <div className="pl-6">
                     <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-green-700 rounded-full transition-all duration-500"
+                        className="h-full bg-primary rounded-full transition-all duration-500"
                         style={{ width: `${masteredPct}%` }}
                       />
                     </div>
@@ -264,7 +264,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                             </span>
                           </div>
                           <Button asChild variant="ghost" size="sm" className="h-6 text-xs px-2">
-                            <Link href={`/study?practice=true&unit=${unit.id}`}>Practice unit →</Link>
+                            <Link href={`/study?practice=true&unit=${unit.id}`}>Practicar Unidad →</Link>
                           </Button>
                         </div>
 
@@ -311,7 +311,7 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                     </div>
                                     <div className="relative z-10">
                                       <Button asChild variant="ghost" size="sm" className="h-7 text-xs px-2">
-                                        <Link href={`/study?practice=true&concept=${concept.id}`}>Practice →</Link>
+                                        <Link href={`/study?practice=true&concept=${concept.id}`}>Practicar →</Link>
                                       </Button>
                                     </div>
                                   </div>

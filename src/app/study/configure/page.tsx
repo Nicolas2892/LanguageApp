@@ -78,8 +78,8 @@ export default async function ConfigurePage() {
   return (
     <main className="max-w-md mx-auto p-6 md:p-10">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">New session</h1>
-        <p className="text-sm text-muted-foreground mt-1">Customise what you study</p>
+        <h1 className="text-2xl font-bold tracking-tight">Nueva Sesión</h1>
+        <p className="text-sm text-muted-foreground mt-1">Personaliza Tu Estudio</p>
       </div>
       <SessionConfig modules={modulesWithMastery} mistakeConceptCount={mistakeConceptCount} />
     </main>

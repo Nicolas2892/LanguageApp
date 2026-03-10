@@ -5,12 +5,12 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 const EXERCISE_TYPES = [
-  { value: 'gap_fill',          label: 'Gap fill',           desc: 'Fill in the missing word or connector' },
-  { value: 'transformation',    label: 'Transformation',     desc: 'Rewrite a sentence using a target structure' },
-  { value: 'translation',       label: 'Translation',        desc: 'Translate an English sentence to Spanish' },
-  { value: 'error_correction',  label: 'Error correction',   desc: 'Spot and fix the grammatical error' },
-  { value: 'sentence_builder',  label: 'Sentence builder',   desc: 'Arrange jumbled words into a correct sentence' },
-  { value: 'free_write',        label: 'Free write',         desc: 'Write freely using a target structure' },
+  { value: 'gap_fill',          label: 'Completar Hueco',        desc: 'Rellena La Palabra O Conector' },
+  { value: 'transformation',    label: 'Transformación',         desc: 'Reescribe Con La Estructura Objetivo' },
+  { value: 'translation',       label: 'Traducción',             desc: 'Traduce Del Inglés Al Español' },
+  { value: 'error_correction',  label: 'Corrección De Errores',  desc: 'Detecta Y Corrige El Error Gramatical' },
+  { value: 'sentence_builder',  label: 'Constructor De Frases',  desc: 'Ordena Las Palabras Correctamente' },
+  { value: 'free_write',        label: 'Escritura Libre',        desc: 'Escribe Libremente Con La Estructura Objetivo' },
 ]
 
 const SESSION_SIZES = [5, 10, 15, 20, 25] as const
@@ -64,7 +64,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
     <div className="space-y-8">
       {/* Mode picker — always shown */}
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Mode</h2>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Modo</h2>
         <div className="grid grid-cols-1 gap-2">
           <button
             onClick={() => setSessionMode('srs')}
@@ -74,8 +74,8 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
                 : 'hover:bg-muted'
             }`}
           >
-            <span className="font-medium">SRS Review</span>
-            <p className="text-xs text-muted-foreground mt-0.5">Work through today&apos;s due queue</p>
+            <span className="font-medium">Repaso Diario</span>
+            <p className="text-xs text-muted-foreground mt-0.5">Trabaja Con Tu Cola De Hoy</p>
           </button>
           <button
             onClick={() => setSessionMode('practice')}
@@ -85,8 +85,8 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
                 : 'hover:bg-muted'
             }`}
           >
-            <span className="font-medium">Open Practice</span>
-            <p className="text-xs text-muted-foreground mt-0.5">Drill any topic freely, no schedule</p>
+            <span className="font-medium">Práctica Abierta</span>
+            <p className="text-xs text-muted-foreground mt-0.5">Practica Cualquier Tema Libremente</p>
           </button>
           {mistakeConceptCount > 0 && (
             <button
@@ -98,7 +98,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="font-medium">Review mistakes</span>
+                <span className="font-medium">Revisar Errores</span>
                 <span className="text-xs text-muted-foreground shrink-0">
                   {mistakeConceptCount} concept{mistakeConceptCount !== 1 ? 's' : ''}
                 </span>
@@ -114,7 +114,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
           {/* Module picker */}
           <section className="space-y-3">
             <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              {isPractice ? 'Choose a topic (optional)' : 'Module'}
+              {isPractice ? 'Elegir Un Tema (Opcional)' : 'Módulo'}
             </h2>
             <div className="grid grid-cols-1 gap-2">
               <button
@@ -125,9 +125,9 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
                     : 'hover:bg-muted'
                 }`}
               >
-                <span className="font-medium">All modules</span>
+                <span className="font-medium">Todos Los Módulos</span>
                 <span className="text-muted-foreground ml-2">
-                  {isPractice ? '(whole catalog)' : '(SRS due queue)'}
+                  {isPractice ? '(Catálogo Completo)' : '(Cola SRS Del Día)'}
                 </span>
               </button>
               {modules.map((mod) => (
@@ -144,7 +144,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
                     <span className={selectedModule === mod.id ? 'font-medium' : ''}>{mod.title}</span>
                     {mod.total > 0 && !isPractice && (
                       <span className="text-xs text-muted-foreground shrink-0">
-                        {mod.mastered}/{mod.total} mastered
+                        {mod.mastered}/{mod.total} Dominados
                       </span>
                     )}
                   </div>
@@ -155,7 +155,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
 
           {/* Session size picker */}
           <section className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">How many exercises?</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">¿Cuántos Ejercicios?</h2>
             <div className="flex gap-2 flex-wrap">
               {SESSION_SIZES.map((size) => (
                 <button
@@ -176,9 +176,9 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
           {/* Exercise type picker */}
           <section className="space-y-3">
             <div className="flex items-baseline justify-between">
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Exercise types</h2>
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Tipos De Ejercicio</h2>
               <span className="text-xs text-muted-foreground">
-                {selectedTypes.length === 0 ? 'All types' : `${selectedTypes.length} selected`}
+                {selectedTypes.length === 0 ? 'Todos Los Tipos' : `${selectedTypes.length} Seleccionados`}
               </span>
             </div>
             <div className="grid grid-cols-1 gap-2">
@@ -203,7 +203,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
                 onClick={() => setSelectedTypes([])}
                 className="text-xs text-muted-foreground underline"
               >
-                Clear selection (use all types)
+                Limpiar Selección (Usar Todos Los Tipos)
               </button>
             )}
           </section>
@@ -211,7 +211,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
       )}
 
       <Button onClick={handleStart} className="w-full rounded-full" size="lg">
-        Start session →
+        Empezar Sesión →
       </Button>
     </div>
   )

@@ -49,14 +49,14 @@
 
 :root {
   --radius: 0.75rem;
-  --background: oklch(0.992 0.002 80);
+  --background: oklch(0.99 0.006 85);
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card: oklch(0.99 0.006 85);
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
+  --popover: oklch(0.99 0.006 85);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.41 0.11 142);
-  --primary-foreground: oklch(1 0 0);
+  --primary: oklch(0.54 0.155 38);
+  --primary-foreground: oklch(0.99 0.006 85);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -66,7 +66,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.41 0.11 142);
+  --ring: oklch(0.54 0.155 38);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -83,14 +83,14 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.58 0.10 142);
-  --primary-foreground: oklch(1 0 0);
+  --background: oklch(0.115 0.016 52);
+  --foreground: oklch(0.91 0.01 75);
+  --card: oklch(0.175 0.016 55);
+  --card-foreground: oklch(0.91 0.01 75);
+  --popover: oklch(0.175 0.016 55);
+  --popover-foreground: oklch(0.91 0.01 75);
+  --primary: oklch(0.54 0.155 38);
+  --primary-foreground: oklch(0.99 0.006 85);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -100,7 +100,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.58 0.10 142);
+  --ring: oklch(0.54 0.155 38);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -129,6 +129,15 @@
   button, a, [role="button"] {
     touch-action: manipulation;
   }
+}
+
+/* D5 semantic palette tokens */
+:root {
+  --d5-ink: #1A1108;
+  --d5-terracotta: #C4522E;
+  --d5-warm: #8C6A3F;
+  --d5-muted: #B8AA99;
+  --d5-paper: #FDFCF9;
 }
 
 /* Senda motion tempo — snappy academic easing */
@@ -184,8 +193,8 @@
 
 /* Fix-G + UX-T: Review card tint — reliable dark mode override via unlayered CSS */
 .review-card-warm {
-  background-color: oklch(0.97 0.03 142 / 0.6); /* green-50 at 60% opacity */
+  background-color: oklch(0.97 0.03 38 / 0.6); /* terracotta-50 at 60% opacity */
 }
 .dark .review-card-warm {
-  background-color: var(--card); /* resolves to oklch(0.205 0 0) in dark mode */
+  background-color: var(--card); /* resolves to warm dark surface in dark mode */
 }

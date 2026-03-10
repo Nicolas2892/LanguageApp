@@ -47,27 +47,27 @@ describe('AccuracyChart', () => {
 
 describe('TYPE_CONFIG', () => {
   it('has correct label for gap_fill', () => {
-    expect(TYPE_CONFIG.gap_fill.label).toBe('Gap fill')
+    expect(TYPE_CONFIG.gap_fill.label).toBe('Completar Hueco')
   })
 
   it('has correct label for translation', () => {
-    expect(TYPE_CONFIG.translation.label).toBe('Translation')
+    expect(TYPE_CONFIG.translation.label).toBe('Traducción')
   })
 
   it('has correct label for transformation', () => {
-    expect(TYPE_CONFIG.transformation.label).toBe('Transformation')
+    expect(TYPE_CONFIG.transformation.label).toBe('Transformación')
   })
 
   it('has correct label for error_correction', () => {
-    expect(TYPE_CONFIG.error_correction.label).toBe('Error correction')
+    expect(TYPE_CONFIG.error_correction.label).toBe('Corrección De Errores')
   })
 
   it('has correct label for free_write', () => {
-    expect(TYPE_CONFIG.free_write.label).toBe('Free write')
+    expect(TYPE_CONFIG.free_write.label).toBe('Escritura Libre')
   })
 
   it('has correct label for sentence_builder', () => {
-    expect(TYPE_CONFIG.sentence_builder.label).toBe('Sentence builder')
+    expect(TYPE_CONFIG.sentence_builder.label).toBe('Constructor De Frases')
   })
 
   it('has distinct colors for all six exercise types', () => {

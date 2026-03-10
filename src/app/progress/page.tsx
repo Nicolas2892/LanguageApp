@@ -15,12 +15,12 @@ import type { ExerciseTypeCount } from '@/components/ExerciseTypeChart'
 import type { TenseSummary } from '@/components/verbs/VerbTenseMastery'
 
 const TYPE_LABELS: Record<string, string> = {
-  gap_fill: 'Gap fill',
-  translation: 'Translation',
-  transformation: 'Transformation',
-  error_correction: 'Error correction',
-  free_write: 'Free write',
-  sentence_builder: 'Sentence builder',
+  gap_fill: 'Completar Hueco',
+  translation: 'Traducción',
+  transformation: 'Transformación',
+  error_correction: 'Corrección De Errores',
+  free_write: 'Escritura Libre',
+  sentence_builder: 'Constructor De Frases',
 }
 
 const CEFR_COLORS: Record<string, { bar: string; text: string }> = {
@@ -236,7 +236,7 @@ export default async function ProgressPage() {
 
   // Page meta
   const now = new Date()
-  const monthLabel = now.toLocaleString('default', { month: 'long' })
+  const monthLabel = now.toLocaleString('es-ES', { month: 'long' })
   const year = now.getFullYear()
   const levelChip = LEVEL_CHIP[computedLevel]
 
@@ -252,9 +252,9 @@ export default async function ProgressPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Progress</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Progreso</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Your learning journey · {monthLabel} {year}
+            Tu Camino De Aprendizaje · {monthLabel} {year}
           </p>
         </div>
         {levelChip && (
@@ -268,9 +268,9 @@ export default async function ProgressPage() {
 
       {!hasAnyData ? (
         <EmptyState
-          heading="Your path is clear."
-          subtext="Complete your first practice session and your progress will start taking shape here."
-          ctaLabel="Start your first session"
+          heading="Tu Camino Está Despejado."
+          subtext="Completa Tu Primera Sesión Y Tu Progreso Tomará Forma Aquí."
+          ctaLabel="Empezar Tu Primera Sesión"
           ctaHref="/study/configure"
         />
       ) : (
@@ -285,8 +285,8 @@ export default async function ProgressPage() {
               </div>
               <p className="text-2xl font-extrabold">{currentStreak}</p>
               <div>
-                <p className="text-xs font-medium">Day streak</p>
-                <p className="text-xs text-muted-foreground">{currentStreak < 7 ? 'Building something.' : "Don't break it now."}</p>
+                <p className="text-xs font-medium">Días Seguidos</p>
+                <p className="text-xs text-muted-foreground">{currentStreak < 7 ? 'Construyendo Algo.' : 'No Lo Rompas Ahora.'}</p>
               </div>
             </div>
 
@@ -297,8 +297,8 @@ export default async function ProgressPage() {
               </div>
               <p className="text-2xl font-extrabold text-green-600 dark:text-green-400">{totalMastered}</p>
               <div>
-                <p className="text-xs font-medium">Mastered</p>
-                <p className="text-xs text-muted-foreground">of {totalConcepts} total</p>
+                <p className="text-xs font-medium">Dominados</p>
+                <p className="text-xs text-muted-foreground">De {totalConcepts} En Total</p>
               </div>
             </div>
 
@@ -309,8 +309,8 @@ export default async function ProgressPage() {
               </div>
               <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{totalProductionCertified}</p>
               <div>
-                <p className="text-xs font-medium">Active skills</p>
-                <p className="text-xs text-muted-foreground">key skill for B2</p>
+                <p className="text-xs font-medium">Habilidades Activas</p>
+                <p className="text-xs text-muted-foreground">Habilidad Clave Para B2</p>
               </div>
             </div>
 
@@ -321,15 +321,15 @@ export default async function ProgressPage() {
               </div>
               <p className="text-2xl font-extrabold text-sky-600 dark:text-sky-400">{overallAccuracy}%</p>
               <div>
-                <p className="text-xs font-medium">Accuracy</p>
-                <p className="text-xs text-muted-foreground">across all exercises</p>
+                <p className="text-xs font-medium">Precisión</p>
+                <p className="text-xs text-muted-foreground">En Todos Los Ejercicios</p>
               </div>
             </div>
           </div>
 
           {/* All-time stats */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">All-time</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Total</p>
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
                 <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
@@ -337,8 +337,8 @@ export default async function ProgressPage() {
                 </div>
                 <p className="text-2xl font-extrabold">{totalAllTimeAttempts.toLocaleString()}</p>
                 <div>
-                  <p className="text-xs font-medium">Exercises done</p>
-                  <p className="text-xs text-muted-foreground">total all time</p>
+                  <p className="text-xs font-medium">Ejercicios Completados</p>
+                  <p className="text-xs text-muted-foreground">Total Acumulado</p>
                 </div>
               </div>
               <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
@@ -351,8 +351,8 @@ export default async function ProgressPage() {
                     : `${totalAllTimeMinutes}m`}
                 </p>
                 <div>
-                  <p className="text-xs font-medium">Learning time</p>
-                  <p className="text-xs text-muted-foreground">total all time</p>
+                  <p className="text-xs font-medium">Tiempo De Estudio</p>
+                  <p className="text-xs text-muted-foreground">Total Acumulado</p>
                 </div>
               </div>
             </div>
@@ -361,7 +361,7 @@ export default async function ProgressPage() {
           {/* CEFR Level Journey */}
           <section className="bg-card rounded-xl border p-5 shadow-sm space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-base">Level progress</h2>
+              <h2 className="font-bold text-base">Progreso De Nivel</h2>
               {levelChip && (
                 <span
                   className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelChip.className}`}
@@ -385,7 +385,7 @@ export default async function ProgressPage() {
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-semibold">{level}</span>
                         <span className="text-muted-foreground">
-                          {mastered} / {total} concepts
+                          {mastered} / {total} Conceptos
                         </span>
                       </div>
                       <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
@@ -402,7 +402,7 @@ export default async function ProgressPage() {
 
             {showB2Hint && (
               <p className="text-xs text-amber-600 dark:text-amber-400 font-medium pt-1 border-t">
-                {b1Remaining} more concept{b1Remaining !== 1 ? 's' : ''} until you unlock B2
+                {b1Remaining} Concepto{b1Remaining !== 1 ? 's' : ''} Más Para Desbloquear B2
               </p>
             )}
           </section>
@@ -410,7 +410,7 @@ export default async function ProgressPage() {
           {/* Exercises by type */}
           {exerciseTypeData.length > 0 && (
             <section className="space-y-3">
-              <h2 className="font-bold text-base">Exercises by type</h2>
+              <h2 className="font-bold text-base">Ejercicios Por Tipo</h2>
               <div className="bg-card rounded-xl border p-5 shadow-sm">
                 <ExerciseTypeChart data={exerciseTypeData} />
               </div>
@@ -420,16 +420,16 @@ export default async function ProgressPage() {
           {/* Skill breakdown */}
           {exerciseAccuracy.length > 0 && (
             <section className="space-y-3">
-              <h2 className="font-bold text-base">Skill breakdown</h2>
+              <h2 className="font-bold text-base">Desglose De Habilidades</h2>
               <div className="bg-card rounded-xl border p-5 shadow-sm">
                 <AccuracyChart data={exerciseAccuracy} />
                 {showInsight && (
                   <p className="text-xs text-muted-foreground border-t mt-3 pt-3">
-                    Best:{' '}
+                    Mejor:{' '}
                     <span className="font-medium text-foreground">
                       {TYPE_LABELS[bestType!.type] ?? bestType!.type}
                     </span>{' '}
-                    ({bestType!.accuracy}%)&nbsp;·&nbsp;Needs work:{' '}
+                    ({bestType!.accuracy}%)&nbsp;·&nbsp;Mejorar:{' '}
                     <span className="font-medium text-foreground">
                       {TYPE_LABELS[worstType!.type] ?? worstType!.type}
                     </span>{' '}
@@ -444,13 +444,13 @@ export default async function ProgressPage() {
           <section className="space-y-3">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="font-bold text-base">Study consistency</h2>
+                <h2 className="font-bold text-base">Consistencia De Estudio</h2>
                 {sessionCount > 0 && (
                   <p className="text-xs text-muted-foreground mt-0.5">
                     <span className="font-medium text-foreground">
-                      {sessionCount} session{sessionCount !== 1 ? 's' : ''}
+                      {sessionCount} Sesion{sessionCount !== 1 ? 'es' : ''}
                     </span>{' '}
-                    this month
+                    Este Mes
                     {totalMinutes > 0 && (
                       <>
                         {' '}·{' '}
@@ -464,9 +464,9 @@ export default async function ProgressPage() {
                 )}
               </div>
               <p className="text-xs text-muted-foreground text-right shrink-0">
-                {uniqueDaysStudied} day{uniqueDaysStudied !== 1 ? 's' : ''} studied
+                {uniqueDaysStudied} Día{uniqueDaysStudied !== 1 ? 's' : ''} Estudiados
                 <br />
-                <span className="text-[10px]">in the last 3 months</span>
+                <span className="text-[10px]">En Los Últimos 3 Meses</span>
               </p>
             </div>
             <div className="bg-card rounded-xl border p-5 shadow-sm overflow-x-auto">

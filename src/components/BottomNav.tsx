@@ -7,7 +7,7 @@ const TABS = [
   { href: '/dashboard',       label: 'Home',       Icon: LayoutDashboard },
   { href: '/study/configure', label: 'Study',      Icon: BookOpen        },
   { href: '/curriculum',      label: 'Curriculum', Icon: LayoutList      },
-  { href: '/verbs',           label: 'Conjugation', Icon: BookMarked      },
+  { href: '/verbs',           label: 'Verbs',       Icon: BookMarked      },
   { href: '/progress',        label: 'Progress',   Icon: BarChart2       },
   { href: '/tutor',           label: 'Tutor',      Icon: Bot             },
 ]
@@ -41,12 +41,12 @@ export function BottomNav() {
               href={href}
               className={`flex-1 flex flex-col items-center justify-center gap-1
                           transition-colors touch-manipulation
-                          ${active ? 'text-green-800 dark:text-green-400' : 'text-muted-foreground'}`}
+                          ${active ? 'text-primary' : 'text-muted-foreground'}`}
             >
               {/* Pill: wider than tall, matching iOS active indicator proportions */}
               <span
                 className={`rounded-full px-3 py-0.5 transition-colors
-                  ${active ? 'bg-green-100 dark:bg-green-950/40' : ''}`}
+                  ${active ? 'bg-primary/10' : ''}`}
               >
                 <Icon className="h-6 w-6" />
               </span>

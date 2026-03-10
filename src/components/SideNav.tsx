@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { href: '/dashboard',       label: 'Home',       Icon: LayoutDashboard },
   { href: '/study/configure', label: 'Study',      Icon: BookOpen        },
   { href: '/curriculum',      label: 'Curriculum', Icon: LayoutList      },
-  { href: '/verbs',           label: 'Conjugation', Icon: BookMarked      },
+  { href: '/verbs',           label: 'Verbs',       Icon: BookMarked      },
   { href: '/progress',        label: 'Progress',   Icon: BarChart2       },
   { href: '/tutor',           label: 'Tutor',      Icon: Bot             },
 ]
@@ -58,7 +58,7 @@ export function SideNav({ userInitials }: Props) {
               href={href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                 ${active
-                  ? 'bg-green-50 dark:bg-green-950/40 text-green-800 dark:text-green-400'
+                  ? 'bg-primary/10 text-primary'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                 }`}
             >
@@ -75,7 +75,7 @@ export function SideNav({ userInitials }: Props) {
           href="/account"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
             ${pathname.startsWith('/account')
-              ? 'bg-green-50 dark:bg-green-950/40 text-green-800 dark:text-green-400'
+              ? 'bg-primary/10 text-primary'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             }`}
         >

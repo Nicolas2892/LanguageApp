@@ -16,9 +16,7 @@ const LAST_WEEK = new Date('2026-02-23T00:00:00.000Z').toISOString()
 
 const defaultProps = {
   userId: 'user-1',
-  dueCount: 5,
   isNewUser: false,
-  modules: [{ id: 'mod-1', title: 'Connectors' }],
   thisWeekStart: THIS_WEEK,
   lastWeekStart: LAST_WEEK,
 }
@@ -170,7 +168,7 @@ describe('DashboardDeferredSection', () => {
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
     expect(screen.getByText('El Subjuntivo')).toBeTruthy()
-    expect(screen.getByText(/write about this/i)).toBeTruthy()
+    expect(screen.getByText(/escribir ahora/i)).toBeTruthy()
   })
 
   it('renders generic free write card when no weakest concept', async () => {
@@ -179,13 +177,13 @@ describe('DashboardDeferredSection', () => {
     )
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
-    expect(screen.getByText(/practice your writing/i)).toBeTruthy()
+    expect(screen.getByText(/practica tu escritura/i)).toBeTruthy()
   })
 
-  it('renders SprintCard always for non-new users', async () => {
+  it('renders Escritura Libre card for non-new users', async () => {
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
-    expect(screen.getByRole('button', { name: /sprint 10 min/i })).toBeTruthy()
+    expect(screen.getByText(/escritura libre/i)).toBeTruthy()
   })
 
   it('renders ReviewMistakes card when mistakeConceptCount > 0', async () => {
@@ -196,8 +194,8 @@ describe('DashboardDeferredSection', () => {
     )
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
-    expect(screen.getByText(/review mistakes/i)).toBeTruthy()
-    expect(screen.getByText(/to revisit/i)).toBeTruthy()
+    expect(screen.getByText(/revisar errores/i)).toBeTruthy()
+    expect(screen.getByText(/para revisar/i)).toBeTruthy()
   })
 
   it('skips ReviewMistakes card when no mistakes', async () => {
@@ -206,22 +204,21 @@ describe('DashboardDeferredSection', () => {
     )
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
-    expect(screen.queryByText(/to revisit/i)).toBeNull()
+    expect(screen.queryByText(/para revisar/i)).toBeNull()
   })
 
   it('hides all deferred cards for new users', async () => {
     const el = await DashboardDeferredSection({ ...defaultProps, isNewUser: true })
     render(el)
-    expect(screen.queryByText(/free write/i)).toBeNull()
-    expect(screen.queryByRole('button', { name: /sprint 10 min/i })).toBeNull()
-    expect(screen.queryByText(/to revisit/i)).toBeNull()
+    expect(screen.queryByText(/escritura libre/i)).toBeNull()
+    expect(screen.queryByText(/para revisar/i)).toBeNull()
   })
 })
 
 describe('DashboardDeferredSkeleton', () => {
   it('renders three placeholder divs', () => {
     const { container } = render(<DashboardDeferredSkeleton />)
-    const placeholders = container.querySelectorAll('.animate-pulse')
+    const placeholders = container.querySelectorAll('.animate-senda-pulse')
     expect(placeholders.length).toBe(3)
   })
 })

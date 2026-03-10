@@ -9,12 +9,12 @@ export interface ExerciseAccuracy {
 }
 
 export const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  gap_fill:         { label: 'Gap fill',         color: '#fb923c' }, // orange-400
-  translation:      { label: 'Translation',       color: '#0ea5e9' }, // sky-500
-  transformation:   { label: 'Transformation',    color: '#8b5cf6' }, // violet-500
-  error_correction: { label: 'Error correction',  color: '#fb7185' }, // rose-400
-  free_write:       { label: 'Free write',        color: '#10b981' }, // emerald-500
-  sentence_builder: { label: 'Sentence builder',  color: '#f59e0b' }, // amber-400
+  gap_fill:         { label: 'Completar Hueco',       color: '#fb923c' }, // orange-400
+  translation:      { label: 'Traducción',             color: '#0ea5e9' }, // sky-500
+  transformation:   { label: 'Transformación',         color: '#8b5cf6' }, // violet-500
+  error_correction: { label: 'Corrección De Errores',  color: '#fb7185' }, // rose-400
+  free_write:       { label: 'Escritura Libre',        color: '#10b981' }, // emerald-500
+  sentence_builder: { label: 'Constructor De Frases',  color: '#f59e0b' }, // amber-400
 }
 
 const DEFAULT_COLOR = '#94a3b8' // slate-400

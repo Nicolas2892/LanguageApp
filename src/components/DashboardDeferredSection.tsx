@@ -1,36 +1,29 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { SprintCard } from '@/components/SprintCard'
 import { WeeklySnapshot } from '@/components/WeeklySnapshot'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { PenLine, RotateCcw } from 'lucide-react'
-import type { Concept, Module } from '@/lib/supabase/types'
+import type { Concept } from '@/lib/supabase/types'
 
 interface Props {
   userId: string
-  dueCount: number
   isNewUser: boolean
-  modules: Pick<Module, 'id' | 'title'>[]
   thisWeekStart: string // ISO string
   lastWeekStart: string // ISO string
 }
 
 export async function DashboardDeferredSection({
   userId,
-  dueCount,
   isNewUser,
-  modules,
   thisWeekStart,
   lastWeekStart,
 }: Props) {
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
 
   // Batch 1 — all parallelized
   const [
     weakestProgressRes,
-    dueByModuleRes,
     mistakeAttemptsRes,
     thisWeekAttemptsRes,
     lastWeekAttemptsRes,
@@ -44,11 +37,6 @@ export async function DashboardDeferredSection({
       .lt('interval_days', MASTERY_THRESHOLD)
       .order('interval_days', { ascending: true })
       .limit(1),
-    supabase
-      .from('user_progress')
-      .select('concept_id, concepts(unit_id, units(module_id))')
-      .eq('user_id', userId)
-      .lte('due_date', today),
     supabase
       .from('exercise_attempts')
       .select('exercise_id')
@@ -79,15 +67,6 @@ export async function DashboardDeferredSection({
       .gte('started_at', lastWeekStart)
       .lt('started_at', thisWeekStart),
   ])
-
-  // dueCountByModule
-  type DueItem = { concept_id: string; concepts: { unit_id: string; units: { module_id: string } | null } | null }
-  const dueItems = (dueByModuleRes.data ?? []) as DueItem[]
-  const dueCountByModule: Record<string, number> = {}
-  for (const item of dueItems) {
-    const moduleId = item.concepts?.units?.module_id
-    if (moduleId) dueCountByModule[moduleId] = (dueCountByModule[moduleId] ?? 0) + 1
-  }
 
   const weakestConceptId =
     (weakestProgressRes.data?.[0] as { concept_id: string } | undefined)?.concept_id ?? null
@@ -165,57 +144,55 @@ export async function DashboardDeferredSection({
         />
       )}
 
-      {/* Free write card */}
+      {/* Escritura Libre card */}
       {!isNewUser && writeConcept && (
-        <div className="border border-l-4 border-l-green-700 rounded-xl p-6 space-y-3 bg-card">
+        <div className="border border-l-4 border-l-primary rounded-xl p-6 space-y-3 bg-card">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Free write
+              Escritura Libre
             </p>
             <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
           </div>
           <p className="text-xl font-bold">{writeConcept.title}</p>
-          <p className="text-xs text-muted-foreground -mt-1">Worth some extra time today</p>
+          <p className="text-xs text-muted-foreground -mt-1">Vale La Pena Tomarse Un Momento</p>
           <Button asChild variant="outline" className="w-full">
-            <Link href={`/write?suggested=${writeConcept.id}`}>Write about this →</Link>
+            <Link href={`/write?suggested=${writeConcept.id}`}>Escribir Ahora →</Link>
+          </Button>
+          <Button asChild variant="ghost" className="w-full text-xs text-muted-foreground h-8">
+            <Link href="/write">Cambiar Concepto →</Link>
           </Button>
         </div>
       )}
       {!isNewUser && !writeConcept && (
-        <div className="border border-l-4 border-l-green-700 rounded-xl p-6 space-y-3 bg-card">
+        <div className="border border-l-4 border-l-primary rounded-xl p-6 space-y-3 bg-card">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Free write
+              Escritura Libre
             </p>
             <PenLine className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
           </div>
-          <p className="text-xl font-bold">Practice your writing</p>
-          <p className="text-muted-foreground text-sm">Pick any concept to write about freely.</p>
+          <p className="text-xl font-bold">Practica Tu Escritura</p>
+          <p className="text-muted-foreground text-sm">Elige Un Concepto Y Escribe Libremente.</p>
           <Button asChild variant="outline" className="w-full">
-            <Link href="/write">Browse concepts →</Link>
+            <Link href="/write">Explorar Conceptos →</Link>
           </Button>
         </div>
       )}
 
-      {/* Sprint card — hidden for brand-new users */}
-      {!isNewUser && (
-        <SprintCard dueCount={dueCount} modules={modules} dueCountByModule={dueCountByModule} />
-      )}
-
-      {/* Review mistakes card — shown when user has failed attempts */}
+      {/* Revisar Errores card — shown when user has failed attempts */}
       {!isNewUser && mistakeConceptCount > 0 && (
         <div className="border border-l-4 border-l-amber-500 rounded-xl p-6 space-y-3 bg-card">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Review mistakes
+              Revisar Errores
             </p>
             <RotateCcw className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
           </div>
           <p className="text-xl font-bold">
-            {mistakeConceptCount} concept{mistakeConceptCount !== 1 ? 's' : ''} to revisit
+            {mistakeConceptCount} Concepto{mistakeConceptCount !== 1 ? 's' : ''} Para Revisar
           </p>
           <Button asChild variant="outline" className="w-full">
-            <Link href="/study?mode=review">Review now →</Link>
+            <Link href="/study?mode=review">Repasar Ahora →</Link>
           </Button>
         </div>
       )}
