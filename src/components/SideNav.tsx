@@ -1,23 +1,21 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  LayoutDashboard, BookOpen, Bot,
-  BarChart2, LayoutList, BookMarked,
-} from 'lucide-react'
 import { UserAvatar } from '@/components/UserAvatar'
-import { LogoMark } from '@/components/LogoMark'
+import { SvgSendaPath } from '@/components/SvgSendaPath'
 
 const NAV_ITEMS = [
-  { href: '/dashboard',       label: 'Home',       Icon: LayoutDashboard },
-  { href: '/study/configure', label: 'Study',      Icon: BookOpen        },
-  { href: '/curriculum',      label: 'Curriculum', Icon: LayoutList      },
-  { href: '/verbs',           label: 'Verbs',       Icon: BookMarked      },
-  { href: '/progress',        label: 'Progress',   Icon: BarChart2       },
-  { href: '/tutor',           label: 'Tutor',      Icon: Bot             },
+  { href: '/dashboard',       label: 'Home'       },
+  { href: '/study/configure', label: 'Study'      },
+  { href: '/curriculum',      label: 'Curriculum' },
+  { href: '/verbs',           label: 'Verbs'       },
+  { href: '/progress',        label: 'Progress'   },
+  { href: '/tutor',           label: 'Tutor'      },
 ]
 
 const HIDDEN_ROUTES = ['/auth', '/onboarding', '/brand-preview', '/admin']
+
+// D5 inline S-path — terracotta, no background rect
 
 interface Props {
   userInitials: string
@@ -28,18 +26,25 @@ export function SideNav({ userInitials }: Props) {
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
   return (
-    <aside className="hidden lg:flex flex-col fixed inset-y-0 left-0 z-40 w-[220px] border-r bg-background">
+    <aside
+      className="hidden lg:flex flex-col fixed inset-y-0 left-0 z-40 w-[220px] border-r bg-background"
+      style={{ borderColor: 'rgba(184,170,153,0.4)' }}
+    >
       {/* Logo */}
       <Link
         href="/dashboard"
-        className="group flex items-center gap-2.5 px-5 h-14 border-b shrink-0"
+        className="flex items-center gap-2.5 px-5 h-14 shrink-0 border-b"
+        style={{ borderColor: 'rgba(184,170,153,0.35)' }}
       >
-        <span className="inline-flex transition-transform duration-200 group-hover:rotate-6">
-          <LogoMark size={32} />
-        </span>
+        <SvgSendaPath size={20} />
         <span
-          className="font-semibold text-sm tracking-tight"
-          style={{ fontFamily: 'var(--font-plus-jakarta), sans-serif' }}
+          style={{
+            fontFamily: 'var(--font-dm-serif), serif',
+            fontStyle: 'italic',
+            fontSize: 20,
+            lineHeight: 1,
+            color: 'var(--d5-ink)',
+          }}
         >
           Senda
         </span>
@@ -47,7 +52,7 @@ export function SideNav({ userInitials }: Props) {
 
       {/* Nav items */}
       <nav className="flex-1 flex flex-col gap-0.5 p-3 overflow-y-auto">
-        {NAV_ITEMS.map(({ href, label, Icon }) => {
+        {NAV_ITEMS.map(({ href, label }) => {
           const active =
             pathname === href ||
             (href === '/study/configure' && pathname.startsWith('/study')) ||
@@ -56,13 +61,23 @@ export function SideNav({ userInitials }: Props) {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                ${active
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                }`}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+              style={{
+                background: active ? 'rgba(184,170,153,0.25)' : 'transparent',
+                color: active ? 'var(--d5-terracotta)' : 'var(--d5-nav-inactive)',
+                fontWeight: active ? 600 : 400,
+              }}
             >
-              <Icon className="h-5 w-5 shrink-0" />
+              {/* Left accent bar */}
+              <span
+                className="shrink-0"
+                style={{
+                  width: 3,
+                  height: 16,
+                  borderRadius: 2,
+                  background: active ? 'var(--d5-terracotta)' : 'transparent',
+                }}
+              />
               {label}
             </Link>
           )
@@ -70,15 +85,25 @@ export function SideNav({ userInitials }: Props) {
       </nav>
 
       {/* Account at bottom */}
-      <div className="p-3 border-t shrink-0">
+      <div className="p-3 border-t shrink-0" style={{ borderColor: 'rgba(184,170,153,0.35)' }}>
         <Link
           href="/account"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-            ${pathname.startsWith('/account')
-              ? 'bg-primary/10 text-primary'
-              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-            }`}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+          style={{
+            background: pathname.startsWith('/account') ? 'rgba(184,170,153,0.25)' : 'transparent',
+            color: pathname.startsWith('/account') ? 'var(--d5-terracotta)' : 'var(--d5-nav-inactive)',
+            fontWeight: pathname.startsWith('/account') ? 600 : 400,
+          }}
         >
+          <span
+            className="shrink-0"
+            style={{
+              width: 3,
+              height: 16,
+              borderRadius: 2,
+              background: pathname.startsWith('/account') ? 'var(--d5-terracotta)' : 'transparent',
+            }}
+          />
           <UserAvatar initials={userInitials} size="sm" />
           Account
         </Link>

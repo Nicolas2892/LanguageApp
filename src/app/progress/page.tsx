@@ -252,8 +252,12 @@ export default async function ProgressPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Progreso</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1
+            style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
+          >
+            Progreso
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--d5-warm)' }}>
             Tu Camino De Aprendizaje · {monthLabel} {year}
           </p>
         </div>
@@ -279,7 +283,7 @@ export default async function ProgressPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
             {/* Streak */}
-            <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+            <div className="senda-card space-y-2">
               <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
                 <Flame className="h-4 w-4 text-green-700 dark:text-green-400" strokeWidth={1.5} />
               </div>
@@ -291,11 +295,11 @@ export default async function ProgressPage() {
             </div>
 
             {/* Mastered */}
-            <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+            <div className="senda-card space-y-2">
               <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
                 <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" strokeWidth={1.5} />
               </div>
-              <p className="text-2xl font-extrabold text-green-600 dark:text-green-400">{totalMastered}</p>
+              <p className="text-2xl font-extrabold" style={{ color: 'var(--d5-terracotta)' }}>{totalMastered}</p>
               <div>
                 <p className="text-xs font-medium">Dominados</p>
                 <p className="text-xs text-muted-foreground">De {totalConcepts} En Total</p>
@@ -303,7 +307,7 @@ export default async function ProgressPage() {
             </div>
 
             {/* Production certified */}
-            <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+            <div className="senda-card space-y-2">
               <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
                 <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" strokeWidth={1.5} />
               </div>
@@ -315,7 +319,7 @@ export default async function ProgressPage() {
             </div>
 
             {/* Accuracy */}
-            <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+            <div className="senda-card space-y-2">
               <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center">
                 <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" strokeWidth={1.5} />
               </div>
@@ -329,9 +333,9 @@ export default async function ProgressPage() {
 
           {/* All-time stats */}
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-3">Total</p>
+            <p className="senda-eyebrow mb-3">Total</p>
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+              <div className="senda-card space-y-2">
                 <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
                   <ListChecks className="h-4 w-4 text-violet-600 dark:text-violet-400" strokeWidth={1.5} />
                 </div>
@@ -341,7 +345,7 @@ export default async function ProgressPage() {
                   <p className="text-xs text-muted-foreground">Total Acumulado</p>
                 </div>
               </div>
-              <div className="bg-card rounded-xl border p-5 space-y-2 shadow-sm">
+              <div className="senda-card space-y-2">
                 <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center">
                   <Clock className="h-4 w-4 text-teal-600 dark:text-teal-400" strokeWidth={1.5} />
                 </div>
@@ -359,9 +363,9 @@ export default async function ProgressPage() {
           </div>
 
           {/* CEFR Level Journey */}
-          <section className="bg-card rounded-xl border p-5 shadow-sm space-y-5">
+          <section className="senda-card space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-bold text-base">Progreso De Nivel</h2>
+              <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Progreso De Nivel</h2>
               {levelChip && (
                 <span
                   className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelChip.className}`}
@@ -410,8 +414,8 @@ export default async function ProgressPage() {
           {/* Exercises by type */}
           {exerciseTypeData.length > 0 && (
             <section className="space-y-3">
-              <h2 className="font-bold text-base">Ejercicios Por Tipo</h2>
-              <div className="bg-card rounded-xl border p-5 shadow-sm">
+              <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Ejercicios Por Tipo</h2>
+              <div className="senda-card">
                 <ExerciseTypeChart data={exerciseTypeData} />
               </div>
             </section>
@@ -420,8 +424,8 @@ export default async function ProgressPage() {
           {/* Skill breakdown */}
           {exerciseAccuracy.length > 0 && (
             <section className="space-y-3">
-              <h2 className="font-bold text-base">Desglose De Habilidades</h2>
-              <div className="bg-card rounded-xl border p-5 shadow-sm">
+              <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Desglose De Habilidades</h2>
+              <div className="senda-card">
                 <AccuracyChart data={exerciseAccuracy} />
                 {showInsight && (
                   <p className="text-xs text-muted-foreground border-t mt-3 pt-3">
@@ -444,7 +448,7 @@ export default async function ProgressPage() {
           <section className="space-y-3">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="font-bold text-base">Consistencia De Estudio</h2>
+                <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Consistencia De Estudio</h2>
                 {sessionCount > 0 && (
                   <p className="text-xs text-muted-foreground mt-0.5">
                     <span className="font-medium text-foreground">
@@ -469,7 +473,7 @@ export default async function ProgressPage() {
                 <span className="text-[10px]">En Los Últimos 3 Meses</span>
               </p>
             </div>
-            <div className="bg-card rounded-xl border p-5 shadow-sm overflow-x-auto">
+            <div className="senda-card overflow-x-auto">
               <ActivityHeatmap data={activityData} weeks={14} />
             </div>
           </section>

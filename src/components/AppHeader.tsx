@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserAvatar } from '@/components/UserAvatar'
-import { LogoMark } from '@/components/LogoMark'
+import { SvgSendaPath } from '@/components/SvgSendaPath'
 
 const HIDDEN_ROUTES = ['/auth', '/study', '/tutor', '/onboarding', '/brand-preview']
 
@@ -19,10 +19,15 @@ export function AppHeader({ userInitials }: Props) {
       <div className="h-14 flex items-center justify-between px-5">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center gap-2">
-          <LogoMark size={32} />
+          <SvgSendaPath size={22} />
           <span
-            className="font-semibold text-sm hidden sm:block tracking-tight"
-            style={{ fontFamily: 'var(--font-plus-jakarta), sans-serif' }}
+            style={{
+              fontFamily: 'var(--font-dm-serif), serif',
+              fontStyle: 'italic',
+              fontSize: 20,
+              lineHeight: 1,
+              color: 'var(--d5-ink)',
+            }}
           >
             Senda
           </span>

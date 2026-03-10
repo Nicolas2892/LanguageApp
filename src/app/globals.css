@@ -138,6 +138,50 @@
   --d5-warm: #8C6A3F;
   --d5-muted: #B8AA99;
   --d5-paper: #FDFCF9;
+
+  /* Adaptive tokens — swap in dark mode */
+  --d5-eyebrow: var(--d5-warm);
+  --d5-separator: var(--d5-warm);
+  --d5-nav-inactive: var(--d5-warm);
+}
+.dark {
+  --d5-eyebrow: var(--d5-muted);
+  --d5-separator: var(--d5-muted);
+  --d5-nav-inactive: var(--d5-muted);
+}
+
+/* Serif italic heading — DM Serif Display, used for card titles and page h1 */
+.senda-heading {
+  font-family: var(--font-dm-serif), serif;
+  font-style: italic;
+  color: var(--d5-ink);
+  line-height: 1.2;
+}
+.dark .senda-heading {
+  color: var(--d5-paper);
+}
+
+/* Section eyebrow — 9px uppercase label used throughout all pages */
+.senda-eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--d5-eyebrow);
+  font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+  line-height: 1;
+}
+
+/* D5 card surface — soft warm fill, no hard border */
+.senda-card {
+  background: rgba(140, 106, 63, 0.07);
+  box-shadow: 0 2px 24px rgba(26, 17, 8, 0.06);
+  border-radius: 20px;
+  padding: 16px 18px;
+}
+.dark .senda-card {
+  background: rgba(140, 106, 63, 0.14);
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.18);
 }
 
 /* Senda motion tempo — snappy academic easing */

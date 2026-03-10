@@ -64,7 +64,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
     <div className="space-y-8">
       {/* Mode picker — always shown */}
       <section className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Modo</h2>
+        <h2 className="senda-eyebrow">Modo</h2>
         <div className="grid grid-cols-1 gap-2">
           <button
             onClick={() => setSessionMode('srs')}
@@ -113,7 +113,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
         <>
           {/* Module picker */}
           <section className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+            <h2 className="senda-eyebrow">
               {isPractice ? 'Elegir Un Tema (Opcional)' : 'Módulo'}
             </h2>
             <div className="grid grid-cols-1 gap-2">
@@ -155,7 +155,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
 
           {/* Session size picker */}
           <section className="space-y-3">
-            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">¿Cuántos Ejercicios?</h2>
+            <h2 className="senda-eyebrow">¿Cuántos Ejercicios?</h2>
             <div className="flex gap-2 flex-wrap">
               {SESSION_SIZES.map((size) => (
                 <button
@@ -176,7 +176,7 @@ export function SessionConfig({ modules, mistakeConceptCount }: Props) {
           {/* Exercise type picker */}
           <section className="space-y-3">
             <div className="flex items-baseline justify-between">
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Tipos De Ejercicio</h2>
+              <h2 className="senda-eyebrow">Tipos De Ejercicio</h2>
               <span className="text-xs text-muted-foreground">
                 {selectedTypes.length === 0 ? 'Todos Los Tipos' : `${selectedTypes.length} Seleccionados`}
               </span>

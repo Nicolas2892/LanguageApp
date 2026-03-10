@@ -78,8 +78,12 @@ export default async function ConfigurePage() {
   return (
     <main className="max-w-md mx-auto p-6 md:p-10">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Nueva Sesión</h1>
-        <p className="text-sm text-muted-foreground mt-1">Personaliza Tu Estudio</p>
+        <h1
+          style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
+        >
+          Nueva Sesión
+        </h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--d5-warm)' }}>Personaliza Tu Estudio</p>
       </div>
       <SessionConfig modules={modulesWithMastery} mistakeConceptCount={mistakeConceptCount} />
     </main>
