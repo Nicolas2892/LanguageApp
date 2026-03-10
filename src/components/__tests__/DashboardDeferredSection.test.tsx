@@ -24,11 +24,6 @@ const defaultProps = {
 function makeSupabaseMock({
   weakestConceptId = 'concept-abc',
   mistakeExerciseIds = [] as string[],
-  thisWeekAttempts = [] as { ai_score: number | null }[],
-  lastWeekAttempts = [] as { ai_score: number | null }[],
-  thisWeekSessions = [] as { started_at: string; ended_at: string | null }[],
-  lastWeekSessions = [] as { started_at: string; ended_at: string | null }[],
-  dueByModule = [] as unknown[],
   writeConceptTitle = 'El Subjuntivo',
 } = {}) {
   // Build a chainable query builder mock
@@ -56,8 +51,7 @@ function makeSupabaseMock({
       // weakest progress query: returns one row
       // dueByModule query: returns dueByModule array
       // We need to distinguish the two user_progress queries.
-      // The weakest query uses .order+.limit(1), dueByModule uses lte(due_date)
-      // We'll use a counter approach via callCount.
+      // call 1: weakest concept query; call 2+: allProgress for curriculum
       let callCount = 0
       const obj: Record<string, unknown> = {}
       const methods = ['eq', 'lt', 'lte', 'gte', 'order', 'limit', 'in', 'not']
@@ -69,7 +63,7 @@ function makeSupabaseMock({
         const result =
           callCount === 1
             ? [{ concept_id: weakestConceptId, interval_days: 3 }]
-            : dueByModule
+            : []
         const inner: Record<string, unknown> = {}
         for (const m of methods) {
           inner[m] = vi.fn().mockReturnValue(inner)
@@ -80,45 +74,7 @@ function makeSupabaseMock({
       })
       return obj
     })(),
-    exercise_attempts: (() => {
-      let callCount = 0
-      const obj: Record<string, unknown> = {}
-      obj.select = vi.fn().mockImplementation(() => {
-        callCount++
-        const data =
-          callCount === 1
-            ? mistakeExerciseIds.map((id) => ({ exercise_id: id }))
-            : callCount === 2
-            ? thisWeekAttempts
-            : lastWeekAttempts
-        const inner: Record<string, unknown> = {}
-        const methods = ['eq', 'lte', 'gte', 'lt', 'not', 'limit']
-        for (const m of methods) {
-          inner[m] = vi.fn().mockReturnValue(inner)
-        }
-        inner.then = (resolve: (v: { data: unknown; error: null }) => unknown) =>
-          Promise.resolve({ data, error: null }).then(resolve)
-        return inner
-      })
-      return obj
-    })(),
-    study_sessions: (() => {
-      let callCount = 0
-      const obj: Record<string, unknown> = {}
-      obj.select = vi.fn().mockImplementation(() => {
-        callCount++
-        const data = callCount === 1 ? thisWeekSessions : lastWeekSessions
-        const inner: Record<string, unknown> = {}
-        const methods = ['eq', 'gte', 'lt']
-        for (const m of methods) {
-          inner[m] = vi.fn().mockReturnValue(inner)
-        }
-        inner.then = (resolve: (v: { data: unknown; error: null }) => unknown) =>
-          Promise.resolve({ data, error: null }).then(resolve)
-        return inner
-      })
-      return obj
-    })(),
+    exercise_attempts: makeQuery(mistakeExerciseIds.map((id) => ({ exercise_id: id }))),
     concepts: makeQuery([{ id: weakestConceptId, title: writeConceptTitle }]),
     exercises: makeQuery(
       mistakeExerciseIds.map((id) => ({ id, concept_id: 'concept-mistake-1' }))
@@ -139,34 +95,7 @@ describe('DashboardDeferredSection', () => {
     )
   })
 
-  it('renders WeeklySnapshot when user has studied this week', async () => {
-    vi.mocked(createClient).mockResolvedValue(
-      makeSupabaseMock({
-        thisWeekAttempts: [
-          { ai_score: 3 },
-          { ai_score: 2 },
-          { ai_score: 1 },
-        ],
-      }) as unknown as Awaited<ReturnType<typeof createClient>>
-    )
-    const el = await DashboardDeferredSection(defaultProps)
-    render(el)
-    expect(screen.getByText('exercises')).toBeTruthy()
-  })
-
-  it('skips WeeklySnapshot when user has no attempts this week', async () => {
-    vi.mocked(createClient).mockResolvedValue(
-      makeSupabaseMock({ thisWeekAttempts: [] }) as unknown as Awaited<ReturnType<typeof createClient>>
-    )
-    const el = await DashboardDeferredSection(defaultProps)
-    render(el)
-    expect(screen.queryByText('exercises')).toBeNull()
-  })
-
   it('renders free write card with concept title when weakest concept exists', async () => {
-    vi.mocked(createClient).mockResolvedValue(
-      makeSupabaseMock({ writeConceptTitle: 'El Subjuntivo' }) as unknown as Awaited<ReturnType<typeof createClient>>
-    )
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
     expect(screen.getByText('El Subjuntivo')).toBeTruthy()

@@ -9,7 +9,6 @@ import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import type { Profile } from '@/lib/supabase/types'
 import { LEVEL_CHIP } from '@/lib/constants'
-import { BookOpen, CheckCircle2 } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -65,7 +64,7 @@ export default async function DashboardPage() {
             marginBottom: 8,
           }}
         >
-          Hola, {profile?.display_name ?? 'learner'}.
+          Hola, {(profile?.display_name ?? 'learner').split(' ')[0]}.
         </h1>
         {profile?.computed_level && (() => {
           const chip = LEVEL_CHIP[profile.computed_level]
@@ -81,13 +80,7 @@ export default async function DashboardPage() {
 
       {/* ── Tu Senda Diaria — SRS review card ──────────────────────────────── */}
       <div className="senda-card space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="senda-eyebrow">Tu Senda Diaria</p>
-          {studiedCount > 0 && dueCount === 0
-            ? <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: 'var(--d5-terracotta)' }} strokeWidth={1.5} />
-            : <BookOpen className="h-4 w-4 shrink-0" style={{ color: 'var(--d5-muted)' }} strokeWidth={1.5} />
-          }
-        </div>
+        <p className="senda-eyebrow">Tu Senda Diaria</p>
 
         {studiedCount === 0 ? (
           <>

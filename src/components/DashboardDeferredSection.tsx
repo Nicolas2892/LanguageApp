@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { WeeklySnapshot } from '@/components/WeeklySnapshot'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import type { Concept } from '@/lib/supabase/types'
@@ -9,8 +8,8 @@ import type { Concept } from '@/lib/supabase/types'
 interface Props {
   userId: string
   isNewUser: boolean
-  thisWeekStart: string // ISO string
-  lastWeekStart: string // ISO string
+  thisWeekStart: string // ISO string — kept for future use; not used in current queries
+  lastWeekStart: string // ISO string — kept for future use; not used in current queries
 }
 
 type ModuleRow   = { id: string; title: string; order_index: number }
@@ -32,15 +31,8 @@ export async function DashboardDeferredSection({
 }: Props) {
   const supabase = await createClient()
 
-  // Batch 1 — all parallelized
-  const [
-    weakestProgressRes,
-    mistakeAttemptsRes,
-    thisWeekAttemptsRes,
-    lastWeekAttemptsRes,
-    thisWeekSessionsRes,
-    lastWeekSessionsRes,
-  ] = await Promise.all([
+  // Batch 1 — parallelized
+  const [weakestProgressRes, mistakeAttemptsRes] = await Promise.all([
     supabase
       .from('user_progress')
       .select('concept_id, interval_days')
@@ -55,28 +47,6 @@ export async function DashboardDeferredSection({
       .lte('ai_score', 1)
       .not('exercise_id', 'is', null)
       .limit(100),
-    supabase
-      .from('exercise_attempts')
-      .select('ai_score')
-      .eq('user_id', userId)
-      .gte('created_at', thisWeekStart),
-    supabase
-      .from('exercise_attempts')
-      .select('ai_score')
-      .eq('user_id', userId)
-      .gte('created_at', lastWeekStart)
-      .lt('created_at', thisWeekStart),
-    supabase
-      .from('study_sessions')
-      .select('started_at, ended_at')
-      .eq('user_id', userId)
-      .gte('started_at', thisWeekStart),
-    supabase
-      .from('study_sessions')
-      .select('started_at, ended_at')
-      .eq('user_id', userId)
-      .gte('started_at', lastWeekStart)
-      .lt('started_at', thisWeekStart),
   ])
 
   const weakestConceptId =
@@ -106,40 +76,6 @@ export async function DashboardDeferredSection({
         (mistakeExercisesRes.data as { concept_id: string }[]).map((e) => e.concept_id)
       ).size
     : 0
-
-  // Weekly snapshot stats
-  type AttemptRow = { ai_score: number | null }
-  type SessionRow = { started_at: string; ended_at: string | null }
-
-  const thisWeekAttempts = (thisWeekAttemptsRes.data ?? []) as AttemptRow[]
-  const lastWeekAttempts = (lastWeekAttemptsRes.data ?? []) as AttemptRow[]
-  const thisWeekExercises = thisWeekAttempts.length
-  const lastWeekExercises = lastWeekAttempts.length
-  const thisWeekAccuracy =
-    thisWeekExercises > 0
-      ? Math.round(
-          (thisWeekAttempts.filter((a) => (a.ai_score ?? 0) >= 2).length / thisWeekExercises) * 100
-        )
-      : null
-  const lastWeekAccuracy =
-    lastWeekExercises > 0
-      ? Math.round(
-          (lastWeekAttempts.filter((a) => (a.ai_score ?? 0) >= 2).length / lastWeekExercises) * 100
-        )
-      : null
-  const calcMinutes = (sessions: SessionRow[]) =>
-    sessions.reduce((sum, s) => {
-      if (!s.ended_at) return sum
-      return sum + Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)
-    }, 0)
-  const thisWeekMinutes = calcMinutes((thisWeekSessionsRes.data ?? []) as SessionRow[])
-  const lastWeekMinutes = calcMinutes((lastWeekSessionsRes.data ?? []) as SessionRow[])
-  const exerciseDelta = lastWeekExercises > 0 ? thisWeekExercises - lastWeekExercises : null
-  const accuracyDelta =
-    thisWeekAccuracy !== null && lastWeekAccuracy !== null
-      ? thisWeekAccuracy - lastWeekAccuracy
-      : null
-  const minutesDelta = lastWeekMinutes > 0 ? thisWeekMinutes - lastWeekMinutes : null
 
   // Batch 3 — curriculum state (3 public reads + 1 user read, all parallel)
   const [modulesRes, unitsRes, conceptsRes, allProgressRes] = await Promise.all([
@@ -196,21 +132,6 @@ export async function DashboardDeferredSection({
 
   return (
     <>
-      {/* Weekly snapshot — only shown after user has studied this week */}
-      {thisWeekExercises > 0 && (
-        <>
-          <WeeklySnapshot
-            exercises={thisWeekExercises}
-            accuracy={thisWeekAccuracy}
-            minutes={thisWeekMinutes}
-            exerciseDelta={exerciseDelta}
-            accuracyDelta={accuracyDelta}
-            minutesDelta={minutesDelta}
-          />
-          <WindingPathSeparator />
-        </>
-      )}
-
       {/* Escritura Libre card */}
       {!isNewUser && writeConcept && (
         <div className="senda-card space-y-3">
