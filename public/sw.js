@@ -1,11 +1,37 @@
 // Service worker for Spanish B1→B2 app
-// Strategy: cache-first for Next.js immutable static assets;
-// network-only for everything else (auth-gated pages don't cache safely).
+// Strategy:
+//   - Cache-first for Next.js immutable static assets
+//   - Pre-cache app shell routes at install time
+//   - Stale-while-revalidate for page navigation (non-auth, non-API)
+//   - Network-only for API calls and auth routes
 
-const CACHE = 'spanish-app-v1'
+const CACHE = 'spanish-app-v2'
 
-self.addEventListener('install', () => {
+const SHELL_URLS = [
+  '/',
+  '/dashboard',
+  '/study',
+  '/study/configure',
+  '/verbs',
+  '/progress',
+  '/curriculum',
+  '/manifest.webmanifest',
+  '/icon',
+  '/apple-icon',
+]
+
+self.addEventListener('install', (e) => {
   self.skipWaiting()
+  e.waitUntil(
+    caches.open(CACHE).then((cache) =>
+      // Add shell URLs individually — a single failure won't block the install
+      Promise.allSettled(
+        SHELL_URLS.map((url) =>
+          cache.add(url).catch(() => { /* ignore — shell pre-cache is best-effort */ })
+        )
+      )
+    )
+  )
 })
 
 self.addEventListener('activate', (e) => {
@@ -25,14 +51,64 @@ self.addEventListener('fetch', (e) => {
   // Only handle GET requests
   if (request.method !== 'GET') return
 
-  // Cache-first for Next.js static assets (immutable, content-hashed filenames)
-  if (request.url.includes('/_next/static/')) {
+  const url = new URL(request.url)
+
+  // ── 1. Cache-first for Next.js immutable static assets ────────────────────
+  if (url.pathname.startsWith('/_next/static/')) {
     e.respondWith(
       caches.match(request).then(
         (hit) =>
           hit ??
           fetch(request).then((res) => {
-            // Only cache successful responses
+            if (res.ok) {
+              const clone = res.clone()
+              caches.open(CACHE).then((cache) => cache.put(request, clone))
+            }
+            return res
+          })
+      )
+    )
+    return
+  }
+
+  // ── 2. Network-only for API calls, auth routes, and cross-origin ───────────
+  if (
+    url.origin !== self.location.origin ||
+    url.pathname.startsWith('/api/') ||
+    url.pathname.startsWith('/auth/')
+  ) {
+    return
+  }
+
+  // ── 3. Stale-while-revalidate for page navigation ─────────────────────────
+  // Serve cached shell immediately; revalidate in background.
+  // Auth-gated data comes from fresh Supabase API calls, so stale HTML is safe.
+  if (request.mode === 'navigate') {
+    e.respondWith(
+      caches.open(CACHE).then((cache) =>
+        cache.match(request).then((cached) => {
+          const networkFetch = fetch(request).then((res) => {
+            if (res.ok) cache.put(request, res.clone())
+            return res
+          })
+          return cached ?? networkFetch
+        })
+      )
+    )
+    return
+  }
+
+  // ── 4. Cache-first for icons and manifest (static meta assets) ────────────
+  if (
+    url.pathname === '/icon' ||
+    url.pathname === '/apple-icon' ||
+    url.pathname === '/manifest.webmanifest'
+  ) {
+    e.respondWith(
+      caches.match(request).then(
+        (hit) =>
+          hit ??
+          fetch(request).then((res) => {
             if (res.ok) {
               const clone = res.clone()
               caches.open(CACHE).then((cache) => cache.put(request, clone))
@@ -42,8 +118,6 @@ self.addEventListener('fetch', (e) => {
       )
     )
   }
-  // All other requests (navigation, API calls) go straight to the network.
-  // This keeps auth-gated pages working correctly.
 })
 
 // Push notification received
