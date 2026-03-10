@@ -18,6 +18,9 @@ vi.mock('@/components/GrammarFocusChip', () => ({
 vi.mock('@/components/WindingPathSeparator', () => ({
   WindingPathSeparator: () => <hr />,
 }))
+vi.mock('@/components/BackgroundMagicS', () => ({
+  BackgroundMagicS: () => null,
+}))
 
 const MODULES = [
   { id: 'mod-1', title: 'Conectores', order_index: 1 },
@@ -111,7 +114,21 @@ describe('CurriculumClient', () => {
   it('renders "Practicar →" module links', () => {
     render(<CurriculumClient {...defaultProps} />)
     const links = screen.getAllByText('Practicar →')
-    expect(links.length).toBeGreaterThanOrEqual(2)
+    // One "Practicar →" link per module (concept rows no longer have practice links)
+    expect(links.length).toBe(2)
+  })
+
+  it('renders concept rows as links to the concept detail page', async () => {
+    const user = userEvent.setup()
+    render(<CurriculumClient {...defaultProps} />)
+
+    // Expand the first module
+    const moduleTitle = screen.getByText('Conectores')
+    await user.click(moduleTitle)
+
+    // Concept row should link to /curriculum/con-1
+    const conceptLink = screen.getByRole('link', { name: /Sin embargo/ })
+    expect(conceptLink).toHaveAttribute('href', '/curriculum/con-1')
   })
 
   it('renders footer text', () => {

@@ -2,12 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Lock } from 'lucide-react'
+import { Lock, ChevronRight } from 'lucide-react'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { LevelChip } from '@/components/LevelChip'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { HardFlagButton } from '@/components/HardFlagButton'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 
 type ModuleRow  = { id: string; title: string; order_index: number }
 type UnitRow    = { id: string; module_id: string; title: string; order_index: number }
@@ -127,13 +128,8 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                 }
               : { width: nodeSize, height: nodeSize, borderRadius: '50%', border: '1.5px solid rgba(26,17,8,0.25)', background: 'transparent', flexShrink: 0 }
 
-          // Title style per state
-          const titleStyle: React.CSSProperties =
-            state === 'active'
-              ? { fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 15, fontWeight: 700, color: 'var(--d5-ink)', lineHeight: 1.3 }
-              : state === 'mastered'
-              ? { fontSize: 13, fontWeight: 500, color: 'var(--d5-ink)', lineHeight: 1.3 }
-              : { fontSize: 13, fontWeight: 400, color: 'rgba(26,17,8,0.4)', lineHeight: 1.3 }
+          // Title size per state (all use senda-heading font)
+          const titleFontSize = state === 'active' ? 15 : 13
 
           // Status chip per state
           const statusChip =
@@ -165,16 +161,32 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                 )}
               </div>
 
-              {/* Content area */}
+              {/* Content area — senda-card */}
               <div
-                style={{ flex: 1, paddingLeft: 16, paddingBottom: isLast ? 16 : 36, paddingTop: isFirst ? 0 : 4, cursor: 'pointer' }}
+                className="senda-card"
+                style={{
+                  flex: 1,
+                  marginLeft: 16,
+                  marginBottom: isLast ? 16 : 24,
+                  marginTop: isFirst ? 0 : 4,
+                  cursor: 'pointer',
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
                 onClick={() => setExpandedModuleId(isExpanded ? null : mod.id)}
               >
+                <BackgroundMagicS opacity={0.05} />
+
                 {/* Title + status + practice row */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={titleStyle}>{mod.title}</span>
+                      <span
+                        className="senda-heading"
+                        style={{ fontSize: titleFontSize }}
+                      >
+                        {mod.title}
+                      </span>
                       <span style={statusChip.style}>{statusChip.label}</span>
                     </div>
                     {/* Meta chip with terracotta dot */}
@@ -261,64 +273,75 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                         const isHard = p?.is_hard ?? false
 
                         return (
-                          <div
+                          <Link
                             key={concept.id}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              paddingTop: 10,
-                              borderTop: '1px solid rgba(26,17,8,0.06)',
-                              opacity: locked ? 0.4 : 1,
-                              gap: 8,
-                            }}
+                            href={`/curriculum/${concept.id}`}
+                            onClick={e => e.stopPropagation()}
+                            style={{ display: 'block', position: 'relative', zIndex: 10 }}
                           >
-                            {/* Left: icon + title + chips */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
-                              {locked && (
-                                <Lock
-                                  size={12}
-                                  strokeWidth={1.5}
-                                  style={{ flexShrink: 0, color: 'var(--d5-muted)' }}
+                            <div
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                marginTop: 10,
+                                paddingLeft: 20,
+                                borderLeft: '2px solid rgba(196,82,46,0.15)',
+                                opacity: locked ? 0.4 : 1,
+                                gap: 8,
+                              }}
+                            >
+                              {/* Left: icon + title + dot + chips */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
+                                {locked && (
+                                  <Lock
+                                    size={12}
+                                    strokeWidth={1.5}
+                                    style={{ flexShrink: 0, color: 'var(--d5-muted)' }}
+                                  />
+                                )}
+                                <span
+                                  style={{
+                                    fontSize: 14,
+                                    color: 'var(--d5-ink)',
+                                    fontWeight: 400,
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {concept.title}
+                                </span>
+                                <span
+                                  style={{
+                                    width: 4,
+                                    height: 4,
+                                    borderRadius: '50%',
+                                    background: 'var(--d5-terracotta)',
+                                    display: 'inline-block',
+                                    flexShrink: 0,
+                                  }}
                                 />
-                              )}
-                              <span
-                                style={{
-                                  fontSize: 14,
-                                  color: 'var(--d5-ink)',
-                                  fontWeight: 400,
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  whiteSpace: 'nowrap',
-                                }}
-                              >
-                                {concept.title}
-                              </span>
-                              <LevelChip level={concept.level} />
-                              <GrammarFocusChip focus={concept.grammar_focus} />
-                            </div>
-                            {/* Right: badge + flag + practice */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                              <span style={badge.style}>{badge.label}</span>
-                              <div onClick={e => e.stopPropagation()}>
-                                <HardFlagButton conceptId={concept.id} initialIsHard={isHard} />
+                                <LevelChip level={concept.level} />
+                                <GrammarFocusChip focus={concept.grammar_focus} />
                               </div>
-                              <Link
-                                href={`/study?practice=true&concept=${concept.id}`}
-                                onClick={e => e.stopPropagation()}
-                                style={{
-                                  fontSize: 11,
-                                  color: 'var(--d5-terracotta)',
-                                  fontWeight: 500,
-                                  whiteSpace: 'nowrap',
-                                  position: 'relative',
-                                  zIndex: 10,
-                                }}
-                              >
-                                Practicar →
-                              </Link>
+                              {/* Right: badge + flag + chevron */}
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                                <span style={badge.style}>{badge.label}</span>
+                                <div
+                                  onClick={e => e.stopPropagation()}
+                                  style={{ position: 'relative', zIndex: 20 }}
+                                >
+                                  <HardFlagButton conceptId={concept.id} initialIsHard={isHard} />
+                                </div>
+                                <ChevronRight
+                                  size={14}
+                                  strokeWidth={1.5}
+                                  style={{ color: 'rgba(26,17,8,0.4)', flexShrink: 0 }}
+                                />
+                              </div>
                             </div>
-                          </div>
+                          </Link>
                         )
                       })
                     )}

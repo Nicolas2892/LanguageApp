@@ -1,13 +1,14 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { Button } from '@/components/ui/button'
 import { SpeakButton } from '@/components/SpeakButton'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
-import { ChevronLeft, BookOpen, PenLine, MessageSquare, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, CheckCircle2 } from 'lucide-react'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { LevelChip } from '@/components/LevelChip'
 import { HardFlagButton } from '@/components/HardFlagButton'
+import { WindingPathSeparator } from '@/components/WindingPathSeparator'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import type { Concept } from '@/lib/supabase/types'
 
 type Example = { es: string; en: string }
@@ -19,18 +20,27 @@ function getMasteryState(intervalDays: number | undefined): MasteryState {
   return 'learning'
 }
 
-const MASTERY_BADGE: Record<MasteryState, { label: string; className: string }> = {
-  mastered: { label: 'Mastered', className: 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border-green-100 dark:border-green-800' },
-  learning: { label: 'Learning', className: 'bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 border-blue-100 dark:border-blue-800' },
-  new:      { label: 'New',      className: 'bg-transparent text-muted-foreground border-border' },
+const MASTERY_BADGE: Record<MasteryState, { label: string; style: React.CSSProperties }> = {
+  mastered: {
+    label: 'Dominado',
+    style: { background: 'rgba(196,82,46,0.1)', color: 'var(--d5-terracotta)', border: '1px solid rgba(196,82,46,0.2)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 600 },
+  },
+  learning: {
+    label: 'Aprendiendo',
+    style: { background: 'rgba(59,130,246,0.08)', color: 'rgb(59,130,246)', border: '1px solid rgba(59,130,246,0.2)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 600 },
+  },
+  new: {
+    label: 'Nuevo',
+    style: { background: 'transparent', color: 'rgba(26,17,8,0.4)', border: '1px solid rgba(26,17,8,0.15)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 600 },
+  },
 }
 
 const EXERCISE_TYPES = [
-  { type: 'gap_fill',         label: 'Gap fill' },
-  { type: 'translation',      label: 'Translation' },
-  { type: 'transformation',   label: 'Transformation' },
-  { type: 'sentence_builder', label: 'Sentence builder' },
-  { type: 'error_correction', label: 'Error correction' },
+  { type: 'gap_fill',         label: 'Completar espacios' },
+  { type: 'translation',      label: 'Traducción' },
+  { type: 'transformation',   label: 'Transformación' },
+  { type: 'sentence_builder', label: 'Construir frase' },
+  { type: 'error_correction', label: 'Corregir error' },
 ] as const
 
 interface Props {
@@ -116,14 +126,14 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
 
   // SRS status
   const srsStatus = (() => {
-    if (!progress) return 'Not started'
+    if (!progress) return 'No comenzado'
     const today     = new Date().toISOString().split('T')[0]
     const daysUntil = Math.ceil(
       (new Date(progress.due_date).getTime() - new Date(today).getTime()) / (1000 * 60 * 60 * 24)
     )
-    if (daysUntil <= 0) return 'Due now'
-    if (daysUntil === 1) return 'Due tomorrow'
-    return `Due in ${daysUntil} days`
+    if (daysUntil <= 0) return 'Pendiente ahora'
+    if (daysUntil === 1) return 'Pendiente mañana'
+    return `En ${daysUntil} días`
   })()
 
   // Back link preserves filter param
@@ -135,127 +145,187 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
   const availableTypes = EXERCISE_TYPES.filter(({ type }) => exerciseTypes.has(type))
 
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+    <main
+      className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10"
+      style={{ position: 'relative', overflow: 'hidden' }}
+    >
+      <BackgroundMagicS opacity={0.05} />
+
       {/* Back navigation */}
       <Link
         href={backHref}
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+          fontSize: 13,
+          color: 'var(--d5-warm)',
+          marginBottom: 24,
+        }}
       >
-        <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
-        Curriculum
+        <ChevronLeft size={16} strokeWidth={1.5} />
+        Currículo
       </Link>
 
-      {/* Breadcrumb + title */}
-      <div className="space-y-2">
-        {moduleName && unit && (
-          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-            {moduleName} · {unit.title}
-          </p>
-        )}
-        <div className="flex items-start gap-3 flex-wrap">
-          <h1 className="text-2xl font-extrabold tracking-tight flex-1 min-w-0">{concept.title}</h1>
-          <div className="flex items-center gap-2 shrink-0">
-            <LevelChip level={concept.level} />
-            <GrammarFocusChip focus={concept.grammar_focus} />
-            <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${badge.className}`}>
-              {badge.label}
-            </span>
-            <HardFlagButton conceptId={id} initialIsHard={isHard} />
-          </div>
+      {/* Card 1 — The Narrative */}
+      <div
+        className="senda-card"
+        style={{ position: 'relative', overflow: 'hidden', marginBottom: 16 }}
+      >
+        {/* Eyebrow + breadcrumb */}
+        <div style={{ marginBottom: 12 }}>
+          <span className="senda-eyebrow">Concepto</span>
+          {moduleName && unit && (
+            <p style={{ fontSize: 11, color: 'var(--d5-warm)', marginTop: 4 }}>
+              {moduleName} · {unit.title}
+            </p>
+          )}
         </div>
+
+        {/* Title */}
+        <h1 className="senda-heading" style={{ fontSize: 22, marginBottom: 10 }}>
+          {concept.title}
+        </h1>
+
+        {/* Chips row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+          <LevelChip level={concept.level} />
+          <GrammarFocusChip focus={concept.grammar_focus} />
+          <span style={badge.style}>{badge.label}</span>
+          <HardFlagButton conceptId={id} initialIsHard={isHard} />
+        </div>
+
+        {/* Explanation */}
+        <p style={{ fontSize: 14, color: 'var(--d5-ink)', lineHeight: 1.6 }}>
+          {concept.explanation}
+        </p>
+
+        {/* Attempt count */}
         {attemptCount > 0 && (
-          <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" strokeWidth={1.5} />
-            {attemptCount} exercise{attemptCount !== 1 ? 's' : ''} completed
+          <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--d5-warm)', marginTop: 12 }}>
+            <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
+            {attemptCount} ejercicio{attemptCount !== 1 ? 's' : ''} completado{attemptCount !== 1 ? 's' : ''}
           </p>
         )}
       </div>
 
-      {/* Explanation */}
-      <div className="bg-card rounded-xl border p-4">
-        <p className="text-sm leading-relaxed">{concept.explanation}</p>
-      </div>
-
-      {/* Examples table */}
+      {/* Card 2 — The Golden Sentence */}
       {examples.length > 0 && (
-        <div className="space-y-2">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Examples</h2>
-          <div className="border rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-muted/50 border-b">
-                  <th className="text-left p-3 font-medium text-muted-foreground w-1/2">Spanish</th>
-                  <th className="text-left p-3 font-medium text-muted-foreground w-1/2">English</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {examples.map((ex, i) => (
-                  <tr key={i} className="bg-card">
-                    <td className="p-3 font-medium">
-                      <div className="flex items-center gap-2">
-                        <span>{ex.es}</span>
-                        <SpeakButton text={ex.es} />
-                      </div>
-                    </td>
-                    <td className="p-3 text-muted-foreground">{ex.en}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div className="senda-card" style={{ marginBottom: 16 }}>
+          <span className="senda-eyebrow" style={{ display: 'block', marginBottom: 14 }}>Ejemplos</span>
+          {examples.map((ex, i) => (
+            <div key={i}>
+              <div
+                style={{
+                  borderLeft: '2px solid var(--d5-terracotta)',
+                  paddingLeft: 12,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--d5-ink)' }}>{ex.es}</span>
+                  <SpeakButton text={ex.es} />
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--d5-warm)', marginTop: 2 }}>{ex.en}</p>
+              </div>
+              {i < examples.length - 1 && <WindingPathSeparator />}
+            </div>
+          ))}
         </div>
       )}
 
-      {/* SRS status */}
-      <div className="bg-card rounded-xl border p-4 flex items-center justify-between">
-        <div className="space-y-0.5">
-          <p className="text-sm font-medium">Review status</p>
-          <p className="text-xs text-muted-foreground">{srsStatus}</p>
-        </div>
-        {progress && (
-          <div className="text-right">
-            <p className="text-lg font-bold leading-none">{progress.repetitions}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {progress.repetitions === 1 ? 'session' : 'sessions'}
-            </p>
+      {/* Card 3 — SRS Status + Practice */}
+      <div className="senda-card">
+        <span className="senda-eyebrow" style={{ display: 'block', marginBottom: 14 }}>Tu Progreso</span>
+
+        {/* SRS row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div>
+            <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--d5-ink)' }}>Estado de repaso</p>
+            <p style={{ fontSize: 12, color: 'var(--d5-warm)', marginTop: 2 }}>{srsStatus}</p>
           </div>
-        )}
-      </div>
+          {progress && (
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--d5-ink)', lineHeight: 1 }}>{progress.repetitions}</p>
+              <p style={{ fontSize: 11, color: 'var(--d5-warm)', marginTop: 2 }}>
+                {progress.repetitions === 1 ? 'sesión' : 'sesiones'}
+              </p>
+            </div>
+          )}
+        </div>
 
-      {/* Practice actions */}
-      <div className="space-y-3">
-        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Practice</h2>
+        {/* Practice all button */}
+        <Link
+          href={`/study?practice=true&concept=${id}`}
+          style={{
+            display: 'block',
+            width: '100%',
+            textAlign: 'center',
+            background: 'var(--d5-terracotta)',
+            color: 'var(--d5-paper)',
+            borderRadius: 9999,
+            padding: '10px 16px',
+            fontSize: 14,
+            fontWeight: 600,
+            marginBottom: 12,
+          }}
+        >
+          Practicar todo →
+        </Link>
 
-        <Button asChild className="w-full rounded-full active:scale-95 transition-transform">
-          <Link href={`/study?practice=true&concept=${id}`}>
-            <BookOpen className="h-4 w-4 mr-2" strokeWidth={1.5} />
-            Practice all
-          </Link>
-        </Button>
-
+        {/* Exercise type pills */}
         {availableTypes.length > 0 && (
-          <div className="grid grid-cols-2 gap-2">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
             {availableTypes.map(({ type, label }) => (
-              <Button key={type} asChild variant="outline" size="sm" className="justify-start">
-                <Link href={`/study?concept=${id}&types=${type}&practice=true`}>{label}</Link>
-              </Button>
+              <Link
+                key={type}
+                href={`/study?concept=${id}&types=${type}&practice=true`}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  color: 'var(--d5-terracotta)',
+                  border: '1px solid rgba(196,82,46,0.3)',
+                  borderRadius: 9999,
+                  padding: '4px 10px',
+                }}
+              >
+                {label}
+              </Link>
             ))}
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-2">
-          <Button asChild variant="outline">
-            <Link href={`/write?suggested=${id}`}>
-              <PenLine className="h-4 w-4 mr-2" strokeWidth={1.5} />
-              Free write
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href={`/tutor?concept=${id}`}>
-              <MessageSquare className="h-4 w-4 mr-2" strokeWidth={1.5} />
-              Ask tutor
-            </Link>
-          </Button>
+        {/* Secondary actions */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <Link
+            href={`/write?suggested=${id}`}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              border: '1px solid rgba(196,82,46,0.3)',
+              color: 'var(--d5-terracotta)',
+              borderRadius: 9999,
+              padding: '8px 12px',
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            Escritura libre
+          </Link>
+          <Link
+            href={`/tutor?concept=${id}`}
+            style={{
+              display: 'block',
+              textAlign: 'center',
+              border: '1px solid rgba(196,82,46,0.3)',
+              color: 'var(--d5-terracotta)',
+              borderRadius: 9999,
+              padding: '8px 12px',
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            Consultar tutor
+          </Link>
         </div>
       </div>
     </main>
