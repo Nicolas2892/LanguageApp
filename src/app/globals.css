@@ -175,13 +175,13 @@
 /* D5 card surface — soft warm fill, no hard border */
 .senda-card {
   background: rgba(140, 106, 63, 0.07);
-  box-shadow: 0 2px 24px rgba(26, 17, 8, 0.06);
+  box-shadow: 0 10px 30px -10px rgba(26, 17, 8, 0.03);
   border-radius: 20px;
   padding: 16px 18px;
 }
 .dark .senda-card {
   background: rgba(140, 106, 63, 0.14);
-  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 }
 
 /* Senda motion tempo — snappy academic easing */

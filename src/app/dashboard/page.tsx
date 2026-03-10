@@ -103,8 +103,12 @@ export default async function DashboardPage() {
                 <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse ml-2 align-middle" />
               )}
             </p>
-            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
-              Maintain your foundation with a quick sprint.
+            <p className="text-[11px] leading-relaxed">
+              <span style={{ fontFamily: 'var(--font-plus-jakarta)', fontWeight: 700, color: 'var(--d5-ink)' }}>{dueCount}</span>
+              {' '}<span style={{ color: 'var(--d5-warm)' }}>Listo{dueCount !== 1 ? 's' : ''}</span>
+              <span style={{ color: 'var(--d5-muted)' }}> · </span>
+              <span style={{ fontFamily: 'var(--font-plus-jakarta)', fontWeight: 700, color: 'var(--d5-ink)' }}>{newConceptsCount}</span>
+              {' '}<span style={{ color: 'var(--d5-warm)' }}>Esperando</span>
             </p>
             <Button asChild className="w-full rounded-full font-bold" style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', border: 'none' }}>
               <Link href="/study">Empezar Repaso</Link>
@@ -132,17 +136,19 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      <WindingPathSeparator />
+      {/* ── Card stack wrapper — BackgroundMagicS threads behind all three cards ── */}
+      <div className="relative overflow-hidden">
+        <BackgroundMagicS opacity={0.04} style={{ left: -20, top: 20, right: 'auto', width: 280, height: 360 }} />
 
-      {/* ── Exploración Abierta — open practice + BackgroundMagicS ─────────── */}
-      {newConceptsCount > 0 && (
-        <>
-          <div
-            className="relative overflow-hidden rounded-[20px] space-y-3"
-            style={{ padding: '16px 18px', minHeight: 130 }}
-          >
-            <BackgroundMagicS />
-            <div className="relative z-10 space-y-3">
+        <WindingPathSeparator />
+
+        {/* ── Exploración Abierta — open practice ─────────────────────────────── */}
+        {newConceptsCount > 0 && (
+          <>
+            <div
+              className="rounded-[20px] space-y-3"
+              style={{ padding: '16px 18px', minHeight: 130, boxShadow: '0 10px 30px -10px rgba(26, 17, 8, 0.03)' }}
+            >
               <p className="senda-eyebrow">Exploración Abierta</p>
               <p
                 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
@@ -161,20 +167,20 @@ export default async function DashboardPage() {
                 <Link href="/study?mode=new">Ir a Práctica Abierta</Link>
               </Button>
             </div>
-          </div>
-          <WindingPathSeparator />
-        </>
-      )}
+            <WindingPathSeparator />
+          </>
+        )}
 
-      {/* ── Deferred section (Escritura Libre · Revisar Errores · Snapshot · Currículo) ── */}
-      <Suspense fallback={<DashboardDeferredSkeleton />}>
-        <DashboardDeferredSection
-          userId={user.id}
-          isNewUser={isNewUser}
-          thisWeekStart={thisWeekStart.toISOString()}
-          lastWeekStart={lastWeekStart.toISOString()}
-        />
-      </Suspense>
+        {/* ── Deferred section (Escritura Libre · Revisar Errores · Snapshot · Currículo) ── */}
+        <Suspense fallback={<DashboardDeferredSkeleton />}>
+          <DashboardDeferredSection
+            userId={user.id}
+            isNewUser={isNewUser}
+            thisWeekStart={thisWeekStart.toISOString()}
+            lastWeekStart={lastWeekStart.toISOString()}
+          />
+        </Suspense>
+      </div>
 
       <OnboardingTour />
     </main>

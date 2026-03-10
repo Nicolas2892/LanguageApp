@@ -107,23 +107,33 @@ export async function DashboardDeferredSection({
     <>
       {/* Escritura Libre card */}
       {!isNewUser && writeConcept && (
-        <div className="senda-card space-y-3">
-          <p className="senda-eyebrow">Escritura Libre</p>
+        <div className="senda-card space-y-3 relative overflow-hidden">
+          {/* Quill icon — top-right decorative mark */}
+          <svg
+            style={{ position: 'absolute', top: 14, right: 16, pointerEvents: 'none' }}
+            width={28} height={28} viewBox="0 0 24 24" fill="none"
+            aria-hidden="true"
+          >
+            <path d="M20.707 5.826l-2.534-2.533a1 1 0 0 0-1.414 0L3 17.05V21h3.95L20.707 7.24a1 1 0 0 0 0-1.414z" stroke="rgba(26,17,8,0.20)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M15 7l2 2" stroke="rgba(26,17,8,0.20)" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
           <p
             style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
           >
-            {writeConcept.title}
+            Escritura Libre
           </p>
           <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
-            Consolida tu comprensión con escritura libre.
+            Express your thoughts. No limits, just practice.
+          </p>
+          <p className="text-[10px] leading-relaxed" style={{ color: 'var(--d5-muted)' }}>
+            Concepto sugerido: {writeConcept.title}
           </p>
           <Button
             asChild
-            variant="outline"
-            className="w-full rounded-full"
-            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
+            className="w-full rounded-full font-bold"
+            style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', border: 'none' }}
           >
-            <Link href={`/write?suggested=${writeConcept.id}`}>Escribir Ahora</Link>
+            <Link href={`/write?suggested=${writeConcept.id}`}>Empezar a Escribir</Link>
           </Button>
           <Button asChild variant="ghost" className="w-full text-xs h-8" style={{ color: 'var(--d5-muted)' }}>
             <Link href="/write">Cambiar Concepto</Link>
@@ -131,23 +141,30 @@ export async function DashboardDeferredSection({
         </div>
       )}
       {!isNewUser && !writeConcept && (
-        <div className="senda-card space-y-3">
-          <p className="senda-eyebrow">Escritura Libre</p>
+        <div className="senda-card space-y-3 relative overflow-hidden">
+          {/* Quill icon — top-right decorative mark */}
+          <svg
+            style={{ position: 'absolute', top: 14, right: 16, pointerEvents: 'none' }}
+            width={28} height={28} viewBox="0 0 24 24" fill="none"
+            aria-hidden="true"
+          >
+            <path d="M20.707 5.826l-2.534-2.533a1 1 0 0 0-1.414 0L3 17.05V21h3.95L20.707 7.24a1 1 0 0 0 0-1.414z" stroke="rgba(26,17,8,0.20)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M15 7l2 2" stroke="rgba(26,17,8,0.20)" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
           <p
             style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
           >
-            Practica tu escritura
+            Escritura Libre
           </p>
           <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
-            Elige un concepto y escribe libremente.
+            Express your thoughts. No limits, just practice.
           </p>
           <Button
             asChild
-            variant="outline"
-            className="w-full rounded-full"
-            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
+            className="w-full rounded-full font-bold"
+            style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', border: 'none' }}
           >
-            <Link href="/write">Explorar Conceptos</Link>
+            <Link href="/write">Empezar a Escribir</Link>
           </Button>
         </div>
       )}

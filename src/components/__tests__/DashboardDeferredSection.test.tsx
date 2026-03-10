@@ -88,8 +88,8 @@ describe('DashboardDeferredSection', () => {
   it('renders free write card with concept title when weakest concept exists', async () => {
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
-    expect(screen.getByText('El Subjuntivo')).toBeTruthy()
-    expect(screen.getByText(/escribir ahora/i)).toBeTruthy()
+    expect(screen.getByText(/el subjuntivo/i)).toBeTruthy()
+    expect(screen.getByText(/empezar a escribir/i)).toBeTruthy()
   })
 
   it('renders generic free write card when no weakest concept', async () => {
@@ -98,7 +98,7 @@ describe('DashboardDeferredSection', () => {
     )
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
-    expect(screen.getByText(/practica tu escritura/i)).toBeTruthy()
+    expect(screen.getByText(/express your thoughts/i)).toBeTruthy()
   })
 
   it('renders Escritura Libre card for non-new users', async () => {

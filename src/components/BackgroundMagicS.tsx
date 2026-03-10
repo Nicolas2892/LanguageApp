@@ -1,12 +1,14 @@
-// Large watermark S-path — positioned absolute, behind the Open Practice card.
+import type { CSSProperties } from 'react'
+
+// Large watermark S-path — positioned absolute, behind its parent card or page section.
 // Parent must be position: relative and overflow: hidden.
-export function BackgroundMagicS({ opacity = 0.07 }: { opacity?: number }) {
+export function BackgroundMagicS({ opacity = 0.07, style }: { opacity?: number; style?: CSSProperties }) {
   return (
     <svg
       viewBox="0 0 200 260"
       width={200}
       height={260}
-      style={{ position: 'absolute', right: -30, top: -10, opacity, pointerEvents: 'none' }}
+      style={{ position: 'absolute', right: -30, top: -10, opacity, pointerEvents: 'none', ...style }}
       aria-hidden="true"
     >
       <path
