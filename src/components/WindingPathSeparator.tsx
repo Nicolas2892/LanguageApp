@@ -16,7 +16,7 @@ export function WindingPathSeparator() {
           strokeWidth={1.2}
           strokeLinecap="round"
           fill="none"
-          opacity={0.45}
+          opacity={0.50}
         />
         {/* Echo stroke — thick, low opacity, adds depth */}
         <path
@@ -25,7 +25,7 @@ export function WindingPathSeparator() {
           strokeWidth={3}
           strokeLinecap="round"
           fill="none"
-          opacity={0.08}
+          opacity={0.10}
         />
       </svg>
     </div>

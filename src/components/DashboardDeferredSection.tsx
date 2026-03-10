@@ -157,7 +157,7 @@ export async function DashboardDeferredSection({
             {writeConcept.title}
           </p>
           <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
-            Consolida tu comprensión escribiendo libremente.
+            Consolida tu comprensión con escritura libre.
           </p>
           <Button
             asChild

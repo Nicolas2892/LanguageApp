@@ -19,7 +19,7 @@ export function AppHeader({ userInitials }: Props) {
       <div className="h-14 flex items-center justify-between px-5">
         {/* Logo */}
         <Link href="/dashboard" className="flex items-center gap-2">
-          <SvgSendaPath size={22} />
+          <SvgSendaPath size={22} strokeWidth={3.5} />
           <span
             style={{
               fontFamily: 'var(--font-dm-serif), serif',

@@ -48,12 +48,11 @@ export function BottomNav() {
                 className="rounded-full px-3 py-0.5 transition-colors"
                 style={{ background: active ? 'rgba(184,170,153,0.28)' : 'transparent' }}
               >
-                <Icon className="h-6 w-6" />
+                <Icon className="h-6 w-6" strokeWidth={1.5} />
               </span>
-              {/* 10px matches iOS 10pt label spec */}
               <span
-                className={`text-[10px] leading-none
-                  ${active ? 'font-semibold' : 'font-medium'}`}
+                className={`text-[9px] leading-none
+                  ${active ? 'font-bold' : 'font-medium'}`}
               >
                 {label}
               </span>

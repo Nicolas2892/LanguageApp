@@ -183,7 +183,7 @@ describe('DashboardDeferredSection', () => {
   it('renders Escritura Libre card for non-new users', async () => {
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
-    expect(screen.getByText(/escritura libre/i)).toBeTruthy()
+    expect(screen.getByText('Escritura Libre')).toBeTruthy()
   })
 
   it('renders ReviewMistakes card when mistakeConceptCount > 0', async () => {
@@ -210,7 +210,7 @@ describe('DashboardDeferredSection', () => {
   it('hides all deferred cards for new users', async () => {
     const el = await DashboardDeferredSection({ ...defaultProps, isNewUser: true })
     render(el)
-    expect(screen.queryByText(/escritura libre/i)).toBeNull()
+    expect(screen.queryByText('Escritura Libre')).toBeNull()
     expect(screen.queryByText(/para revisar/i)).toBeNull()
   })
 })
