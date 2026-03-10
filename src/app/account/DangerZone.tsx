@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { LogOut, Trash2, AlertTriangle } from 'lucide-react'
+import { LogOut, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export function DangerZone() {
@@ -36,26 +36,20 @@ export function DangerZone() {
   return (
     <div className="space-y-4">
       {/* Sign Out — neutral section */}
-      <h2 className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        <LogOut className="h-3.5 w-3.5" />
-        Session
-      </h2>
+      <span className="senda-eyebrow">Sesión</span>
       <Button
         variant="outline"
         className="w-full rounded-full"
         onClick={handleSignOut}
       >
         <LogOut className="h-4 w-4 mr-2" />
-        Sign out
+        Cerrar sesión
       </Button>
 
-      <hr className="border-border" />
+      <div className="mt-6 mb-2" />
 
       {/* Delete Account — danger only */}
-      <h2 className="flex items-center gap-1.5 text-xs font-semibold text-red-600 uppercase tracking-wide">
-        <AlertTriangle className="h-3.5 w-3.5" />
-        Danger zone
-      </h2>
+      <span className="senda-eyebrow text-red-600">Zona de peligro</span>
 
       {!confirming ? (
         <Button
@@ -64,12 +58,12 @@ export function DangerZone() {
           onClick={() => setConfirming(true)}
         >
           <Trash2 className="h-4 w-4 mr-2" />
-          Delete account
+          Eliminar cuenta
         </Button>
       ) : (
         <div className="space-y-3 border border-red-200 rounded-xl p-4">
           <p className="text-sm text-red-700">
-            This will permanently delete your account and all progress. This cannot be undone.
+            Esto eliminará permanentemente tu cuenta y todo tu progreso. Esta acción no se puede deshacer.
           </p>
           <div className="flex gap-2">
             <Button
@@ -77,14 +71,14 @@ export function DangerZone() {
               className="flex-1 rounded-full"
               onClick={() => setConfirming(false)}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               className="flex-1 rounded-full bg-red-600 hover:bg-red-700 text-white"
               disabled={deleting}
               onClick={handleDeleteConfirm}
             >
-              {deleting ? 'Deleting…' : 'Yes, delete my account'}
+              {deleting ? 'Eliminando…' : 'Sí, eliminar mi cuenta'}
             </Button>
           </div>
           {deleteError && (

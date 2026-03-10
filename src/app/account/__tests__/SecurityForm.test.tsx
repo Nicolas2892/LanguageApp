@@ -20,25 +20,25 @@ describe('SecurityForm', () => {
     vi.clearAllMocks()
   })
 
-  it('renders "Change email" and "Change password" headings', () => {
+  it('renders "Cambiar correo" and "Cambiar contraseña" headings', () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    expect(screen.getByText('Change email')).toBeTruthy()
-    expect(screen.getByText('Change password')).toBeTruthy()
+    expect(screen.getByText('Cambiar correo')).toBeTruthy()
+    expect(screen.getByText('Cambiar contraseña')).toBeTruthy()
   })
 
   it('email submit calls updateUser with entered value', async () => {
     mockUpdateUser.mockResolvedValueOnce({ error: null })
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('New email address'), 'new@example.com')
-    await userEvent.click(screen.getByRole('button', { name: 'Update email' }))
+    await userEvent.type(screen.getByLabelText('Nuevo correo'), 'new@example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar correo' }))
     expect(mockUpdateUser).toHaveBeenCalledWith({ email: 'new@example.com' })
   })
 
   it('email success shows confirmation message', async () => {
     mockUpdateUser.mockResolvedValueOnce({ error: null })
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('New email address'), 'new@example.com')
-    await userEvent.click(screen.getByRole('button', { name: 'Update email' }))
+    await userEvent.type(screen.getByLabelText('Nuevo correo'), 'new@example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar correo' }))
     await waitFor(() => {
       expect(screen.getByText(/Confirmation email sent/)).toBeTruthy()
     })
@@ -47,8 +47,8 @@ describe('SecurityForm', () => {
   it('email error shows error message', async () => {
     mockUpdateUser.mockResolvedValueOnce({ error: new Error('Email already in use') })
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('New email address'), 'taken@example.com')
-    await userEvent.click(screen.getByRole('button', { name: 'Update email' }))
+    await userEvent.type(screen.getByLabelText('Nuevo correo'), 'taken@example.com')
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar correo' }))
     await waitFor(() => {
       expect(screen.getByText('Email already in use')).toBeTruthy()
     })
@@ -56,33 +56,33 @@ describe('SecurityForm', () => {
 
   it('OAuth user sees notice and no password form', () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={true} />)
-    expect(screen.getByText(/Password changes are not available for Google sign-in/)).toBeTruthy()
-    expect(screen.queryByLabelText('Current password')).toBeNull()
+    expect(screen.getByText(/Los cambios de contraseña no están disponibles/)).toBeTruthy()
+    expect(screen.queryByLabelText('Contraseña actual')).toBeNull()
   })
 
   it('non-OAuth user renders three password fields', () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    expect(screen.getByLabelText('Current password')).toBeTruthy()
-    expect(screen.getByLabelText('New password')).toBeTruthy()
-    expect(screen.getByLabelText('Confirm new password')).toBeTruthy()
+    expect(screen.getByLabelText('Contraseña actual')).toBeTruthy()
+    expect(screen.getByLabelText('Nueva contraseña')).toBeTruthy()
+    expect(screen.getByLabelText('Confirmar contraseña')).toBeTruthy()
   })
 
   it('client validation: new password < 6 chars shows error, no API call', async () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('Current password'), 'oldpassword')
-    await userEvent.type(screen.getByLabelText('New password'), 'abc')
-    await userEvent.type(screen.getByLabelText('Confirm new password'), 'abc')
-    await userEvent.click(screen.getByRole('button', { name: 'Update password' }))
+    await userEvent.type(screen.getByLabelText('Contraseña actual'), 'oldpassword')
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'abc')
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'abc')
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar contraseña' }))
     expect(screen.getByText('New password must be at least 6 characters.')).toBeTruthy()
     expect(mockSignInWithPassword).not.toHaveBeenCalled()
   })
 
   it('client validation: passwords don\'t match shows error, no API call', async () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('Current password'), 'oldpassword')
-    await userEvent.type(screen.getByLabelText('New password'), 'newpassword123')
-    await userEvent.type(screen.getByLabelText('Confirm new password'), 'differentpassword')
-    await userEvent.click(screen.getByRole('button', { name: 'Update password' }))
+    await userEvent.type(screen.getByLabelText('Contraseña actual'), 'oldpassword')
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'newpassword123')
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'differentpassword')
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar contraseña' }))
     expect(screen.getByText('Passwords do not match.')).toBeTruthy()
     expect(mockSignInWithPassword).not.toHaveBeenCalled()
   })
@@ -91,10 +91,10 @@ describe('SecurityForm', () => {
     mockSignInWithPassword.mockResolvedValueOnce({ error: null })
     mockUpdateUser.mockResolvedValueOnce({ error: null })
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('Current password'), 'oldpassword')
-    await userEvent.type(screen.getByLabelText('New password'), 'newpassword123')
-    await userEvent.type(screen.getByLabelText('Confirm new password'), 'newpassword123')
-    await userEvent.click(screen.getByRole('button', { name: 'Update password' }))
+    await userEvent.type(screen.getByLabelText('Contraseña actual'), 'oldpassword')
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'newpassword123')
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'newpassword123')
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar contraseña' }))
     expect(mockSignInWithPassword).toHaveBeenCalledWith({
       email: 'user@example.com',
       password: 'oldpassword',
@@ -107,10 +107,10 @@ describe('SecurityForm', () => {
   it('wrong current password shows error, no updateUser called', async () => {
     mockSignInWithPassword.mockResolvedValueOnce({ error: new Error('Invalid login credentials') })
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('Current password'), 'wrongpassword')
-    await userEvent.type(screen.getByLabelText('New password'), 'newpassword123')
-    await userEvent.type(screen.getByLabelText('Confirm new password'), 'newpassword123')
-    await userEvent.click(screen.getByRole('button', { name: 'Update password' }))
+    await userEvent.type(screen.getByLabelText('Contraseña actual'), 'wrongpassword')
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'newpassword123')
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'newpassword123')
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar contraseña' }))
     await waitFor(() => {
       expect(screen.getByText('Current password is incorrect.')).toBeTruthy()
     })
@@ -121,8 +121,8 @@ describe('SecurityForm', () => {
 
   it('invalid email format shows error and does not call updateUser', async () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('New email address'), 'notanemail')
-    await userEvent.click(screen.getByRole('button', { name: 'Update email' }))
+    await userEvent.type(screen.getByLabelText('Nuevo correo'), 'notanemail')
+    await userEvent.click(screen.getByRole('button', { name: 'Actualizar correo' }))
     expect(screen.getByText('Please enter a valid email address.')).toBeTruthy()
     expect(mockUpdateUser).not.toHaveBeenCalled()
   })
@@ -131,19 +131,18 @@ describe('SecurityForm', () => {
 
   it('show/hide toggle on current password changes input type', async () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    const input = screen.getByLabelText('Current password') as HTMLInputElement
+    const input = screen.getByLabelText('Contraseña actual') as HTMLInputElement
     expect(input.type).toBe('password')
-    // find the toggle button closest to current_password
-    const toggleBtns = screen.getAllByRole('button', { name: 'Show password' })
+    const toggleBtns = screen.getAllByRole('button', { name: 'Mostrar contraseña' })
     await userEvent.click(toggleBtns[0])
     expect(input.type).toBe('text')
   })
 
   it('show/hide toggle on new password changes input type', async () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    const input = screen.getByLabelText('New password') as HTMLInputElement
+    const input = screen.getByLabelText('Nueva contraseña') as HTMLInputElement
     expect(input.type).toBe('password')
-    const toggleBtns = screen.getAllByRole('button', { name: 'Show password' })
+    const toggleBtns = screen.getAllByRole('button', { name: 'Mostrar contraseña' })
     await userEvent.click(toggleBtns[1])
     expect(input.type).toBe('text')
   })
@@ -152,26 +151,26 @@ describe('SecurityForm', () => {
 
   it('password strength hidden when new password field is empty', () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    expect(screen.queryByText('Too short')).toBeNull()
-    expect(screen.queryByText('OK')).toBeNull()
-    expect(screen.queryByText('Strong')).toBeNull()
+    expect(screen.queryByText('Muy corta')).toBeNull()
+    expect(screen.queryByText('Aceptable')).toBeNull()
+    expect(screen.queryByText('Segura')).toBeNull()
   })
 
-  it('password strength shows "Too short" for fewer than 6 chars', async () => {
+  it('password strength shows "Muy corta" for fewer than 6 chars', async () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('New password'), 'abc')
-    expect(screen.getByText('Too short')).toBeTruthy()
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'abc')
+    expect(screen.getByText('Muy corta')).toBeTruthy()
   })
 
-  it('password strength shows "OK" for 6–11 chars', async () => {
+  it('password strength shows "Aceptable" for 6–11 chars', async () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('New password'), 'abcdef')
-    expect(screen.getByText('OK')).toBeTruthy()
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'abcdef')
+    expect(screen.getByText('Aceptable')).toBeTruthy()
   })
 
-  it('password strength shows "Strong" for 12+ chars', async () => {
+  it('password strength shows "Segura" for 12+ chars', async () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
-    await userEvent.type(screen.getByLabelText('New password'), 'abcdefghijkl')
-    expect(screen.getByText('Strong')).toBeTruthy()
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'abcdefghijkl')
+    expect(screen.getByText('Segura')).toBeTruthy()
   })
 })

@@ -2,8 +2,6 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getInitials } from '@/lib/utils'
-import { UserAvatar } from '@/components/UserAvatar'
-import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { Button } from '@/components/ui/button'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { AccountForm } from './AccountForm'
@@ -18,28 +16,10 @@ export default async function AccountPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [profileRes, masteryRes] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase
-      .from('concepts')
-      .select('level, user_progress!inner(production_mastered, interval_days)')
-      .eq('user_progress.user_id', user.id),
-  ])
+  const profileRes = await supabase.from('profiles').select('*').eq('id', user.id).single()
 
   if (!profileRes.data) redirect('/dashboard')
   const profile = profileRes.data as Profile
-
-  // Build mastery breakdown by CEFR level
-  type MasteryRow = { level: string; user_progress: { production_mastered: boolean; interval_days: number }[] }
-  const totalByLevel: Record<string, number> = {}
-  const masteredByLevel: Record<string, number> = {}
-  for (const row of ((masteryRes.data ?? []) as MasteryRow[])) {
-    totalByLevel[row.level] = (totalByLevel[row.level] ?? 0) + 1
-    const progress = row.user_progress[0]
-    if (progress?.interval_days >= MASTERY_THRESHOLD && progress?.production_mastered) {
-      masteredByLevel[row.level] = (masteredByLevel[row.level] ?? 0) + 1
-    }
-  }
 
   const isOAuthUser = user.app_metadata?.provider === 'google'
   const initials = getInitials(profile.display_name, user.email!)
@@ -63,14 +43,29 @@ export default async function AccountPage() {
         </h1>
         {/* Inline avatar row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <UserAvatar initials={initials} size="lg" />
+          <div style={{
+            width: 44,
+            height: 44,
+            borderRadius: '50%',
+            background: 'rgba(26,17,8,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            fontSize: 15,
+            fontWeight: 700,
+            color: 'rgba(26,17,8,0.40)',
+            letterSpacing: '0.02em',
+          }}>
+            {initials}
+          </div>
           <div>
             {profile.display_name && (
               <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--d5-ink)', lineHeight: 1.3 }}>
                 {profile.display_name}
               </p>
             )}
-            <p style={{ fontSize: 13, color: 'var(--d5-warm)' }}>{user.email}</p>
+            <p style={{ fontSize: 13, color: 'var(--d5-muted)' }}>{user.email}</p>
           </div>
         </div>
       </div>
@@ -78,28 +73,28 @@ export default async function AccountPage() {
       <WindingPathSeparator />
 
       {/* Perfil */}
-      <div className="senda-card">
-        <AccountForm profile={profile} mastery={{ masteredByLevel, totalByLevel }} />
+      <div>
+        <AccountForm profile={profile} />
       </div>
 
       <WindingPathSeparator />
 
       {/* Seguridad */}
-      <div className="senda-card">
+      <div>
         <SecurityForm userEmail={user.email!} isOAuthUser={isOAuthUser} />
       </div>
 
       <WindingPathSeparator />
 
       {/* Notificaciones */}
-      <div className="senda-card">
+      <div>
         <NotificationSettings />
       </div>
 
       <WindingPathSeparator />
 
       {/* Eliminar cuenta */}
-      <div className="senda-card">
+      <div>
         <DangerZone />
       </div>
 

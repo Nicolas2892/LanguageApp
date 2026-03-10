@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ShieldCheck, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface Props {
@@ -91,53 +91,50 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
 
   return (
     <div className="space-y-6">
-      <h2 className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-        <ShieldCheck className="h-3.5 w-3.5" />
-        Security
-      </h2>
+      <span className="senda-eyebrow">Seguridad</span>
 
       {/* Change Email */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium">Change email</h3>
-        <p className="text-xs text-muted-foreground -mt-2">Current: {userEmail}</p>
+        <h3 className="text-sm font-medium">Cambiar correo</h3>
+        <p className="text-xs text-muted-foreground -mt-2">Actual: {userEmail}</p>
         <div className="space-y-1.5">
-          <Label htmlFor="new_email">New email address</Label>
+          <Label htmlFor="new_email">Nuevo correo</Label>
           <Input
             id="new_email"
             type="email"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
-            placeholder="you@example.com"
+            placeholder="tu@ejemplo.com"
           />
         </div>
         {emailError && (
           <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{emailError}</p>
         )}
         {emailMessage && (
-          <p className="text-sm text-green-700 border border-green-200 rounded-lg p-3">{emailMessage}</p>
+          <p className="text-sm border rounded-lg p-3" style={{ color: 'var(--d5-terracotta)', borderColor: 'rgba(196,82,46,0.30)' }}>{emailMessage}</p>
         )}
         <Button
           onClick={handleEmailChange}
           disabled={emailSaving || !newEmail}
           className="w-full rounded-full active:scale-95 transition-transform"
         >
-          {emailSaving ? 'Sending…' : 'Update email'}
+          {emailSaving ? 'Enviando…' : 'Actualizar correo'}
         </Button>
       </div>
 
-      <hr className="border-border" />
+      <div className="border-t border-border" />
 
       {/* Change Password */}
       <div className="space-y-4">
-        <h3 className="text-sm font-medium">Change password</h3>
+        <h3 className="text-sm font-medium">Cambiar contraseña</h3>
         {isOAuthUser ? (
           <p className="text-sm text-muted-foreground">
-            Password changes are not available for Google sign-in accounts.
+            Los cambios de contraseña no están disponibles para cuentas de Google.
           </p>
         ) : (
           <>
             <div className="space-y-1.5">
-              <Label htmlFor="current_password">Current password</Label>
+              <Label htmlFor="current_password">Contraseña actual</Label>
               <div className="relative">
                 <Input
                   id="current_password"
@@ -151,14 +148,14 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   tabIndex={-1}
                   onClick={() => setShowCurrentPwd(!showCurrentPwd)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={showCurrentPwd ? 'Hide password' : 'Show password'}
+                  aria-label={showCurrentPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showCurrentPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="new_password">New password</Label>
+              <Label htmlFor="new_password">Nueva contraseña</Label>
               <div className="relative">
                 <Input
                   id="new_password"
@@ -172,7 +169,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   tabIndex={-1}
                   onClick={() => setShowNewPwd(!showNewPwd)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={showNewPwd ? 'Hide password' : 'Show password'}
+                  aria-label={showNewPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showNewPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -183,12 +180,12 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   newPwd.length < 12 ? 'text-amber-500' :
                   'text-green-600'
                 }`}>
-                  {newPwd.length < 6 ? 'Too short' : newPwd.length < 12 ? 'OK' : 'Strong'}
+                  {newPwd.length < 6 ? 'Muy corta' : newPwd.length < 12 ? 'Aceptable' : 'Segura'}
                 </p>
               )}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="confirm_password">Confirm new password</Label>
+              <Label htmlFor="confirm_password">Confirmar contraseña</Label>
               <div className="relative">
                 <Input
                   id="confirm_password"
@@ -202,7 +199,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   tabIndex={-1}
                   onClick={() => setShowConfirmPwd(!showConfirmPwd)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label={showConfirmPwd ? 'Hide password' : 'Show password'}
+                  aria-label={showConfirmPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showConfirmPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -212,14 +209,14 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
               <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{pwdError}</p>
             )}
             {pwdMessage && (
-              <p className="text-sm text-green-700 border border-green-200 rounded-lg p-3">{pwdMessage}</p>
+              <p className="text-sm border rounded-lg p-3" style={{ color: 'var(--d5-terracotta)', borderColor: 'rgba(196,82,46,0.30)' }}>{pwdMessage}</p>
             )}
             <Button
               onClick={handlePasswordChange}
               disabled={pwdSaving}
               className="w-full rounded-full active:scale-95 transition-transform"
             >
-              {pwdSaving ? 'Updating…' : 'Update password'}
+              {pwdSaving ? 'Actualizando…' : 'Actualizar contraseña'}
             </Button>
           </>
         )}
