@@ -5,13 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Volume2, VolumeX, CheckCircle2 } from 'lucide-react'
 import { useSpeech } from '@/lib/hooks/useSpeech'
 import { useTheme } from '@/components/ThemeProvider'
+import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import type { Profile } from '@/lib/supabase/types'
-
-const LEVEL_LABELS: Record<string, string> = {
-  B1: 'Intermediate',
-  B2: 'Advanced',
-  C1: 'Proficient',
-}
 
 type ThemeValue = 'light' | 'dark' | 'system'
 
@@ -20,6 +15,36 @@ const THEME_OPTIONS: { value: ThemeValue; label: string }[] = [
   { value: 'light', label: 'Claro' },
   { value: 'dark', label: 'Oscuro' },
 ]
+
+const eyebrowStyle: React.CSSProperties = {
+  fontSize: 9,
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: 'var(--d5-muted)',
+  display: 'block',
+  marginBottom: 14,
+}
+
+const fieldLabelStyle: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 600,
+  color: 'var(--d5-warm)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+}
+
+const bareInputStyle: React.CSSProperties = {
+  background: 'transparent',
+  border: 'none',
+  borderBottom: '1px solid rgba(184,170,153,0.4)',
+  borderRadius: 0,
+  fontSize: 13,
+  color: 'var(--d5-ink)',
+  padding: '4px 0',
+  outline: 'none',
+  width: '100%',
+}
 
 interface Props {
   profile: Profile
@@ -84,107 +109,47 @@ export function AccountForm({ profile }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      <span className="senda-eyebrow">Perfil</span>
+    <div>
+      {/* ── Section 1: Perfil ── */}
+      <div style={{ padding: '4px 0 16px' }}>
+        <span style={eyebrowStyle}>Perfil</span>
 
-      {/* Display name */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <label
-          htmlFor="display_name"
-          style={{ fontSize: 10, fontWeight: 600, color: 'var(--d5-warm)', textTransform: 'uppercase', letterSpacing: '0.06em' }}
-        >
-          Nombre
-        </label>
-        <input
-          id="display_name"
-          value={displayName}
-          onChange={(e) => { setDisplayName(e.target.value); setSaved(false) }}
-          maxLength={50}
-          placeholder="Tu nombre"
-          style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: '1px solid rgba(184,170,153,0.4)',
-            borderRadius: 0,
-            fontSize: 13,
-            color: 'var(--d5-ink)',
-            padding: '4px 0',
-            outline: 'none',
-            width: '100%',
-          }}
-        />
-        {displayName.length >= 35 && (
-          <p className="text-xs text-muted-foreground text-right">{displayName.length}/50</p>
-        )}
-      </div>
-
-      {/* Computed level — read-only */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--d5-warm)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          Nivel actual
-        </span>
-        <span style={{
-          background: 'rgba(251,191,36,0.15)',
-          color: '#78350f',
-          borderRadius: 9999,
-          padding: '2px 10px',
-          fontSize: 12,
-          fontWeight: 700,
-        }}>
-          {computedLevel} · {LEVEL_LABELS[computedLevel] ?? computedLevel}
-        </span>
-      </div>
-
-      {/* Daily goal */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        <label
-          htmlFor="daily_goal"
-          style={{ fontSize: 10, fontWeight: 600, color: 'var(--d5-warm)', textTransform: 'uppercase', letterSpacing: '0.06em' }}
-        >
-          Meta diaria (minutos)
-        </label>
-        <input
-          id="daily_goal"
-          type="number"
-          min={5}
-          max={120}
-          value={goalMinutes}
-          onChange={(e) => { setGoalMinutes(e.target.value); setSaved(false) }}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            borderBottom: '1px solid rgba(184,170,153,0.4)',
-            borderRadius: 0,
-            fontSize: 13,
-            color: 'var(--d5-ink)',
-            padding: '4px 0',
-            outline: 'none',
-            width: '100%',
-          }}
-        />
-        <p className="text-xs text-muted-foreground">Entre 5 y 120 minutos.</p>
-      </div>
-
-      {/* Feedback */}
-      {error && (
-        <p className="text-sm text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg p-3">{error}</p>
-      )}
-      {saved && (
-        <div className="flex items-center gap-2 text-sm border rounded-lg p-3" style={{ color: 'var(--d5-terracotta)', borderColor: 'rgba(196,82,46,0.30)' }}>
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
-          <span>Cambios guardados.</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 18 }}>
+          <label htmlFor="display_name" style={fieldLabelStyle}>Nombre</label>
+          <input
+            id="display_name"
+            value={displayName}
+            onChange={(e) => { setDisplayName(e.target.value); setSaved(false) }}
+            maxLength={50}
+            placeholder="Tu nombre"
+            style={bareInputStyle}
+          />
+          {displayName.length >= 35 && (
+            <p style={{ fontSize: 11, color: 'var(--d5-muted)', textAlign: 'right' }}>{displayName.length}/50</p>
+          )}
         </div>
-      )}
 
-      <Button onClick={() => handleSave()} disabled={saving} className="w-full rounded-full active:scale-95 transition-transform">
-        {saving ? 'Guardando…' : 'Guardar cambios'}
-      </Button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label htmlFor="daily_goal" style={fieldLabelStyle}>Meta diaria</label>
+          <input
+            id="daily_goal"
+            type="number"
+            min={5}
+            max={120}
+            value={goalMinutes}
+            onChange={(e) => { setGoalMinutes(e.target.value); setSaved(false) }}
+            style={bareInputStyle}
+          />
+        </div>
+      </div>
 
-      <span className="senda-eyebrow block pt-2">Apariencia</span>
+      <WindingPathSeparator />
 
-      {/* Theme toggle */}
-      <div className="space-y-2">
-        <div className="flex gap-2">
+      {/* ── Section 2: Apariencia ── */}
+      <div style={{ padding: '4px 0 16px' }}>
+        <span style={eyebrowStyle}>Apariencia</span>
+
+        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
           {THEME_OPTIONS.map(({ value, label }) => (
             <button
               key={value}
@@ -192,48 +157,81 @@ export function AccountForm({ profile }: Props) {
               onClick={() => handleThemeChange(value)}
               aria-pressed={theme === value}
               style={{
-                flex: 1,
+                padding: '6px 14px',
                 borderRadius: 9999,
-                padding: '6px 0',
-                fontSize: 12,
+                fontSize: 10,
                 fontWeight: theme === value ? 700 : 400,
                 border: 'none',
                 cursor: 'pointer',
                 transition: 'background 150ms, color 150ms',
                 background: theme === value ? 'rgba(26,17,8,0.08)' : 'rgba(26,17,8,0.03)',
-                color: theme === value ? 'var(--d5-ink)' : 'rgba(26,17,8,0.40)',
+                color: theme === value ? 'var(--d5-ink)' : 'rgba(26,17,8,0.45)',
               }}
             >
               {label}
             </button>
           ))}
         </div>
+
+        <button
+          type="button"
+          onClick={toggleAudio}
+          className={`w-full rounded-xl border p-3 flex items-center gap-3 text-left transition-colors ${
+            audioEnabled === false
+              ? 'border-gray-200 hover:border-gray-300'
+              : 'border-primary bg-primary/5'
+          }`}
+        >
+          {audioEnabled === false ? (
+            <VolumeX className="h-4 w-4 shrink-0 text-muted-foreground" />
+          ) : (
+            <Volume2 className="h-4 w-4 shrink-0 text-primary" />
+          )}
+          <div>
+            <p className={`text-sm font-medium ${audioEnabled === false ? '' : 'text-primary'}`}>
+              {audioEnabled === false ? 'Audio desactivado' : 'Audio activado'}
+            </p>
+            <p className="text-xs font-normal text-muted-foreground mt-0.5">
+              Reproducir frases en español en los ejercicios y el currículo
+            </p>
+          </div>
+        </button>
       </div>
 
-      {/* Audio playback toggle */}
-      <button
-        type="button"
-        onClick={toggleAudio}
-        className={`w-full rounded-xl border p-3 flex items-center gap-3 text-left transition-colors ${
-          audioEnabled === false
-            ? 'border-gray-200 hover:border-gray-300'
-            : 'border-primary bg-primary/5'
-        }`}
-      >
-        {audioEnabled === false ? (
-          <VolumeX className="h-4 w-4 shrink-0 text-muted-foreground" />
-        ) : (
-          <Volume2 className="h-4 w-4 shrink-0 text-primary" />
+      <WindingPathSeparator />
+
+      {/* ── Section 3: Nivel actual ── */}
+      <div style={{ padding: '4px 0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: 10, color: 'var(--d5-warm)' }}>Nivel actual</span>
+        <span style={{
+          fontSize: 10,
+          fontWeight: 700,
+          padding: '2px 10px',
+          borderRadius: 9999,
+          background: 'rgba(245,158,11,0.12)',
+          color: '#92400e',
+        }}>
+          {computedLevel}
+        </span>
+      </div>
+
+      <WindingPathSeparator />
+
+      {/* ── Section 4: Guardar ── */}
+      <div style={{ padding: '4px 0 0' }}>
+        {error && (
+          <p className="text-sm text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">{error}</p>
         )}
-        <div>
-          <p className={`text-sm font-medium ${audioEnabled === false ? '' : 'text-primary'}`}>
-            {audioEnabled === false ? 'Audio desactivado' : 'Audio activado'}
-          </p>
-          <p className="text-xs font-normal text-muted-foreground mt-0.5">
-            Reproducir frases en español en los ejercicios y el currículo
-          </p>
-        </div>
-      </button>
+        {saved && (
+          <div className="flex items-center gap-2 text-sm border rounded-lg p-3 mb-4" style={{ color: 'var(--d5-terracotta)', borderColor: 'rgba(196,82,46,0.30)' }}>
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span>Cambios guardados.</span>
+          </div>
+        )}
+        <Button onClick={() => handleSave()} disabled={saving} className="w-full rounded-full active:scale-95 transition-transform">
+          {saving ? 'Guardando…' : 'Guardar cambios'}
+        </Button>
+      </div>
     </div>
   )
 }

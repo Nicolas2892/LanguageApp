@@ -61,11 +61,11 @@ export default async function AccountPage() {
           </div>
           <div>
             {profile.display_name && (
-              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--d5-ink)', lineHeight: 1.3 }}>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--d5-ink)', lineHeight: 1.3 }}>
                 {profile.display_name}
               </p>
             )}
-            <p style={{ fontSize: 13, color: 'var(--d5-muted)' }}>{user.email}</p>
+            <p style={{ fontSize: 11, color: 'var(--d5-muted)', marginTop: 2 }}>{user.email}</p>
           </div>
         </div>
       </div>

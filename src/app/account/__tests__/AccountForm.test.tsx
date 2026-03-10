@@ -55,7 +55,7 @@ describe('AccountForm', () => {
 
   it('pre-fills daily goal from profile', () => {
     renderWithTheme(<AccountForm profile={baseProfile} />)
-    expect((screen.getByLabelText('Meta diaria (minutos)') as HTMLInputElement).value).toBe('15')
+    expect((screen.getByLabelText('Meta diaria') as HTMLInputElement).value).toBe('15')
   })
 
   it('shows "Guardar cambios" as initial button text', () => {
@@ -67,20 +67,19 @@ describe('AccountForm', () => {
 
   it('displays the computed level chip', () => {
     renderWithTheme(<AccountForm profile={baseProfile} />)
-    expect(screen.getByText(/B1/)).toBeTruthy()
-    expect(screen.getByText(/Intermediate/)).toBeTruthy()
+    expect(screen.getByText('B1')).toBeTruthy()
   })
 
-  it('shows B2 label when computed_level is B2', () => {
+  it('shows B2 chip when computed_level is B2', () => {
     const profile = { ...baseProfile, computed_level: 'B2' }
     renderWithTheme(<AccountForm profile={profile} />)
-    expect(screen.getByText(/Advanced/)).toBeTruthy()
+    expect(screen.getByText('B2')).toBeTruthy()
   })
 
-  it('shows C1 label when computed_level is C1', () => {
+  it('shows C1 chip when computed_level is C1', () => {
     const profile = { ...baseProfile, computed_level: 'C1' }
     renderWithTheme(<AccountForm profile={profile} />)
-    expect(screen.getByText(/Proficient/)).toBeTruthy()
+    expect(screen.getByText('C1')).toBeTruthy()
   })
 
   it('does not render level picker buttons', () => {
@@ -94,8 +93,8 @@ describe('AccountForm', () => {
 
   it('shows error when daily goal is below 5', async () => {
     renderWithTheme(<AccountForm profile={baseProfile} />)
-    await userEvent.clear(screen.getByLabelText('Meta diaria (minutos)'))
-    await userEvent.type(screen.getByLabelText('Meta diaria (minutos)'), '4')
+    await userEvent.clear(screen.getByLabelText('Meta diaria'))
+    await userEvent.type(screen.getByLabelText('Meta diaria'), '4')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     expect(screen.getByText('Daily goal must be between 5 and 120 minutes.')).toBeTruthy()
     expect(global.fetch).not.toHaveBeenCalled()
@@ -103,8 +102,8 @@ describe('AccountForm', () => {
 
   it('shows error when daily goal exceeds 120', async () => {
     renderWithTheme(<AccountForm profile={baseProfile} />)
-    await userEvent.clear(screen.getByLabelText('Meta diaria (minutos)'))
-    await userEvent.type(screen.getByLabelText('Meta diaria (minutos)'), '121')
+    await userEvent.clear(screen.getByLabelText('Meta diaria'))
+    await userEvent.type(screen.getByLabelText('Meta diaria'), '121')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     expect(screen.getByText('Daily goal must be between 5 and 120 minutes.')).toBeTruthy()
     expect(global.fetch).not.toHaveBeenCalled()
@@ -112,8 +111,8 @@ describe('AccountForm', () => {
 
   it('shows error when daily goal is not a number', async () => {
     renderWithTheme(<AccountForm profile={baseProfile} />)
-    await userEvent.clear(screen.getByLabelText('Meta diaria (minutos)'))
-    await userEvent.type(screen.getByLabelText('Meta diaria (minutos)'), 'abc')
+    await userEvent.clear(screen.getByLabelText('Meta diaria'))
+    await userEvent.type(screen.getByLabelText('Meta diaria'), 'abc')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     expect(screen.getByText('Daily goal must be between 5 and 120 minutes.')).toBeTruthy()
     expect(global.fetch).not.toHaveBeenCalled()
