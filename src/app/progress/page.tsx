@@ -7,7 +7,8 @@ import { AnimatedBar } from '@/components/AnimatedBar'
 import { ExerciseTypeChart } from '@/components/ExerciseTypeChart'
 import { VerbTenseMastery } from '@/components/verbs/VerbTenseMastery'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
-import { Flame, CheckCircle, Zap, Target, BarChart2, ListChecks, Clock } from 'lucide-react'
+import { Flame, CheckCircle, Zap, Target, ListChecks, Clock } from 'lucide-react'
+import { EmptyState } from '@/components/EmptyState'
 import type { ExerciseAccuracy } from './AccuracyChart'
 import type { DayActivity } from './ActivityHeatmap'
 import type { ExerciseTypeCount } from '@/components/ExerciseTypeChart'
@@ -266,19 +267,12 @@ export default async function ProgressPage() {
       </div>
 
       {!hasAnyData ? (
-        <div className="text-center py-16 space-y-4">
-          <BarChart2 className="h-14 w-14 text-green-300 mx-auto" strokeWidth={1.5} />
-          <p className="text-xl font-bold">No data yet</p>
-          <p className="text-muted-foreground text-sm">
-            Complete some exercises to see your progress here.
-          </p>
-          <Link
-            href="/study"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors mt-2"
-          >
-            Start studying →
-          </Link>
-        </div>
+        <EmptyState
+          heading="Your path is clear."
+          subtext="Complete your first practice session and your progress will start taking shape here."
+          ctaLabel="Start your first session"
+          ctaHref="/study/configure"
+        />
       ) : (
         <>
           {/* Stats row — 2×2 mobile / 4-col desktop */}

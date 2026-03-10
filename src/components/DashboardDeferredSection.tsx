@@ -226,9 +226,9 @@ export async function DashboardDeferredSection({
 export function DashboardDeferredSkeleton() {
   return (
     <>
-      <div className="animate-pulse rounded-xl bg-muted h-24" />
-      <div className="animate-pulse rounded-xl bg-muted h-36" />
-      <div className="animate-pulse rounded-xl bg-muted h-36" />
+      <div className="animate-senda-pulse senda-skeleton-fill rounded-xl h-24" />
+      <div className="animate-senda-pulse senda-skeleton-fill rounded-xl h-36" />
+      <div className="animate-senda-pulse senda-skeleton-fill rounded-xl h-36" />
     </>
   )
 }

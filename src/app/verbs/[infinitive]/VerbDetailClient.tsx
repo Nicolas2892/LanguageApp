@@ -179,7 +179,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
                           <td className="px-5 py-2.5 text-muted-foreground w-28 font-medium">
                             {PRONOUN_LABELS[pronoun] ?? pronoun}
                           </td>
-                          <td className="px-5 py-2.5 font-medium">
+                          <td className="px-5 py-2.5 font-medium break-words">
                             {row && row.form !== ''
                               ? colourEndings
                                 ? <ColouredForm form={row.form} stem={row.stem} />

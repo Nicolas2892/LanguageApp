@@ -9,6 +9,7 @@ import { computeUnlockedLevels, computeUnlockProgress } from '@/lib/curriculum/p
 import type { CefrLevel } from '@/lib/curriculum/prerequisites'
 import { Trophy, ChevronRight, Lock } from 'lucide-react'
 import { HardFlagButton } from '@/components/HardFlagButton'
+import { EmptyState } from '@/components/EmptyState'
 
 type MasteryState = 'mastered' | 'learning' | 'new'
 type FilterTab = 'all' | 'new' | 'learning' | 'mastered'
@@ -179,12 +180,18 @@ export default async function CurriculumPage({ searchParams }: Props) {
 
       {/* Global empty state */}
       {!anyMatch && (filter !== 'all' || levelFilter !== 'all') && (
-        <div className="text-center py-12 text-muted-foreground">
-          {filter !== 'all'
-            ? <p className="text-base">{EMPTY_STATE[filter as Exclude<FilterTab, 'all'>]}</p>
-            : <p className="text-base">No {levelFilter} concepts match the current filters.</p>
+        <EmptyState
+          heading="Nothing here yet."
+          subtext={
+            filter === 'mastered'
+              ? "Master your first concept and it will appear here."
+              : filter === 'learning'
+              ? "Start a session to move concepts into progress."
+              : `No ${levelFilter} concepts match the current filters.`
           }
-        </div>
+          ctaLabel="See all concepts"
+          ctaHref="/curriculum"
+        />
       )}
 
       {/* Module accordions */}
@@ -286,13 +293,13 @@ export default async function CurriculumPage({ searchParams }: Props) {
                                   className="absolute inset-0 rounded-lg"
                                   aria-label={`View ${concept.title}`}
                                 />
-                                <div className={`flex items-center justify-between px-3 py-2.5 gap-2 ${locked ? 'opacity-40' : ''}`}>
-                                  {/* Left: title + lock icon */}
-                                  <div className="min-w-0 flex-1 flex items-center gap-1.5">
-                                    {locked && <Lock className="h-3 w-3 shrink-0 text-muted-foreground" strokeWidth={1.5} />}
-                                    <p className={`font-medium text-sm leading-snug truncate ${locked ? 'text-muted-foreground' : ''}`}>{concept.title}</p>
+                                <div className={`flex flex-wrap items-start justify-between px-3 py-2.5 gap-x-2 gap-y-1.5 ${locked ? 'opacity-40' : ''}`}>
+                                  {/* Left: title + lock icon — line-clamp-2 prevents single-line overflow */}
+                                  <div className="min-w-0 flex-1 flex items-start gap-1.5">
+                                    {locked && <Lock className="h-3 w-3 shrink-0 text-muted-foreground mt-0.5" strokeWidth={1.5} />}
+                                    <p className={`font-medium text-sm leading-snug line-clamp-2 ${locked ? 'text-muted-foreground' : ''}`}>{concept.title}</p>
                                   </div>
-                                  {/* Right: badges + practice shortcut */}
+                                  {/* Right: badges + practice shortcut — wraps to next line on narrow viewports */}
                                   <div className="flex items-center gap-2 shrink-0">
                                     <LevelChip level={concept.level} />
                                     <GrammarFocusChip focus={concept.grammar_focus} />

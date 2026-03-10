@@ -166,6 +166,22 @@
 }
 .animate-exercise-in { animation: exercise-fadein var(--duration-senda) var(--ease-senda); }
 
+/* Senda skeleton loading — gentle opacity pulse, no scale transform */
+@keyframes senda-skeleton {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+.animate-senda-pulse {
+  animation: senda-skeleton 1.4s ease-in-out infinite;
+}
+/* Skeleton fill token: 5% ink tint against Crisp Vellum, dark-mode safe */
+.senda-skeleton-fill {
+  background-color: oklch(0.145 0 0 / 0.05);
+}
+.dark .senda-skeleton-fill {
+  background-color: oklch(0.985 0 0 / 0.07);
+}
+
 /* Fix-G + UX-T: Review card tint — reliable dark mode override via unlayered CSS */
 .review-card-warm {
   background-color: oklch(0.97 0.03 142 / 0.6); /* green-50 at 60% opacity */
