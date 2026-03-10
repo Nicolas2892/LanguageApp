@@ -98,7 +98,7 @@ export default async function DashboardPage() {
             <p
               style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
             >
-              Ready for Review: {dueCount} Key Concept{dueCount !== 1 ? 's' : ''}
+              {dueCount} Concepto{dueCount !== 1 ? 's' : ''} listos para repasar
               {dueCount >= 10 && (
                 <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse ml-2 align-middle" />
               )}

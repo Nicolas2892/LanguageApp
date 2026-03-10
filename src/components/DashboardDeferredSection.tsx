@@ -31,51 +31,24 @@ export async function DashboardDeferredSection({
 }: Props) {
   const supabase = await createClient()
 
-  // Batch 1 — parallelized
-  const [weakestProgressRes, mistakeAttemptsRes] = await Promise.all([
-    supabase
-      .from('user_progress')
-      .select('concept_id, interval_days')
-      .eq('user_id', userId)
-      .lt('interval_days', MASTERY_THRESHOLD)
-      .order('interval_days', { ascending: true })
-      .limit(1),
-    supabase
-      .from('exercise_attempts')
-      .select('exercise_id')
-      .eq('user_id', userId)
-      .lte('ai_score', 1)
-      .not('exercise_id', 'is', null)
-      .limit(100),
-  ])
+  // Batch 1 — weakest concept for Escritura Libre suggestion
+  const weakestProgressRes = await supabase
+    .from('user_progress')
+    .select('concept_id, interval_days')
+    .eq('user_id', userId)
+    .lt('interval_days', MASTERY_THRESHOLD)
+    .order('interval_days', { ascending: true })
+    .limit(1)
 
   const weakestConceptId =
     (weakestProgressRes.data?.[0] as { concept_id: string } | undefined)?.concept_id ?? null
 
-  const mistakeExerciseIds = [
-    ...new Set(
-      (mistakeAttemptsRes.data ?? [])
-        .map((a) => (a as { exercise_id: string | null }).exercise_id)
-        .filter((id): id is string => id !== null)
-    ),
-  ]
-
-  // Batch 2 — independent follow-ups gated on batch 1 results
-  const [writeConceptRes, mistakeExercisesRes] = await Promise.all([
-    !isNewUser && weakestConceptId
-      ? supabase.from('concepts').select('id, title').eq('id', weakestConceptId).single()
-      : Promise.resolve({ data: null, error: null }),
-    !isNewUser && mistakeExerciseIds.length > 0
-      ? supabase.from('exercises').select('concept_id').in('id', mistakeExerciseIds)
-      : Promise.resolve({ data: null, error: null }),
-  ])
+  // Batch 2 — write concept lookup
+  const writeConceptRes = !isNewUser && weakestConceptId
+    ? await supabase.from('concepts').select('id, title').eq('id', weakestConceptId).single()
+    : { data: null, error: null }
 
   const writeConcept = writeConceptRes.data as Pick<Concept, 'id' | 'title'> | null
-  const mistakeConceptCount = mistakeExercisesRes.data
-    ? new Set(
-        (mistakeExercisesRes.data as { concept_id: string }[]).map((e) => e.concept_id)
-      ).size
-    : 0
 
   // Batch 3 — curriculum state (3 public reads + 1 user read, all parallel)
   const [modulesRes, unitsRes, conceptsRes, allProgressRes] = await Promise.all([
@@ -179,28 +152,6 @@ export async function DashboardDeferredSection({
         </div>
       )}
 
-      {/* Revisar Errores card — separator only rendered when this card is present */}
-      {!isNewUser && mistakeConceptCount > 0 && (
-        <>
-          <WindingPathSeparator />
-          <div className="senda-card space-y-3">
-            <p className="senda-eyebrow">Revisar Errores</p>
-            <p
-              style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
-            >
-              {mistakeConceptCount} Concepto{mistakeConceptCount !== 1 ? 's' : ''} para revisar
-            </p>
-            <Button
-              asChild
-              variant="outline"
-              className="w-full rounded-full"
-              style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
-            >
-              <Link href="/study?mode=review">Repasar Ahora</Link>
-            </Button>
-          </div>
-        </>
-      )}
 
       {/* Tu Currículo — module progress list */}
       {moduleSummaries.length > 0 && (

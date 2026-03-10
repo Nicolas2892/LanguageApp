@@ -23,17 +23,14 @@ const defaultProps = {
 
 function makeSupabaseMock({
   weakestConceptId = 'concept-abc',
-  mistakeExerciseIds = [] as string[],
   writeConceptTitle = 'El Subjuntivo',
 } = {}) {
-  // Build a chainable query builder mock
   const makeQuery = (data: unknown[]) => {
     const obj: Record<string, unknown> = {}
     const methods = ['select', 'eq', 'lte', 'lt', 'gte', 'not', 'order', 'limit', 'in', 'single']
     for (const m of methods) {
       obj[m] = vi.fn().mockReturnValue(obj)
     }
-    // make it thenable (await resolves to { data, error: null })
     obj.then = (resolve: (v: { data: unknown; error: null }) => unknown) =>
       Promise.resolve({ data, error: null }).then(resolve)
     obj.single = vi.fn().mockReturnValue({
@@ -48,9 +45,6 @@ function makeSupabaseMock({
 
   const fromMap: Record<string, unknown> = {
     user_progress: (() => {
-      // weakest progress query: returns one row
-      // dueByModule query: returns dueByModule array
-      // We need to distinguish the two user_progress queries.
       // call 1: weakest concept query; call 2+: allProgress for curriculum
       let callCount = 0
       const obj: Record<string, unknown> = {}
@@ -74,11 +68,7 @@ function makeSupabaseMock({
       })
       return obj
     })(),
-    exercise_attempts: makeQuery(mistakeExerciseIds.map((id) => ({ exercise_id: id }))),
     concepts: makeQuery([{ id: weakestConceptId, title: writeConceptTitle }]),
-    exercises: makeQuery(
-      mistakeExerciseIds.map((id) => ({ id, concept_id: 'concept-mistake-1' }))
-    ),
     modules: makeQuery([{ id: 'mod-1', title: 'Conectores del Discurso', order_index: 1 }]),
     units: makeQuery([{ id: 'unit-1', module_id: 'mod-1' }]),
   }
@@ -117,32 +107,16 @@ describe('DashboardDeferredSection', () => {
     expect(screen.getByText('Escritura Libre')).toBeTruthy()
   })
 
-  it('renders ReviewMistakes card when mistakeConceptCount > 0', async () => {
-    vi.mocked(createClient).mockResolvedValue(
-      makeSupabaseMock({
-        mistakeExerciseIds: ['ex-1', 'ex-2'],
-      }) as unknown as Awaited<ReturnType<typeof createClient>>
-    )
+  it('does not render Revisar Errores card', async () => {
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
-    expect(screen.getByText(/revisar errores/i)).toBeTruthy()
-    expect(screen.getByText(/para revisar/i)).toBeTruthy()
-  })
-
-  it('skips ReviewMistakes card when no mistakes', async () => {
-    vi.mocked(createClient).mockResolvedValue(
-      makeSupabaseMock({ mistakeExerciseIds: [] }) as unknown as Awaited<ReturnType<typeof createClient>>
-    )
-    const el = await DashboardDeferredSection(defaultProps)
-    render(el)
-    expect(screen.queryByText(/para revisar/i)).toBeNull()
+    expect(screen.queryByText(/revisar errores/i)).toBeNull()
   })
 
   it('hides all deferred cards for new users', async () => {
     const el = await DashboardDeferredSection({ ...defaultProps, isNewUser: true })
     render(el)
     expect(screen.queryByText('Escritura Libre')).toBeNull()
-    expect(screen.queryByText(/para revisar/i)).toBeNull()
   })
 
   it('renders Tu Currículo section with module states', async () => {
@@ -150,7 +124,6 @@ describe('DashboardDeferredSection', () => {
     render(el)
     expect(screen.getByText('Tu Currículo')).toBeTruthy()
     expect(screen.getByText('Conectores del Discurso')).toBeTruthy()
-    // No user_progress for the concept → state is Próximamente
     expect(screen.getByText('Próximamente')).toBeTruthy()
   })
 })

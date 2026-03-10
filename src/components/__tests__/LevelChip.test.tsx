@@ -3,11 +3,11 @@ import { render, screen } from '@testing-library/react'
 import { LevelChip } from '../LevelChip'
 
 describe('LevelChip', () => {
-  it('renders "B1" chip with green class', () => {
+  it('renders "B1" chip with amber class', () => {
     render(<LevelChip level="B1" />)
     const chip = screen.getByText('B1')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('green')
+    expect(chip.className).toContain('amber')
   })
 
   it('renders "B2" chip with amber class', () => {
@@ -17,11 +17,11 @@ describe('LevelChip', () => {
     expect(chip.className).toContain('amber')
   })
 
-  it('renders "C1" chip with violet class', () => {
+  it('renders "C1" chip with amber class', () => {
     render(<LevelChip level="C1" />)
     const chip = screen.getByText('C1')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('violet')
+    expect(chip.className).toContain('amber')
   })
 
   it('renders nothing when level is null', () => {

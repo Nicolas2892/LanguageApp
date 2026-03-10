@@ -16,9 +16,9 @@ export const LEVEL_UNLOCK_THRESHOLD = 0.8
 /** Interval multiplier for hard-flagged concepts (~40% more frequent reviews) */
 export const HARD_INTERVAL_MULTIPLIER = 0.6
 
-/** Colour config for CEFR level chips (B1/B2/C1) — D5 subtle palette */
+/** Colour config for CEFR level chips (B1/B2/C1) — D5 subtle amber palette */
 export const LEVEL_CHIP: Record<string, { label: string; className: string }> = {
-  B1: { label: 'B1', className: 'bg-green-500/[0.12] text-green-800 dark:bg-green-400/[0.12] dark:text-green-300' },
+  B1: { label: 'B1', className: 'bg-amber-500/[0.12] text-amber-800 dark:bg-amber-400/[0.12] dark:text-amber-300' },
   B2: { label: 'B2', className: 'bg-amber-500/[0.12] text-amber-800 dark:bg-amber-400/[0.12] dark:text-amber-300' },
-  C1: { label: 'C1', className: 'bg-violet-500/[0.12] text-violet-800 dark:bg-violet-400/[0.12] dark:text-violet-300' },
+  C1: { label: 'C1', className: 'bg-amber-500/[0.12] text-amber-800 dark:bg-amber-400/[0.12] dark:text-amber-300' },
 }
