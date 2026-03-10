@@ -1,13 +1,14 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { AccuracyChart } from './AccuracyChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { ExerciseTypeChart } from '@/components/ExerciseTypeChart'
 import { VerbTenseMastery } from '@/components/verbs/VerbTenseMastery'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
+import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
-import { Flame, CheckCircle, Zap, Target, ListChecks, Clock } from 'lucide-react'
+import { Flame, CheckCircle, Target, ListChecks, Clock } from 'lucide-react'
 import { EmptyState } from '@/components/EmptyState'
 import type { ExerciseAccuracy } from './AccuracyChart'
 import type { DayActivity } from './ActivityHeatmap'
@@ -23,10 +24,19 @@ const TYPE_LABELS: Record<string, string> = {
   sentence_builder: 'Constructor De Frases',
 }
 
-const CEFR_COLORS: Record<string, { bar: string; text: string }> = {
-  B1: { bar: 'bg-green-500',  text: 'text-green-700 dark:text-green-400'  },
-  B2: { bar: 'bg-amber-500',  text: 'text-amber-700 dark:text-amber-400'  },
-  C1: { bar: 'bg-violet-500', text: 'text-violet-700 dark:text-violet-400' },
+const CEFR_COLORS: Record<string, { barStyle: React.CSSProperties; textStyle: React.CSSProperties }> = {
+  B1: {
+    barStyle: { background: 'var(--d5-muted)' },
+    textStyle: { color: 'var(--d5-warm)' },
+  },
+  B2: {
+    barStyle: { background: 'var(--d5-terracotta)' },
+    textStyle: { color: 'var(--d5-terracotta)' },
+  },
+  C1: {
+    barStyle: { background: 'rgba(26,17,8,0.4)' },
+    textStyle: { color: 'var(--d5-ink)' },
+  },
 }
 
 export default async function ProgressPage() {
@@ -82,10 +92,6 @@ export default async function ProgressPage() {
   }
 
   const totalConcepts = (conceptRows ?? []).length
-  const totalProductionCertified = Array.from(productionByLevel.values()).reduce(
-    (s, v) => s + v,
-    0
-  )
 
   const CEFR_LEVELS = ['B1', 'B2', 'C1'] as const
   const cefrData = CEFR_LEVELS.map((level) => ({
@@ -247,241 +253,256 @@ export default async function ProgressPage() {
   const showB2Hint = b1Pct >= 0.6 && b1Remaining > 0
 
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-24 lg:pb-10">
-
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1
-            style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
-          >
-            Progreso
-          </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--d5-warm)' }}>
-            Tu Camino De Aprendizaje · {monthLabel} {year}
-          </p>
-        </div>
-        {levelChip && (
-          <span
-            className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${levelChip.className}`}
-          >
-            {levelChip.label}
-          </span>
-        )}
+    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-24 lg:pb-10 relative overflow-hidden">
+      {/* BackgroundMagicS watermark */}
+      <div style={{ position: 'absolute', top: '15%', right: -20, opacity: 0.025, pointerEvents: 'none', zIndex: 0 }} aria-hidden="true">
+        <BackgroundMagicS opacity={1} />
       </div>
 
-      {!hasAnyData ? (
-        <EmptyState
-          heading="Tu Camino Está Despejado."
-          subtext="Completa Tu Primera Sesión Y Tu Progreso Tomará Forma Aquí."
-          ctaLabel="Empezar Tu Primera Sesión"
-          ctaHref="/study/configure"
-        />
-      ) : (
-        <>
-          {/* Stats row — 2×2 mobile / 4-col desktop */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* All content above watermark */}
+      <div style={{ position: 'relative', zIndex: 1 }} className="space-y-8">
 
-            {/* Streak */}
-            <div className="senda-card space-y-2">
-              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
-                <Flame className="h-4 w-4 text-green-700 dark:text-green-400" strokeWidth={1.5} />
-              </div>
-              <p className="text-2xl font-extrabold">{currentStreak}</p>
-              <div>
-                <p className="text-xs font-medium">Días Seguidos</p>
-                <p className="text-xs text-muted-foreground">{currentStreak < 7 ? 'Construyendo Algo.' : 'No Lo Rompas Ahora.'}</p>
-              </div>
-            </div>
-
-            {/* Mastered */}
-            <div className="senda-card space-y-2">
-              <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
-                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" strokeWidth={1.5} />
-              </div>
-              <p className="text-2xl font-extrabold" style={{ color: 'var(--d5-terracotta)' }}>{totalMastered}</p>
-              <div>
-                <p className="text-xs font-medium">Dominados</p>
-                <p className="text-xs text-muted-foreground">De {totalConcepts} En Total</p>
-              </div>
-            </div>
-
-            {/* Production certified */}
-            <div className="senda-card space-y-2">
-              <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" strokeWidth={1.5} />
-              </div>
-              <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{totalProductionCertified}</p>
-              <div>
-                <p className="text-xs font-medium">Habilidades Activas</p>
-                <p className="text-xs text-muted-foreground">Habilidad Clave Para B2</p>
-              </div>
-            </div>
-
-            {/* Accuracy */}
-            <div className="senda-card space-y-2">
-              <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center">
-                <Target className="h-4 w-4 text-sky-600 dark:text-sky-400" strokeWidth={1.5} />
-              </div>
-              <p className="text-2xl font-extrabold text-sky-600 dark:text-sky-400">{overallAccuracy}%</p>
-              <div>
-                <p className="text-xs font-medium">Precisión</p>
-                <p className="text-xs text-muted-foreground">En Todos Los Ejercicios</p>
-              </div>
-            </div>
-          </div>
-
-          {/* All-time stats */}
+        {/* Header */}
+        <div className="flex items-start justify-between">
           <div>
-            <p className="senda-eyebrow mb-3">Total</p>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="senda-card space-y-2">
-                <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
-                  <ListChecks className="h-4 w-4 text-violet-600 dark:text-violet-400" strokeWidth={1.5} />
-                </div>
-                <p className="text-2xl font-extrabold">{totalAllTimeAttempts.toLocaleString()}</p>
-                <div>
-                  <p className="text-xs font-medium">Ejercicios Completados</p>
-                  <p className="text-xs text-muted-foreground">Total Acumulado</p>
-                </div>
-              </div>
-              <div className="senda-card space-y-2">
-                <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-teal-600 dark:text-teal-400" strokeWidth={1.5} />
-                </div>
-                <p className="text-2xl font-extrabold">
-                  {totalAllTimeMinutes >= 60
-                    ? `${Math.floor(totalAllTimeMinutes / 60)}h ${totalAllTimeMinutes % 60}m`
-                    : `${totalAllTimeMinutes}m`}
-                </p>
-                <div>
-                  <p className="text-xs font-medium">Tiempo De Estudio</p>
-                  <p className="text-xs text-muted-foreground">Total Acumulado</p>
-                </div>
-              </div>
-            </div>
+            <h1
+              style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
+            >
+              Progreso
+            </h1>
+            <p className="text-sm mt-1" style={{ color: 'var(--d5-warm)' }}>
+              Tu Camino De Aprendizaje · {monthLabel} {year}
+            </p>
           </div>
+          {levelChip && (
+            <span
+              className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${levelChip.className}`}
+            >
+              {levelChip.label}
+            </span>
+          )}
+        </div>
 
-          {/* CEFR Level Journey */}
-          <section className="senda-card space-y-5">
-            <div className="flex items-center justify-between">
-              <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Progreso De Nivel</h2>
-              {levelChip && (
-                <span
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelChip.className}`}
-                >
-                  {levelChip.label}
-                </span>
-              )}
+        {!hasAnyData ? (
+          <EmptyState
+            heading="Tu Camino Está Despejado."
+            subtext="Completa Tu Primera Sesión Y Tu Progreso Tomará Forma Aquí."
+            ctaLabel="Empezar Tu Primera Sesión"
+            ctaHref="/study/configure"
+          />
+        ) : (
+          <>
+            <WindingPathSeparator />
+
+            {/* Stats row — 3-col grid */}
+            <div className="grid grid-cols-3 gap-3">
+
+              {/* Streak */}
+              <div
+                style={{
+                  background: 'rgba(26,17,8,0.04)',
+                  borderRadius: 14,
+                  padding: '10px',
+                  textAlign: 'center',
+                }}
+              >
+                <div className="flex justify-center mb-1">
+                  <Flame className="h-4 w-4" style={{ color: 'var(--d5-terracotta)' }} strokeWidth={1.5} />
+                </div>
+                <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-terracotta)', lineHeight: 1.2 }}>{currentStreak}</p>
+                <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2 }}>Días Seguidos</p>
+              </div>
+
+              {/* Mastered */}
+              <div
+                style={{
+                  background: 'rgba(26,17,8,0.04)',
+                  borderRadius: 14,
+                  padding: '10px',
+                  textAlign: 'center',
+                }}
+              >
+                <div className="flex justify-center mb-1">
+                  <CheckCircle className="h-4 w-4" style={{ color: 'var(--d5-ink)' }} strokeWidth={1.5} />
+                </div>
+                <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-ink)', lineHeight: 1.2 }}>{totalMastered}</p>
+                <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2 }}>Dominados</p>
+              </div>
+
+              {/* Accuracy */}
+              <div
+                style={{
+                  background: 'rgba(26,17,8,0.04)',
+                  borderRadius: 14,
+                  padding: '10px',
+                  textAlign: 'center',
+                }}
+              >
+                <div className="flex justify-center mb-1">
+                  <Target className="h-4 w-4" style={{ color: 'var(--d5-ink)' }} strokeWidth={1.5} />
+                </div>
+                <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-ink)', lineHeight: 1.2 }}>{overallAccuracy}%</p>
+                <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2 }}>Precisión</p>
+              </div>
             </div>
 
-            <div className="space-y-0">
-              {cefrData.map(({ level, mastered, production, total }, idx) => {
-                const pct = total > 0 ? Math.round((mastered / total) * 100) : 0
-                const color = CEFR_COLORS[level]
-                return (
-                  <div key={level} className="relative">
-                    {/* Dashed connector between levels */}
-                    {idx > 0 && (
-                      <div className="absolute left-2 -top-3 h-3 border-l-2 border-dashed border-border" />
-                    )}
-                    <div className="space-y-1.5 pt-5">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold">{level}</span>
-                        <span className="text-muted-foreground">
-                          {mastered} / {total} Conceptos
-                        </span>
-                      </div>
-                      <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
-                        <AnimatedBar pct={pct} className={color?.bar ?? 'bg-gray-400'} />
-                      </div>
-                      <div className="flex justify-end">
-                        <p className={`text-[11px] font-medium ${color?.text ?? ''}`}>{pct}%</p>
+            {/* All-time stats */}
+            <div>
+              <p className="senda-eyebrow mb-3">Total</p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="senda-card space-y-2">
+                  <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
+                    <ListChecks className="h-4 w-4 text-violet-600 dark:text-violet-400" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-2xl font-extrabold">{totalAllTimeAttempts.toLocaleString()}</p>
+                  <div>
+                    <p className="text-xs font-medium">Ejercicios Completados</p>
+                    <p className="text-xs text-muted-foreground">Total Acumulado</p>
+                  </div>
+                </div>
+                <div className="senda-card space-y-2">
+                  <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center">
+                    <Clock className="h-4 w-4 text-teal-600 dark:text-teal-400" strokeWidth={1.5} />
+                  </div>
+                  <p className="text-2xl font-extrabold">
+                    {totalAllTimeMinutes >= 60
+                      ? `${Math.floor(totalAllTimeMinutes / 60)}h ${totalAllTimeMinutes % 60}m`
+                      : `${totalAllTimeMinutes}m`}
+                  </p>
+                  <div>
+                    <p className="text-xs font-medium">Tiempo De Estudio</p>
+                    <p className="text-xs text-muted-foreground">Total Acumulado</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <WindingPathSeparator />
+
+            {/* CEFR Level Journey */}
+            <section className="senda-card space-y-5">
+              <div className="flex items-center justify-between">
+                <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Progreso De Nivel</h2>
+                {levelChip && (
+                  <span
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelChip.className}`}
+                  >
+                    {levelChip.label}
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-0">
+                {cefrData.map(({ level, mastered, total }, idx) => {
+                  const pct = total > 0 ? Math.round((mastered / total) * 100) : 0
+                  const color = CEFR_COLORS[level]
+                  return (
+                    <div key={level} className="relative">
+                      {idx > 0 && (
+                        <div className="absolute left-2 -top-3 h-3 border-l-2 border-dashed border-border" />
+                      )}
+                      <div className="space-y-1.5 pt-5">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-semibold">{level}</span>
+                          <span className="text-muted-foreground">
+                            {mastered} / {total} Conceptos
+                          </span>
+                        </div>
+                        <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
+                          <AnimatedBar pct={pct} style={color?.barStyle} />
+                        </div>
+                        <div className="flex justify-end">
+                          <p style={{ fontSize: 11, fontWeight: 500, ...color?.textStyle }}>{pct}%</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
+                  )
+                })}
+              </div>
 
-            {showB2Hint && (
-              <p className="text-xs text-amber-600 dark:text-amber-400 font-medium pt-1 border-t">
-                {b1Remaining} Concepto{b1Remaining !== 1 ? 's' : ''} Más Para Desbloquear B2
-              </p>
+              {showB2Hint && (
+                <p className="text-xs font-medium pt-1 border-t" style={{ color: 'var(--d5-terracotta)' }}>
+                  {b1Remaining} Concepto{b1Remaining !== 1 ? 's' : ''} Más Para Desbloquear B2
+                </p>
+              )}
+            </section>
+
+            <WindingPathSeparator />
+
+            {/* Verb conjugation mastery */}
+            <VerbTenseMastery summaries={verbTenseSummaries} />
+
+            <WindingPathSeparator />
+
+            {/* Exercises by type */}
+            {exerciseTypeData.length > 0 && (
+              <section className="space-y-3">
+                <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Ejercicios Por Tipo</h2>
+                <div className="senda-card">
+                  <ExerciseTypeChart data={exerciseTypeData} />
+                </div>
+              </section>
             )}
-          </section>
 
-          {/* Exercises by type */}
-          {exerciseTypeData.length > 0 && (
+            {/* Skill breakdown */}
+            {exerciseAccuracy.length > 0 && (
+              <section className="space-y-3">
+                <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Desglose De Habilidades</h2>
+                <div className="senda-card">
+                  <AccuracyChart data={exerciseAccuracy} />
+                  {showInsight && (
+                    <p className="text-xs text-muted-foreground border-t mt-3 pt-3">
+                      Mejor:{' '}
+                      <span className="font-medium text-foreground">
+                        {TYPE_LABELS[bestType!.type] ?? bestType!.type}
+                      </span>{' '}
+                      ({bestType!.accuracy}%)&nbsp;·&nbsp;Mejorar:{' '}
+                      <span className="font-medium text-foreground">
+                        {TYPE_LABELS[worstType!.type] ?? worstType!.type}
+                      </span>{' '}
+                      ({worstType!.accuracy}%)
+                    </p>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* Study consistency */}
             <section className="space-y-3">
-              <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Ejercicios Por Tipo</h2>
-              <div className="senda-card">
-                <ExerciseTypeChart data={exerciseTypeData} />
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Consistencia De Estudio</h2>
+                  {sessionCount > 0 && (
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      <span className="font-medium text-foreground">
+                        {sessionCount} Sesion{sessionCount !== 1 ? 'es' : ''}
+                      </span>{' '}
+                      Este Mes
+                      {totalMinutes > 0 && (
+                        <>
+                          {' '}·{' '}
+                          <span className="font-medium text-foreground">
+                            {(totalMinutes / 60).toFixed(1)} hrs
+                          </span>{' '}
+                          total
+                        </>
+                      )}
+                    </p>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground text-right shrink-0">
+                  {uniqueDaysStudied} Día{uniqueDaysStudied !== 1 ? 's' : ''} Estudiados
+                  <br />
+                  <span className="text-[10px]">En Los Últimos 3 Meses</span>
+                </p>
+              </div>
+              <div className="senda-card overflow-x-auto">
+                <ActivityHeatmap data={activityData} weeks={14} />
               </div>
             </section>
-          )}
-
-          {/* Skill breakdown */}
-          {exerciseAccuracy.length > 0 && (
-            <section className="space-y-3">
-              <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Desglose De Habilidades</h2>
-              <div className="senda-card">
-                <AccuracyChart data={exerciseAccuracy} />
-                {showInsight && (
-                  <p className="text-xs text-muted-foreground border-t mt-3 pt-3">
-                    Mejor:{' '}
-                    <span className="font-medium text-foreground">
-                      {TYPE_LABELS[bestType!.type] ?? bestType!.type}
-                    </span>{' '}
-                    ({bestType!.accuracy}%)&nbsp;·&nbsp;Mejorar:{' '}
-                    <span className="font-medium text-foreground">
-                      {TYPE_LABELS[worstType!.type] ?? worstType!.type}
-                    </span>{' '}
-                    ({worstType!.accuracy}%)
-                  </p>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Study consistency */}
-          <section className="space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Consistencia De Estudio</h2>
-                {sessionCount > 0 && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    <span className="font-medium text-foreground">
-                      {sessionCount} Sesion{sessionCount !== 1 ? 'es' : ''}
-                    </span>{' '}
-                    Este Mes
-                    {totalMinutes > 0 && (
-                      <>
-                        {' '}·{' '}
-                        <span className="font-medium text-foreground">
-                          {(totalMinutes / 60).toFixed(1)} hrs
-                        </span>{' '}
-                        total
-                      </>
-                    )}
-                  </p>
-                )}
-              </div>
-              <p className="text-xs text-muted-foreground text-right shrink-0">
-                {uniqueDaysStudied} Día{uniqueDaysStudied !== 1 ? 's' : ''} Estudiados
-                <br />
-                <span className="text-[10px]">En Los Últimos 3 Meses</span>
-              </p>
-            </div>
-            <div className="senda-card overflow-x-auto">
-              <ActivityHeatmap data={activityData} weeks={14} />
-            </div>
-          </section>
-
-          {/* Verb conjugation mastery */}
-          <VerbTenseMastery summaries={verbTenseSummaries} />
-        </>
-      )}
+          </>
+        )}
+      </div>
     </main>
   )
 }

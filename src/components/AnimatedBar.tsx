@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 
 interface Props {
   pct: number
   className?: string
+  style?: React.CSSProperties
 }
 
-export function AnimatedBar({ pct, className }: Props) {
+export function AnimatedBar({ pct, className, style }: Props) {
   const [width, setWidth] = useState(0)
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export function AnimatedBar({ pct, className }: Props) {
   return (
     <div
       className={cn('h-full rounded-full transition-all duration-700', className)}
-      style={{ width: `${width}%` }}
+      style={{ width: `${width}%`, ...style }}
     />
   )
 }
