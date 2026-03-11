@@ -10,6 +10,9 @@ import { HardFlagButton } from '@/components/HardFlagButton'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import type { Concept } from '@/lib/supabase/types'
+import type { VerbTense } from '@/lib/verbs/constants'
+import { TENSE_LABELS } from '@/lib/verbs/constants'
+import { ConjugationInsightTable, type ConjugationRow } from './ConjugationInsightTable'
 
 type Example = { es: string; en: string }
 type MasteryState = 'mastered' | 'learning' | 'new'
@@ -43,6 +46,22 @@ const EXERCISE_TYPES = [
   { type: 'error_correction', label: 'Corregir error' },
 ] as const
 
+// Maps concept titles (exact DB values) to a VerbTense for the conjugation insight card.
+// Only tense-focused concepts are included; connector/periphrasis/ser-estar concepts omitted.
+// pluperfect/conditional_perfect are compound tenses not in VerbTense — omitted intentionally.
+const CONCEPT_TENSE_MAP: Partial<Record<string, VerbTense>> = {
+  'Usos del pretérito indefinido':                        'preterite',
+  'Usos del pretérito imperfecto':                        'imperfect',
+  'Indefinido vs. imperfecto: contraste narrativo':       'preterite',
+  'Verbos de deseo (querer, esperar, desear)':            'present_subjunctive',
+  'Verbos de emoción (alegrarse, temer, sorprender)':    'present_subjunctive',
+  'Verbos de duda y negación (dudar, no creer, negar)':  'present_subjunctive',
+  'Condicional tipo 2: Si + imperfecto de subjuntivo':   'imperfect_subjunctive',
+  'Condicional tipo 3: Si + pluscuamperfecto de subjuntivo': 'imperfect_subjunctive',
+  'Ojalá + imperfecto de subjuntivo':                    'imperfect_subjunctive',
+  'Imperfecto de subjuntivo en estilo indirecto':        'imperfect_subjunctive',
+}
+
 interface Props {
   params: Promise<{ id: string }>
   searchParams: Promise<{ filter?: string }>
@@ -66,8 +85,10 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
   if (!conceptData) notFound()
   const concept = conceptData as Concept
 
-  // Fetch unit + module in parallel
-  const [unitRes, exercisesRes, progressRes] = await Promise.all([
+  const tenseKey = CONCEPT_TENSE_MAP[concept.title] ?? null
+
+  // Fetch unit, exercises, progress (+ hablar verb id if tense-mapped) in parallel
+  const [unitRes, exercisesRes, progressRes, hablarRes] = await Promise.all([
     supabase.from('units').select('id, title, module_id').eq('id', concept.unit_id).single(),
     supabase.from('exercises').select('id, type').eq('concept_id', id),
     supabase
@@ -76,6 +97,9 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
       .eq('user_id', user.id)
       .eq('concept_id', id)
       .maybeSingle(),
+    tenseKey
+      ? supabase.from('verbs').select('id').eq('infinitive', 'hablar').single()
+      : Promise.resolve({ data: null }),
   ])
 
   type UnitRow     = { id: string; title: string; module_id: string }
@@ -85,6 +109,29 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
   const unit     = unitRes.data     as UnitRow     | null
   const progress = progressRes.data as ProgressRow | null
   const typedExercises = (exercisesRes.data ?? []) as ExerciseRow[]
+
+  // Fetch hablar conjugations for the tense insight card
+  let insightRows: ConjugationRow[] | null = null
+  if (tenseKey && hablarRes.data) {
+    const hablarId = (hablarRes.data as { id: string }).id
+    const { data: conjData } = await supabase
+      .from('verb_conjugations')
+      .select('stem, yo, tu, el, nosotros, vosotros, ellos')
+      .eq('verb_id', hablarId)
+      .eq('tense', tenseKey)
+      .single()
+    if (conjData) {
+      const c = conjData as { stem: string; yo: string; tu: string; el: string; nosotros: string; vosotros: string; ellos: string }
+      insightRows = [
+        { pronoun: 'yo',          form: c.yo,       stem: c.stem },
+        { pronoun: 'tú',          form: c.tu,        stem: c.stem },
+        { pronoun: 'él/ella',     form: c.el,        stem: c.stem },
+        { pronoun: 'nosotros',    form: c.nosotros,  stem: c.stem },
+        { pronoun: 'vosotros',    form: c.vosotros,  stem: c.stem },
+        { pronoun: 'ellos/ellas', form: c.ellos,     stem: c.stem },
+      ]
+    }
+  }
   const exerciseIds = typedExercises.map((e) => e.id)
   const exerciseTypes = new Set(typedExercises.map((e) => e.type))
 
@@ -233,7 +280,20 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         </div>
       )}
 
-      {/* Card 3 — SRS Status + Practice */}
+      {/* Card 3 — Conjugation Insight (only for tense-mapped concepts) */}
+      {insightRows && tenseKey && (
+        <div className="senda-card" style={{ marginBottom: 16 }}>
+          <span className="senda-eyebrow" style={{ display: 'block', marginBottom: 6 }}>
+            Conjugación de ejemplo
+          </span>
+          <p style={{ fontSize: 11, color: 'var(--d5-muted)', marginBottom: 12 }}>
+            hablar · {TENSE_LABELS[tenseKey]}
+          </p>
+          <ConjugationInsightTable rows={insightRows} />
+        </div>
+      )}
+
+      {/* Card 4 — SRS Status + Practice */}
       <div className="senda-card">
         <span className="senda-eyebrow" style={{ display: 'block', marginBottom: 14 }}>Tu Progreso</span>
 

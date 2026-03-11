@@ -136,6 +136,39 @@ describe('CurriculumClient', () => {
     expect(screen.getByText('tu senda continúa…')).toBeInTheDocument()
   })
 
+  it('shows unit sub-headers when an expanded module has multiple units', async () => {
+    const user = userEvent.setup()
+    const multiUnitModule = { id: 'mod-multi', title: 'Pasado', order_index: 3 }
+    const multiUnits = [
+      { id: 'unit-a', module_id: 'mod-multi', title: 'Indefinido', order_index: 1 },
+      { id: 'unit-b', module_id: 'mod-multi', title: 'Imperfecto', order_index: 2 },
+    ]
+    const multiConcepts = [
+      { id: 'con-a', unit_id: 'unit-a', title: 'Pretérito indef', difficulty: 1, level: 'B1', grammar_focus: null },
+      { id: 'con-b', unit_id: 'unit-b', title: 'Pretérito imp', difficulty: 2, level: 'B1', grammar_focus: null },
+    ]
+    render(
+      <CurriculumClient
+        modules={[multiUnitModule]}
+        units={multiUnits}
+        concepts={multiConcepts}
+        progressEntries={[]}
+        unlockedLevelsList={['B1', 'B2']}
+      />
+    )
+    await user.click(screen.getByText('Pasado'))
+    expect(screen.getByText('Indefinido')).toBeInTheDocument()
+    expect(screen.getByText('Imperfecto')).toBeInTheDocument()
+  })
+
+  it('does not show unit sub-headers when an expanded module has a single unit', async () => {
+    const user = userEvent.setup()
+    render(<CurriculumClient {...defaultProps} />)
+    await user.click(screen.getByText('Conectores'))
+    // 'Unidad 1' is the single unit title — should NOT appear as a sub-header
+    expect(screen.queryByText('Unidad 1')).not.toBeInTheDocument()
+  })
+
   it('shows lock icon for locked concepts', async () => {
     const user = userEvent.setup()
     // B2 unlocked but C1 not
