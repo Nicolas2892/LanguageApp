@@ -633,6 +633,85 @@ Removed unused `boldNum` property from mode array objects (lines 77, 80). Proper
 
 ---
 
+## Verb Detail Page — D5 Mockup Alignment Redesign (2026-03-11)
+
+**Files changed:** `src/app/verbs/[infinitive]/VerbDetailClient.tsx`, `src/app/verbs/[infinitive]/__tests__/VerbDetailClient.test.tsx` (new)
+
+Previously stacked all 9 conjugation tenses vertically as separate `.senda-card` sections, creating an overwhelming scroll experience. Redesigned to match D5 mockup: horizontal tense tab bar, single visible tense, Lora italic forms, zebra striping, and bottom CTA.
+
+### Restructure 1: Vertical tense stack → horizontal pill tab bar
+
+Replaced 9 vertically stacked `senda-card` sections with a single-tense-at-a-time view controlled by a horizontal scrollable pill bar (`role="tablist"`). Pills use D5 token styling:
+- Active: `var(--d5-terracotta)` bg, `var(--d5-paper)` text, `fontWeight: 700`
+- Inactive: `var(--d5-pill-bg)` bg, `var(--d5-pill-text)` text, `fontWeight: 500`
+- `minHeight: 44px` touch targets (Spec §9)
+- `transition: background 200ms ease-out, color 200ms ease-out` (Spec §8)
+
+Added `TENSE_SHORT_LABELS` map for abbreviated pill labels (e.g. "Subj. Presente" instead of full "Presente de Subjuntivo").
+
+### Restructure 2: Layout reorder — CTA moved to bottom
+
+Old order: Header → CTA + colour toggle → 9 tense cards
+New order: Header → WindingPathSeparator → Pill bar → Single tense card → CTA + colour toggle
+
+Moving CTA below the conjugation table matches the mockup's "explore then act" reading flow.
+
+### Fix 1: Heading dark mode bug + terracotta colour (Spec §10.1)
+
+`<h1>` used inline `color: 'var(--d5-ink)'` — near-black `#1A1108` in both modes, invisible on dark backgrounds. Replaced with `color: 'var(--d5-terracotta)'` which is identical in both modes. Also bumped font-size from 26px to 28px.
+
+### Fix 2: WindingPathSeparator added (Spec §5)
+
+Inserted `WindingPathSeparator` between the header and pill bar, matching the macro-section divider pattern used on dashboard and concept detail pages.
+
+### Fix 3: Expanded pronoun labels
+
+| Before | After |
+|---|---|
+| `él/ella` | `él/ella/Ud.` |
+| `nosotros` | `nosotros/as` |
+| `vosotros` | `vosotros/as` |
+| `ellos/ellas` | `ellos/as` |
+
+### Fix 4: Conjugation table refinements (Spec §3, §4)
+
+- **Lora italic forms**: conjugation form cells now use `fontFamily: 'var(--font-lora), serif'` + `fontStyle: 'italic'` (matching mockup typography)
+- **Zebra striping**: odd rows get `background: rgba(140,106,63,0.03)` for subtle banding
+- **Softer dividers**: `borderBottom` changed from Tailwind `border-b` class to `1px solid rgba(184,170,153,0.15)` — lighter, no border on last row
+- **Wider pronoun column**: `w-28` → `w-32` (accommodates "nosotros/as")
+
+### Fix 5: Empty state text — Spanish serif italic
+
+Old: "No conjugations seeded for this tense yet."
+New: "Sin datos aún — practica para ver tu progreso." in Lora italic, `color: var(--d5-muted)`
+
+### Fix 6: Attempt label localised
+
+"attempts" → "intentos" (Spanish)
+
+### New state: `selectedTense`
+
+Added `useState<VerbTense>(TENSES[0])` — defaults to `present_indicative` (Presente). Only the selected tense's data is rendered, eliminating the 9-card vertical scroll.
+
+### Test file: 10 new tests
+
+`src/app/verbs/[infinitive]/__tests__/VerbDetailClient.test.tsx`:
+
+1. Renders infinitive + english translation
+2. Renders verb group badge
+3. First tense selected by default (Presente pill `aria-selected="true"`)
+4. Tense switching updates visible content (table → empty state)
+5. All 6 expanded pronoun labels render
+6. Colour endings toggle works (`aria-pressed`)
+7. Mastery bar renders when attempts > 0
+8. Mastery bar hidden when no attempts
+9. CTA link points to `/verbs/configure?verb={infinitive}`
+10. WindingPathSeparator is present
+
+**Test suite: 1337 tests across 56 files — 10 new tests all passing.** (3 pre-existing GrammarFocusChip failures unrelated to this change.)
+
+---
+
 ## Spec Sections Not Yet Implemented
 
 | Spec Section | Status | Notes |
