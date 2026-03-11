@@ -125,6 +125,10 @@ Micro-tags must use the exact structural format: [ • B2/1 • Subjuntivo ]
 
 The separator dot must be rendered at 4px utilizing the Brand Terracotta (#C4522E) color.
 
+Level Chips (B1 / B2 / C1)
+
+The CEFR level chip displayed on the dashboard, account page, and curriculum must always use a fixed Warm Yellow (#fef9c3) background — regardless of level (B1, B2, or C1) and regardless of light/dark mode. Text colour must remain Brand Ink (#1A1108) for contrast. Per-level colour differentiation (green/amber/purple) is removed in favour of a single, unified chip treatment.
+
 Data Locking
 
 Key numerical data points (e.g., "18 concepts due") must be weighted in Bold DM Sans to ensure immediate scannability against regular subtext.
