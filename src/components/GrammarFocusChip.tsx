@@ -1,9 +1,9 @@
 export type GrammarFocus = 'indicative' | 'subjunctive' | 'both'
 
 const GRAMMAR_FOCUS_CONFIG: Record<GrammarFocus, { label: string; className: string }> = {
-  indicative:  { label: 'Indicative',  className: 'bg-sky-100 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 border-sky-200 dark:border-sky-800' },
-  subjunctive: { label: 'Subjunctive', className: 'bg-violet-100 dark:bg-violet-950/40 text-violet-700 dark:text-violet-400 border-violet-200 dark:border-violet-800' },
-  both:        { label: 'Both moods',  className: 'bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800' },
+  indicative:  { label: 'Indicative',  className: 'bg-[rgba(74,103,65,0.10)] dark:bg-[rgba(74,103,65,0.20)] text-[#4A6741] dark:text-[#8BB880] border-[rgba(74,103,65,0.25)] dark:border-[rgba(74,103,65,0.35)]' },
+  subjunctive: { label: 'Subjunctive', className: 'bg-[rgba(123,82,114,0.10)] dark:bg-[rgba(123,82,114,0.20)] text-[#7B5272] dark:text-[#C49AB8] border-[rgba(123,82,114,0.25)] dark:border-[rgba(123,82,114,0.35)]' },
+  both:        { label: 'Both moods',  className: 'bg-[rgba(139,115,50,0.10)] dark:bg-[rgba(139,115,50,0.20)] text-[#8B7332] dark:text-[#C4AD6A] border-[rgba(139,115,50,0.25)] dark:border-[rgba(139,115,50,0.35)]' },
 }
 
 interface Props {
