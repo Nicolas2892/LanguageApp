@@ -252,7 +252,7 @@ describe('ConceptDetailPage', () => {
     expect(screen.getByText('Cómo funciona')).toBeInTheDocument()
   })
 
-  it('renders stacked CTA buttons', async () => {
+  it('renders three-tier CTA layout', async () => {
     vi.mocked(createClient).mockResolvedValue(makeMockSupabase() as never)
     const el = await ConceptDetailPage({
       params: Promise.resolve({ id: 'con-1' }),
@@ -260,7 +260,7 @@ describe('ConceptDetailPage', () => {
     })
     render(el)
     expect(screen.getByText('Practicar este concepto →')).toBeInTheDocument()
-    expect(screen.getByText('Escritura libre')).toBeInTheDocument()
-    expect(screen.getByText('Consultar tutor')).toBeInTheDocument()
+    expect(screen.getByText('Escritura libre →')).toBeInTheDocument()
+    expect(screen.getByText('Consultar tutor →')).toBeInTheDocument()
   })
 })

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { SpeakButton } from '@/components/SpeakButton'
 import { getMasteryState, MASTERY_BADGE } from '@/lib/mastery/badge'
-import { ChevronLeft, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, CheckCircle2, Pencil, Bot } from 'lucide-react'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { LevelChip } from '@/components/LevelChip'
 import { HardFlagButton } from '@/components/HardFlagButton'
@@ -295,68 +295,59 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         )}
       </div>
 
-      {/* ── CTAs (stacked full-width) ── */}
-      <div className="flex flex-col gap-3">
-        {/* Primary CTA */}
-        <Link
-          href={`/study?practice=true&concept=${id}`}
-          className="block w-full text-center rounded-full text-sm font-semibold transition-colors duration-200"
-          style={{
-            background: 'var(--d5-terracotta)',
-            color: 'var(--d5-paper)',
-            padding: '0.75rem 1rem',
-          }}
-        >
-          Practicar este concepto →
-        </Link>
+      {/* ── Tier 1: Primary CTA ── */}
+      <Link
+        href={`/study?practice=true&concept=${id}`}
+        className="block w-full text-center rounded-full text-sm font-semibold transition-colors duration-200"
+        style={{
+          background: 'var(--d5-terracotta)',
+          color: 'var(--d5-paper)',
+          padding: '0.75rem 1rem',
+        }}
+      >
+        Practicar este concepto →
+      </Link>
 
-        {/* Secondary CTAs */}
+      {/* ── Tier 2: Exercise type chips ── */}
+      {availableTypes.length > 0 && (
+        <div className="mt-4">
+          <p className="senda-eyebrow mb-2">Por tipo</p>
+          <div className="flex flex-wrap gap-2">
+            {availableTypes.map(({ type, label }) => (
+              <Link
+                key={type}
+                href={`/study?concept=${id}&types=${type}&practice=true`}
+                className="inline-flex items-center rounded-full text-xs font-medium transition-colors duration-200 hover:bg-[#C4522E]/15"
+                style={{
+                  color: 'var(--d5-terracotta)',
+                  background: 'rgba(196,82,46,0.08)',
+                  padding: '0.375rem 0.75rem',
+                }}
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Tier 3: Secondary navigation links ── */}
+      <div className="flex flex-col gap-2 mt-4">
         <Link
           href={`/write?suggested=${id}`}
-          className="block w-full text-center rounded-full text-sm font-medium transition-colors duration-200 hover:bg-[#C4522E]/10"
-          style={{
-            border: '1.5px solid rgba(196,82,46,0.3)',
-            color: 'var(--d5-terracotta)',
-            padding: '0.625rem 1rem',
-          }}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--d5-warm)] hover:text-[var(--d5-terracotta)] transition-colors duration-200"
         >
-          Escritura libre
+          <Pencil className="h-3.5 w-3.5" />
+          Escritura libre →
         </Link>
         <Link
           href={`/tutor?concept=${id}`}
-          className="block w-full text-center rounded-full text-sm font-medium transition-colors duration-200 hover:bg-[#C4522E]/10"
-          style={{
-            border: '1.5px solid rgba(196,82,46,0.3)',
-            color: 'var(--d5-terracotta)',
-            padding: '0.625rem 1rem',
-          }}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--d5-warm)] hover:text-[var(--d5-terracotta)] transition-colors duration-200"
         >
-          Consultar tutor
+          <Bot className="h-3.5 w-3.5" />
+          Consultar tutor →
         </Link>
       </div>
-
-      {/* Exercise type pills (below CTAs, less prominent) */}
-      {availableTypes.length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-4">
-          {availableTypes.map(({ type, label }) => (
-            <Link
-              key={type}
-              href={`/study?concept=${id}&types=${type}&practice=true`}
-              className="text-xs font-medium rounded-full transition-colors duration-200 hover:bg-[#C4522E]/10"
-              style={{
-                color: 'var(--d5-terracotta)',
-                border: '1.5px solid rgba(196,82,46,0.3)',
-                padding: '0.375rem 0.75rem',
-                minHeight: '2.75rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-              }}
-            >
-              {label}
-            </Link>
-          ))}
-        </div>
-      )}
     </main>
   )
 }

@@ -733,6 +733,41 @@ Final order: Header → Separator → Mood pills → Tense label + colour toggle
 
 ---
 
+## 2026-03-11 — Concept Detail CTA Three-Tier Hierarchy
+
+### Problem
+The concept detail page (`/curriculum/[id]`) had 3 stacked full-width outlined/filled buttons (Practicar, Escritura libre, Consultar tutor) plus exercise type pills in a bordered row below — 8 competing tappable elements with false visual equivalence between practice/writing/tutor and exercise type pills over-promoted as CTAs.
+
+### Solution — Three-tier visual hierarchy
+
+**Tier 1 — Primary CTA (loud)**
+- Full-width `rounded-full` terracotta-fill button: "Practicar este concepto →"
+- Unchanged from previous — matches dashboard/verb detail pattern
+
+**Tier 2 — Exercise type chips (medium)**
+- `flex flex-wrap gap-2` inline chips with `.senda-eyebrow` "Por tipo" label
+- Subtle `bg-[rgba(196,82,46,0.08)]` background, no border, `rounded-full`, `text-xs font-medium`
+- `hover:bg-[#C4522E]/15` — visually subordinate drill-down filters, not CTAs
+
+**Tier 3 — Secondary navigation links (quiet)**
+- "Escritura libre →" and "Consultar tutor →" as plain text links (not buttons)
+- `text-[var(--d5-warm)]` colour — clearly de-emphasised vs terracotta
+- Lucide icons inline: `Pencil` for Escritura, `Bot` for Tutor
+- `hover:text-[var(--d5-terracotta)]` on hover for affordance
+
+### Files changed
+| File | Change |
+|---|---|
+| `src/app/curriculum/[id]/page.tsx` | Replaced stacked CTAs + bordered pills with three-tier layout |
+| `src/app/curriculum/[id]/__tests__/ConceptDetailPage.test.tsx` | Updated test to match new link text ("→" suffix) |
+
+### Verification
+- TypeScript: clean (pre-existing `.next/types` cache errors only)
+- Tests: 1358 passing (3 pre-existing GrammarFocusChip failures unrelated)
+- Visual: primary button stands alone; chips are clearly subordinate filters; text links are quiet secondary nav
+
+---
+
 ## Spec Sections Not Yet Implemented
 
 | Spec Section | Status | Notes |
