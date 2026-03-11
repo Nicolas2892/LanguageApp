@@ -912,3 +912,46 @@ Full in-sentence conjugation drill feature. Migrations 014 + 015 applied; all se
 - `/admin` hidden from SideNav + BottomNav via `HIDDEN_ROUTES` for **all** users including admins
 - Admin layout uses `return null` after `redirect()` calls to prevent null-dereference in tests (where `redirect` is mocked as `vi.fn()` and doesn't throw)
 - Stats joined in TypeScript (not Postgres RPCs) — acceptable at current scale
+
+---
+
+## D5 Brand: Verb List Page Alignment ✓ (2026-03)
+
+Aligned `/verbs` directory page with D5 brand system. Added UX improvements for filtering and scannability.
+
+### Visual changes
+- Page heading → `senda-heading`, subtitle → `senda-eyebrow` ("100 verbos de alta frecuencia")
+- CTA text → "Practicar →" (Spanish)
+- `BackgroundMagicS` watermark added; `relative overflow-hidden` wrapper
+- Bottom padding → `pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-10`
+- Mastery summary line under eyebrow: "X practicados · Y dominados" (computed server-side)
+- Letter group headers → `senda-eyebrow` class
+- Search input → `senda-input` class, Spanish placeholder "Buscar verbos...", primary-coloured icon when query active
+- Empty state → Spanish text in `senda-card` container
+
+### VerbCard changes
+- `bg-card rounded-xl border` → `senda-card animate-card-in` (staggered fade-in via `animationDelay` per card index, capped at 12)
+- Mastery dots: `bg-green-500` → `bg-primary` (terracotta)
+- Inline verb group badge → `VerbGroupChip` component
+- Added `style` prop for animation delay passthrough
+
+### New component: `VerbGroupChip`
+- `src/components/verbs/VerbGroupChip.tsx` — colour-coded pill mirroring `GrammarFocusChip` pattern
+- `-ar` → teal (`#386664`), `-er` → plum (`#69466E`), `-ir` → gold (`#8B7332`), `irregular` → clay (`#A8503C`)
+- Normalises DB values (`"ar"` → `"-ar"` key)
+
+### Filter chip system
+- Replaced single "Irregular only" toggle with 6-chip row: Todos · -AR · -ER · -IR · Irregulares · Favoritos
+- Active chip: `var(--d5-terracotta)` bg + `var(--d5-paper)` text; inactive: `var(--d5-pill-bg/text/border)` tokens
+- Group filters are mutually exclusive (clicking same chip toggles off → returns to Todos); Favoritos is independent toggle
+- Horizontal scroll on mobile (`overflow-x-auto`)
+
+### CSS additions
+- `@keyframes card-fade-in` + `.animate-card-in` — fade + translateY(8px), 200ms, `backwards` fill for stagger support
+- Added to `prefers-reduced-motion: reduce` suppression list
+
+### Tests (27 new)
+- `VerbGroupChip.test.tsx` — 7 tests (all groups, null/undefined, unknown, styling)
+- `VerbCard.test.tsx` — 8 tests (rendering, link, senda-card, primary dots, style prop)
+- `VerbDirectory.test.tsx` — 12 tests (all filters, search, empty state, stagger, chip rendering)
+- Fixed 3 pre-existing failures in `GrammarFocusChip.test.tsx` (updated assertions from old Tailwind names to current rgba colours)

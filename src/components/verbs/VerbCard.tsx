@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { VerbFavoriteButton } from './VerbFavoriteButton'
+import { VerbGroupChip } from './VerbGroupChip'
 
 interface MasteryDot {
   tense: string
@@ -13,6 +14,7 @@ interface Props {
   verbGroup: string
   favorited: boolean
   masteryDots: MasteryDot[]
+  style?: React.CSSProperties
 }
 
 /** A single dot per tense; filled (green) when accuracy ≥ 70%. */
@@ -25,7 +27,7 @@ function MasteryDots({ dots }: { dots: MasteryDot[] }) {
           title={`${d.tense.replace(/_/g, ' ')}: ${d.pct}%`}
           className={`inline-block h-2 w-2 rounded-full ${
             d.pct >= 70
-              ? 'bg-green-500'
+              ? 'bg-primary'
               : d.pct > 0
               ? 'bg-amber-400'
               : 'bg-muted-foreground/25'
@@ -36,20 +38,19 @@ function MasteryDots({ dots }: { dots: MasteryDot[] }) {
   )
 }
 
-export function VerbCard({ id, infinitive, english, verbGroup, favorited, masteryDots }: Props) {
+export function VerbCard({ id, infinitive, english, verbGroup, favorited, masteryDots, style }: Props) {
   return (
     <Link
       href={`/verbs/${infinitive}`}
-      className="relative bg-card rounded-xl border p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-2 min-h-[7rem]"
+      className="relative senda-card animate-card-in hover:shadow-md transition-shadow flex flex-col gap-2 min-h-[7rem]"
+      style={style}
     >
       <div className="flex items-start justify-between gap-1">
         <div>
           <p className="font-bold text-base">{infinitive}</p>
           <p className="text-xs text-muted-foreground">{english}</p>
         </div>
-        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0 mt-0.5">
-          -{verbGroup}
-        </span>
+        <VerbGroupChip group={verbGroup} />
       </div>
       <div className="flex items-center justify-between mt-auto">
         <MasteryDots dots={masteryDots} />

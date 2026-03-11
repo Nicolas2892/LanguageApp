@@ -7,21 +7,21 @@ describe('GrammarFocusChip', () => {
     render(<GrammarFocusChip focus="indicative" />)
     const chip = screen.getByText('Indicative')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('sky')
+    expect(chip.className).toContain('#4A6741')
   })
 
   it('renders "Subjunctive" chip for subjunctive focus', () => {
     render(<GrammarFocusChip focus="subjunctive" />)
     const chip = screen.getByText('Subjunctive')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('violet')
+    expect(chip.className).toContain('#7B5272')
   })
 
   it('renders "Both moods" chip for both focus', () => {
     render(<GrammarFocusChip focus="both" />)
     const chip = screen.getByText('Both moods')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('amber')
+    expect(chip.className).toContain('#8B7332')
   })
 
   it('renders nothing when focus is null', () => {
