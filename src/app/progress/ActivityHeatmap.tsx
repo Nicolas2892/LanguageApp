@@ -10,11 +10,11 @@ interface Props {
   weeks?: number
 }
 
-function getColor(count: number) {
-  if (count === 0) return 'bg-muted'
-  if (count <= 2) return 'bg-green-200'
-  if (count <= 5) return 'bg-green-400'
-  return 'bg-green-600'
+function getColorStyle(count: number): { className?: string; style?: React.CSSProperties } {
+  if (count === 0) return { className: 'bg-muted' }
+  if (count <= 2) return { style: { background: 'var(--d5-muted)' } }
+  if (count <= 5) return { style: { background: 'var(--d5-warm)' } }
+  return { style: { background: 'var(--d5-terracotta)' } }
 }
 
 const DAY_LABELS = ['Mon', '', 'Wed', '', 'Fri', '', '']
@@ -81,7 +81,8 @@ export function ActivityHeatmap({ data, weeks = 14 }: Props) {
                   <div
                     key={weekIdx}
                     title={`${cell.date}: ${cell.count} exercise${cell.count !== 1 ? 's' : ''}`}
-                    className={`w-3 h-3 rounded-sm ${getColor(cell.count)}`}
+                    className={`w-3 h-3 rounded-sm ${getColorStyle(cell.count).className ?? ''}`}
+                    style={getColorStyle(cell.count).style}
                   />
                 )
               })}
@@ -92,9 +93,10 @@ export function ActivityHeatmap({ data, weeks = 14 }: Props) {
       {/* Legend */}
       <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
         <span>Less</span>
-        {['bg-muted', 'bg-green-200', 'bg-green-400', 'bg-green-600'].map((c) => (
-          <div key={c} className={`w-3 h-3 rounded-sm ${c}`} />
-        ))}
+        <div className="w-3 h-3 rounded-sm bg-muted" />
+        <div className="w-3 h-3 rounded-sm" style={{ background: 'var(--d5-muted)' }} />
+        <div className="w-3 h-3 rounded-sm" style={{ background: 'var(--d5-warm)' }} />
+        <div className="w-3 h-3 rounded-sm" style={{ background: 'var(--d5-terracotta)' }} />
         <span>More</span>
       </div>
     </div>

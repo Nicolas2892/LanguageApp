@@ -7,18 +7,11 @@ function Bone({ className, style }: { className: string; style?: React.CSSProper
 
 export default function CurriculumLoading() {
   return (
-    <main className="max-w-3xl mx-auto p-6 md:p-10 space-y-6 pb-24 lg:pb-10">
+    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-6 pb-24 lg:pb-10">
       {/* Header skeleton */}
       <div className="space-y-2">
         <Bone className="h-8 w-40" />
         <Bone className="h-4 w-56 rounded-lg" />
-      </div>
-
-      {/* Filter tabs skeleton */}
-      <div className="flex gap-3">
-        {[60, 44, 56, 60].map((w, i) => (
-          <Bone key={i} className={`h-8 rounded-full`} style={{ width: w }} />
-        ))}
       </div>
 
       {/* Module accordion skeletons — no border, surface fill only */}

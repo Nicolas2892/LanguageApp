@@ -3,9 +3,12 @@ import { render, screen } from '@testing-library/react'
 import { VerbTenseMastery } from '../VerbTenseMastery'
 
 describe('VerbTenseMastery', () => {
-  it('renders nothing when summaries is empty', () => {
-    const { container } = render(<VerbTenseMastery summaries={[]} />)
-    expect(container.firstChild).toBeNull()
+  it('renders empty state when summaries is empty', () => {
+    render(<VerbTenseMastery summaries={[]} />)
+    expect(screen.getByText('Verbos por Tiempo')).toBeInTheDocument()
+    expect(
+      screen.getByText('Completa ejercicios de verbos para ver tu progreso.')
+    ).toBeInTheDocument()
   })
 
   it('renders a row for each tense summary', () => {
@@ -17,13 +20,15 @@ describe('VerbTenseMastery', () => {
 
     expect(screen.getByText('Presente de Indicativo')).toBeInTheDocument()
     expect(screen.getByText('Pretérito Indefinido')).toBeInTheDocument()
-    expect(screen.getByText('80/100 · 80%')).toBeInTheDocument()
-    expect(screen.getByText('30/50 · 60%')).toBeInTheDocument()
+    expect(screen.getByText('80%')).toBeInTheDocument()
+    expect(screen.getByText('60%')).toBeInTheDocument()
+    expect(screen.getByText('100 intentos')).toBeInTheDocument()
+    expect(screen.getByText('50 intentos')).toBeInTheDocument()
   })
 
-  it('renders section heading', () => {
+  it('renders section eyebrow', () => {
     const summaries = [{ tense: 'imperfect', correct: 5, attempts: 10, pct: 50 }]
     render(<VerbTenseMastery summaries={summaries} />)
-    expect(screen.getByText('Verb Conjugation Mastery')).toBeInTheDocument()
+    expect(screen.getByText('Verbos por Tiempo')).toBeInTheDocument()
   })
 })

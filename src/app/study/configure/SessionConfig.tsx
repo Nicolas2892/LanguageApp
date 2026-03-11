@@ -16,11 +16,11 @@ const EXERCISE_TYPES = [
 const SESSION_SIZES = [5, 10, 15, 20, 25] as const
 const DEFAULT_SIZE = 10
 
-// Shared eyebrow style — uses D5.muted (lighter than dashboard warm eyebrows)
+// Shared eyebrow style — uses adaptive --d5-eyebrow token
 const EYEBROW: React.CSSProperties = {
   fontSize: 9, fontWeight: 700, letterSpacing: '0.12em',
-  textTransform: 'uppercase', color: 'var(--d5-muted)',
-  marginBottom: 10,
+  textTransform: 'uppercase', color: 'var(--d5-eyebrow)',
+  marginBottom: 8,
   fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
 }
 
@@ -74,10 +74,10 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
   }
 
   const modes: Array<{ id: SessionMode; title: string; subtitle: string }> = [
-    { id: 'srs',      title: 'Repaso Diario',    subtitle: `${dueCount} concepto${dueCount !== 1 ? 's' : ''} pendientes hoy` },
+    { id: 'srs',      title: 'Repaso Diario',    subtitle: `${dueCount} concepto${dueCount !== 1 ? 's' : ''} pendientes hoy`, boldNum: dueCount },
     { id: 'practice', title: 'Práctica Abierta', subtitle: 'Todo el catálogo · sin límite SRS' },
     ...(mistakeConceptCount > 0
-      ? [{ id: 'review' as SessionMode, title: 'Revisar Errores', subtitle: 'Conceptos donde fallaste' }]
+      ? [{ id: 'review' as SessionMode, title: 'Revisar Errores', subtitle: `${mistakeConceptCount} concepto${mistakeConceptCount !== 1 ? 's' : ''} con errores`, boldNum: mistakeConceptCount }]
       : []),
   ]
 
@@ -86,26 +86,29 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
     fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
     whiteSpace: 'nowrap', flexShrink: 0,
     minHeight: 44, display: 'flex', alignItems: 'center',
+    transition: 'background 200ms ease-out, color 200ms ease-out',
   }
 
   return (
     <div>
       {/* ── Mode section ─────────────────────────────────────────────────── */}
-      <div className="px-[18px]">
+      <div className="px-4">
         <p style={EYEBROW}>Modo de estudio</p>
         <div className="flex flex-col gap-2">
           {modes.map((mode) => (
             <button
               key={mode.id}
               onClick={() => setSessionMode(mode.id)}
+              className="senda-focus-ring"
               style={{
                 position: 'relative', textAlign: 'left',
-                borderRadius: 12, padding: '10px 14px', border: 'none', cursor: 'pointer',
-                background: sessionMode === mode.id ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.02)',
+                borderRadius: '0.75rem', padding: '12px 16px', border: 'none', cursor: 'pointer',
+                background: sessionMode === mode.id ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
+                transition: 'background 200ms ease-out, color 200ms ease-out',
               }}
             >
               {sessionMode === mode.id && (
-                <div style={{ position: 'absolute', top: 10, right: 12 }}>
+                <div style={{ position: 'absolute', top: 12, right: 12 }}>
                   <svg viewBox="0 0 18 8" width={13} height={6}>
                     <path
                       d="M 1 5 C 4 2, 7 6, 11 4 C 14 2, 17 4, 17 4"
@@ -115,7 +118,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
                 </div>
               )}
               <div style={{
-                fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 14,
+                fontFamily: 'var(--font-lora), serif', fontWeight: 600, fontStyle: 'italic', fontSize: 14,
                 color: sessionMode === mode.id ? 'var(--d5-paper)' : 'var(--d5-ink)',
                 marginBottom: 2,
               }}>
@@ -123,7 +126,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
               </div>
               <div style={{
                 fontSize: 10,
-                color: sessionMode === mode.id ? 'rgba(253,252,249,0.75)' : 'var(--d5-muted)',
+                color: sessionMode === mode.id ? 'var(--d5-paper-75)' : 'var(--d5-muted)',
                 fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
               }}>
                 {mode.subtitle}
@@ -139,16 +142,17 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
       {sessionMode !== 'review' && (
         <>
           {/* Module pills — multi-select; empty = all modules */}
-          <div className="px-[18px]">
+          <div className="px-4">
             <p style={EYEBROW}>Módulo</p>
-            <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
               <button
                 onClick={() => setSelectedModules([])}
+                className="senda-focus-ring"
                 style={{
                   ...pillBase,
                   padding: '0 16px',
-                  background: selectedModules.length === 0 ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
-                  color: selectedModules.length === 0 ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
+                  background: selectedModules.length === 0 ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
+                  color: selectedModules.length === 0 ? 'var(--d5-paper)' : 'var(--d5-pill-text)',
                   fontSize: 12, fontWeight: 700,
                 }}
               >
@@ -160,11 +164,12 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
                   <button
                     key={mod.id}
                     onClick={() => toggleModule(mod.id)}
+                    className="senda-focus-ring"
                     style={{
                       ...pillBase,
-                      padding: '0 14px',
-                      background: active ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
-                      color: active ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
+                      padding: '0 16px',
+                      background: active ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
+                      color: active ? 'var(--d5-paper)' : 'var(--d5-pill-text)',
                       fontSize: 12, maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis',
                     }}
                   >
@@ -176,19 +181,20 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
           </div>
 
           {/* Session size pills */}
-          <div className="px-[18px] mt-4">
+          <div className="px-4 mt-4">
             <p style={EYEBROW}>¿Cuántos ejercicios?</p>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {SESSION_SIZES.map((size) => (
                 <button
                   key={size}
                   onClick={() => setSessionSize(size)}
+                  className="senda-focus-ring"
                   style={{
                     ...pillBase,
-                    padding: '0 18px',
-                    background: sessionSize === size ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
-                    color: sessionSize === size ? 'var(--d5-paper)' : 'rgba(26,17,8,0.6)',
-                    fontSize: 12, fontWeight: sessionSize === size ? 700 : 400,
+                    padding: '0 16px',
+                    background: sessionSize === size ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
+                    color: sessionSize === size ? 'var(--d5-paper)' : 'var(--d5-pill-text)',
+                    fontSize: 12, fontWeight: sessionSize === size ? 700 : 500,
                   }}
                 >
                   {size}
@@ -198,23 +204,25 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
           </div>
 
           {/* Exercise type grid */}
-          <div className="px-[18px] mt-4">
+          <div className="px-4 mt-4">
             <p style={EYEBROW}>Tipos de ejercicio</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
               {EXERCISE_TYPES.map((type) => {
                 const active = selectedTypes.includes(type.value)
                 return (
                   <button
                     key={type.value}
                     onClick={() => toggleType(type.value)}
+                    className="senda-focus-ring"
                     style={{
-                      padding: '12px 8px', borderRadius: 8, textAlign: 'center',
+                      padding: '12px 8px', borderRadius: '0.5rem', textAlign: 'center',
                       border: 'none', cursor: 'pointer', minHeight: 44,
                       fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
                       fontSize: 11,
-                      background: active ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
-                      fontWeight: active ? 700 : 400,
-                      color: active ? 'var(--d5-paper)' : 'rgba(26,17,8,0.4)',
+                      background: active ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
+                      fontWeight: active ? 700 : 500,
+                      color: active ? 'var(--d5-paper)' : 'var(--d5-pill-text-soft)',
+                      transition: 'background 200ms ease-out, color 200ms ease-out',
                     }}
                   >
                     {type.label}
@@ -229,14 +237,16 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
       <WindingPathSeparator />
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <div className="px-[18px] pt-2 pb-5">
+      <div className="px-4 pt-2 pb-5">
         <button
           onClick={handleStart}
+          className="senda-focus-ring"
           style={{
             background: 'var(--d5-terracotta)', color: 'var(--d5-paper)',
-            border: 'none', borderRadius: 99, padding: '13px 0', width: '100%',
+            border: 'none', borderRadius: 99, padding: '12px 0', width: '100%',
             fontWeight: 700, fontSize: 14, cursor: 'pointer',
             fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
+            transition: 'opacity 200ms ease-out',
           }}
         >
           Empezar Sesión →

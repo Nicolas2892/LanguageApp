@@ -90,12 +90,10 @@ export default async function DashboardPage() {
                 <span className="inline-block h-2 w-2 rounded-full bg-[var(--d5-terracotta)] animate-senda-pulse ml-2 align-middle" />
               )}
             </p>
-            <p className="text-xs leading-relaxed">
-              <span className="font-bold text-foreground">{dueCount}</span>
-              {' '}<span style={{ color: 'var(--d5-warm)' }}>Listo{dueCount !== 1 ? 's' : ''}</span>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
+              {dueCount} Listo{dueCount !== 1 ? 's' : ''}
               <span style={{ color: 'var(--d5-muted)' }}> · </span>
-              <span className="font-bold text-foreground">{newConceptsCount}</span>
-              {' '}<span style={{ color: 'var(--d5-warm)' }}>Esperando</span>
+              {newConceptsCount} Esperando
             </p>
             <Button asChild className="w-full rounded-full font-bold" style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', border: 'none' }}>
               <Link href="/study">Empezar Repaso</Link>

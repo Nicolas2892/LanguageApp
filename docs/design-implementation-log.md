@@ -266,13 +266,256 @@ Animation classes:
 BackgroundMagicS: muted stroke → warm stroke, 0.03 → 0.05 opacity.
 WindingPathSeparator: 0.50 → 0.15 opacity, echo 0.10 → 0.04.
 
-### LEVEL_CHIP — D5 Warm Palette
+### LEVEL_CHIP — Warm Yellow (updated 2026-03-11)
 
-All three CEFR levels (B1/B2/C1) use the same warm token:
+All three CEFR levels (B1/B2/C1) use a unified Warm Yellow chip:
 ```
-bg-[#8C6A3F]/12 text-[#1A1108] dark:bg-[#8C6A3F]/12 dark:text-[#B8AA99]
+bg-[#fef9c3] text-[#1A1108] dark:bg-[#fef9c3] dark:text-[#1A1108]
 ```
-Previously used distinct Tailwind colours (green/amber/purple); unified under D5.
+Previously used `bg-[#8C6A3F]/12`; updated to match master spec level chip rule. Border class removed from `LevelChip.tsx`.
+
+---
+
+## Dashboard — Additional Spec Fixes (2026-03-11)
+
+**Files changed:** `src/lib/constants.ts`, `src/components/LevelChip.tsx`, `src/components/SideNav.tsx`, `src/app/globals.css`, `src/components/__tests__/LevelChip.test.tsx`, `src/app/dashboard/page.tsx`
+
+### Fix 1: LevelChip unified Warm Yellow background (Master Spec — Level Chips)
+
+`LEVEL_CHIP` in `constants.ts` changed from `bg-[#8C6A3F]/12` to `bg-[#fef9c3]` with `text-[#1A1108]` in both light and dark mode. Removed `border` class from `LevelChip.tsx`. Affects dashboard, curriculum, and account pages.
+
+### Fix 2: SideNav hardcoded RGBA → CSS tokens (Spec §2)
+
+Replaced 4 hardcoded `rgba(184,170,153,...)` values with new adaptive CSS variables:
+- `--d5-nav-border` — light `rgba(184,170,153,0.4)` / dark `rgba(184,170,153,0.25)`
+- `--d5-nav-active-bg` — light `rgba(184,170,153,0.25)` / dark `rgba(184,170,153,0.15)`
+
+### Fix 3: SideNav inactive font weight 400 → 500 (Spec §3)
+
+DM Sans body mandate requires weight 500 for labels. Inactive nav items and account link updated.
+
+### Fix 4: SideNav nav gap base-4 grid (Spec §9)
+
+`gap-0.5` (2px) → `gap-1` (4px) for base-4 grid compliance.
+
+### Fix 5: Dashboard "Listos / Esperando" text style unified
+
+Removed `font-bold text-foreground` from the due/new counts so numbers match the same `var(--d5-warm)` colour and normal weight as labels.
+
+### Fix 6: BottomNav icons — brand preview SVGs (Spec §5)
+
+Replaced Lucide `Book` and `Bot` icons with brand-preview custom SVG paths for Study and Tutor tabs. Inactive tab colour set to `#9ca3af`.
+
+---
+
+## Study Configure Page — Spec Compliance (2026-03-11)
+
+**Files changed:** `src/app/study/configure/page.tsx`, `src/app/study/configure/SessionConfig.tsx`, `src/app/globals.css`
+
+### Fix 1: Spacing grid violations → base-4 (Spec §9)
+
+10 arbitrary pixel values replaced:
+- `px-[18px]` → `px-4` (16px) — 6 occurrences across both files
+- `pb-[10px]` → `pb-3` (12px)
+- `gap: 6` → `gap: 8` — 3 occurrences (module pills, size pills, type grid)
+- `padding: '10px 14px'` → `'12px 16px'`
+- `padding: '0 14px'` → `'0 16px'`
+- `padding: '0 18px'` → `'0 16px'`
+- `padding: '13px 0'` → `'12px 0'` (CTA button)
+- `marginBottom: 10` → `8` (eyebrow style)
+
+### Fix 2: Hardcoded RGBA → CSS tokens (Spec §2)
+
+Added 4 new adaptive CSS tokens to `globals.css` (light / dark):
+| Token | Light | Dark |
+|---|---|---|
+| `--d5-pill-bg` | `rgba(26,17,8,0.03)` | `rgba(253,252,249,0.06)` |
+| `--d5-pill-text` | `rgba(26,17,8,0.6)` | `rgba(253,252,249,0.6)` |
+| `--d5-pill-text-soft` | `rgba(26,17,8,0.4)` | `rgba(253,252,249,0.4)` |
+| `--d5-paper-75` | `rgba(253,252,249,0.75)` | `rgba(253,252,249,0.55)` |
+
+Replaced 10 inline hardcoded `rgba(26,17,8,...)` and `rgba(253,252,249,...)` values.
+
+### Fix 3: Lora font weight 600 (Spec §3)
+
+Added `fontWeight: 600` to page title h1 and mode card titles (both use Lora italic).
+
+### Fix 4: Inactive font weight 400 → 500 (Spec §3)
+
+Session size pills and exercise type grid inactive state changed from `fontWeight: 400` to `500`.
+
+### Fix 5: Eyebrow adaptive token (Spec §3)
+
+Eyebrow style changed from `color: 'var(--d5-muted)'` to `color: 'var(--d5-eyebrow)'` — adapts warm (light) / muted (dark).
+
+### Fix 6: Focus-visible rings on all interactive elements (Spec §9)
+
+`senda-focus-ring` class added to: mode cards, module pills, session size pills, exercise type grid buttons, CTA button (7+ elements total).
+
+### Fix 7: Transition timing on all interactive elements (Spec §8)
+
+`transition: 'background 200ms ease-out, color 200ms ease-out'` added to `pillBase` style, mode card buttons, exercise type buttons, and CTA button.
+
+### Fix 8: Border-radius px → rem (Spec §3)
+
+- Mode cards: `borderRadius: 12` → `'0.75rem'`
+- Exercise type grid: `borderRadius: 8` → `'0.5rem'`
+
+### Fix 9: Data locking — bold numerals (Spec §6)
+
+Mistake review mode subtitle changed from static "Conceptos donde fallaste" to `"${mistakeConceptCount} concepto(s) con errores"`, matching the SRS mode's count display pattern.
+
+---
+
+## Curriculum Pages — D5 Master Spec Compliance (2026-03-11)
+
+**Files changed:** `src/app/globals.css`, `src/app/curriculum/CurriculumClient.tsx`, `src/app/curriculum/[id]/page.tsx`, `src/app/curriculum/loading.tsx`, `src/lib/mastery/badge.ts` (new)
+
+### Fix 1: New adaptive CSS tokens (Spec §2, §10.1)
+
+Added two new adaptive tokens to `globals.css`:
+
+| Token | Light | Dark | Usage |
+|---|---|---|---|
+| `--d5-line` | `rgba(26,17,8,0.12)` | `rgba(184,170,153,0.15)` | Timeline lines, progress bar tracks |
+| `--d5-border-subtle` | `rgba(26,17,8,0.15)` | `rgba(184,170,153,0.2)` | Chip borders, node outlines |
+
+### Fix 2: Page heading dark mode + weight (Spec §3, §10.1)
+
+`CurriculumClient.tsx` h1 replaced inline Lora styles (`fontWeight: 700`, `color: var(--d5-ink)`) with `className="senda-heading"` + `fontSize: 26`. Fixes dark mode visibility (`.senda-heading` swaps colour) and corrects weight to 600 per spec.
+
+### Fix 3: Concept title dark mode (Spec §10.1)
+
+Concept row title in `CurriculumClient.tsx` changed from `color: 'var(--d5-ink)'` to `className="text-foreground"` — auto-adapts in dark mode.
+
+### Fix 4: "Nuevo" mastery badge dark mode (Spec §10.1)
+
+"Nuevo" badge used hardcoded `rgba(26,17,8,...)` for text and border — invisible in dark mode. Changed to:
+- Text: `var(--d5-pill-text-soft)` (40% ink → 40% paper in dark)
+- Border: `var(--d5-border-subtle)` (15% ink → 20% muted in dark)
+
+### Fix 5: Timeline lines & nodes — hardcoded RGBA → tokens (Spec §2, §10.1)
+
+| Element | Before | After |
+|---|---|---|
+| Line above/below node | `rgba(26,17,8,0.12)` | `var(--d5-line)` |
+| Upcoming node border | `rgba(26,17,8,0.25)` | `var(--d5-border-subtle)` |
+| "Próximamente" chip text | `rgba(26,17,8,0.35)` | `var(--d5-pill-text-soft)` |
+| Meta chip border ("X/Y Dominados") | `rgba(26,17,8,0.15)` | `var(--d5-border-subtle)` |
+| Chevron colour | `rgba(26,17,8,0.4)` | `var(--d5-pill-text-soft)` |
+| Progress bar track | `rgba(26,17,8,0.08)` | `var(--d5-line)` |
+
+### Fix 6: Concept detail page — `var(--d5-ink)` → `text-foreground` (Spec §10.1)
+
+Four inline `color: 'var(--d5-ink)'` replaced with `className="text-foreground"`:
+- Explanation paragraph (line 224)
+- Example Spanish text (line 250)
+- SRS "Estado de repaso" label (line 281)
+- Repetitions count number (line 286)
+
+### Fix 7: Shared mastery module — eliminate duplication
+
+Extracted `getMasteryState()`, `MasteryState` type, and `MASTERY_BADGE` config into new `src/lib/mastery/badge.ts`. Both `CurriculumClient.tsx` and `[id]/page.tsx` now import from this shared module instead of maintaining duplicate definitions.
+
+### Fix 8: `animate-page-in` on both pages (Spec §8)
+
+Added `animate-page-in` class to `<main>` wrapper on both the curriculum list and concept detail pages.
+
+### Fix 9: Loading skeleton fixes
+
+- `max-w-3xl` → `max-w-2xl` to match actual page width
+- Removed stale "filter tabs" skeleton row (filter tabs were removed from the page in a prior refactor)
+
+---
+
+## Progress Page — D5 Mockup Alignment (2026-03-11)
+
+**Files changed:** `src/app/progress/page.tsx`, `src/components/verbs/VerbTenseMastery.tsx`, `src/app/progress/ActivityHeatmap.tsx`, `src/components/verbs/__tests__/VerbTenseMastery.test.tsx`
+
+### Restructure 1: Header simplified (Spec §3)
+
+- Title: "Progreso" → "Tu Progreso"
+- Subtitle: "Tu Camino De Aprendizaje · {month} {year}" → "Nivel {level} · {totalAttempts} ejercicios"
+- Removed level chip badge from header — mockup doesn't include it
+
+### Restructure 2: Stats row — icons removed, labels restyled
+
+Removed `Flame`, `CheckCircle`, `Target` icons from the 3-column stat cards. Labels changed from single-line title case to multi-line lowercase matching mockup:
+- Streak: "Días Seguidos" → "días\nseguidos"
+- Mastered: "Dominados" → "de {total}\ndominados"
+- Accuracy: "Precisión" → "precisión\nglobal"
+
+Uses `whiteSpace: 'pre-line'` for multi-line rendering.
+
+### Restructure 3: Sections removed (reducing visual clutter + DB load)
+
+| Removed section | Component/data | Reason |
+|---|---|---|
+| "Total" all-time stats | `allTimeAttemptCount`, `allTimeSessions` queries; `ListChecks`, `Clock` icons | Heavy data, not in mockup |
+| "Ejercicios Por Tipo" | `ExerciseTypeChart` component; `exerciseTypeCounts` computation | Not in mockup |
+| "Desglose De Habilidades" | `AccuracyChart` component; `bestType`/`worstType`/`showInsight` | Not in mockup |
+
+Removed imports: `AccuracyChart`, `ExerciseTypeChart`, `Flame`, `CheckCircle`, `Target`, `ListChecks`, `Clock`, `LEVEL_CHIP`, `ExerciseAccuracy`, `ExerciseTypeCount`.
+
+Files kept on disk for potential reuse — only imports removed from `page.tsx`.
+
+### Restructure 4: CEFR Journey section — bare layout
+
+- Removed `senda-card` wrapper → bare `<section>` with `px-1` padding
+- Title replaced with eyebrow: `senda-eyebrow` class, colour `var(--d5-muted)`, text "Tu Camino CEFR"
+- Removed dashed connector lines between levels (`border-l-2 border-dashed`)
+- Removed duplicate level chip inside section
+- Removed percentage row below each bar
+- Thinner bars: `h-2` → `h-1` (4px)
+- Track background: `bg-muted` → `color-mix(in oklch, var(--d5-muted) 20%, transparent)`
+- Labels: "{m} / {t} Conceptos" → "{m} / {t} dominados"
+- Removed B2 hint text and related computation (`showB2Hint`, `b1Pct`, `b1Remaining`)
+
+### Restructure 5: Study Consistency section — restyled, kept
+
+- Heading: replaced Lora italic `<h2>` with `senda-eyebrow` class in `var(--d5-muted)`
+- Removed `senda-card` wrapper around heatmap → bare layout
+- Session/days stats restyled with `--d5-muted` / `--d5-warm` tokens instead of `text-muted-foreground` / `text-foreground`
+
+### Restructure 6: ActivityHeatmap — D5 palette (Spec §2)
+
+Replaced `bg-green-200/400/600` (violated D5 "no green for brand" rule) with D5 warm palette:
+
+| Count | Before | After |
+|---|---|---|
+| 0 | `bg-muted` | `bg-muted` (unchanged) |
+| 1–2 | `bg-green-200` | `var(--d5-muted)` |
+| 3–5 | `bg-green-400` | `var(--d5-warm)` |
+| 6+ | `bg-green-600` | `var(--d5-terracotta)` |
+
+Refactored `getColor()` → `getColorStyle()` returning `{ className?, style? }` to support CSS custom properties via inline style (Tailwind classes can't reference CSS vars dynamically). Legend updated to match.
+
+### Restructure 7: VerbTenseMastery — full restyle
+
+| Aspect | Before | After |
+|---|---|---|
+| Title | `<h2>` "Verb Conjugation Mastery" | `senda-eyebrow` "Verbos por Tiempo" in `var(--d5-muted)` |
+| Wrapper | `bg-card rounded-xl border p-5 shadow-sm` | Bare `<section>` with `px-1` |
+| Bar height | `h-2` | `h-[3px]` |
+| Bar track | `bg-muted` | `color-mix(in oklch, var(--d5-muted) 20%, transparent)` |
+| Bar colour (≥70%) | `bg-green-500` | `var(--d5-muted)` |
+| Bar colour (<70%) | `bg-amber-400` / `bg-rose-400` | `var(--d5-terracotta)` |
+| Right label | `{correct}/{attempts} · {pct}%` | `{pct}%` (font-weight 600) |
+| Sub-bar text | — | `{attempts} intentos` (9px, muted) |
+| Empty state | Returns `null` | Italic serif: "Completa ejercicios de verbos para ver tu progreso." |
+
+### Restructure 8: Footer added
+
+Centered italic serif text at bottom: "tu senda continúa…" with `color-mix(in oklch, var(--d5-ink) 25%, transparent)`.
+
+### Test updates
+
+`VerbTenseMastery.test.tsx`:
+- Empty state test: now checks for eyebrow + italic serif message (previously asserted `null`)
+- Data rows: assertions updated for new `{pct}%` and `{attempts} intentos` format (previously `{correct}/{attempts} · {pct}%`)
+- Heading test: "Verb Conjugation Mastery" → "Verbos por Tiempo"
+
+**Test suite: 1348 tests across 57 files — all passing.**
 
 ---
 
@@ -280,10 +523,11 @@ Previously used distinct Tailwind colours (green/amber/purple); unified under D5
 
 | Spec Section | Status | Notes |
 |---|---|---|
-| §3 rem-only typography | Partial | Account page fully converted; other pages still have px inline styles |
+| §3 rem-only typography | Partial | Account page fully converted; study configure still uses px inline styles for font-size |
 | §6 Form fills (Dark Cream) | Partial | Account page fully converted (`.senda-input` class); auth + onboarding forms not audited |
 | §7 Accordion chevrons | Not started | Curriculum accordions lack right-aligned chevron affordance |
 | §7 Modal shadows | Not audited | Need to verify modals use deeper shadow formula |
-| §9 Base-4 spacing | Partial | Most spacing follows Tailwind scale; some arbitrary values remain |
-| §9 44px touch targets | Partial | Account page theme pills fixed (44px min-height); other pages not audited |
+| §9 Base-4 spacing | Done | Dashboard + account + study configure all on grid |
+| §9 44px touch targets | Done | Account theme pills, study configure pills all ≥ 44px |
 | §9 max-w-prose | Not started | Extended text blocks (tutor chat, explanations) not constrained |
+| §9 Focus states | Partial | Account + study configure done; other pages not audited |

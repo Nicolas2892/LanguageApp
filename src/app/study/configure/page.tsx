@@ -90,7 +90,7 @@ export default async function ConfigurePage() {
   return (
     <main className="max-w-md mx-auto pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-8">
       {/* Compact header */}
-      <div className="flex items-center justify-between px-[18px] pt-4 pb-2">
+      <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <Link
           href="/dashboard"
           className="text-[11px] font-semibold"
@@ -103,10 +103,11 @@ export default async function ConfigurePage() {
       </div>
 
       {/* Title */}
-      <div className="px-[18px] pt-1 pb-[10px]">
+      <div className="px-4 pt-1 pb-3">
         <h1
           style={{
             fontFamily: 'var(--font-lora), serif',
+            fontWeight: 600,
             fontStyle: 'italic',
             fontSize: 22,
             lineHeight: 1.2,

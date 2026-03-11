@@ -2,7 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { SpeakButton } from '@/components/SpeakButton'
-import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { getMasteryState, MASTERY_BADGE } from '@/lib/mastery/badge'
 import { ChevronLeft, CheckCircle2 } from 'lucide-react'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { LevelChip } from '@/components/LevelChip'
@@ -15,28 +15,6 @@ import { TENSE_LABELS } from '@/lib/verbs/constants'
 import { ConjugationInsightTable, type ConjugationRow } from './ConjugationInsightTable'
 
 type Example = { es: string; en: string }
-type MasteryState = 'mastered' | 'learning' | 'new'
-
-function getMasteryState(intervalDays: number | undefined): MasteryState {
-  if (intervalDays === undefined) return 'new'
-  if (intervalDays >= MASTERY_THRESHOLD) return 'mastered'
-  return 'learning'
-}
-
-const MASTERY_BADGE: Record<MasteryState, { label: string; style: React.CSSProperties }> = {
-  mastered: {
-    label: 'Dominado',
-    style: { background: 'rgba(196,82,46,0.1)', color: 'var(--d5-terracotta)', border: '1px solid rgba(196,82,46,0.2)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 600 },
-  },
-  learning: {
-    label: 'Aprendiendo',
-    style: { background: 'rgba(59,130,246,0.08)', color: 'rgb(59,130,246)', border: '1px solid rgba(59,130,246,0.2)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 600 },
-  },
-  new: {
-    label: 'Nuevo',
-    style: { background: 'transparent', color: 'rgba(26,17,8,0.4)', border: '1px solid rgba(26,17,8,0.15)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 600 },
-  },
-}
 
 const EXERCISE_TYPES = [
   { type: 'gap_fill',         label: 'Completar espacios' },
@@ -193,7 +171,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
 
   return (
     <main
-      className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10"
+      className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 animate-page-in"
       style={{ position: 'relative', overflow: 'hidden' }}
     >
       <BackgroundMagicS opacity={0.05} />
@@ -243,7 +221,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         </div>
 
         {/* Explanation */}
-        <p style={{ fontSize: 14, color: 'var(--d5-ink)', lineHeight: 1.6 }}>
+        <p className="text-foreground" style={{ fontSize: 14, lineHeight: 1.6 }}>
           {concept.explanation}
         </p>
 
@@ -269,7 +247,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontSize: 16, fontWeight: 500, color: 'var(--d5-ink)' }}>{ex.es}</span>
+                  <span className="text-foreground" style={{ fontSize: 16, fontWeight: 500 }}>{ex.es}</span>
                   <SpeakButton text={ex.es} />
                 </div>
                 <p style={{ fontSize: 13, color: 'var(--d5-warm)', marginTop: 2 }}>{ex.en}</p>
@@ -300,12 +278,12 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         {/* SRS row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--d5-ink)' }}>Estado de repaso</p>
+            <p className="text-foreground" style={{ fontSize: 13, fontWeight: 500 }}>Estado de repaso</p>
             <p style={{ fontSize: 12, color: 'var(--d5-warm)', marginTop: 2 }}>{srsStatus}</p>
           </div>
           {progress && (
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--d5-ink)', lineHeight: 1 }}>{progress.repetitions}</p>
+              <p className="text-foreground" style={{ fontSize: 20, fontWeight: 700, lineHeight: 1 }}>{progress.repetitions}</p>
               <p style={{ fontSize: 11, color: 'var(--d5-warm)', marginTop: 2 }}>
                 {progress.repetitions === 1 ? 'sesión' : 'sesiones'}
               </p>

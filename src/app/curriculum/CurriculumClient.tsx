@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Lock, ChevronRight } from 'lucide-react'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { getMasteryState, MASTERY_BADGE } from '@/lib/mastery/badge'
 import { LevelChip } from '@/components/LevelChip'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { HardFlagButton } from '@/components/HardFlagButton'
@@ -15,7 +16,6 @@ type UnitRow    = { id: string; module_id: string; title: string; order_index: n
 type ConceptRow = { id: string; unit_id: string; title: string; difficulty: number; level: string | null; grammar_focus: string | null }
 type ProgressRow = { concept_id: string; interval_days: number; is_hard: boolean }
 type ModuleState = 'mastered' | 'active' | 'upcoming'
-type MasteryState = 'mastered' | 'learning' | 'new'
 
 interface Props {
   modules: ModuleRow[]
@@ -25,12 +25,6 @@ interface Props {
   unlockedLevelsList: string[]
 }
 
-function getMasteryState(intervalDays: number | undefined): MasteryState {
-  if (intervalDays === undefined) return 'new'
-  if (intervalDays >= MASTERY_THRESHOLD) return 'mastered'
-  return 'learning'
-}
-
 function getModuleState(allModConcepts: ConceptRow[], progressMap: Map<string, ProgressRow>): ModuleState {
   if (allModConcepts.length === 0) return 'upcoming'
   const mastered = allModConcepts.filter(c => (progressMap.get(c.id)?.interval_days ?? -1) >= MASTERY_THRESHOLD).length
@@ -38,21 +32,6 @@ function getModuleState(allModConcepts: ConceptRow[], progressMap: Map<string, P
   if (mastered === allModConcepts.length) return 'mastered'
   if (attempted > 0) return 'active'
   return 'upcoming'
-}
-
-const MASTERY_BADGE: Record<MasteryState, { label: string; style: React.CSSProperties }> = {
-  mastered: {
-    label: 'Dominado',
-    style: { background: 'rgba(196,82,46,0.1)', color: 'var(--d5-terracotta)', border: '1px solid rgba(196,82,46,0.2)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 600 },
-  },
-  learning: {
-    label: 'Aprendiendo',
-    style: { background: 'rgba(59,130,246,0.08)', color: 'rgb(59,130,246)', border: '1px solid rgba(59,130,246,0.2)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 600 },
-  },
-  new: {
-    label: 'Nuevo',
-    style: { background: 'transparent', color: 'rgba(26,17,8,0.4)', border: '1px solid rgba(26,17,8,0.15)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 600 },
-  },
 }
 
 export function CurriculumClient({ modules, units, concepts, progressEntries, unlockedLevelsList }: Props) {
@@ -79,19 +58,10 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
   }
 
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 animate-page-in">
       {/* Header */}
       <div style={{ marginBottom: 32 }}>
-        <h1
-          style={{
-            fontFamily: 'var(--font-lora), serif',
-            fontStyle: 'italic',
-            fontSize: 26,
-            fontWeight: 700,
-            color: 'var(--d5-ink)',
-            lineHeight: 1.15,
-          }}
-        >
+        <h1 className="senda-heading" style={{ fontSize: 26 }}>
           Tu Currículo
         </h1>
         <p style={{ fontSize: 11, color: 'var(--d5-warm)', marginTop: 4 }}>B1 → B2 · Tu camino personal</p>
@@ -126,7 +96,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                   background: 'var(--d5-paper)',
                   flexShrink: 0,
                 }
-              : { width: nodeSize, height: nodeSize, borderRadius: '50%', border: '1.5px solid rgba(26,17,8,0.25)', background: 'transparent', flexShrink: 0 }
+              : { width: nodeSize, height: nodeSize, borderRadius: '50%', border: '1.5px solid var(--d5-border-subtle)', background: 'transparent', flexShrink: 0 }
 
           // Title size per state (all use senda-heading font)
           const titleFontSize = state === 'active' ? 15 : 13
@@ -137,9 +107,9 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
               ? { label: 'Completado', style: { background: 'rgba(184,170,153,0.3)', color: 'var(--d5-muted)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 500 } as React.CSSProperties }
               : state === 'active'
               ? { label: 'En Progreso', style: { background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 500 } as React.CSSProperties }
-              : { label: 'Próximamente', style: { color: 'rgba(26,17,8,0.35)', fontSize: 10, fontWeight: 400, padding: '2px 7px' } as React.CSSProperties }
+              : { label: 'Próximamente', style: { color: 'var(--d5-pill-text-soft)', fontSize: 10, fontWeight: 400, padding: '2px 7px' } as React.CSSProperties }
 
-          const lineColor = idx === 1 ? 'var(--d5-muted)' : 'rgba(26,17,8,0.12)'
+          const lineColor = idx === 1 ? 'var(--d5-muted)' : 'var(--d5-line)'
 
           return (
             <div key={mod.id} style={{ display: 'flex' }}>
@@ -157,7 +127,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                 </div>
                 {/* Line below node */}
                 {!isLast && (
-                  <div style={{ width: 1.5, flex: 1, minHeight: 24, background: 'rgba(26,17,8,0.12)', marginTop: 4 }} />
+                  <div style={{ width: 1.5, flex: 1, minHeight: 24, background: 'var(--d5-line)', marginTop: 4 }} />
                 )}
               </div>
 
@@ -198,7 +168,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                           gap: 4,
                           padding: '2px 7px',
                           borderRadius: 9999,
-                          border: '1px solid rgba(26,17,8,0.15)',
+                          border: '1px solid var(--d5-border-subtle)',
                           fontSize: 10,
                           color: 'var(--d5-warm)',
                           fontWeight: 400,
@@ -244,7 +214,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                       marginTop: 10,
                       height: 3,
                       borderRadius: 999,
-                      background: 'rgba(26,17,8,0.08)',
+                      background: 'var(--d5-line)',
                       width: '58%',
                       overflow: 'hidden',
                     }}
@@ -321,9 +291,9 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                       />
                                     )}
                                     <span
+                                      className="text-foreground"
                                       style={{
                                         fontSize: 14,
-                                        color: 'var(--d5-ink)',
                                         fontWeight: 400,
                                         overflow: 'hidden',
                                         textOverflow: 'ellipsis',
@@ -357,7 +327,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                     <ChevronRight
                                       size={14}
                                       strokeWidth={1.5}
-                                      style={{ color: 'rgba(26,17,8,0.4)', flexShrink: 0 }}
+                                      style={{ color: 'var(--d5-pill-text-soft)', flexShrink: 0 }}
                                     />
                                   </div>
                                 </div>

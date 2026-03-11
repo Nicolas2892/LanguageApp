@@ -1,42 +1,19 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { AccuracyChart } from './AccuracyChart'
 import { ActivityHeatmap } from './ActivityHeatmap'
 import { AnimatedBar } from '@/components/AnimatedBar'
-import { ExerciseTypeChart } from '@/components/ExerciseTypeChart'
 import { VerbTenseMastery } from '@/components/verbs/VerbTenseMastery'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
-import { MASTERY_THRESHOLD, LEVEL_CHIP } from '@/lib/constants'
-import { Flame, CheckCircle, Target, ListChecks, Clock } from 'lucide-react'
+import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { EmptyState } from '@/components/EmptyState'
-import type { ExerciseAccuracy } from './AccuracyChart'
 import type { DayActivity } from './ActivityHeatmap'
-import type { ExerciseTypeCount } from '@/components/ExerciseTypeChart'
 import type { TenseSummary } from '@/components/verbs/VerbTenseMastery'
 
-const TYPE_LABELS: Record<string, string> = {
-  gap_fill: 'Completar Hueco',
-  translation: 'Traducción',
-  transformation: 'Transformación',
-  error_correction: 'Corrección De Errores',
-  free_write: 'Escritura Libre',
-  sentence_builder: 'Constructor De Frases',
-}
-
-const CEFR_COLORS: Record<string, { barStyle: React.CSSProperties; textStyle: React.CSSProperties }> = {
-  B1: {
-    barStyle: { background: 'var(--d5-muted)' },
-    textStyle: { color: 'var(--d5-warm)' },
-  },
-  B2: {
-    barStyle: { background: 'var(--d5-terracotta)' },
-    textStyle: { color: 'var(--d5-terracotta)' },
-  },
-  C1: {
-    barStyle: { background: 'rgba(26,17,8,0.4)' },
-    textStyle: { color: 'var(--d5-ink)' },
-  },
+const CEFR_COLORS: Record<string, { barStyle: React.CSSProperties }> = {
+  B1: { barStyle: { background: 'var(--d5-muted)' } },
+  B2: { barStyle: { background: 'var(--d5-terracotta)' } },
+  C1: { barStyle: { background: 'rgba(26,17,8,0.4)' } },
 }
 
 export default async function ProgressPage() {
@@ -76,7 +53,6 @@ export default async function ProgressPage() {
   }
 
   const masteredByLevel = new Map<string, number>()
-  const productionByLevel = new Map<string, number>()
   let totalMastered = 0
 
   for (const row of (progressRows as ProgressRow[] ?? [])) {
@@ -86,9 +62,6 @@ export default async function ProgressPage() {
       masteredByLevel.set(level, (masteredByLevel.get(level) ?? 0) + 1)
       totalMastered++
     }
-    if (row.production_mastered) {
-      productionByLevel.set(level, (productionByLevel.get(level) ?? 0) + 1)
-    }
   }
 
   const totalConcepts = (conceptRows ?? []).length
@@ -97,11 +70,10 @@ export default async function ProgressPage() {
   const cefrData = CEFR_LEVELS.map((level) => ({
     level,
     mastered: masteredByLevel.get(level) ?? 0,
-    production: productionByLevel.get(level) ?? 0,
     total: totalByLevel.get(level) ?? 0,
   }))
 
-  // ── 3. Accuracy by exercise type ──────────────────────────────────────────
+  // ── 3. Accuracy (overall) ────────────────────────────────────────────────
   const { data: attemptRows } = await supabase
     .from('exercise_attempts')
     .select('ai_score, exercises(type)')
@@ -118,14 +90,12 @@ export default async function ProgressPage() {
     byType.set(type, agg)
   }
 
-  const exerciseAccuracy: ExerciseAccuracy[] = Array.from(byType.entries())
+  const exerciseAccuracy = Array.from(byType.entries())
     .filter(([, v]) => v.total >= 1)
-    .map(([type, v]) => ({
-      type,
+    .map(([, v]) => ({
       accuracy: Math.round((v.correct / v.total) * 100),
       attempts: v.total,
     }))
-    .sort((a, b) => b.attempts - a.attempts)
 
   const totalAttempts = exerciseAccuracy.reduce((s, e) => s + e.attempts, 0)
   const overallAccuracy =
@@ -134,14 +104,6 @@ export default async function ProgressPage() {
           exerciseAccuracy.reduce((s, e) => s + e.accuracy * e.attempts, 0) / totalAttempts
         )
       : 0
-
-  // Best + worst exercise type insight
-  const sortedByAccuracy = exerciseAccuracy.length >= 2
-    ? [...exerciseAccuracy].sort((a, b) => b.accuracy - a.accuracy)
-    : null
-  const bestType = sortedByAccuracy?.[0] ?? null
-  const worstType = sortedByAccuracy?.[sortedByAccuracy.length - 1] ?? null
-  const showInsight = bestType && worstType && bestType.type !== worstType.type
 
   // ── 4. Activity heatmap (last 12 weeks) ───────────────────────────────────
   const twelveWeeksAgo = new Date()
@@ -183,39 +145,7 @@ export default async function ProgressPage() {
     return sum + Math.round(ms / 60000)
   }, 0)
 
-  // ── 6. All-time stats ──────────────────────────────────────────────────────
-  const [{ count: allTimeAttemptCount }, { data: allTimeSessions }] = await Promise.all([
-    supabase
-      .from('exercise_attempts')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id),
-    supabase
-      .from('study_sessions')
-      .select('started_at, ended_at')
-      .eq('user_id', user.id),
-  ])
-
-  const totalAllTimeAttempts = allTimeAttemptCount ?? 0
-  const totalAllTimeMinutes = (allTimeSessions ?? [] as SessionRow[]).reduce((sum, s) => {
-    if (!s.ended_at) return sum
-    const ms = new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()
-    return sum + Math.round(ms / 60000)
-  }, 0)
-
-  // Exercise type breakdown (all-time)
-  const exerciseTypeCounts = new Map<string, number>()
-  for (const row of (attemptRows ?? []) as Array<{ ai_score: number | null; exercises: { type: string } | null }>) {
-    const type = row.exercises?.type
-    if (!type) continue
-    exerciseTypeCounts.set(type, (exerciseTypeCounts.get(type) ?? 0) + 1)
-  }
-  const exerciseTypeData: ExerciseTypeCount[] = Array.from(exerciseTypeCounts.entries())
-    .map(([type, count]) => ({ type, count }))
-    .sort((a, b) => b.count - a.count)
-
-  const hasAnyData = totalAttempts > 0
-
-  // ── 7. Verb conjugation mastery ────────────────────────────────────────────
+  // ── 6. Verb conjugation mastery ────────────────────────────────────────────
   const { data: verbProgressRows } = await supabase
     .from('verb_progress')
     .select('tense, attempt_count, correct_count')
@@ -240,17 +170,7 @@ export default async function ProgressPage() {
     }))
     .sort((a, b) => a.pct - b.pct)  // worst first
 
-  // Page meta
-  const now = new Date()
-  const monthLabel = now.toLocaleString('es-ES', { month: 'long' })
-  const year = now.getFullYear()
-  const levelChip = LEVEL_CHIP[computedLevel]
-
-  // Motivating B1→B2 hint
-  const b1 = cefrData.find((d) => d.level === 'B1')
-  const b1Pct = b1 && b1.total > 0 ? b1.mastered / b1.total : 0
-  const b1Remaining = b1 ? b1.total - b1.mastered : 0
-  const showB2Hint = b1Pct >= 0.6 && b1Remaining > 0
+  const hasAnyData = totalAttempts > 0
 
   return (
     <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-24 lg:pb-10 relative overflow-hidden">
@@ -263,24 +183,15 @@ export default async function ProgressPage() {
       <div style={{ position: 'relative', zIndex: 1 }} className="space-y-8">
 
         {/* Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1
-              style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
-            >
-              Progreso
-            </h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--d5-warm)' }}>
-              Tu Camino De Aprendizaje · {monthLabel} {year}
-            </p>
-          </div>
-          {levelChip && (
-            <span
-              className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${levelChip.className}`}
-            >
-              {levelChip.label}
-            </span>
-          )}
+        <div>
+          <h1
+            style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
+          >
+            Tu Progreso
+          </h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--d5-warm)' }}>
+            Nivel {computedLevel} · {totalAttempts} ejercicios
+          </p>
         </div>
 
         {!hasAnyData ? (
@@ -306,11 +217,10 @@ export default async function ProgressPage() {
                   textAlign: 'center',
                 }}
               >
-                <div className="flex justify-center mb-1">
-                  <Flame className="h-4 w-4" style={{ color: 'var(--d5-terracotta)' }} strokeWidth={1.5} />
-                </div>
                 <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-terracotta)', lineHeight: 1.2 }}>{currentStreak}</p>
-                <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2 }}>Días Seguidos</p>
+                <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2, lineHeight: 1.3 }}>
+                  días{'\n'}seguidos
+                </p>
               </div>
 
               {/* Mastered */}
@@ -322,11 +232,10 @@ export default async function ProgressPage() {
                   textAlign: 'center',
                 }}
               >
-                <div className="flex justify-center mb-1">
-                  <CheckCircle className="h-4 w-4" style={{ color: 'var(--d5-ink)' }} strokeWidth={1.5} />
-                </div>
                 <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-ink)', lineHeight: 1.2 }}>{totalMastered}</p>
-                <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2 }}>Dominados</p>
+                <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2, lineHeight: 1.3, whiteSpace: 'pre-line' }}>
+                  {`de ${totalConcepts}\ndominados`}
+                </p>
               </div>
 
               {/* Accuracy */}
@@ -338,93 +247,38 @@ export default async function ProgressPage() {
                   textAlign: 'center',
                 }}
               >
-                <div className="flex justify-center mb-1">
-                  <Target className="h-4 w-4" style={{ color: 'var(--d5-ink)' }} strokeWidth={1.5} />
-                </div>
                 <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-ink)', lineHeight: 1.2 }}>{overallAccuracy}%</p>
-                <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2 }}>Precisión</p>
-              </div>
-            </div>
-
-            {/* All-time stats */}
-            <div>
-              <p className="senda-eyebrow mb-3">Total</p>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="senda-card space-y-2">
-                  <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
-                    <ListChecks className="h-4 w-4 text-violet-600 dark:text-violet-400" strokeWidth={1.5} />
-                  </div>
-                  <p className="text-2xl font-extrabold">{totalAllTimeAttempts.toLocaleString()}</p>
-                  <div>
-                    <p className="text-xs font-medium">Ejercicios Completados</p>
-                    <p className="text-xs text-muted-foreground">Total Acumulado</p>
-                  </div>
-                </div>
-                <div className="senda-card space-y-2">
-                  <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center">
-                    <Clock className="h-4 w-4 text-teal-600 dark:text-teal-400" strokeWidth={1.5} />
-                  </div>
-                  <p className="text-2xl font-extrabold">
-                    {totalAllTimeMinutes >= 60
-                      ? `${Math.floor(totalAllTimeMinutes / 60)}h ${totalAllTimeMinutes % 60}m`
-                      : `${totalAllTimeMinutes}m`}
-                  </p>
-                  <div>
-                    <p className="text-xs font-medium">Tiempo De Estudio</p>
-                    <p className="text-xs text-muted-foreground">Total Acumulado</p>
-                  </div>
-                </div>
+                <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2, lineHeight: 1.3, whiteSpace: 'pre-line' }}>
+                  {`precisión\nglobal`}
+                </p>
               </div>
             </div>
 
             <WindingPathSeparator />
 
             {/* CEFR Level Journey */}
-            <section className="senda-card space-y-5">
-              <div className="flex items-center justify-between">
-                <h2 style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Progreso De Nivel</h2>
-                {levelChip && (
-                  <span
-                    className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelChip.className}`}
-                  >
-                    {levelChip.label}
-                  </span>
-                )}
-              </div>
+            <section className="space-y-4 px-1">
+              <p className="senda-eyebrow" style={{ color: 'var(--d5-muted)' }}>Tu Camino CEFR</p>
 
-              <div className="space-y-0">
-                {cefrData.map(({ level, mastered, total }, idx) => {
+              <div className="space-y-5">
+                {cefrData.map(({ level, mastered, total }) => {
                   const pct = total > 0 ? Math.round((mastered / total) * 100) : 0
                   const color = CEFR_COLORS[level]
                   return (
-                    <div key={level} className="relative">
-                      {idx > 0 && (
-                        <div className="absolute left-2 -top-3 h-3 border-l-2 border-dashed border-border" />
-                      )}
-                      <div className="space-y-1.5 pt-5">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="font-semibold">{level}</span>
-                          <span className="text-muted-foreground">
-                            {mastered} / {total} Conceptos
-                          </span>
-                        </div>
-                        <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
-                          <AnimatedBar pct={pct} style={color?.barStyle} />
-                        </div>
-                        <div className="flex justify-end">
-                          <p style={{ fontSize: 11, fontWeight: 500, ...color?.textStyle }}>{pct}%</p>
-                        </div>
+                    <div key={level} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-semibold">{level}</span>
+                        <span className="text-muted-foreground">
+                          {mastered} / {total} dominados
+                        </span>
+                      </div>
+                      <div className="relative h-1 w-full rounded-full overflow-hidden" style={{ background: 'color-mix(in oklch, var(--d5-muted) 20%, transparent)' }}>
+                        <AnimatedBar pct={pct} style={color?.barStyle} />
                       </div>
                     </div>
                   )
                 })}
               </div>
-
-              {showB2Hint && (
-                <p className="text-xs font-medium pt-1 border-t" style={{ color: 'var(--d5-terracotta)' }}>
-                  {b1Remaining} Concepto{b1Remaining !== 1 ? 's' : ''} Más Para Desbloquear B2
-                </p>
-              )}
             </section>
 
             <WindingPathSeparator />
@@ -434,54 +288,21 @@ export default async function ProgressPage() {
 
             <WindingPathSeparator />
 
-            {/* Exercises by type */}
-            {exerciseTypeData.length > 0 && (
-              <section className="space-y-3">
-                <h2 style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Ejercicios Por Tipo</h2>
-                <div className="senda-card">
-                  <ExerciseTypeChart data={exerciseTypeData} />
-                </div>
-              </section>
-            )}
-
-            {/* Skill breakdown */}
-            {exerciseAccuracy.length > 0 && (
-              <section className="space-y-3">
-                <h2 style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Desglose De Habilidades</h2>
-                <div className="senda-card">
-                  <AccuracyChart data={exerciseAccuracy} />
-                  {showInsight && (
-                    <p className="text-xs text-muted-foreground border-t mt-3 pt-3">
-                      Mejor:{' '}
-                      <span className="font-medium text-foreground">
-                        {TYPE_LABELS[bestType!.type] ?? bestType!.type}
-                      </span>{' '}
-                      ({bestType!.accuracy}%)&nbsp;·&nbsp;Mejorar:{' '}
-                      <span className="font-medium text-foreground">
-                        {TYPE_LABELS[worstType!.type] ?? worstType!.type}
-                      </span>{' '}
-                      ({worstType!.accuracy}%)
-                    </p>
-                  )}
-                </div>
-              </section>
-            )}
-
             {/* Study consistency */}
             <section className="space-y-3">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Consistencia De Estudio</h2>
+                  <p className="senda-eyebrow" style={{ color: 'var(--d5-muted)' }}>Consistencia De Estudio</p>
                   {sessionCount > 0 && (
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      <span className="font-medium text-foreground">
+                    <p className="text-xs mt-1" style={{ color: 'var(--d5-muted)' }}>
+                      <span className="font-medium" style={{ color: 'var(--d5-warm)' }}>
                         {sessionCount} Sesion{sessionCount !== 1 ? 'es' : ''}
                       </span>{' '}
                       Este Mes
                       {totalMinutes > 0 && (
                         <>
                           {' '}·{' '}
-                          <span className="font-medium text-foreground">
+                          <span className="font-medium" style={{ color: 'var(--d5-warm)' }}>
                             {(totalMinutes / 60).toFixed(1)} hrs
                           </span>{' '}
                           total
@@ -490,16 +311,27 @@ export default async function ProgressPage() {
                     </p>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground text-right shrink-0">
+                <p className="text-xs text-right shrink-0" style={{ color: 'var(--d5-muted)' }}>
                   {uniqueDaysStudied} Día{uniqueDaysStudied !== 1 ? 's' : ''} Estudiados
                   <br />
                   <span className="text-[10px]">En Los Últimos 3 Meses</span>
                 </p>
               </div>
-              <div className="senda-card overflow-x-auto">
-                <ActivityHeatmap data={activityData} weeks={14} />
-              </div>
+              <ActivityHeatmap data={activityData} weeks={14} />
             </section>
+
+            {/* Footer */}
+            <p
+              className="text-center pt-4"
+              style={{
+                fontFamily: 'var(--font-lora), serif',
+                fontStyle: 'italic',
+                fontSize: 14,
+                color: 'color-mix(in oklch, var(--d5-ink) 25%, transparent)',
+              }}
+            >
+              tu senda continúa…
+            </p>
           </>
         )}
       </div>

@@ -149,6 +149,12 @@
   --d5-nav-border: rgba(184, 170, 153, 0.4);
   --d5-nav-active-bg: rgba(184, 170, 153, 0.25);
 
+  /* Pill / chip inactive tokens (configure page, selectors) */
+  --d5-pill-bg: rgba(26, 17, 8, 0.03);
+  --d5-pill-text: rgba(26, 17, 8, 0.6);
+  --d5-pill-text-soft: rgba(26, 17, 8, 0.4);
+  --d5-paper-75: rgba(253, 252, 249, 0.75);
+
   /* BackgroundMagicS adaptive tokens */
   --d5-magic-stroke: var(--d5-muted);
   --d5-magic-opacity: 0.03;
@@ -156,6 +162,10 @@
   /* WindingPathSeparator adaptive opacity tokens */
   --d5-separator-opacity: 0.50;
   --d5-separator-echo-opacity: 0.10;
+
+  /* Timeline & progress bar tracks, chip borders */
+  --d5-line: rgba(26, 17, 8, 0.12);
+  --d5-border-subtle: rgba(26, 17, 8, 0.15);
 }
 .dark {
   --d5-eyebrow: var(--d5-muted);
@@ -163,10 +173,16 @@
   --d5-nav-inactive: var(--d5-muted);
   --d5-nav-border: rgba(184, 170, 153, 0.25);
   --d5-nav-active-bg: rgba(184, 170, 153, 0.15);
+  --d5-pill-bg: rgba(253, 252, 249, 0.06);
+  --d5-pill-text: rgba(253, 252, 249, 0.6);
+  --d5-pill-text-soft: rgba(253, 252, 249, 0.4);
+  --d5-paper-75: rgba(253, 252, 249, 0.55);
   --d5-magic-stroke: var(--d5-warm);
   --d5-magic-opacity: 0.05;
   --d5-separator-opacity: 0.15;
   --d5-separator-echo-opacity: 0.04;
+  --d5-line: rgba(184, 170, 153, 0.15);
+  --d5-border-subtle: rgba(184, 170, 153, 0.2);
 }
 
 /* Serif italic heading — Lora, used for card titles and page h1 */
