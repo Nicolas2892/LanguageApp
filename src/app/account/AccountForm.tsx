@@ -83,9 +83,9 @@ export function AccountForm({ profile }: Props) {
     <div>
       {/* ── Section 1: Perfil ── */}
       <div style={{ padding: '0.25rem 0 1rem' }}>
-        <span className="senda-eyebrow block" style={{ marginBottom: '0.875rem' }}>Perfil</span>
+        <span className="senda-eyebrow block mb-3">Perfil</span>
 
-        <div className="flex flex-col gap-1" style={{ marginBottom: '1.125rem' }}>
+        <div className="flex flex-col gap-1 mb-4">
           <label htmlFor="display_name" className="senda-field-label">Nombre</label>
           <input
             id="display_name"
@@ -96,7 +96,7 @@ export function AccountForm({ profile }: Props) {
             className="senda-input"
           />
           {displayName.length >= 35 && (
-            <p style={{ fontSize: '0.6875rem', color: 'var(--d5-muted)', textAlign: 'right' }}>{displayName.length}/50</p>
+            <p className="text-xs text-right" style={{ color: 'var(--d5-muted)' }}>{displayName.length}/50</p>
           )}
         </div>
 
@@ -118,7 +118,7 @@ export function AccountForm({ profile }: Props) {
 
       {/* ── Section 2: Apariencia ── */}
       <div style={{ padding: '0.25rem 0 1rem' }}>
-        <span className="senda-eyebrow block" style={{ marginBottom: '0.875rem' }}>Apariencia</span>
+        <span className="senda-eyebrow block mb-3">Apariencia</span>
 
         <div className="flex gap-2" style={{ marginBottom: '1rem' }}>
           {THEME_OPTIONS.map(({ value, label }) => (
@@ -133,7 +133,7 @@ export function AccountForm({ profile }: Props) {
                   : 'bg-[rgba(140,106,63,0.04)] text-[var(--d5-muted)] dark:bg-[rgba(184,170,153,0.06)]'
               }`}
               style={{
-                fontSize: '0.625rem',
+                fontSize: '0.75rem',
                 minHeight: '2.75rem',
               }}
             >
@@ -161,10 +161,10 @@ export function AccountForm({ profile }: Props) {
             <Volume2 size={16} strokeWidth={1.5} className="shrink-0" style={{ color: 'var(--d5-terracotta)' }} />
           )}
           <div>
-            <p style={{ fontSize: '0.8125rem', fontWeight: 500 }} className={audioEnabled === false ? 'text-[var(--d5-muted)]' : 'text-[var(--d5-ink)] dark:text-[var(--d5-paper)]'}>
+            <p className={`text-sm font-medium ${audioEnabled === false ? 'text-[var(--d5-muted)]' : 'text-[var(--d5-ink)] dark:text-[var(--d5-paper)]'}`}>
               {audioEnabled === false ? 'Audio desactivado' : 'Audio activado'}
             </p>
-            <p style={{ fontSize: '0.6875rem', color: 'var(--d5-muted)', marginTop: '0.125rem' }}>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--d5-muted)' }}>
               Reproducir frases en español en los ejercicios y el currículo
             </p>
           </div>
@@ -178,7 +178,7 @@ export function AccountForm({ profile }: Props) {
         <span className="senda-field-label">Nivel actual</span>
         {levelChip ? (
           <span className={levelChip.className} style={{
-            fontSize: '0.625rem',
+            fontSize: '0.75rem',
             fontWeight: 700,
             padding: '0.125rem 0.625rem',
             borderRadius: 9999,
@@ -187,7 +187,7 @@ export function AccountForm({ profile }: Props) {
           </span>
         ) : (
           <span style={{
-            fontSize: '0.625rem',
+            fontSize: '0.75rem',
             fontWeight: 700,
             padding: '0.125rem 0.625rem',
             borderRadius: 9999,

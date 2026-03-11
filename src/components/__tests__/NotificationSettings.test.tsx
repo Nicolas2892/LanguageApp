@@ -41,35 +41,35 @@ describe('NotificationSettings', () => {
   it('shows unsupported message when Notification API is absent', async () => {
     stubNotification(null)
     await act(async () => { render(<NotificationSettings />) })
-    expect(screen.getByText(/not supported/i)).toBeTruthy()
+    expect(screen.getByText(/no están disponibles/i)).toBeTruthy()
   })
 
   it('shows blocked message when permission is denied', async () => {
     stubNotification('denied')
     await act(async () => { render(<NotificationSettings />) })
-    expect(screen.getByText(/blocked/i)).toBeTruthy()
+    expect(screen.getByText(/bloqueadas/i)).toBeTruthy()
   })
 
-  it('shows active state and Turn off button when permission is granted', async () => {
+  it('shows active state and Desactivar button when permission is granted', async () => {
     stubNotification('granted')
     await act(async () => { render(<NotificationSettings />) })
     expect(screen.getByText(/notificaciones activas/i)).toBeTruthy()
-    expect(screen.getByRole('button', { name: /turn off/i })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /desactivar/i })).toBeTruthy()
   })
 
-  it('shows Enable notifications button when permission is default', async () => {
+  it('shows Activar notificaciones button when permission is default', async () => {
     stubNotification('default')
     await act(async () => { render(<NotificationSettings />) })
-    expect(screen.getByRole('button', { name: /enable notifications/i })).toBeTruthy()
+    expect(screen.getByRole('button', { name: /activar notificaciones/i })).toBeTruthy()
   })
 
-  it('"Turn off" calls DELETE /api/push/subscribe', async () => {
+  it('"Desactivar" calls DELETE /api/push/subscribe', async () => {
     stubNotification('granted')
     const fetchMock = vi.fn().mockResolvedValue({ ok: true })
     vi.stubGlobal('fetch', fetchMock)
     await act(async () => { render(<NotificationSettings />) })
     await act(async () => {
-      screen.getByRole('button', { name: /turn off/i }).click()
+      screen.getByRole('button', { name: /desactivar/i }).click()
     })
     expect(fetchMock).toHaveBeenCalledWith('/api/push/subscribe', { method: 'DELETE' })
   })

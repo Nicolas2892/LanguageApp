@@ -81,55 +81,55 @@ export function NotificationSettings() {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <BellRing size={15} strokeWidth={1.5} style={{ color: 'var(--d5-ink)', flexShrink: 0 }} />
-        <h2 style={{ fontSize: 13, fontWeight: 600, color: 'rgba(26,17,8,0.6)' }}>Notificaciones push</h2>
+        <BellRing size={15} strokeWidth={1.5} className="shrink-0 text-[var(--d5-ink)] dark:text-[var(--d5-paper)]" />
+        <h2 className="text-sm font-semibold text-[var(--d5-warm)] dark:text-[var(--d5-muted)]">Notificaciones push</h2>
       </div>
 
       {notifState === 'loading' && (
-        <p className="text-sm text-muted-foreground">Checking…</p>
+        <p className="text-sm text-muted-foreground">Cargando…</p>
       )}
 
       {notifState === 'unsupported' && (
         <p className="text-sm text-muted-foreground">
-          Push notifications are not supported in this browser.
+          Las notificaciones push no están disponibles en este navegador.
         </p>
       )}
 
       {notifState === 'denied' && (
         <p className="text-sm text-muted-foreground">
-          Notifications are blocked. Enable them in your browser settings to receive streak reminders.
+          Las notificaciones están bloqueadas. Actívalas en los ajustes de tu navegador para recibir recordatorios de racha.
         </p>
       )}
 
       {notifState === 'granted' && (
         <div className="space-y-2">
-          <div className="flex items-center gap-2" style={{ fontSize: 12, color: 'var(--d5-terracotta)' }}>
-            <Bell size={14} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+          <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--d5-terracotta)' }}>
+            <Bell size={14} strokeWidth={1.5} className="shrink-0" />
             <span>Notificaciones activas — recibirás un aviso cuando tu racha esté en riesgo.</span>
           </div>
           <button
             onClick={handleDisable}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted active:scale-95 transition-transform disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted active:scale-95 transition-transform disabled:opacity-60"
           >
             <BellOff className="h-3.5 w-3.5" />
-            {loading ? 'Turning off…' : 'Turn off'}
+            {loading ? 'Desactivando…' : 'Desactivar'}
           </button>
         </div>
       )}
 
       {notifState === 'default' && (
         <div className="space-y-2">
-          <p style={{ fontSize: 12, color: 'var(--d5-muted)' }}>
+          <p className="text-xs" style={{ color: 'var(--d5-muted)' }}>
             Recibe un recordatorio diario cuando tu racha esté en riesgo.
           </p>
           <button
             onClick={handleEnable}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-3 py-1.5 text-xs font-semibold hover:bg-primary/90 active:scale-95 transition-transform disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 py-1.5 text-xs font-semibold hover:bg-primary/90 active:scale-95 transition-transform disabled:opacity-60"
           >
             <Bell className="h-3.5 w-3.5" />
-            {loading ? 'Enabling…' : 'Enable notifications'}
+            {loading ? 'Activando…' : 'Activar notificaciones'}
           </button>
         </div>
       )}

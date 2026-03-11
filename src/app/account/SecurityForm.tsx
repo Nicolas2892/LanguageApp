@@ -89,12 +89,12 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
 
   return (
     <div className="flex flex-col">
-      <span className="senda-eyebrow block" style={{ marginBottom: '0.875rem' }}>Seguridad</span>
+      <span className="senda-eyebrow block mb-3">Seguridad</span>
 
       {/* ── Change Email ── */}
-      <div className="flex flex-col" style={{ gap: '0.875rem', paddingBottom: '1rem' }}>
+      <div className="flex flex-col gap-3 pb-4">
         <span className="senda-sub-header">Cambiar correo</span>
-        <p style={{ fontSize: '0.6875rem', color: 'var(--d5-muted)', marginTop: '-0.5rem' }}>Actual: {userEmail}</p>
+        <p className="text-xs -mt-2" style={{ color: 'var(--d5-muted)' }}>Actual: {userEmail}</p>
 
         <div className="flex flex-col gap-1">
           <label htmlFor="new_email" className="senda-field-label">Nuevo correo</label>
@@ -125,7 +125,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
       </div>
 
       {/* ── Change Password ── */}
-      <div className="flex flex-col" style={{ gap: '0.875rem', paddingTop: '0.5rem' }}>
+      <div className="flex flex-col gap-3 pt-2">
         <span className="senda-sub-header">Cambiar contraseña</span>
 
         {isOAuthUser ? (
@@ -186,9 +186,9 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
               </div>
               {newPwd.length > 0 && (
                 <p style={{
-                  fontSize: '0.625rem',
+                  fontSize: '0.75rem',
                   fontWeight: 600,
-                  color: newPwd.length < 6 ? '#ef4444' : newPwd.length < 12 ? '#f59e0b' : '#16a34a',
+                  color: newPwd.length < 6 ? 'var(--destructive)' : newPwd.length < 12 ? '#f59e0b' : 'var(--d5-terracotta)',
                   marginTop: '0.125rem',
                 }}>
                   {newPwd.length < 6 ? 'Muy corta' : newPwd.length < 12 ? 'Aceptable' : 'Segura'}

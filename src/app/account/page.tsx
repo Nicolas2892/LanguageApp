@@ -26,28 +26,20 @@ export default async function AccountPage() {
   const initials = getInitials(profile.display_name, user.email!)
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 relative">
-      <BackgroundMagicS opacity={0.03} style={{ position: 'fixed', right: 0, top: '8%', width: 480, height: 624 }} />
+    <main className="max-w-xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 relative">
+      <BackgroundMagicS style={{ position: 'fixed', right: 0, top: '8%', width: 480, height: 624 }} />
       {/* Header */}
-      <div>
-        <h1
-          className="senda-heading"
-          style={{
-            fontSize: '1.375rem',
-            fontWeight: 700,
-            lineHeight: 1.15,
-            marginBottom: '0.75rem',
-          }}
-        >
+      <div className="mb-6">
+        <h1 className="senda-heading text-2xl mb-3">
           Mi Cuenta
         </h1>
         {/* Inline avatar row */}
-        <div className="flex items-center" style={{ gap: '0.875rem' }}>
+        <div className="flex items-center gap-4">
           <div className="flex items-center justify-center shrink-0 rounded-full" style={{
             width: '2.75rem',
             height: '2.75rem',
             background: 'rgba(140,106,63,0.10)',
-            fontSize: '0.9375rem',
+            fontSize: '0.875rem',
             fontWeight: 700,
             color: 'var(--d5-warm)',
             letterSpacing: '0.02em',
@@ -56,11 +48,11 @@ export default async function AccountPage() {
           </div>
           <div>
             {profile.display_name && (
-              <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--d5-ink)', lineHeight: 1.3 }} className="dark:text-[var(--d5-paper)]">
+              <p className="text-sm font-semibold dark:text-[var(--d5-paper)]" style={{ color: 'var(--d5-ink)', lineHeight: 1.3 }}>
                 {profile.display_name}
               </p>
             )}
-            <p style={{ fontSize: '0.6875rem', color: 'var(--d5-muted)', marginTop: '0.125rem' }}>{user.email}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--d5-muted)' }}>{user.email}</p>
           </div>
         </div>
       </div>
@@ -68,27 +60,40 @@ export default async function AccountPage() {
       <WindingPathSeparator />
 
       {/* Perfil */}
-      <AccountForm profile={profile} />
+      <div className="mt-6">
+        <AccountForm profile={profile} />
+      </div>
 
-      <WindingPathSeparator />
+      <div className="mt-12">
+        <WindingPathSeparator />
+      </div>
 
       {/* Seguridad */}
-      <SecurityForm userEmail={user.email!} isOAuthUser={isOAuthUser} />
+      <div className="mt-6">
+        <SecurityForm userEmail={user.email!} isOAuthUser={isOAuthUser} />
+      </div>
 
-      <WindingPathSeparator />
+      <div className="mt-12">
+        <WindingPathSeparator />
+      </div>
 
       {/* Notificaciones + Sesión + Danger Zone — grouped */}
-      <NotificationSettings />
-      <div style={{ height: '0.5rem' }} />
-      <DangerZone />
+      <div className="mt-6">
+        <NotificationSettings />
+      </div>
+      <div className="mt-12">
+        <DangerZone />
+      </div>
 
       {profile.is_admin && (
         <>
-          <WindingPathSeparator />
-          <div className="senda-card flex items-center justify-between">
+          <div className="mt-12">
+            <WindingPathSeparator />
+          </div>
+          <div className="senda-card flex items-center justify-between mt-6">
             <div>
               <p className="senda-eyebrow mb-1">Admin</p>
-              <p style={{ fontSize: '0.8125rem', color: 'var(--d5-warm)' }}>Gestión de contenido</p>
+              <p className="text-sm" style={{ color: 'var(--d5-warm)' }}>Gestión de contenido</p>
             </div>
             <Button asChild variant="outline" size="sm">
               <Link href="/admin">Abrir →</Link>
@@ -97,9 +102,13 @@ export default async function AccountPage() {
         </>
       )}
 
-      <WindingPathSeparator />
+      <div className="mt-12">
+        <WindingPathSeparator />
+      </div>
 
-      <IOSInstallCard />
+      <div className="mt-6">
+        <IOSInstallCard />
+      </div>
     </main>
   )
 }

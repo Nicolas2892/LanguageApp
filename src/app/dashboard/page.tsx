@@ -70,7 +70,7 @@ export default async function DashboardPage() {
       <WindingPathSeparator />
 
       {/* ── Tu Senda Diaria — SRS review card ──────────────────────────────── */}
-      <div className="senda-card space-y-3">
+      <div className="senda-card space-y-3 mt-2">
         <p className="senda-eyebrow">Tu Senda Diaria</p>
 
         {studiedCount === 0 ? (
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Card stack wrapper — BackgroundMagicS threads behind all three cards ── */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden mt-2">
         <BackgroundMagicS style={{ left: -20, top: 20, right: 'auto', width: 280, height: 360 }} />
 
         <WindingPathSeparator />

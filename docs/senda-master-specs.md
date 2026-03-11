@@ -35,35 +35,45 @@ Partial/Accent Error: Orange/amber wash (e.g., oklch(0.97 0.05 75)) — used for
 
 These must never appear as persistent backgrounds, borders, or text colours.
 
-3. Typography, Casing & Sizing Rules
-Hierarchy
-Headers (Custom Serif): Lora
+## 3. Typography, Casing & Sizing Rules
+Hierarchy & Brand Authority
 
-Body & Subtext (Geometric Grotesk): DM Sans
+Headers (Editorial Serif): 'Lora'
 
-Casing Mandate
-Strict Sentence/Title Case: Applied globally across all headers, body copy, and UI labels.
+Role: High-contrast "Ink" strokes for structural authority. Lora was chosen over DM Serif Display for its superior italic quality, optical size range down to text-base (16px), and full weight axis (400–700) — DM Serif Display is single-weight (400) which causes faux-bolding.
 
-Uppercase Restriction: Wide-tracked uppercase is strictly forbidden for standard labels, form inputs, and headers. It is exclusively reserved for micro-metadata tags (e.g., [ • B2/1 • Subjuntivo ]). Section eyebrow labels (e.g., "Tu Senda Diaria") follow Title Case and are not considered micro-metadata.
+Mandate: Must be rendered in Brand Ink (#1A1108). Weight: 600 (semi-bold). Style: italic. Tracking: normal.
 
-Relative Sizing Scale & Leading (rem only)
-Hardcoded pixel (px) values are strictly forbidden for typography to ensure fluid scaling. The root is established as text-base (1rem).
+Body & UI Controls (Geometric Grotesk): 'DM Sans'
 
-text-xs (0.75rem): Micro-metadata and labels.
+Role: Clean workhorse for all instructional and interactive text.
 
-text-sm (0.875rem): Secondary subtext and UI hints.
+Mandate: Primary Labels (e.g., "Nombre") must use Weight 500 (Medium). Body text uses Weight 450.
 
-text-base (1rem): Standard UI controls and short paragraphs.
+The Senda Sizing Scale (REM Only)
+Hardcoded pixel values are strictly forbidden. All sizes must follow this relative scale:
 
-text-lg (1.125rem): Primary reading size for pedagogical explanations (Narrative Blocks).
+text-xs (0.75rem): Micro-metadata and tags.
 
-text-xl to text-3xl: Reserved exclusively for Lora headers.
+text-sm (0.875rem): Primary Labels and UI Hints. (Must be weight 500/Medium for contrast).
 
-Leading & Tracking:
+text-base (1rem): Standard UI controls, inputs, and short paragraphs.
 
-Headers must use tight leading (leading-tight) with normal or tight tracking to maintain the density of the serif strokes.
+text-lg (1.125rem): Narrative blocks and pedagogical explanations.
 
-Body text must use open leading (leading-relaxed) with standard tracking to ensure maximum legibility for learners reading extended Spanish text.
+text-xl (1.25rem): Card titles and secondary page sections (Lora).
+
+text-2xl (1.5rem): Standard Page Titles (Lora).
+
+text-3xl (1.875rem): Hero Headers (e.g., "Hola, Nicolas").
+
+Casing, Leading & Contrast
+
+Casing: Strict Sentence/Title Case globally. Uppercase is strictly reserved for metadata tags.
+
+Leading: Headers use leading-tight. Body text uses leading-relaxed for maximum legibility.
+
+The Ink Protocol (Contrast): All structural headers and page section labels must use Brand Ink (#1A1108). Utilizing Brand Warm or Muted for structural text is prohibited to ensure a minimum 7:1 contrast ratio against the Vellum.
 
 4. Surface & Elevation (The "Lift")
 The "Paper Stack" Layout
@@ -92,7 +102,7 @@ Chevrons: Clickable parent rows (accordions, page links) must include a right-al
 
 Proprietary SVG Registry
 
-senda_background_magic.svg: An absolute-positioned background trail. Must be set to an ultra-low opacity watermark of 0.03.
+senda_background_magic.svg: An absolute-positioned background trail. Opacity is controlled by the adaptive CSS token `--d5-magic-opacity` (0.03 light, 0.05 dark). Do not hardcode opacity props — let the token handle light/dark adaptation.
 
 senda_path_separator.svg: A structural divider. Restricted to dividing macro-sections (e.g., separating entirely different functional blocks). It must never be used between tightly coupled elements like adjacent form inputs.
 
@@ -120,21 +130,29 @@ Data Locking
 Key numerical data points (e.g., "18 concepts due") must be weighted in Bold DM Sans to ensure immediate scannability against regular subtext.
 
 7. Layout Architecture & Hidden UI
+Vertical Rhythm & Spatial Gaps
+To prevent "UI Collapse," the spacing between elements must follow a strict hierarchical rhythm:
+
+Macro-Section Gaps: Space between major distinct modules (e.g., separating "Perfil" from "Seguridad"): gap-y-12 (3rem). This provides the "editorial breath" needed for clarity.
+
+Header-to-Content Gaps: Space between a Section Header and its first input/element: gap-y-2 (0.5rem). This keeps the header tightly coupled with its content.
+
+Standard Component Gaps: Space between individual inputs or secondary rows: gap-y-6 (1.5rem).
+
 Card Structure & Gestalt Grouping
+Structural Containers: Cards are the primary containers. They must utilize ample internal padding (p-6 or p-8) to prevent content from crowding the edges.
 
-Cards act as the primary structural containers. They must utilize ample internal padding (e.g., p-6 or p-8) to let content breathe.
-
-Proximity Rule: Tightly related items (like Email and Password inputs) must be grouped via spatial proximity (gap-4 or gap-6) within the same card. Do not divide related items with SVG separators.
+Proximity Rule: Tightly related items (like Email and Password inputs) must be grouped via spatial proximity (gap-y-4) within the card. Do not divide related items with SVG separators.
 
 Expandable UI (Accordions & Dropdowns)
+Hierarchy Collapse Prevention: When an accordion expands, the children must not share the same visual weight as the parent. Children must utilize DM Sans at a smaller size or lighter opacity to ensure the parent header remains the focal point.
 
-Hierarchy Collapse Prevention: When an accordion expands, the expanded children must not share the same visual weight as the parent header.
+Indentation & Affordance: Nested items must sit on a slightly indented track. Every clickable parent row must include a subtle right-aligned chevron (>) utilizing Brand Ink (#1A1108) at 30-40% opacity to clearly signal depth without competing with the label.
 
-Indentation & Affordance: Nested items must sit on a slightly indented track. Every clickable parent row must include a subtle right-aligned chevron (>) utilizing Brand Ink (#1A1108) at 30-40% opacity to clearly signal hidden depth.
+Modals & Overlays
+Elevation Mapping: Modals require a deeper ambient occlusion shadow to communicate Z-index distance from the Vellum: box-shadow: 0 20px 40px -10px rgba(26, 17, 8, 0.15).
 
-Modals & Overlays: Modals require a deeper ambient occlusion shadow to communicate Z-index distance: box-shadow: 0 20px 40px -10px rgba(26, 17, 8, 0.15).
-
-Scrims: Background scrims (the dark overlay behind a modal) must utilize a blurred, low-opacity Brand Ink (#1A1108) wash rather than a harsh, solid black.
+Scrim Protocol: Background scrims (the dark overlay) must utilize a blurred, low-opacity Brand Ink (#1A1108) wash. Pure black or high-opacity overlays are prohibited as they destroy the "Paper Stack" aesthetic.
 
 8. Motion & Transitions
 The Kinetic Identity

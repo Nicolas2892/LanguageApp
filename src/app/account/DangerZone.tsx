@@ -54,7 +54,7 @@ export function DangerZone() {
       {!confirming ? (
         <Button
           variant="outline"
-          className="w-full rounded-full border-red-300 text-red-600 hover:bg-red-50"
+          className="w-full rounded-full bg-red-50 text-red-600 hover:bg-red-100 border-none dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/30"
           onClick={() => setConfirming(true)}
         >
           <Trash2 size={15} strokeWidth={1.5} className="mr-2" />
