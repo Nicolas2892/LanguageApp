@@ -47,7 +47,7 @@ describe('IOSInstallCard', () => {
     await act(async () => {
       render(<IOSInstallCard />)
     })
-    expect(screen.queryByText('Install on your iPhone')).toBeNull()
+    expect(screen.queryByText('Instalar en tu iPhone')).toBeNull()
   })
 
   it('renders nothing when already installed (standalone mode)', async () => {
@@ -56,7 +56,7 @@ describe('IOSInstallCard', () => {
     await act(async () => {
       render(<IOSInstallCard />)
     })
-    expect(screen.queryByText('Install on your iPhone')).toBeNull()
+    expect(screen.queryByText('Instalar en tu iPhone')).toBeNull()
   })
 
   it('renders the install card on iOS Safari (non-standalone)', async () => {
@@ -65,7 +65,7 @@ describe('IOSInstallCard', () => {
     await act(async () => {
       render(<IOSInstallCard />)
     })
-    expect(screen.getByText('Install on your iPhone')).toBeTruthy()
+    expect(screen.getByText('Instalar en tu iPhone')).toBeTruthy()
   })
 
   it('renders nothing on iOS Chrome (not Safari)', async () => {
@@ -74,6 +74,6 @@ describe('IOSInstallCard', () => {
     await act(async () => {
       render(<IOSInstallCard />)
     })
-    expect(screen.queryByText('Install on your iPhone')).toBeNull()
+    expect(screen.queryByText('Instalar en tu iPhone')).toBeNull()
   })
 })

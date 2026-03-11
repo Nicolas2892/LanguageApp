@@ -176,22 +176,31 @@ export function AccountForm({ profile }: Props) {
         <button
           type="button"
           onClick={toggleAudio}
-          className={`w-full rounded-xl border p-3 flex items-center gap-3 text-left transition-colors ${
-            audioEnabled === false
-              ? 'border-gray-200 hover:border-gray-300'
-              : 'border-primary bg-primary/5'
-          }`}
+          style={{
+            width: '100%',
+            borderRadius: 12,
+            padding: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            textAlign: 'left',
+            background: audioEnabled === false ? 'rgba(26,17,8,0.03)' : 'rgba(196,82,46,0.05)',
+            boxShadow: '0 10px 30px -10px rgba(26,17,8,0.06)',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'background 150ms',
+          }}
         >
           {audioEnabled === false ? (
-            <VolumeX className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <VolumeX size={16} strokeWidth={1.5} style={{ color: 'var(--d5-ink)', flexShrink: 0, opacity: 0.4 }} />
           ) : (
-            <Volume2 className="h-4 w-4 shrink-0 text-primary" />
+            <Volume2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
           )}
           <div>
-            <p className={`text-sm font-medium ${audioEnabled === false ? '' : 'text-primary'}`}>
+            <p style={{ fontSize: 13, fontWeight: 500, color: audioEnabled === false ? 'var(--d5-muted)' : 'var(--d5-ink)' }}>
               {audioEnabled === false ? 'Audio desactivado' : 'Audio activado'}
             </p>
-            <p className="text-xs font-normal text-muted-foreground mt-0.5">
+            <p style={{ fontSize: 11, color: 'var(--d5-muted)', marginTop: 2 }}>
               Reproducir frases en español en los ejercicios y el currículo
             </p>
           </div>

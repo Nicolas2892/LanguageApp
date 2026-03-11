@@ -42,7 +42,7 @@ export function DangerZone() {
         className="w-full rounded-full"
         onClick={handleSignOut}
       >
-        <LogOut className="h-4 w-4 mr-2" />
+        <LogOut size={15} strokeWidth={1.5} style={{ marginRight: 8, color: 'var(--d5-ink)' }} />
         Cerrar sesión
       </Button>
 
@@ -57,11 +57,11 @@ export function DangerZone() {
           className="w-full rounded-full border-red-300 text-red-600 hover:bg-red-50"
           onClick={() => setConfirming(true)}
         >
-          <Trash2 className="h-4 w-4 mr-2" />
+          <Trash2 size={15} strokeWidth={1.5} style={{ marginRight: 8 }} />
           Eliminar cuenta
         </Button>
       ) : (
-        <div className="space-y-3 border border-red-200 rounded-xl p-4">
+        <div className="space-y-3 rounded-xl p-4" style={{ background: 'rgba(220,38,38,0.04)', boxShadow: '0 10px 30px -10px rgba(26,17,8,0.06)' }}>
           <p className="text-sm text-red-700">
             Esto eliminará permanentemente tu cuenta y todo tu progreso. Esta acción no se puede deshacer.
           </p>

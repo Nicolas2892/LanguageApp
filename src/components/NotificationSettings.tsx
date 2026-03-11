@@ -81,8 +81,8 @@ export function NotificationSettings() {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
-        <BellRing className="h-4 w-4 text-muted-foreground" />
-        <h2 className="text-sm font-semibold">Push notifications</h2>
+        <BellRing size={15} strokeWidth={1.5} style={{ color: 'var(--d5-ink)', flexShrink: 0 }} />
+        <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--d5-ink)' }}>Notificaciones push</h2>
       </div>
 
       {notifState === 'loading' && (
@@ -103,9 +103,9 @@ export function NotificationSettings() {
 
       {notifState === 'granted' && (
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-            <Bell className="h-4 w-4" />
-            <span>Notifications active — you&apos;ll be reminded when your streak is at risk.</span>
+          <div className="flex items-center gap-2" style={{ fontSize: 12, color: 'var(--d5-terracotta)' }}>
+            <Bell size={14} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+            <span>Notificaciones activas — recibirás un aviso cuando tu racha esté en riesgo.</span>
           </div>
           <button
             onClick={handleDisable}
@@ -120,8 +120,8 @@ export function NotificationSettings() {
 
       {notifState === 'default' && (
         <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Get a daily reminder when your streak is at risk.
+          <p style={{ fontSize: 12, color: 'var(--d5-muted)' }}>
+            Recibe un recordatorio diario cuando tu racha esté en riesgo.
           </p>
           <button
             onClick={handleEnable}

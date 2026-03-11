@@ -2,14 +2,43 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 
 interface Props {
   userEmail: string
   isOAuthUser: boolean
+}
+
+const eyebrowStyle: React.CSSProperties = {
+  fontSize: 9,
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: 'var(--d5-muted)',
+  display: 'block',
+  marginBottom: 14,
+}
+
+const fieldLabelStyle: React.CSSProperties = {
+  fontSize: 10,
+  fontWeight: 600,
+  color: 'var(--d5-warm)',
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+}
+
+const bareInputStyle: React.CSSProperties = {
+  background: 'transparent',
+  border: 'none',
+  borderBottom: '1px solid rgba(184,170,153,0.4)',
+  borderRadius: 0,
+  fontSize: 13,
+  color: 'var(--d5-ink)',
+  padding: '4px 0',
+  outline: 'none',
+  width: '100%',
 }
 
 export function SecurityForm({ userEmail, isOAuthUser }: Props) {
@@ -90,29 +119,35 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      <span className="senda-eyebrow">Seguridad</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <span style={eyebrowStyle}>Seguridad</span>
 
-      {/* Change Email */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium">Cambiar correo</h3>
-        <p className="text-xs text-muted-foreground -mt-2">Actual: {userEmail}</p>
-        <div className="space-y-1.5">
-          <Label htmlFor="new_email">Nuevo correo</Label>
-          <Input
+      {/* ── Change Email ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 16 }}>
+        <span style={{ fontSize: 11, color: 'var(--d5-warm)', fontWeight: 500 }}>
+          Cambiar correo
+        </span>
+        <p style={{ fontSize: 11, color: 'var(--d5-muted)', marginTop: -8 }}>Actual: {userEmail}</p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label htmlFor="new_email" style={fieldLabelStyle}>Nuevo correo</label>
+          <input
             id="new_email"
             type="email"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             placeholder="tu@ejemplo.com"
+            style={bareInputStyle}
           />
         </div>
+
         {emailError && (
-          <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{emailError}</p>
+          <p style={{ fontSize: 12, color: '#dc2626', padding: '8px 12px', borderRadius: 8, background: 'rgba(220,38,38,0.06)' }}>{emailError}</p>
         )}
         {emailMessage && (
-          <p className="text-sm border rounded-lg p-3" style={{ color: 'var(--d5-terracotta)', borderColor: 'rgba(196,82,46,0.30)' }}>{emailMessage}</p>
+          <p style={{ fontSize: 12, color: 'var(--d5-terracotta)', padding: '8px 12px', borderRadius: 8, background: 'rgba(196,82,46,0.06)' }}>{emailMessage}</p>
         )}
+
         <Button
           onClick={handleEmailChange}
           disabled={emailSaving || !newEmail}
@@ -122,95 +157,112 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
         </Button>
       </div>
 
-      <div className="border-t border-border" />
+      <WindingPathSeparator />
 
-      {/* Change Password */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-medium">Cambiar contraseña</h3>
+      {/* ── Change Password ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 16 }}>
+        <span style={{ fontSize: 11, color: 'var(--d5-warm)', fontWeight: 500 }}>
+          Cambiar contraseña
+        </span>
+
         {isOAuthUser ? (
-          <p className="text-sm text-muted-foreground">
+          <p style={{ fontSize: 12, color: 'var(--d5-muted)' }}>
             Los cambios de contraseña no están disponibles para cuentas de Google.
           </p>
         ) : (
           <>
-            <div className="space-y-1.5">
-              <Label htmlFor="current_password">Contraseña actual</Label>
-              <div className="relative">
-                <Input
+            {/* Current password */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label htmlFor="current_password" style={fieldLabelStyle}>Contraseña actual</label>
+              <div style={{ position: 'relative' }}>
+                <input
                   id="current_password"
                   type={showCurrentPwd ? 'text' : 'password'}
                   value={currentPwd}
                   onChange={(e) => setCurrentPwd(e.target.value)}
-                  className="pr-10"
+                  style={{ ...bareInputStyle, paddingRight: 28 }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowCurrentPwd(!showCurrentPwd)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                   aria-label={showCurrentPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
-                  {showCurrentPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showCurrentPwd
+                    ? <EyeOff size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />
+                    : <Eye size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />}
                 </button>
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="new_password">Nueva contraseña</Label>
-              <div className="relative">
-                <Input
+
+            {/* New password */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label htmlFor="new_password" style={fieldLabelStyle}>Nueva contraseña</label>
+              <div style={{ position: 'relative' }}>
+                <input
                   id="new_password"
                   type={showNewPwd ? 'text' : 'password'}
                   value={newPwd}
                   onChange={(e) => setNewPwd(e.target.value)}
-                  className="pr-10"
+                  style={{ ...bareInputStyle, paddingRight: 28 }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowNewPwd(!showNewPwd)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                   aria-label={showNewPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
-                  {showNewPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showNewPwd
+                    ? <EyeOff size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />
+                    : <Eye size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />}
                 </button>
               </div>
               {newPwd.length > 0 && (
-                <p className={`text-xs font-medium ${
-                  newPwd.length < 6 ? 'text-red-500' :
-                  newPwd.length < 12 ? 'text-amber-500' :
-                  'text-green-600'
-                }`}>
+                <p style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: newPwd.length < 6 ? '#ef4444' : newPwd.length < 12 ? '#f59e0b' : '#16a34a',
+                  marginTop: 2,
+                }}>
                   {newPwd.length < 6 ? 'Muy corta' : newPwd.length < 12 ? 'Aceptable' : 'Segura'}
                 </p>
               )}
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="confirm_password">Confirmar contraseña</Label>
-              <div className="relative">
-                <Input
+
+            {/* Confirm password */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <label htmlFor="confirm_password" style={fieldLabelStyle}>Confirmar contraseña</label>
+              <div style={{ position: 'relative' }}>
+                <input
                   id="confirm_password"
                   type={showConfirmPwd ? 'text' : 'password'}
                   value={confirmPwd}
                   onChange={(e) => setConfirmPwd(e.target.value)}
-                  className="pr-10"
+                  style={{ ...bareInputStyle, paddingRight: 28 }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowConfirmPwd(!showConfirmPwd)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                   aria-label={showConfirmPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
-                  {showConfirmPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showConfirmPwd
+                    ? <EyeOff size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />
+                    : <Eye size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />}
                 </button>
               </div>
             </div>
+
             {pwdError && (
-              <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{pwdError}</p>
+              <p style={{ fontSize: 12, color: '#dc2626', padding: '8px 12px', borderRadius: 8, background: 'rgba(220,38,38,0.06)' }}>{pwdError}</p>
             )}
             {pwdMessage && (
-              <p className="text-sm border rounded-lg p-3" style={{ color: 'var(--d5-terracotta)', borderColor: 'rgba(196,82,46,0.30)' }}>{pwdMessage}</p>
+              <p style={{ fontSize: 12, color: 'var(--d5-terracotta)', padding: '8px 12px', borderRadius: 8, background: 'rgba(196,82,46,0.06)' }}>{pwdMessage}</p>
             )}
+
             <Button
               onClick={handlePasswordChange}
               disabled={pwdSaving}

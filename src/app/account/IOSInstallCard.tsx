@@ -25,24 +25,24 @@ export function IOSInstallCard() {
   if (!show) return null
 
   return (
-    <div className="rounded-xl border p-5 space-y-3">
+    <div className="rounded-xl p-5 space-y-3" style={{ boxShadow: '0 10px 30px -10px rgba(26,17,8,0.08)', background: 'rgba(196,82,46,0.03)' }}>
       <div className="flex items-center gap-2">
-        <Smartphone className="h-4 w-4 text-green-700 shrink-0" />
-        <p className="text-sm font-semibold">Install on your iPhone</p>
+        <Smartphone size={16} strokeWidth={1.5} style={{ color: 'var(--d5-ink)', flexShrink: 0 }} />
+        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--d5-ink)' }}>Instalar en tu iPhone</p>
       </div>
-      <p className="text-sm text-muted-foreground">Open in Safari, then:</p>
+      <p style={{ fontSize: 12, color: 'var(--d5-muted)' }}>Ábrelo en Safari, luego:</p>
       <ol className="space-y-2">
-        <li className="flex items-center gap-3 text-sm">
-          <span className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-            <Share2 className="h-3.5 w-3.5 text-green-700" />
+        <li className="flex items-center gap-3" style={{ fontSize: 12, color: 'var(--d5-ink)' }}>
+          <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(196,82,46,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <Share2 size={13} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)' }} />
           </span>
-          Tap <strong>Share</strong> in Safari&apos;s toolbar
+          Toca <strong>Compartir</strong> en la barra de Safari
         </li>
-        <li className="flex items-center gap-3 text-sm">
-          <span className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center shrink-0">
-            <PlusSquare className="h-3.5 w-3.5 text-green-700" />
+        <li className="flex items-center gap-3" style={{ fontSize: 12, color: 'var(--d5-ink)' }}>
+          <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(196,82,46,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <PlusSquare size={13} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)' }} />
           </span>
-          Tap <strong>Add to Home Screen</strong>
+          Toca <strong>Añadir a pantalla de inicio</strong>
         </li>
       </ol>
     </div>

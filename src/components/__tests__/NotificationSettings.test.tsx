@@ -53,7 +53,7 @@ describe('NotificationSettings', () => {
   it('shows active state and Turn off button when permission is granted', async () => {
     stubNotification('granted')
     await act(async () => { render(<NotificationSettings />) })
-    expect(screen.getByText(/notifications active/i)).toBeTruthy()
+    expect(screen.getByText(/notificaciones activas/i)).toBeTruthy()
     expect(screen.getByRole('button', { name: /turn off/i })).toBeTruthy()
   })
 

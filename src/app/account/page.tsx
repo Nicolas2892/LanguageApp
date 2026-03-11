@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getInitials } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { AccountForm } from './AccountForm'
 import { SecurityForm } from './SecurityForm'
 import { DangerZone } from './DangerZone'
@@ -25,7 +26,8 @@ export default async function AccountPage() {
   const initials = getInitials(profile.display_name, user.email!)
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10" style={{ position: 'relative' }}>
+      <BackgroundMagicS opacity={0.03} style={{ position: 'fixed', right: 0, top: '8%', width: 480, height: 624 }} />
       {/* Header */}
       <div>
         <h1
