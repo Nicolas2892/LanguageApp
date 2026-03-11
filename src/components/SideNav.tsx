@@ -28,13 +28,13 @@ export function SideNav({ userInitials }: Props) {
   return (
     <aside
       className="hidden lg:flex flex-col fixed inset-y-0 left-0 z-40 w-[220px] border-r bg-background"
-      style={{ borderColor: 'rgba(184,170,153,0.4)' }}
+      style={{ borderColor: 'var(--d5-nav-border)' }}
     >
       {/* Logo */}
       <Link
         href="/dashboard"
         className="flex items-center gap-2.5 px-5 h-14 shrink-0 border-b"
-        style={{ borderColor: 'rgba(184,170,153,0.35)' }}
+        style={{ borderColor: 'var(--d5-nav-border)' }}
       >
         <SvgSendaPath size={20} />
         <span
@@ -51,7 +51,7 @@ export function SideNav({ userInitials }: Props) {
       </Link>
 
       {/* Nav items */}
-      <nav className="flex-1 flex flex-col gap-0.5 p-3 overflow-y-auto">
+      <nav className="flex-1 flex flex-col gap-1 p-3 overflow-y-auto">
         {NAV_ITEMS.map(({ href, label }) => {
           const active =
             pathname === href ||
@@ -63,9 +63,9 @@ export function SideNav({ userInitials }: Props) {
               href={href}
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
               style={{
-                background: active ? 'rgba(184,170,153,0.25)' : 'transparent',
+                background: active ? 'var(--d5-nav-active-bg)' : 'transparent',
                 color: active ? 'var(--d5-terracotta)' : 'var(--d5-nav-inactive)',
-                fontWeight: active ? 600 : 400,
+                fontWeight: active ? 600 : 500,
               }}
             >
               {/* Left accent bar */}
@@ -85,14 +85,14 @@ export function SideNav({ userInitials }: Props) {
       </nav>
 
       {/* Account at bottom */}
-      <div className="p-3 border-t shrink-0" style={{ borderColor: 'rgba(184,170,153,0.35)' }}>
+      <div className="p-3 border-t shrink-0" style={{ borderColor: 'var(--d5-nav-border)' }}>
         <Link
           href="/account"
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
           style={{
-            background: pathname.startsWith('/account') ? 'rgba(184,170,153,0.25)' : 'transparent',
+            background: pathname.startsWith('/account') ? 'var(--d5-nav-active-bg)' : 'transparent',
             color: pathname.startsWith('/account') ? 'var(--d5-terracotta)' : 'var(--d5-nav-inactive)',
-            fontWeight: pathname.startsWith('/account') ? 600 : 400,
+            fontWeight: pathname.startsWith('/account') ? 600 : 500,
           }}
         >
           <span

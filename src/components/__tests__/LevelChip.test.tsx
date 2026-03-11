@@ -3,25 +3,25 @@ import { render, screen } from '@testing-library/react'
 import { LevelChip } from '../LevelChip'
 
 describe('LevelChip', () => {
-  it('renders "B1" chip with D5 warm palette class', () => {
+  it('renders "B1" chip with warm yellow background', () => {
     render(<LevelChip level="B1" />)
     const chip = screen.getByText('B1')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('#8C6A3F')
+    expect(chip.className).toContain('#fef9c3')
   })
 
-  it('renders "B2" chip with D5 warm palette class', () => {
+  it('renders "B2" chip with warm yellow background', () => {
     render(<LevelChip level="B2" />)
     const chip = screen.getByText('B2')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('#8C6A3F')
+    expect(chip.className).toContain('#fef9c3')
   })
 
-  it('renders "C1" chip with D5 warm palette class', () => {
+  it('renders "C1" chip with warm yellow background', () => {
     render(<LevelChip level="C1" />)
     const chip = screen.getByText('C1')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('#8C6A3F')
+    expect(chip.className).toContain('#fef9c3')
   })
 
   it('renders nothing when level is null', () => {
