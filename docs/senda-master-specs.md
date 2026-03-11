@@ -115,6 +115,18 @@ Secondary Actions: Outline style. Transparent background, 1.5px Brand Terracotta
 
 Interaction: Secondary outline buttons must utilize a bg-[#C4522E]/10 (Brand Terracotta at 10% opacity) fill on hover/active states for haptic-visual feedback.
 
+Pill Selectors (Tab Bars, Filters, Chip Groups)
+
+Pill selectors are used for tense tabs, module filters, session size pickers, and exercise type grids. They follow a strict two-state treatment:
+
+Active Pill: Solid Brand Terracotta (#C4522E) background with Brand Paper (#FDFCF9) text. Font weight: 700 (Bold). Border: none.
+
+Inactive Pill: Transparent background with a 1.5px solid Brand Muted (#B8AA99) border at 40% opacity. Text colour: Brand Warm (#8C6A3F). Font weight: 400 (Regular). The outlined/ghost style ensures the active terracotta pill stands out by contrast — solid fill backgrounds on inactive pills are prohibited as they compete with the active state.
+
+Interaction: Inactive pills must transition background and color over 200ms ease-out. Hover state uses Brand Terracotta at 5% opacity fill. All pills must maintain a minimum 44px touch target height.
+
+Dark Mode: Inactive pill border switches to Brand Muted (#B8AA99) at 25% opacity. Text colour switches to Brand Muted (#B8AA99). Active pill remains unchanged (solid terracotta).
+
 Forms & Inputs
 
 Forms & Inputs: Input fields must not use harsh borders or bottom underlines. Apply a faint background fill utilizing Dark Cream (#E8E6E1) instead.

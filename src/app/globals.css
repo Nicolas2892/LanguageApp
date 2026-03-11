@@ -153,6 +153,7 @@
   --d5-pill-bg: rgba(26, 17, 8, 0.03);
   --d5-pill-text: rgba(26, 17, 8, 0.6);
   --d5-pill-text-soft: rgba(26, 17, 8, 0.4);
+  --d5-pill-border: rgba(184, 170, 153, 0.40);
   --d5-paper-75: rgba(253, 252, 249, 0.75);
 
   /* BackgroundMagicS adaptive tokens */
@@ -176,6 +177,7 @@
   --d5-pill-bg: rgba(253, 252, 249, 0.06);
   --d5-pill-text: rgba(253, 252, 249, 0.6);
   --d5-pill-text-soft: rgba(253, 252, 249, 0.4);
+  --d5-pill-border: rgba(184, 170, 153, 0.25);
   --d5-paper-75: rgba(253, 252, 249, 0.55);
   --d5-magic-stroke: var(--d5-warm);
   --d5-magic-opacity: 0.05;

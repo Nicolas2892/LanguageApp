@@ -6,9 +6,31 @@ import { ArrowLeft, Palette } from 'lucide-react'
 import { VerbFavoriteButton } from '@/components/verbs/VerbFavoriteButton'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
-import { TENSES, TENSE_LABELS, TENSE_DESCRIPTIONS, type VerbTense } from '@/lib/verbs/constants'
+import { TENSE_LABELS, TENSE_DESCRIPTIONS, type VerbTense } from '@/lib/verbs/constants'
 
 const COLOUR_ENDINGS_KEY = 'verb-colour-endings'
+
+/* ── Mood-grouped tenses ── */
+
+interface MoodGroup {
+  label: string
+  tenses: VerbTense[]
+}
+
+const MOOD_GROUPS: MoodGroup[] = [
+  {
+    label: 'Indicativo',
+    tenses: ['present_indicative', 'preterite', 'imperfect', 'future', 'conditional'],
+  },
+  {
+    label: 'Subjuntivo',
+    tenses: ['present_subjunctive', 'imperfect_subjunctive'],
+  },
+  {
+    label: 'Imperativo',
+    tenses: ['imperative_affirmative', 'imperative_negative'],
+  },
+]
 
 const TENSE_SHORT_LABELS: Record<string, string> = {
   present_indicative:     'Presente',
@@ -16,10 +38,10 @@ const TENSE_SHORT_LABELS: Record<string, string> = {
   imperfect:              'Imperfecto',
   future:                 'Futuro',
   conditional:            'Condicional',
-  present_subjunctive:    'Subj. Presente',
-  imperfect_subjunctive:  'Subj. Imperfecto',
-  imperative_affirmative: 'Imp. Afirmativo',
-  imperative_negative:    'Imp. Negativo',
+  present_subjunctive:    'Presente',
+  imperfect_subjunctive:  'Imperfecto',
+  imperative_affirmative: 'Afirmativo',
+  imperative_negative:    'Negativo',
 }
 
 const PRONOUN_LABELS: Record<string, string> = {
@@ -61,21 +83,21 @@ function stripAccents(s: string) {
 
 function ColouredForm({ form, stem }: { form: string; stem: string }) {
   if (stem === '' || !stripAccents(form).startsWith(stripAccents(stem))) {
-    return <span className="text-primary font-semibold">{form}</span>
+    return <span style={{ color: 'var(--d5-terracotta)', fontWeight: 600 }}>{form}</span>
   }
   const stemPart = form.substring(0, stem.length)
   const ending = form.substring(stem.length)
   return (
     <>
-      <span className="text-muted-foreground">{stemPart}</span>
-      <span className="text-primary font-semibold">{ending}</span>
+      <span style={{ color: 'color-mix(in oklch, var(--d5-ink) 75%, transparent)', fontWeight: 400 }}>{stemPart}</span>
+      <span style={{ color: 'var(--d5-terracotta)', fontWeight: 600 }}>{ending}</span>
     </>
   )
 }
 
 export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favorited, tenseData }: Props) {
   const [colourEndings, setColourEndings] = useState(true)
-  const [selectedTense, setSelectedTense] = useState<VerbTense>(TENSES[0])
+  const [selectedTense, setSelectedTense] = useState<VerbTense>('present_indicative')
 
   useEffect(() => {
     try {
@@ -102,7 +124,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
   const attempts = activeData?.attempts ?? 0
 
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-5 pb-24 lg:pb-10">
+    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-24 lg:pb-10" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Header */}
       <div className="flex items-center gap-3">
         <Link
@@ -128,69 +150,85 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
         <VerbFavoriteButton verbId={verbId} initialFavorited={favorited} size="md" />
       </div>
 
-      <WindingPathSeparator />
-
-      {/* Horizontal tense pill bar */}
-      <div
-        role="tablist"
-        aria-label="Tense selector"
-        style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}
-      >
-        {TENSES.map((tense) => {
-          const active = tense === selectedTense
-          return (
-            <button
-              key={tense}
-              role="tab"
-              aria-selected={active}
-              onClick={() => setSelectedTense(tense)}
-              style={{
-                borderRadius: 99, border: 'none', cursor: 'pointer',
-                fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
-                whiteSpace: 'nowrap', flexShrink: 0,
-                minHeight: 44, display: 'flex', alignItems: 'center',
-                padding: '0 16px', fontSize: 12, fontWeight: active ? 700 : 500,
-                transition: 'background 200ms ease-out, color 200ms ease-out',
-                background: active ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
-                color: active ? 'var(--d5-paper)' : 'var(--d5-pill-text)',
-              }}
-            >
-              {TENSE_SHORT_LABELS[tense]}
-            </button>
-          )
-        })}
+      <div style={{ margin: '-4px 0' }}>
+        <WindingPathSeparator />
       </div>
 
-      {/* Active tense card */}
-      <section className="senda-card overflow-hidden" style={{ padding: 0 }}>
-        {/* Tense header */}
-        <div className="px-5 py-3" style={{ borderBottom: '1px solid rgba(184,170,153,0.15)' }}>
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="senda-eyebrow mb-1">{TENSE_LABELS[selectedTense]}</p>
-              <p className="text-[11px]" style={{ color: 'var(--d5-muted)' }}>{TENSE_DESCRIPTIONS[selectedTense]}</p>
+      {/* Mood-grouped tense selector */}
+      <div role="tablist" aria-label="Tense selector" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {MOOD_GROUPS.map((group) => (
+          <div key={group.label}>
+            <p
+              className="senda-eyebrow"
+              style={{ marginBottom: 8, color: 'var(--d5-muted)', fontSize: '0.5625rem' }}
+            >
+              {group.label}
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {group.tenses.map((tense) => {
+                const active = tense === selectedTense
+                return (
+                  <button
+                    key={tense}
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setSelectedTense(tense)}
+                    className="senda-focus-ring"
+                    style={{
+                      borderRadius: 99, cursor: 'pointer',
+                      fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
+                      whiteSpace: 'nowrap',
+                      minHeight: 44, display: 'flex', alignItems: 'center',
+                      padding: '0 16px', fontSize: 12,
+                      fontWeight: active ? 700 : 400,
+                      transition: 'background 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out',
+                      background: active ? 'var(--d5-terracotta)' : 'transparent',
+                      color: active ? 'var(--d5-paper)' : 'var(--d5-warm)',
+                      border: active ? '1.5px solid transparent' : '1.5px solid var(--d5-pill-border)',
+                    }}
+                  >
+                    {TENSE_SHORT_LABELS[tense]}
+                  </button>
+                )
+              })}
             </div>
-            {masteryPct !== null && (
-              <div className="text-right shrink-0">
-                <p className="text-xs font-semibold text-foreground">{masteryPct}%</p>
-                <p className="text-[10px] text-muted-foreground">{attempts} intentos</p>
-              </div>
-            )}
           </div>
+        ))}
+      </div>
 
-          {masteryPct !== null && (
-            <div className="relative h-1.5 w-full rounded-full bg-muted mt-2 overflow-hidden" data-testid="mastery-bar">
-              <AnimatedBar
-                pct={masteryPct}
-                className={masteryPct >= 70 ? 'bg-green-500' : masteryPct >= 40 ? 'bg-amber-400' : 'bg-rose-400'}
-              />
-            </div>
-          )}
+      {/* Tense header — label + description + colour toggle */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+        <div>
+          <p className="senda-eyebrow" style={{ marginBottom: 4 }}>{TENSE_LABELS[selectedTense]}</p>
+          <p className="text-[11px]" style={{ color: 'var(--d5-muted)' }}>{TENSE_DESCRIPTIONS[selectedTense]}</p>
         </div>
+        <button
+          onClick={toggleColourEndings}
+          aria-pressed={colourEndings}
+          aria-label="Toggle colour endings"
+          title={colourEndings ? 'Hide coloured endings' : 'Show coloured endings'}
+          className="senda-focus-ring"
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: 8, marginTop: -4, marginRight: -8, borderRadius: 8,
+            color: colourEndings ? 'var(--d5-terracotta)' : 'var(--d5-muted)',
+            transition: 'color 200ms ease-out',
+          }}
+        >
+          <Palette className="h-4 w-4" />
+        </button>
+      </div>
 
-        {/* Conjugation table */}
-        {rows.length > 0 ? (
-          <table className="w-full text-sm" role="table">
+      {/* Conjugation table */}
+      {rows.length > 0 ? (
+        <div
+          style={{
+            background: 'rgba(26,17,8,0.025)',
+            borderRadius: 14,
+            padding: '4px 14px',
+          }}
+        >
+          <table className="w-full" role="table">
             <tbody>
               {PRONOUN_ORDER.map((pronoun, idx) => {
                 const row = rows.find((r) => r.pronoun === pronoun)
@@ -202,18 +240,27 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
                       background: idx % 2 === 1 ? 'rgba(140,106,63,0.03)' : undefined,
                     }}
                   >
-                    <td className="px-5 py-2.5 w-32 font-medium" style={{ color: 'var(--d5-muted)' }}>
+                    <td
+                      style={{
+                        padding: '8px 2px', width: 82, flexShrink: 0,
+                        fontSize: 11, color: 'var(--d5-muted)',
+                        fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
+                      }}
+                    >
                       {PRONOUN_LABELS[pronoun] ?? pronoun}
                     </td>
                     <td
-                      className="px-5 py-2.5 font-medium break-words"
-                      style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic' }}
+                      style={{
+                        padding: '8px 2px',
+                        fontFamily: 'var(--font-lora), serif', fontStyle: 'italic',
+                        fontSize: 14,
+                      }}
                     >
                       {row && row.form !== ''
                         ? colourEndings
                           ? <ColouredForm form={row.form} stem={row.stem} />
-                          : row.form
-                        : <span className="text-muted-foreground/40 text-xs italic">—</span>
+                          : <span style={{ color: 'var(--d5-ink)' }}>{row.form}</span>
+                        : <span style={{ color: 'var(--d5-muted)', fontSize: 12, fontStyle: 'italic' }}>—</span>
                       }
                     </td>
                   </tr>
@@ -221,37 +268,45 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
               })}
             </tbody>
           </table>
-        ) : (
-          <p className="px-5 py-6 text-sm italic" style={{ fontFamily: 'var(--font-lora), serif', color: 'var(--d5-muted)' }}>
-            Sin datos aún — practica para ver tu progreso.
-          </p>
-        )}
-      </section>
+        </div>
+      ) : (
+        <p style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 14, color: 'var(--d5-warm)', lineHeight: 1.5, padding: '8px 0' }}>
+          Sin datos aún — practica para ver tu progreso.
+        </p>
+      )}
 
-      {/* Bottom actions */}
-      <div className="flex gap-3">
-        <Link
-          href={`/verbs/configure?verb=${infinitive}`}
-          className="flex flex-1 items-center justify-center rounded-full px-5 py-3 text-sm font-bold transition-colors hover:opacity-90"
-          style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)' }}
-        >
-          Practicar este verbo →
-        </Link>
-        <button
-          onClick={toggleColourEndings}
-          aria-pressed={colourEndings}
-          aria-label="Toggle colour endings"
-          title={colourEndings ? 'Hide coloured endings' : 'Show coloured endings'}
-          className={`flex items-center gap-1.5 rounded-xl border px-3 py-3 text-sm font-medium transition-colors ${
-            colourEndings
-              ? 'bg-primary/10 border-primary/30 text-primary'
-              : 'bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted'
-          }`}
-        >
-          <Palette className="h-4 w-4" />
-          <span className="hidden sm:inline">Endings</span>
-        </button>
-      </div>
+      {/* Mastery stats — below table */}
+      {masteryPct !== null && (
+        <div style={{ padding: '0 2px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <p style={{ fontSize: 10, color: 'var(--d5-warm)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+              {attempts} intentos
+            </p>
+            <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--d5-ink)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+              {masteryPct}%
+            </p>
+          </div>
+          <div className="relative overflow-hidden" style={{ height: 5, borderRadius: 99, background: 'color-mix(in oklch, var(--d5-muted) 25%, transparent)' }} data-testid="mastery-bar">
+            <AnimatedBar
+              pct={masteryPct}
+              className={masteryPct >= 70 ? '' : ''}
+              style={{
+                background: masteryPct >= 70 ? 'var(--d5-muted)' : 'var(--d5-terracotta)',
+                borderRadius: 99,
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* CTA */}
+      <Link
+        href={`/verbs/configure?verb=${infinitive}`}
+        className="flex items-center justify-center rounded-full px-5 py-3 text-sm font-bold transition-colors hover:opacity-90"
+        style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', width: '100%' }}
+      >
+        Practicar este verbo →
+      </Link>
     </main>
   )
 }

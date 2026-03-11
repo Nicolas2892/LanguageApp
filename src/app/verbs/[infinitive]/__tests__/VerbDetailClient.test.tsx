@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { VerbDetailClient } from '../VerbDetailClient'
+import type { CSSProperties } from 'react'
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
@@ -18,8 +19,8 @@ vi.mock('@/components/verbs/VerbFavoriteButton', () => ({
 
 // Mock AnimatedBar (avoid mount-delay timer)
 vi.mock('@/components/AnimatedBar', () => ({
-  AnimatedBar: ({ pct, className }: { pct: number; className: string }) => (
-    <div data-testid="animated-bar" data-pct={pct} className={className} />
+  AnimatedBar: ({ pct, style }: { pct: number; className?: string; style?: CSSProperties }) => (
+    <div data-testid="animated-bar" data-pct={pct} style={style} />
   ),
 }))
 
@@ -68,7 +69,6 @@ const defaultProps = {
 }
 
 beforeEach(() => {
-  // Clear localStorage mock
   const store: Record<string, string> = {}
   vi.stubGlobal('localStorage', {
     getItem: vi.fn((k: string) => store[k] ?? null),
@@ -92,10 +92,19 @@ describe('VerbDetailClient', () => {
     expect(screen.getByText('-ar')).toBeInTheDocument()
   })
 
+  it('renders mood group labels', () => {
+    render(<VerbDetailClient {...defaultProps} />)
+    expect(screen.getByText('Indicativo')).toBeInTheDocument()
+    expect(screen.getByText('Subjuntivo')).toBeInTheDocument()
+    expect(screen.getByText('Imperativo')).toBeInTheDocument()
+  })
+
   it('selects first tense (Presente) by default', () => {
     render(<VerbDetailClient {...defaultProps} />)
     const tabs = screen.getAllByRole('tab')
-    const presenteTab = tabs.find(t => t.textContent === 'Presente')
+    // First Presente tab (under Indicativo) should be active
+    const presenteTab = tabs[0]
+    expect(presenteTab).toHaveTextContent('Presente')
     expect(presenteTab).toHaveAttribute('aria-selected', 'true')
   })
 
@@ -132,7 +141,6 @@ describe('VerbDetailClient', () => {
     render(<VerbDetailClient {...defaultProps} />)
 
     const toggleBtn = screen.getByRole('button', { name: 'Toggle colour endings' })
-    // Default is true
     expect(toggleBtn).toHaveAttribute('aria-pressed', 'true')
 
     await user.click(toggleBtn)

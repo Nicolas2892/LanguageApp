@@ -635,80 +635,101 @@ Removed unused `boldNum` property from mode array objects (lines 77, 80). Proper
 
 ## Verb Detail Page — D5 Mockup Alignment Redesign (2026-03-11)
 
-**Files changed:** `src/app/verbs/[infinitive]/VerbDetailClient.tsx`, `src/app/verbs/[infinitive]/__tests__/VerbDetailClient.test.tsx` (new)
+**Files changed:** `src/app/verbs/[infinitive]/VerbDetailClient.tsx`, `src/app/verbs/[infinitive]/__tests__/VerbDetailClient.test.tsx` (new), `src/app/globals.css`, `docs/senda-master-specs.md`
 
-Previously stacked all 9 conjugation tenses vertically as separate `.senda-card` sections, creating an overwhelming scroll experience. Redesigned to match D5 mockup: horizontal tense tab bar, single visible tense, Lora italic forms, zebra striping, and bottom CTA.
+Previously stacked all 9 conjugation tenses vertically as separate `.senda-card` sections, creating an overwhelming scroll experience. Two-pass redesign to match D5 mockup: mood-grouped pill selector, mockup-matched table colours, icon-only colour toggle, and mastery bar below table.
 
-### Restructure 1: Vertical tense stack → horizontal pill tab bar
+### Restructure 1: Vertical tense stack → mood-grouped pill selector
 
-Replaced 9 vertically stacked `senda-card` sections with a single-tense-at-a-time view controlled by a horizontal scrollable pill bar (`role="tablist"`). Pills use D5 token styling:
-- Active: `var(--d5-terracotta)` bg, `var(--d5-paper)` text, `fontWeight: 700`
-- Inactive: `var(--d5-pill-bg)` bg, `var(--d5-pill-text)` text, `fontWeight: 500`
-- `minHeight: 44px` touch targets (Spec §9)
-- `transition: background 200ms ease-out, color 200ms ease-out` (Spec §8)
+Replaced 9 vertically stacked `senda-card` sections with a mood-grouped tense selector. Three rows with eyebrow labels:
+- **Indicativo**: Presente, Indefinido, Imperfecto, Futuro, Condicional
+- **Subjuntivo**: Presente, Imperfecto
+- **Imperativo**: Afirmativo, Negativo
 
-Added `TENSE_SHORT_LABELS` map for abbreviated pill labels (e.g. "Subj. Presente" instead of full "Presente de Subjuntivo").
+Uses `flexWrap: wrap` — no horizontal scrollbar. Short labels are contextual (e.g. just "Presente" under Subjuntivo, not "Subj. Presente").
 
-### Restructure 2: Layout reorder — CTA moved to bottom
+### Restructure 2: Inactive pills — outlined ghost style (new Spec §6)
 
-Old order: Header → CTA + colour toggle → 9 tense cards
-New order: Header → WindingPathSeparator → Pill bar → Single tense card → CTA + colour toggle
+Inactive pills changed from solid `--d5-pill-bg` fill to transparent + outlined per new master spec rule:
+- Active: solid `var(--d5-terracotta)` bg, `var(--d5-paper)` text, `fontWeight: 700`, no border
+- Inactive: `transparent` bg, `1.5px solid var(--d5-pill-border)`, `var(--d5-warm)` text, `fontWeight: 400`
 
-Moving CTA below the conjugation table matches the mockup's "explore then act" reading flow.
+New CSS token `--d5-pill-border` added to `globals.css`:
+- Light: `rgba(184, 170, 153, 0.40)`
+- Dark: `rgba(184, 170, 153, 0.25)`
 
-### Fix 1: Heading dark mode bug + terracotta colour (Spec §10.1)
+Pill Selectors spec section added to `docs/senda-master-specs.md` §6 for cross-page consistency.
 
-`<h1>` used inline `color: 'var(--d5-ink)'` — near-black `#1A1108` in both modes, invisible on dark backgrounds. Replaced with `color: 'var(--d5-terracotta)'` which is identical in both modes. Also bumped font-size from 26px to 28px.
+### Restructure 3: Table colours — mockup alignment
 
-### Fix 2: WindingPathSeparator added (Spec §5)
+Stem and ending colours now match the D5 brand preview mockup exactly:
 
-Inserted `WindingPathSeparator` between the header and pill bar, matching the macro-section divider pattern used on dashboard and concept detail pages.
+| Element | Before | After |
+|---|---|---|
+| Stem text | `text-muted-foreground` (cold grey) | `color-mix(in oklch, var(--d5-ink) 75%, transparent)` (warm, quiet) |
+| Stem weight | `font-semibold` (600) | `fontWeight: 400` (regular) |
+| Ending text | `text-primary` (Tailwind) | `var(--d5-terracotta)` (explicit) |
+| Ending weight | `font-semibold` (600) | `fontWeight: 600` (unchanged) |
+| Non-coloured form | default foreground | `var(--d5-ink)` |
 
-### Fix 3: Expanded pronoun labels
+This creates clear visual hierarchy: endings pop in terracotta against a warm-but-subdued stem.
 
-| Before | After |
-|---|---|
-| `él/ella` | `él/ella/Ud.` |
-| `nosotros` | `nosotros/as` |
-| `vosotros` | `vosotros/as` |
-| `ellos/ellas` | `ellos/as` |
+### Restructure 4: Table container — warm tint
 
-### Fix 4: Conjugation table refinements (Spec §3, §4)
+Removed `senda-card` wrapper from the table. Added inner container matching mockup:
+- `background: rgba(26,17,8,0.025)`, `borderRadius: 14`, `padding: '4px 14px'`
 
-- **Lora italic forms**: conjugation form cells now use `fontFamily: 'var(--font-lora), serif'` + `fontStyle: 'italic'` (matching mockup typography)
-- **Zebra striping**: odd rows get `background: rgba(140,106,63,0.03)` for subtle banding
-- **Softer dividers**: `borderBottom` changed from Tailwind `border-b` class to `1px solid rgba(184,170,153,0.15)` — lighter, no border on last row
-- **Wider pronoun column**: `w-28` → `w-32` (accommodates "nosotros/as")
+### Restructure 5: Mastery bar moved below table
 
-### Fix 5: Empty state text — Spanish serif italic
+Previously in tense header above the table. Now sits below the table, matching mockup layout. Uses mockup bar styling:
+- Track: `color-mix(in oklch, var(--d5-muted) 25%, transparent)`, `height: 5px`
+- Fill: `var(--d5-muted)` for ≥70%, `var(--d5-terracotta)` for <70% (replacing semantic green/amber/rose)
+- Stats: `{attempts} intentos` left, `{pct}%` bold right
 
-Old: "No conjugations seeded for this tense yet."
-New: "Sin datos aún — practica para ver tu progreso." in Lora italic, `color: var(--d5-muted)`
+### Restructure 6: Colour toggle → icon-only
 
-### Fix 6: Attempt label localised
+Replaced the chunky bordered button (Palette icon + "Endings" text + border chrome) with a bare icon button in the tense header row:
+- No background, no border — just the `Palette` icon
+- Terracotta when active, muted when inactive
+- `senda-focus-ring` for keyboard accessibility
+- Positioned top-right of the tense label/description block
 
-"attempts" → "intentos" (Spanish)
+### Restructure 7: CTA full-width
 
-### New state: `selectedTense`
+With the colour toggle removed from the action row, the CTA becomes `width: 100%` — cleaner, no competing elements.
 
-Added `useState<VerbTense>(TENSES[0])` — defaults to `present_indicative` (Presente). Only the selected tense's data is rendered, eliminating the 9-card vertical scroll.
+### Restructure 8: Pronoun styling — quieter labels
 
-### Test file: 10 new tests
+Matched mockup pronoun styling:
+- Font: `fontSize: 11`, DM Sans (explicit `fontFamily`)
+- Removed `font-medium` (was weight 500) — now default weight
+- Width: `82px` (fixed, matching mockup)
+
+### Fix 1: WindingPathSeparator spacing
+
+Added negative margin wrapper (`margin: '-4px 0'`) around separator for breathing room between header and pill selector.
+
+### Fix 2: Layout reorder — explore then act
+
+Final order: Header → Separator → Mood pills → Tense label + colour toggle → Table → Mastery bar → CTA
+
+### Test file: 11 tests
 
 `src/app/verbs/[infinitive]/__tests__/VerbDetailClient.test.tsx`:
 
 1. Renders infinitive + english translation
 2. Renders verb group badge
-3. First tense selected by default (Presente pill `aria-selected="true"`)
-4. Tense switching updates visible content (table → empty state)
-5. All 6 expanded pronoun labels render
-6. Colour endings toggle works (`aria-pressed`)
-7. Mastery bar renders when attempts > 0
-8. Mastery bar hidden when no attempts
-9. CTA link points to `/verbs/configure?verb={infinitive}`
-10. WindingPathSeparator is present
+3. Renders mood group labels (Indicativo, Subjuntivo, Imperativo)
+4. First tense selected by default (Presente pill `aria-selected="true"`)
+5. Tense switching updates visible content (table → empty state)
+6. All 6 expanded pronoun labels render
+7. Colour endings toggle works (`aria-pressed`)
+8. Mastery bar renders when attempts > 0
+9. Mastery bar hidden when no attempts
+10. CTA link points to `/verbs/configure?verb={infinitive}`
+11. WindingPathSeparator is present
 
-**Test suite: 1337 tests across 56 files — 10 new tests all passing.** (3 pre-existing GrammarFocusChip failures unrelated to this change.)
+**Test suite: 1358 tests across 58 files — 11 tests all passing.** (3 pre-existing GrammarFocusChip failures unrelated to this change.)
 
 ---
 
