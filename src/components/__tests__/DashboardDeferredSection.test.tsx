@@ -98,7 +98,7 @@ describe('DashboardDeferredSection', () => {
     )
     const el = await DashboardDeferredSection(defaultProps)
     render(el)
-    expect(screen.getByText(/express your thoughts/i)).toBeTruthy()
+    expect(screen.getByText(/expresa tus ideas/i)).toBeTruthy()
   })
 
   it('renders Escritura Libre card for non-new users', async () => {

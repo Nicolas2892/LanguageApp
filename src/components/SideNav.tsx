@@ -39,7 +39,7 @@ export function SideNav({ userInitials }: Props) {
         <SvgSendaPath size={20} />
         <span
           style={{
-            fontFamily: 'var(--font-dm-serif), serif',
+            fontFamily: 'var(--font-lora), serif',
             fontStyle: 'italic',
             fontSize: 20,
             lineHeight: 1,

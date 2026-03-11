@@ -45,7 +45,7 @@ export function EmptyState({ heading, subtext, ctaLabel, ctaHref }: EmptyStatePr
         {/* Heading — DM Serif italic */}
         <h2
           className="text-xl leading-snug text-foreground"
-          style={{ fontFamily: 'var(--font-dm-serif), Georgia, serif', fontStyle: 'italic' }}
+          style={{ fontFamily: 'var(--font-lora), Georgia, serif', fontStyle: 'italic' }}
         >
           {heading}
         </h2>

@@ -1,4 +1,4 @@
-import { Cormorant_Garamond, DM_Serif_Display, Plus_Jakarta_Sans } from 'next/font/google'
+import { Cormorant_Garamond, Lora, DM_Sans } from 'next/font/google'
 import { createClient } from '@/lib/supabase/server'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import {
@@ -16,17 +16,17 @@ const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
 })
 
-const dmSerif = DM_Serif_Display({
+const dmSerif = Lora({
   subsets: ['latin'],
   weight: ['400'],
   style: ['italic'],
-  variable: '--font-dm-serif',
+  variable: '--font-lora',
 })
 
-const plusJakarta = Plus_Jakarta_Sans({
+const plusJakarta = DM_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-  variable: '--font-plus-jakarta',
+  variable: '--font-dm-sans',
 })
 
 const TENSE_LABELS_MAP: Record<string, string> = {

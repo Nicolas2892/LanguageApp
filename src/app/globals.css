@@ -7,7 +7,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-plus-jakarta);
+  --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -138,21 +138,34 @@
   --d5-warm: #8C6A3F;
   --d5-muted: #B8AA99;
   --d5-paper: #FDFCF9;
+  --d5-cream: #E8E6E1;
 
   /* Adaptive tokens — swap in dark mode */
   --d5-eyebrow: var(--d5-warm);
   --d5-separator: var(--d5-warm);
   --d5-nav-inactive: var(--d5-warm);
+
+  /* BackgroundMagicS adaptive tokens */
+  --d5-magic-stroke: var(--d5-muted);
+  --d5-magic-opacity: 0.03;
+
+  /* WindingPathSeparator adaptive opacity tokens */
+  --d5-separator-opacity: 0.50;
+  --d5-separator-echo-opacity: 0.10;
 }
 .dark {
   --d5-eyebrow: var(--d5-muted);
   --d5-separator: var(--d5-muted);
   --d5-nav-inactive: var(--d5-muted);
+  --d5-magic-stroke: var(--d5-warm);
+  --d5-magic-opacity: 0.05;
+  --d5-separator-opacity: 0.15;
+  --d5-separator-echo-opacity: 0.04;
 }
 
-/* Serif italic heading — DM Serif Display, used for card titles and page h1 */
+/* Serif italic heading — Lora, used for card titles and page h1 */
 .senda-heading {
-  font-family: var(--font-dm-serif), serif;
+  font-family: var(--font-lora), serif;
   font-style: italic;
   color: var(--d5-ink);
   line-height: 1.2;
@@ -161,27 +174,73 @@
   color: var(--d5-paper);
 }
 
-/* Section eyebrow — 9px uppercase label used throughout all pages */
+/* Section eyebrow — 0.75rem label used throughout all pages */
 .senda-eyebrow {
-  font-size: 9px;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--d5-eyebrow);
-  font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
   line-height: 1;
 }
 
 /* D5 card surface — soft warm fill, no hard border */
 .senda-card {
   background: rgba(140, 106, 63, 0.07);
-  box-shadow: 0 10px 30px -10px rgba(26, 17, 8, 0.03);
+  box-shadow: 0 10px 30px -10px rgba(26, 17, 8, 0.08);
   border-radius: 20px;
-  padding: 16px 18px;
+  padding: 16px 20px;
 }
 .dark .senda-card {
-  background: rgba(140, 106, 63, 0.14);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  background: #241910;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+}
+
+/* Senda form input — borderless, Dark Cream fill (Spec §6) */
+.senda-input {
+  background: var(--d5-cream);
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--d5-ink);
+  padding: 0.5rem 0.75rem;
+  outline: none;
+  width: 100%;
+  transition: box-shadow 200ms ease-out;
+}
+.senda-input::placeholder {
+  color: var(--d5-muted);
+}
+.senda-input:focus-visible {
+  outline: 2px solid var(--d5-terracotta);
+  outline-offset: 2px;
+}
+.dark .senda-input {
+  background: rgba(26, 17, 8, 0.40);
+  color: var(--d5-paper);
+}
+
+/* Senda field label — small muted label above inputs */
+.senda-field-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--d5-warm);
+}
+
+/* Senda sub-header — section sub-title within a form */
+.senda-sub-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--d5-warm);
+}
+.dark .senda-sub-header {
+  color: var(--d5-muted);
+}
+
+/* Focus-visible for bare interactive elements (Spec §9) */
+.senda-focus-ring:focus-visible {
+  outline: 2px solid var(--d5-terracotta);
+  outline-offset: 2px;
 }
 
 /* Senda motion tempo — snappy academic easing */
@@ -241,4 +300,16 @@
 }
 .dark .review-card-warm {
   background-color: var(--card); /* resolves to warm dark surface in dark mode */
+}
+
+/* Accessibility: suppress non-essential animations for reduced-motion users */
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-in,
+  .animate-exercise-in,
+  .animate-flash-green,
+  .animate-flash-red,
+  .animate-flash-orange,
+  .animate-senda-pulse {
+    animation: none !important;
+  }
 }

@@ -54,22 +54,13 @@ export default async function DashboardPage() {
 
       {/* ── Greeting ────────────────────────────────────────────────────────── */}
       <div className="mb-3">
-        <h1
-          style={{
-            fontFamily: 'var(--font-dm-serif), serif',
-            fontStyle: 'italic',
-            fontSize: 24,
-            lineHeight: 1.2,
-            color: 'var(--d5-ink)',
-            marginBottom: 8,
-          }}
-        >
+        <h1 className="senda-heading text-2xl mb-2">
           Hola, {(profile?.display_name ?? 'learner').split(' ')[0]}.
         </h1>
         {profile?.computed_level && (() => {
           const chip = LEVEL_CHIP[profile.computed_level]
           return chip ? (
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${chip.className}`}>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${chip.className}`}>
               Nivel {chip.label}
             </span>
           ) : null
@@ -84,30 +75,26 @@ export default async function DashboardPage() {
 
         {studiedCount === 0 ? (
           <>
-            <p
-              style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
-            >
+            <p className="senda-heading text-base">
               Sin repasos aún
             </p>
-            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
               Completa tu primera sesión y lo seguiremos desde aquí.
             </p>
           </>
         ) : dueCount > 0 ? (
           <>
-            <p
-              style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
-            >
+            <p className="senda-heading text-base">
               {dueCount} Concepto{dueCount !== 1 ? 's' : ''} listos para repasar
               {dueCount >= 10 && (
-                <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse ml-2 align-middle" />
+                <span className="inline-block h-2 w-2 rounded-full bg-[var(--d5-terracotta)] animate-senda-pulse ml-2 align-middle" />
               )}
             </p>
-            <p className="text-[11px] leading-relaxed">
-              <span style={{ fontFamily: 'var(--font-plus-jakarta)', fontWeight: 700, color: 'var(--d5-ink)' }}>{dueCount}</span>
+            <p className="text-xs leading-relaxed">
+              <span className="font-bold text-foreground">{dueCount}</span>
               {' '}<span style={{ color: 'var(--d5-warm)' }}>Listo{dueCount !== 1 ? 's' : ''}</span>
               <span style={{ color: 'var(--d5-muted)' }}> · </span>
-              <span style={{ fontFamily: 'var(--font-plus-jakarta)', fontWeight: 700, color: 'var(--d5-ink)' }}>{newConceptsCount}</span>
+              <span className="font-bold text-foreground">{newConceptsCount}</span>
               {' '}<span style={{ color: 'var(--d5-warm)' }}>Esperando</span>
             </p>
             <Button asChild className="w-full rounded-full font-bold" style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', border: 'none' }}>
@@ -116,12 +103,10 @@ export default async function DashboardPage() {
           </>
         ) : (
           <>
-            <p
-              style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
-            >
+            <p className="senda-heading text-base">
               Todo al día en tu senda hoy
             </p>
-            <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
               Perfecto — vuelve mañana o explora a tu ritmo.
             </p>
             <Button
@@ -138,24 +123,19 @@ export default async function DashboardPage() {
 
       {/* ── Card stack wrapper — BackgroundMagicS threads behind all three cards ── */}
       <div className="relative overflow-hidden">
-        <BackgroundMagicS opacity={0.04} style={{ left: -20, top: 20, right: 'auto', width: 280, height: 360 }} />
+        <BackgroundMagicS style={{ left: -20, top: 20, right: 'auto', width: 280, height: 360 }} />
 
         <WindingPathSeparator />
 
         {/* ── Exploración Abierta — open practice ─────────────────────────────── */}
         {newConceptsCount > 0 && (
           <>
-            <div
-              className="rounded-[20px] space-y-3"
-              style={{ padding: '16px 18px', minHeight: 130, boxShadow: '0 10px 30px -10px rgba(26, 17, 8, 0.03)' }}
-            >
+            <div className="senda-card space-y-3">
               <p className="senda-eyebrow">Exploración Abierta</p>
-              <p
-                style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
-              >
+              <p className="senda-heading text-base">
                 Tu Práctica: {newConceptsCount} Concepto{newConceptsCount !== 1 ? 's' : ''} Esperándote
               </p>
-              <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
+              <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
                 Continúa tu camino con práctica libre.
               </p>
               <Button

@@ -45,7 +45,7 @@ export default function OfflinePage() {
 
         {/* Heading — serif italic */}
         <h1 style={{
-          fontFamily: 'var(--font-dm-serif), Georgia, serif',
+          fontFamily: 'var(--font-lora), Georgia, serif',
           fontStyle: 'italic',
           fontSize: '1.75rem',
           fontWeight: 400,

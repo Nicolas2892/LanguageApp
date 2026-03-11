@@ -42,14 +42,14 @@ export function DangerZone() {
         className="w-full rounded-full"
         onClick={handleSignOut}
       >
-        <LogOut size={15} strokeWidth={1.5} style={{ marginRight: 8, color: 'var(--d5-ink)' }} />
+        <LogOut size={15} strokeWidth={1.5} className="mr-2 text-[var(--d5-ink)] dark:text-[var(--d5-paper)]" />
         Cerrar sesión
       </Button>
 
       <div className="mt-6 mb-2" />
 
       {/* Delete Account — danger only */}
-      <span className="senda-eyebrow text-red-600">Zona de peligro</span>
+      <span className="senda-eyebrow">Zona de peligro</span>
 
       {!confirming ? (
         <Button
@@ -57,7 +57,7 @@ export function DangerZone() {
           className="w-full rounded-full border-red-300 text-red-600 hover:bg-red-50"
           onClick={() => setConfirming(true)}
         >
-          <Trash2 size={15} strokeWidth={1.5} style={{ marginRight: 8 }} />
+          <Trash2 size={15} strokeWidth={1.5} className="mr-2" />
           Eliminar cuenta
         </Button>
       ) : (
@@ -82,7 +82,7 @@ export function DangerZone() {
             </Button>
           </div>
           {deleteError && (
-            <p className="text-sm text-red-600 border border-red-200 rounded-lg p-3">{deleteError}</p>
+            <p className="text-sm text-red-600 rounded-lg p-3" style={{ background: 'rgba(220,38,38,0.06)' }}>{deleteError}</p>
           )}
         </div>
       )}

@@ -21,7 +21,7 @@ const EYEBROW: React.CSSProperties = {
   fontSize: 9, fontWeight: 700, letterSpacing: '0.12em',
   textTransform: 'uppercase', color: 'var(--d5-muted)',
   marginBottom: 10,
-  fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+  fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
 }
 
 type SessionMode = 'srs' | 'review' | 'practice'
@@ -83,7 +83,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
 
   const pillBase: React.CSSProperties = {
     borderRadius: 99, border: 'none', cursor: 'pointer',
-    fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+    fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
     whiteSpace: 'nowrap', flexShrink: 0,
     minHeight: 44, display: 'flex', alignItems: 'center',
   }
@@ -115,7 +115,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
                 </div>
               )}
               <div style={{
-                fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 14,
+                fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 14,
                 color: sessionMode === mode.id ? 'var(--d5-paper)' : 'var(--d5-ink)',
                 marginBottom: 2,
               }}>
@@ -124,7 +124,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
               <div style={{
                 fontSize: 10,
                 color: sessionMode === mode.id ? 'rgba(253,252,249,0.75)' : 'var(--d5-muted)',
-                fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+                fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
               }}>
                 {mode.subtitle}
               </div>
@@ -210,7 +210,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
                     style={{
                       padding: '12px 8px', borderRadius: 8, textAlign: 'center',
                       border: 'none', cursor: 'pointer', minHeight: 44,
-                      fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+                      fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
                       fontSize: 11,
                       background: active ? 'var(--d5-terracotta)' : 'rgba(26,17,8,0.03)',
                       fontWeight: active ? 700 : 400,
@@ -236,7 +236,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
             background: 'var(--d5-terracotta)', color: 'var(--d5-paper)',
             border: 'none', borderRadius: 99, padding: '13px 0', width: '100%',
             fontWeight: 700, fontSize: 14, cursor: 'pointer',
-            fontFamily: 'var(--font-plus-jakarta), system-ui, sans-serif',
+            fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
           }}
         >
           Empezar Sesión →

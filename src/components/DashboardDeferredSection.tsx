@@ -110,28 +110,27 @@ export async function DashboardDeferredSection({
         <div className="senda-card space-y-3 relative overflow-hidden">
           {/* Quill icon — top-right decorative mark */}
           <svg
-            style={{ position: 'absolute', top: 14, right: 16, pointerEvents: 'none' }}
+            style={{ position: 'absolute', top: 16, right: 16, pointerEvents: 'none', opacity: 0.25 }}
             width={28} height={28} viewBox="0 0 24 24" fill="none"
             aria-hidden="true"
           >
-            <path d="M20.707 5.826l-2.534-2.533a1 1 0 0 0-1.414 0L3 17.05V21h3.95L20.707 7.24a1 1 0 0 0 0-1.414z" stroke="rgba(26,17,8,0.20)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M15 7l2 2" stroke="rgba(26,17,8,0.20)" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M20.707 5.826l-2.534-2.533a1 1 0 0 0-1.414 0L3 17.05V21h3.95L20.707 7.24a1 1 0 0 0 0-1.414z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M15 7l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
-          <p
-            style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
-          >
+          <p className="senda-heading text-base">
             Escritura Libre
           </p>
-          <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
-            Express your thoughts. No limits, just practice.
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
+            Expresa tus ideas. Sin límites, solo práctica.
           </p>
-          <p className="text-[10px] leading-relaxed" style={{ color: 'var(--d5-muted)' }}>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-muted)' }}>
             Concepto sugerido: {writeConcept.title}
           </p>
           <Button
             asChild
+            variant="outline"
             className="w-full rounded-full font-bold"
-            style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', border: 'none' }}
+            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
           >
             <Link href={`/write?suggested=${writeConcept.id}`}>Empezar a Escribir</Link>
           </Button>
@@ -144,25 +143,24 @@ export async function DashboardDeferredSection({
         <div className="senda-card space-y-3 relative overflow-hidden">
           {/* Quill icon — top-right decorative mark */}
           <svg
-            style={{ position: 'absolute', top: 14, right: 16, pointerEvents: 'none' }}
+            style={{ position: 'absolute', top: 16, right: 16, pointerEvents: 'none', opacity: 0.25 }}
             width={28} height={28} viewBox="0 0 24 24" fill="none"
             aria-hidden="true"
           >
-            <path d="M20.707 5.826l-2.534-2.533a1 1 0 0 0-1.414 0L3 17.05V21h3.95L20.707 7.24a1 1 0 0 0 0-1.414z" stroke="rgba(26,17,8,0.20)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M15 7l2 2" stroke="rgba(26,17,8,0.20)" strokeWidth="1.5" strokeLinecap="round" />
+            <path d="M20.707 5.826l-2.534-2.533a1 1 0 0 0-1.414 0L3 17.05V21h3.95L20.707 7.24a1 1 0 0 0 0-1.414z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M15 7l2 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
-          <p
-            style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 16, lineHeight: 1.4, color: 'var(--d5-ink)' }}
-          >
+          <p className="senda-heading text-base">
             Escritura Libre
           </p>
-          <p className="text-[11px] leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
-            Express your thoughts. No limits, just practice.
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
+            Expresa tus ideas. Sin límites, solo práctica.
           </p>
           <Button
             asChild
+            variant="outline"
             className="w-full rounded-full font-bold"
-            style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', border: 'none' }}
+            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
           >
             <Link href="/write">Empezar a Escribir</Link>
           </Button>
@@ -185,31 +183,25 @@ export async function DashboardDeferredSection({
               return (
                 <div
                   key={mod.title}
-                  className="flex items-center justify-between py-2.5"
-                  style={{
-                    borderBottom:
-                      i < moduleSummaries.length - 1
-                        ? '1px solid rgba(184,170,153,0.25)'
-                        : 'none',
-                  }}
+                  className="flex items-center justify-between py-3"
                 >
                   <span
-                    className="flex-1 mr-2 text-[12px] truncate"
-                    style={{ color: isUpcoming ? 'rgba(26,17,8,0.45)' : 'var(--d5-ink)' }}
+                    className={`flex-1 mr-2 text-sm truncate ${isUpcoming ? 'text-[var(--d5-muted)]' : 'text-foreground'}`}
                   >
                     {mod.title}
                   </span>
                   <span
-                    className="text-[9px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap"
+                    className={`text-xs font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap ${
+                      mod.state === 'mastered' ? 'bg-[var(--d5-cream)] dark:bg-[rgba(140,106,63,0.12)]'
+                      : mod.state === 'upcoming' ? 'bg-[rgba(232,230,225,0.5)] dark:bg-[rgba(140,106,63,0.08)]'
+                      : ''
+                    }`}
                     style={{
-                      background:
-                        mod.state === 'mastered' ? 'rgba(184,170,153,0.3)'
-                        : mod.state === 'active' ? 'var(--d5-terracotta)'
-                        : 'transparent',
+                      ...(mod.state === 'active' ? { background: 'var(--d5-terracotta)' } : {}),
                       color:
                         mod.state === 'mastered' ? 'var(--d5-warm)'
                         : mod.state === 'active' ? 'var(--d5-paper)'
-                        : 'rgba(26,17,8,0.35)',
+                        : 'var(--d5-muted)',
                     }}
                   >
                     {stateLabel}

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Volume2, VolumeX, CheckCircle2 } from 'lucide-react'
 import { useSpeech } from '@/lib/hooks/useSpeech'
 import { useTheme } from '@/components/ThemeProvider'
-import { WindingPathSeparator } from '@/components/WindingPathSeparator'
+import { LEVEL_CHIP } from '@/lib/constants'
 import type { Profile } from '@/lib/supabase/types'
 
 type ThemeValue = 'light' | 'dark' | 'system'
@@ -15,33 +15,6 @@ const THEME_OPTIONS: { value: ThemeValue; label: string }[] = [
   { value: 'light', label: 'Claro' },
   { value: 'dark', label: 'Oscuro' },
 ]
-
-const eyebrowStyle: React.CSSProperties = {
-  fontSize: 9,
-  fontWeight: 700,
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  color: 'var(--d5-muted)',
-  display: 'block',
-  marginBottom: 14,
-}
-
-const fieldLabelStyle: React.CSSProperties = {
-  fontSize: 10,
-  fontWeight: 500,
-  color: 'rgba(26,17,8,0.5)',
-}
-
-const bareInputStyle: React.CSSProperties = {
-  background: 'rgba(26,17,8,0.04)',
-  border: '1px solid rgba(26,17,8,0.08)',
-  borderRadius: 8,
-  fontSize: 13,
-  color: 'var(--d5-ink)',
-  padding: '8px 12px',
-  outline: 'none',
-  width: '100%',
-}
 
 interface Props {
   profile: Profile
@@ -56,7 +29,8 @@ export function AccountForm({ profile }: Props) {
   const { enabled: audioEnabled, toggle: toggleAudio } = useSpeech()
   const { theme, setTheme } = useTheme()
 
-  const computedLevel = profile.computed_level ?? 'B1'
+  const computedLevel = (profile.computed_level ?? 'B1') as keyof typeof LEVEL_CHIP
+  const levelChip = LEVEL_CHIP[computedLevel]
 
   async function handleSave(extraFields?: Record<string, unknown>) {
     setSaving(true)
@@ -108,26 +82,26 @@ export function AccountForm({ profile }: Props) {
   return (
     <div>
       {/* ── Section 1: Perfil ── */}
-      <div style={{ padding: '4px 0 16px' }}>
-        <span style={eyebrowStyle}>Perfil</span>
+      <div style={{ padding: '0.25rem 0 1rem' }}>
+        <span className="senda-eyebrow block" style={{ marginBottom: '0.875rem' }}>Perfil</span>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 18 }}>
-          <label htmlFor="display_name" style={fieldLabelStyle}>Nombre</label>
+        <div className="flex flex-col gap-1" style={{ marginBottom: '1.125rem' }}>
+          <label htmlFor="display_name" className="senda-field-label">Nombre</label>
           <input
             id="display_name"
             value={displayName}
             onChange={(e) => { setDisplayName(e.target.value); setSaved(false) }}
             maxLength={50}
             placeholder="Tu nombre"
-            style={bareInputStyle}
+            className="senda-input"
           />
           {displayName.length >= 35 && (
-            <p style={{ fontSize: 11, color: 'var(--d5-muted)', textAlign: 'right' }}>{displayName.length}/50</p>
+            <p style={{ fontSize: '0.6875rem', color: 'var(--d5-muted)', textAlign: 'right' }}>{displayName.length}/50</p>
           )}
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <label htmlFor="daily_goal" style={fieldLabelStyle}>Meta diaria</label>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="daily_goal" className="senda-field-label">Meta diaria</label>
           <input
             id="daily_goal"
             type="number"
@@ -135,34 +109,32 @@ export function AccountForm({ profile }: Props) {
             max={120}
             value={goalMinutes}
             onChange={(e) => { setGoalMinutes(e.target.value); setSaved(false) }}
-            style={bareInputStyle}
+            className="senda-input"
           />
         </div>
       </div>
 
-      <WindingPathSeparator />
+      <div style={{ height: '1.5rem' }} />
 
       {/* ── Section 2: Apariencia ── */}
-      <div style={{ padding: '4px 0 16px' }}>
-        <span style={eyebrowStyle}>Apariencia</span>
+      <div style={{ padding: '0.25rem 0 1rem' }}>
+        <span className="senda-eyebrow block" style={{ marginBottom: '0.875rem' }}>Apariencia</span>
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <div className="flex gap-2" style={{ marginBottom: '1rem' }}>
           {THEME_OPTIONS.map(({ value, label }) => (
             <button
               key={value}
               type="button"
               onClick={() => handleThemeChange(value)}
               aria-pressed={theme === value}
+              className={`senda-focus-ring rounded-full px-3.5 border-none cursor-pointer transition-[background,color] duration-200 ease-out ${
+                theme === value
+                  ? 'bg-[rgba(140,106,63,0.12)] text-[var(--d5-ink)] font-bold dark:bg-[rgba(184,170,153,0.18)] dark:text-[var(--d5-paper)]'
+                  : 'bg-[rgba(140,106,63,0.04)] text-[var(--d5-muted)] dark:bg-[rgba(184,170,153,0.06)]'
+              }`}
               style={{
-                padding: '6px 14px',
-                borderRadius: 9999,
-                fontSize: 10,
-                fontWeight: theme === value ? 700 : 400,
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background 150ms, color 150ms',
-                background: theme === value ? 'rgba(26,17,8,0.08)' : 'rgba(26,17,8,0.03)',
-                color: theme === value ? 'var(--d5-ink)' : 'rgba(26,17,8,0.45)',
+                fontSize: '0.625rem',
+                minHeight: '2.75rem',
               }}
             >
               {label}
@@ -173,62 +145,68 @@ export function AccountForm({ profile }: Props) {
         <button
           type="button"
           onClick={toggleAudio}
+          className={`senda-focus-ring w-full rounded-xl flex items-center gap-3 text-left border-none cursor-pointer transition-[background] duration-200 ease-out ${
+            audioEnabled === false
+              ? 'bg-[rgba(140,106,63,0.04)] dark:bg-[rgba(184,170,153,0.06)]'
+              : 'bg-[rgba(196,82,46,0.05)] dark:bg-[rgba(196,82,46,0.10)]'
+          }`}
           style={{
-            width: '100%',
-            borderRadius: 12,
-            padding: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            textAlign: 'left',
-            background: audioEnabled === false ? 'rgba(26,17,8,0.03)' : 'rgba(196,82,46,0.05)',
+            padding: '0.75rem',
             boxShadow: '0 10px 30px -10px rgba(26,17,8,0.06)',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'background 150ms',
           }}
         >
           {audioEnabled === false ? (
-            <VolumeX size={16} strokeWidth={1.5} style={{ color: 'var(--d5-ink)', flexShrink: 0, opacity: 0.4 }} />
+            <VolumeX size={16} strokeWidth={1.5} className="shrink-0 opacity-40" style={{ color: 'var(--d5-ink)' }} />
           ) : (
-            <Volume2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
+            <Volume2 size={16} strokeWidth={1.5} className="shrink-0" style={{ color: 'var(--d5-terracotta)' }} />
           )}
           <div>
-            <p style={{ fontSize: 13, fontWeight: 500, color: audioEnabled === false ? 'var(--d5-muted)' : 'var(--d5-ink)' }}>
+            <p style={{ fontSize: '0.8125rem', fontWeight: 500 }} className={audioEnabled === false ? 'text-[var(--d5-muted)]' : 'text-[var(--d5-ink)] dark:text-[var(--d5-paper)]'}>
               {audioEnabled === false ? 'Audio desactivado' : 'Audio activado'}
             </p>
-            <p style={{ fontSize: 11, color: 'var(--d5-muted)', marginTop: 2 }}>
+            <p style={{ fontSize: '0.6875rem', color: 'var(--d5-muted)', marginTop: '0.125rem' }}>
               Reproducir frases en español en los ejercicios y el currículo
             </p>
           </div>
         </button>
       </div>
 
-      <WindingPathSeparator />
+      <div style={{ height: '1.5rem' }} />
 
       {/* ── Section 3: Nivel actual ── */}
-      <div style={{ padding: '4px 0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 10, color: 'var(--d5-warm)' }}>Nivel actual</span>
-        <span style={{
-          fontSize: 10,
-          fontWeight: 700,
-          padding: '2px 10px',
-          borderRadius: 9999,
-          background: 'rgba(245,158,11,0.12)',
-          color: '#92400e',
-        }}>
-          {computedLevel}
-        </span>
+      <div className="flex items-center justify-between" style={{ padding: '0.25rem 0 1rem' }}>
+        <span className="senda-field-label">Nivel actual</span>
+        {levelChip ? (
+          <span className={levelChip.className} style={{
+            fontSize: '0.625rem',
+            fontWeight: 700,
+            padding: '0.125rem 0.625rem',
+            borderRadius: 9999,
+          }}>
+            {computedLevel}
+          </span>
+        ) : (
+          <span style={{
+            fontSize: '0.625rem',
+            fontWeight: 700,
+            padding: '0.125rem 0.625rem',
+            borderRadius: 9999,
+            background: 'rgba(245,158,11,0.12)',
+            color: '#92400e',
+          }}>
+            {computedLevel}
+          </span>
+        )}
       </div>
 
       {/* ── Section 4: Guardar ── */}
-      <div style={{ padding: '4px 0 0' }}>
+      <div style={{ padding: '0.25rem 0 0' }}>
         {error && (
-          <p style={{ fontSize: 12, color: '#dc2626', padding: '8px 12px', borderRadius: 8, background: 'rgba(220,38,38,0.06)', marginBottom: 16 }}>{error}</p>
+          <p style={{ fontSize: '0.75rem', color: '#dc2626', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(220,38,38,0.06)', marginBottom: '1rem' }}>{error}</p>
         )}
         {saved && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--d5-terracotta)', padding: '8px 12px', borderRadius: 8, background: 'rgba(196,82,46,0.06)', marginBottom: 16 }}>
-            <CheckCircle2 size={14} strokeWidth={1.5} style={{ flexShrink: 0 }} />
+          <div className="flex items-center gap-2" style={{ fontSize: '0.75rem', color: 'var(--d5-terracotta)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(196,82,46,0.06)', marginBottom: '1rem' }}>
+            <CheckCircle2 size={14} strokeWidth={1.5} className="shrink-0" />
             <span>Cambios guardados.</span>
           </div>
         )}

@@ -1,0 +1,289 @@
+# Design Implementation Log
+
+This file tracks which sections of the Senda Master Spec (`docs/senda-master-specs.md`) have been implemented, where, and any deviations or decisions made during implementation.
+
+---
+
+## Dashboard — Senda Master Spec Compliance (2026-03-11)
+
+**Files changed:** `src/app/dashboard/page.tsx`, `src/components/DashboardDeferredSection.tsx`, `src/components/ui/button.tsx`, `src/app/globals.css`, `src/components/__tests__/LevelChip.test.tsx`, `src/components/__tests__/DashboardDeferredSection.test.tsx`
+
+### Fix 1: Heading text invisible in dark mode (Spec §10.1)
+
+All Lora headings used inline `color: 'var(--d5-ink)'` which is always `#1A1108` — invisible on dark ink background. Replaced all inline Lora heading style blocks with `className="senda-heading"` + only a font-size class (`text-2xl`, `text-base`). The `.senda-heading` class (defined in `globals.css`) handles the dark swap via `.dark .senda-heading { color: var(--d5-paper) }`.
+
+Also fixed inline `color: 'var(--d5-ink)'` on the due count stats line — replaced with `className="font-bold text-foreground"` which auto-adapts via Tailwind's dark mode.
+
+**Affected locations:**
+- `page.tsx` h1 greeting → `senda-heading text-2xl`
+- `page.tsx` card titles (3 variants) → `senda-heading text-base`
+- `DashboardDeferredSection.tsx` Escritura Libre titles (2 variants) → `senda-heading text-base`
+
+### Fix 2: Quill SVG invisible in dark mode (Spec §5, §10.3)
+
+Quill icon hardcoded `stroke="#1A1108"`. Replaced with `stroke="currentColor"` on both quill SVG instances. The parent card text colour already adapts via `--card-foreground`.
+
+### Fix 3: Exploración Abierta card missing `.senda-card` (Spec §4)
+
+The card used manual `rounded-[20px]` + inline box-shadow + padding but lacked the warm background tint and dark mode surface. Replaced with `className="senda-card space-y-3"`, removing redundant inline styles.
+
+### Fix 4: Outline button border should be 1.5px (Spec §6)
+
+Spec §6 requires secondary outline buttons have 1.5px border. Changed `border` → `border-[1.5px]` in the `outline` variant of `buttonVariants` in `src/components/ui/button.tsx`. This is a global change — all outline buttons across the app now use 1.5px.
+
+### Fix 5: English copy in Escritura Libre card (Spec §3 — Title Case Spanish)
+
+"Express your thoughts. No limits, just practice." → "Expresa tus ideas. Sin límites, solo práctica."
+
+### Fix 6: `prefers-reduced-motion` support (Spec §8)
+
+Added at end of `globals.css`:
+```css
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-in,
+  .animate-exercise-in,
+  .animate-flash-green,
+  .animate-flash-red,
+  .animate-flash-orange,
+  .animate-senda-pulse {
+    animation: none !important;
+  }
+}
+```
+
+### Fix 7: Header line-height (Spec §3)
+
+Resolved by Fix 1. `.senda-heading` sets `line-height: 1.2` — tighter than the previous inline `1.4`.
+
+### Fix 8: Urgency dot pulse timing (Spec §8)
+
+Replaced Tailwind `animate-pulse` (2s, infinite) with `animate-senda-pulse` (1.4s ease-in-out, already defined). The urgency dot is decorative, so 1.4s matches the D5 motion identity.
+
+### Fix 9: Curriculum module tags (Spec §2 — Dark Cream for secondary tags)
+
+- "Completado": `bg-[var(--d5-cream)]` light / `bg-[rgba(140,106,63,0.12)]` dark, text `var(--d5-warm)`
+- "En Progreso": solid `var(--d5-terracotta)` bg, `var(--d5-paper)` text (unchanged)
+- "Próximamente": `bg-[rgba(232,230,225,0.5)]` light / `bg-[rgba(140,106,63,0.08)]` dark, text `var(--d5-muted)`
+- Module titles: switched from `color: 'var(--d5-ink)'` to `text-foreground` for dark mode safety
+
+**Test updates:** `LevelChip.test.tsx` updated to match D5 warm palette (`#8C6A3F` instead of `amber`). `DashboardDeferredSection.test.tsx` updated to match Spanish copy (`/expresa tus ideas/i`).
+
+---
+
+## Account Page — Senda Master Spec Compliance (2026-03-11)
+
+**Files changed:** `src/app/globals.css`, `src/app/account/page.tsx`, `src/app/account/AccountForm.tsx`, `src/app/account/SecurityForm.tsx`, `src/app/account/DangerZone.tsx`, `src/app/account/IOSInstallCard.tsx`, `src/app/account/loading.tsx`
+
+### Fix 1: New reusable CSS utility classes (Spec §6, §9)
+
+Added four new classes to `globals.css` for account (and future) form use:
+
+| Class | Purpose |
+|---|---|
+| `.senda-input` | Borderless input with Dark Cream (`--d5-cream`) fill; `0.8125rem` font; terracotta `focus-visible` ring; dark mode uses `rgba(26,17,8,0.40)` sunken fill |
+| `.senda-field-label` | `0.625rem` label in `--d5-warm` above inputs |
+| `.senda-sub-header` | `0.75rem` section sub-title in `--d5-warm`; dark mode swaps to `--d5-muted` |
+| `.senda-focus-ring` | Generic `focus-visible` ring (2px solid terracotta, 2px offset) for bare buttons |
+
+### Fix 2: Hardcoded px → rem throughout (Spec §3)
+
+All inline `fontSize: <number>` replaced with rem strings across all 6 component files:
+- `22px` → `1.375rem`, `15px` → `0.9375rem`, `14px` → `0.875rem`, `13px` → `0.8125rem`, `12px` → `0.75rem`, `11px` → `0.6875rem`, `10px` → `0.625rem`, `9px` → `0.5625rem`
+- Spacing values also converted: `marginBottom: 12` → `0.75rem`, `gap: 14` → `0.875rem`, etc.
+
+### Fix 3: Inputs — remove CSS borders, use Dark Cream fill (Spec §6)
+
+Removed all three duplicated `bareInputStyle` objects (in `AccountForm.tsx` and `SecurityForm.tsx`) which used:
+- `border: '1px solid rgba(26,17,8,0.08)'` ← violates spec (borderless inputs)
+- `background: 'rgba(26,17,8,0.04)'` ← too transparent, should be solid Dark Cream
+
+Replaced with `className="senda-input"` — solid `#E8E6E1` fill, no border, proper `focus-visible` ring.
+
+### Fix 4: Dark mode broken on inline rgba styles (Spec §10.1)
+
+Multiple elements used hardcoded `rgba(26,17,8,...)` which is invisible on dark ink backgrounds:
+- **Field labels**: `color: 'rgba(26,17,8,0.5)'` → `.senda-field-label` (uses `--d5-warm`)
+- **Sub-headers**: `color: 'rgba(26,17,8,0.6)'` → `.senda-sub-header` (swaps to `--d5-muted` in dark)
+- **Theme toggle pills**: inline `rgba` bg/color → Tailwind classes with `dark:` variants (`dark:bg-[rgba(184,170,153,0.18)]`, `dark:text-[var(--d5-paper)]`)
+- **Audio button**: inline `rgba` bg → className with `dark:` variants
+- **Display name**: added `dark:text-[var(--d5-paper)]`
+- **Avatar circle**: changed from `rgba(26,17,8,0.08)` to `rgba(140,106,63,0.10)` for brand warmth
+- **IOSInstallCard**: text colours get `dark:text-[var(--d5-paper)]` classes
+
+### Fix 5: Skeleton loading uses grey shimmer (Spec §4)
+
+`loading.tsx` replaced:
+- `bg-muted animate-pulse` → `senda-skeleton-fill animate-senda-pulse` (brand-aligned 1.4s opacity pulse)
+- `bg-card rounded-xl border p-6 shadow-sm` → `senda-card` (removes hard border, uses warm tint fill)
+
+### Fix 6: Excessive WindingPathSeparators (Spec §5)
+
+Reduced from 8 total (6 in `page.tsx` + 2 inside `AccountForm`) to 4 in `page.tsx`:
+1. After header/avatar row
+2. After AccountForm (before SecurityForm)
+3. After SecurityForm (before Notificaciones + DangerZone grouped)
+4. Before IOSInstallCard
+
+Internal AccountForm separators replaced with `<div style={{ height: '1.5rem' }} />` spacing dividers. Notificaciones and DangerZone grouped under same macro-section with `0.5rem` gap instead of a separator.
+
+### Fix 7: Missing focus-visible rings on bare elements (Spec §9)
+
+- Theme toggle pills: added `senda-focus-ring` class
+- Audio toggle button: added `senda-focus-ring` class
+- Password eye toggle buttons: added `senda-focus-ring` class
+
+### Fix 8: Touch targets below 44px (Spec §9)
+
+Theme toggle pills: added `minHeight: '2.75rem'` (44px) to meet spec minimum.
+
+### Fix 9: Transition timing (Spec §8)
+
+- Theme pills: `transition: 'background 150ms'` → `transition-[background,color] duration-200 ease-out`
+- Audio button: `transition: 'background 150ms'` → `transition-[background] duration-200 ease-out`
+
+### Fix 10: DangerZone persistent red eyebrow (Spec §2)
+
+- "Zona de peligro" eyebrow: removed `text-red-600` override — now uses default `.senda-eyebrow` colour (Brand Warm), keeping the label neutral while the delete button retains red as a functional danger signal.
+- Error message: removed `border border-red-200` — uses `background: rgba(220,38,38,0.06)` only (no hard border per spec).
+- Sign-out icon: added `dark:text-[var(--d5-paper)]` for dark mode visibility.
+
+### Fix 11: Level badge uses LEVEL_CHIP constant (Spec §2)
+
+Replaced hardcoded amber badge with `LEVEL_CHIP[computedLevel]?.className` from `src/lib/constants.ts`, which already follows D5 warm palette. Fallback to inline amber style if level not found.
+
+### Fix 12: Eyebrow style mismatch (Spec §3)
+
+Removed three duplicated `eyebrowStyle` inline objects that used `fontSize: 9` (0.5625rem) and `color: 'var(--d5-muted)'`. Replaced with `className="senda-eyebrow"` which uses spec-correct `0.75rem` and `var(--d5-eyebrow)` (adaptive warm/muted).
+
+---
+
+## D5 Brand Direction — Global Implementation (2026-03-10)
+
+**Reference:** Art Direction 5, applied across all production pages.
+
+### Colour System (Spec §2)
+
+Semantic palette tokens defined in `src/app/globals.css` under `:root`:
+| Token | Value | Usage |
+|---|---|---|
+| `--d5-ink` | `#1A1108` | Near-black heading colour |
+| `--d5-terracotta` | `#C4522E` | Primary/CTA colour (maps to `--primary`) |
+| `--d5-warm` | `#8C6A3F` | Mid-tone body labels, nav inactive (light) |
+| `--d5-muted` | `#B8AA99` | Muted text, nav inactive (dark), pronoun cells |
+| `--d5-paper` | `#FDFCF9` | Background / button foreground |
+| `--d5-cream` | `#E8E6E1` | Secondary tags, form fills |
+
+Adaptive tokens auto-swap in `.dark`:
+- `--d5-eyebrow`: warm → muted
+- `--d5-separator`: warm → muted
+- `--d5-nav-inactive`: warm → muted
+- `--d5-magic-stroke`: muted → warm (BackgroundMagicS)
+- `--d5-magic-opacity`: 0.03 → 0.05
+
+Shadcn `--primary` mapped to terracotta `oklch(0.54 0.155 38)`.
+
+### Typography (Spec §3)
+
+- Headers: Lora (serif, italic) via `.senda-heading` class
+- Body: DM Sans via `--font-dm-sans`
+- Eyebrows: `.senda-eyebrow` — 0.75rem, bold, tracking 0.12em, `var(--d5-eyebrow)` colour
+- All production UI labels in **Title-Case Spanish** (e.g., "Tu Senda Diaria", "Empezar Repaso")
+
+### Card Surface (Spec §4)
+
+`.senda-card` class in `globals.css`:
+- Light: `rgba(140, 106, 63, 0.07)` bg, `0 10px 30px -10px rgba(26, 17, 8, 0.08)` shadow, 20px radius, 16px 20px padding
+- Dark: `#241910` bg, `0 10px 30px -10px rgba(0, 0, 0, 0.4)` shadow
+
+No CSS `border` on structural cards — separation via padding, shadows, and SVG paths.
+
+### SVG Atoms (Spec §5)
+
+- `SvgSendaPath.tsx` — inline terracotta S-path; used in SideNav + AppHeader wordmarks
+- `WindingPathSeparator.tsx` — calligraphic SVG divider using `--d5-separator`; placed between dashboard sections
+- `BackgroundMagicS.tsx` — large watermark S-path (absolute positioned); adaptive stroke/opacity via `--d5-magic-stroke` / `--d5-magic-opacity`
+
+### Button Hierarchy (Spec §6)
+
+- Primary: solid terracotta bg, paper text
+- Outline: transparent bg, 1.5px terracotta border, terracotta text; hover `bg-[#C4522E]/10`
+- Dark mode outline hover: `bg-[#FDFCF9]/5`
+- Focus ring: 2px solid `#C4522E`, 2px offset, offset colour adapts (paper light / ink dark)
+
+### Motion (Spec §8)
+
+CSS custom properties in `globals.css`:
+- `--ease-senda: cubic-bezier(0.4, 0, 0.2, 1)`
+- `--duration-senda: 200ms`
+
+Animation classes:
+| Class | Keyframes | Duration |
+|---|---|---|
+| `animate-flash-green` | Green wash feedback | 200ms |
+| `animate-flash-red` | Red wash feedback | 200ms |
+| `animate-flash-orange` | Amber wash (accent error) | 200ms |
+| `animate-page-in` | Fade + translateY(4px) | 200ms |
+| `animate-exercise-in` | Fade + translateY(6px) | 200ms |
+| `animate-senda-pulse` | Opacity pulse (1→0.45→1) | 1.4s infinite |
+
+`prefers-reduced-motion: reduce` suppresses all non-essential animations.
+
+### Skeleton Loading (Spec §4)
+
+- `.senda-skeleton-fill`: `oklch(0.145 0 0 / 0.05)` light, `oklch(0.985 0 0 / 0.07)` dark
+- Combined with `.animate-senda-pulse` (1.4s opacity pulse, no scale)
+
+### Navigation (Spec §7)
+
+**SideNav** (desktop, `hidden lg:flex`):
+- D5 design: `SvgSendaPath` + DM Serif italic "Senda" wordmark
+- Left 3px terracotta accent bar per active item
+- `--d5-nav-inactive` for inactive items
+- 6 items: Dashboard → Study → Curriculum → Verbs → Progress → Tutor
+
+**BottomNav** (mobile, `lg:hidden`):
+- Same 6-tab order
+- Active pill: inline `rgba(184,170,153,0.28)` bg
+- Hidden on `/verbs/session`
+
+**AppHeader** (mobile, `lg:hidden`):
+- Sticky; `SvgSendaPath size={22}` + DM Serif italic "Senda" wordmark
+- Hidden on `/auth`, `/study`, `/tutor`, `/onboarding`
+
+### Dark Mode — Night Journal (Spec §10)
+
+| Element | Light | Dark |
+|---|---|---|
+| Background | `oklch(0.99 0.006 85)` (#FDFCF9) | `oklch(0.115 0.016 52)` (#1A1108) |
+| Card surface | Same as bg | `oklch(0.175 0.016 55)` (#241910) |
+| Foreground | `oklch(0.145 0 0)` | `oklch(0.91 0.01 75)` (warm cream) |
+| Primary | Terracotta (unchanged) | Terracotta (unchanged) |
+| Borders | `oklch(0.922 0 0)` | `oklch(1 0 0 / 10%)` |
+| Inputs | `oklch(0.922 0 0)` | `oklch(1 0 0 / 15%)` |
+
+`.senda-heading` colour: `--d5-ink` → `--d5-paper` in dark.
+`.senda-card` bg: warm tint → `#241910`.
+BackgroundMagicS: muted stroke → warm stroke, 0.03 → 0.05 opacity.
+WindingPathSeparator: 0.50 → 0.15 opacity, echo 0.10 → 0.04.
+
+### LEVEL_CHIP — D5 Warm Palette
+
+All three CEFR levels (B1/B2/C1) use the same warm token:
+```
+bg-[#8C6A3F]/12 text-[#1A1108] dark:bg-[#8C6A3F]/12 dark:text-[#B8AA99]
+```
+Previously used distinct Tailwind colours (green/amber/purple); unified under D5.
+
+---
+
+## Spec Sections Not Yet Implemented
+
+| Spec Section | Status | Notes |
+|---|---|---|
+| §3 rem-only typography | Partial | Account page fully converted; other pages still have px inline styles |
+| §6 Form fills (Dark Cream) | Partial | Account page fully converted (`.senda-input` class); auth + onboarding forms not audited |
+| §7 Accordion chevrons | Not started | Curriculum accordions lack right-aligned chevron affordance |
+| §7 Modal shadows | Not audited | Need to verify modals use deeper shadow formula |
+| §9 Base-4 spacing | Partial | Most spacing follows Tailwind scale; some arbitrary values remain |
+| §9 44px touch targets | Partial | Account page theme pills fixed (44px min-height); other pages not audited |
+| §9 max-w-prose | Not started | Extended text blocks (tutor chat, explanations) not constrained |

@@ -84,7 +84,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
       <div style={{ marginBottom: 32 }}>
         <h1
           style={{
-            fontFamily: 'var(--font-dm-serif), serif',
+            fontFamily: 'var(--font-lora), serif',
             fontStyle: 'italic',
             fontSize: 26,
             fontWeight: 700,

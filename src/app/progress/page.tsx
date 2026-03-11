@@ -266,7 +266,7 @@ export default async function ProgressPage() {
         <div className="flex items-start justify-between">
           <div>
             <h1
-              style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
+              style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
             >
               Progreso
             </h1>
@@ -382,7 +382,7 @@ export default async function ProgressPage() {
             {/* CEFR Level Journey */}
             <section className="senda-card space-y-5">
               <div className="flex items-center justify-between">
-                <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Progreso De Nivel</h2>
+                <h2 style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Progreso De Nivel</h2>
                 {levelChip && (
                   <span
                     className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelChip.className}`}
@@ -437,7 +437,7 @@ export default async function ProgressPage() {
             {/* Exercises by type */}
             {exerciseTypeData.length > 0 && (
               <section className="space-y-3">
-                <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Ejercicios Por Tipo</h2>
+                <h2 style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Ejercicios Por Tipo</h2>
                 <div className="senda-card">
                   <ExerciseTypeChart data={exerciseTypeData} />
                 </div>
@@ -447,7 +447,7 @@ export default async function ProgressPage() {
             {/* Skill breakdown */}
             {exerciseAccuracy.length > 0 && (
               <section className="space-y-3">
-                <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Desglose De Habilidades</h2>
+                <h2 style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Desglose De Habilidades</h2>
                 <div className="senda-card">
                   <AccuracyChart data={exerciseAccuracy} />
                   {showInsight && (
@@ -471,7 +471,7 @@ export default async function ProgressPage() {
             <section className="space-y-3">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Consistencia De Estudio</h2>
+                  <h2 style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: 'var(--d5-ink)' }}>Consistencia De Estudio</h2>
                   {sessionCount > 0 && (
                     <p className="text-xs text-muted-foreground mt-0.5">
                       <span className="font-medium text-foreground">

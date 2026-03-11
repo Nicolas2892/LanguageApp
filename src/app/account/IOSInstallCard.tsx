@@ -27,19 +27,19 @@ export function IOSInstallCard() {
   return (
     <div className="rounded-xl p-5 space-y-3" style={{ boxShadow: '0 10px 30px -10px rgba(26,17,8,0.08)', background: 'rgba(196,82,46,0.03)' }}>
       <div className="flex items-center gap-2">
-        <Smartphone size={16} strokeWidth={1.5} style={{ color: 'var(--d5-ink)', flexShrink: 0 }} />
-        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--d5-ink)' }}>Instalar en tu iPhone</p>
+        <Smartphone size={16} strokeWidth={1.5} className="shrink-0 text-[var(--d5-ink)] dark:text-[var(--d5-paper)]" />
+        <p style={{ fontSize: '0.8125rem', fontWeight: 600 }} className="text-[var(--d5-ink)] dark:text-[var(--d5-paper)]">Instalar en tu iPhone</p>
       </div>
-      <p style={{ fontSize: 12, color: 'var(--d5-muted)' }}>Ábrelo en Safari, luego:</p>
+      <p style={{ fontSize: '0.75rem', color: 'var(--d5-muted)' }}>Ábrelo en Safari, luego:</p>
       <ol className="space-y-2">
-        <li className="flex items-center gap-3" style={{ fontSize: 12, color: 'var(--d5-ink)' }}>
-          <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(196,82,46,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <li className="flex items-center gap-3 text-[var(--d5-ink)] dark:text-[var(--d5-paper)]" style={{ fontSize: '0.75rem' }}>
+          <span className="flex items-center justify-center shrink-0 rounded-full" style={{ width: '1.75rem', height: '1.75rem', background: 'rgba(196,82,46,0.10)' }}>
             <Share2 size={13} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)' }} />
           </span>
           Toca <strong>Compartir</strong> en la barra de Safari
         </li>
-        <li className="flex items-center gap-3" style={{ fontSize: 12, color: 'var(--d5-ink)' }}>
-          <span style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(196,82,46,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <li className="flex items-center gap-3 text-[var(--d5-ink)] dark:text-[var(--d5-paper)]" style={{ fontSize: '0.75rem' }}>
+          <span className="flex items-center justify-center shrink-0 rounded-full" style={{ width: '1.75rem', height: '1.75rem', background: 'rgba(196,82,46,0.10)' }}>
             <PlusSquare size={13} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)' }} />
           </span>
           Toca <strong>Añadir a pantalla de inicio</strong>

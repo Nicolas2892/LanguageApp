@@ -10,39 +10,6 @@ interface Props {
   isOAuthUser: boolean
 }
 
-const eyebrowStyle: React.CSSProperties = {
-  fontSize: 9,
-  fontWeight: 700,
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  color: 'var(--d5-muted)',
-  display: 'block',
-  marginBottom: 14,
-}
-
-const fieldLabelStyle: React.CSSProperties = {
-  fontSize: 10,
-  fontWeight: 500,
-  color: 'rgba(26,17,8,0.5)',
-}
-
-const subHeaderStyle: React.CSSProperties = {
-  fontSize: 12,
-  fontWeight: 600,
-  color: 'rgba(26,17,8,0.6)',
-}
-
-const bareInputStyle: React.CSSProperties = {
-  background: 'rgba(26,17,8,0.04)',
-  border: '1px solid rgba(26,17,8,0.08)',
-  borderRadius: 8,
-  fontSize: 13,
-  color: 'var(--d5-ink)',
-  padding: '8px 12px',
-  outline: 'none',
-  width: '100%',
-}
-
 export function SecurityForm({ userEmail, isOAuthUser }: Props) {
   const supabase = createClient()
 
@@ -121,31 +88,31 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      <span style={eyebrowStyle}>Seguridad</span>
+    <div className="flex flex-col">
+      <span className="senda-eyebrow block" style={{ marginBottom: '0.875rem' }}>Seguridad</span>
 
       {/* ── Change Email ── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 16 }}>
-        <span style={subHeaderStyle}>Cambiar correo</span>
-        <p style={{ fontSize: 11, color: 'var(--d5-muted)', marginTop: -8 }}>Actual: {userEmail}</p>
+      <div className="flex flex-col" style={{ gap: '0.875rem', paddingBottom: '1rem' }}>
+        <span className="senda-sub-header">Cambiar correo</span>
+        <p style={{ fontSize: '0.6875rem', color: 'var(--d5-muted)', marginTop: '-0.5rem' }}>Actual: {userEmail}</p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <label htmlFor="new_email" style={fieldLabelStyle}>Nuevo correo</label>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="new_email" className="senda-field-label">Nuevo correo</label>
           <input
             id="new_email"
             type="email"
             value={newEmail}
             onChange={(e) => setNewEmail(e.target.value)}
             placeholder="tu@ejemplo.com"
-            style={bareInputStyle}
+            className="senda-input"
           />
         </div>
 
         {emailError && (
-          <p style={{ fontSize: 12, color: '#dc2626', padding: '8px 12px', borderRadius: 8, background: 'rgba(220,38,38,0.06)' }}>{emailError}</p>
+          <p style={{ fontSize: '0.75rem', color: '#dc2626', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(220,38,38,0.06)' }}>{emailError}</p>
         )}
         {emailMessage && (
-          <p style={{ fontSize: 12, color: 'var(--d5-terracotta)', padding: '8px 12px', borderRadius: 8, background: 'rgba(196,82,46,0.06)' }}>{emailMessage}</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--d5-terracotta)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(196,82,46,0.06)' }}>{emailMessage}</p>
         )}
 
         <Button
@@ -158,31 +125,32 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
       </div>
 
       {/* ── Change Password ── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 8 }}>
-        <span style={subHeaderStyle}>Cambiar contraseña</span>
+      <div className="flex flex-col" style={{ gap: '0.875rem', paddingTop: '0.5rem' }}>
+        <span className="senda-sub-header">Cambiar contraseña</span>
 
         {isOAuthUser ? (
-          <p style={{ fontSize: 12, color: 'var(--d5-muted)' }}>
+          <p style={{ fontSize: '0.75rem', color: 'var(--d5-muted)' }}>
             Los cambios de contraseña no están disponibles para cuentas de Google.
           </p>
         ) : (
           <>
             {/* Current password */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label htmlFor="current_password" style={fieldLabelStyle}>Contraseña actual</label>
-              <div style={{ position: 'relative' }}>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="current_password" className="senda-field-label">Contraseña actual</label>
+              <div className="relative">
                 <input
                   id="current_password"
                   type={showCurrentPwd ? 'text' : 'password'}
                   value={currentPwd}
                   onChange={(e) => setCurrentPwd(e.target.value)}
-                  style={{ ...bareInputStyle, paddingRight: 40 }}
+                  className="senda-input"
+                  style={{ paddingRight: '2.5rem' }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowCurrentPwd(!showCurrentPwd)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  className="senda-focus-ring absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0"
                   aria-label={showCurrentPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showCurrentPwd
@@ -193,21 +161,22 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
             </div>
 
             {/* New password */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label htmlFor="new_password" style={fieldLabelStyle}>Nueva contraseña</label>
-              <div style={{ position: 'relative' }}>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="new_password" className="senda-field-label">Nueva contraseña</label>
+              <div className="relative">
                 <input
                   id="new_password"
                   type={showNewPwd ? 'text' : 'password'}
                   value={newPwd}
                   onChange={(e) => setNewPwd(e.target.value)}
-                  style={{ ...bareInputStyle, paddingRight: 40 }}
+                  className="senda-input"
+                  style={{ paddingRight: '2.5rem' }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowNewPwd(!showNewPwd)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  className="senda-focus-ring absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0"
                   aria-label={showNewPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showNewPwd
@@ -217,10 +186,10 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
               </div>
               {newPwd.length > 0 && (
                 <p style={{
-                  fontSize: 10,
+                  fontSize: '0.625rem',
                   fontWeight: 600,
                   color: newPwd.length < 6 ? '#ef4444' : newPwd.length < 12 ? '#f59e0b' : '#16a34a',
-                  marginTop: 2,
+                  marginTop: '0.125rem',
                 }}>
                   {newPwd.length < 6 ? 'Muy corta' : newPwd.length < 12 ? 'Aceptable' : 'Segura'}
                 </p>
@@ -228,21 +197,22 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
             </div>
 
             {/* Confirm password */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label htmlFor="confirm_password" style={fieldLabelStyle}>Confirmar contraseña</label>
-              <div style={{ position: 'relative' }}>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="confirm_password" className="senda-field-label">Confirmar contraseña</label>
+              <div className="relative">
                 <input
                   id="confirm_password"
                   type={showConfirmPwd ? 'text' : 'password'}
                   value={confirmPwd}
                   onChange={(e) => setConfirmPwd(e.target.value)}
-                  style={{ ...bareInputStyle, paddingRight: 40 }}
+                  className="senda-input"
+                  style={{ paddingRight: '2.5rem' }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowConfirmPwd(!showConfirmPwd)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  className="senda-focus-ring absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0"
                   aria-label={showConfirmPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showConfirmPwd
@@ -253,10 +223,10 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
             </div>
 
             {pwdError && (
-              <p style={{ fontSize: 12, color: '#dc2626', padding: '8px 12px', borderRadius: 8, background: 'rgba(220,38,38,0.06)' }}>{pwdError}</p>
+              <p style={{ fontSize: '0.75rem', color: '#dc2626', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(220,38,38,0.06)' }}>{pwdError}</p>
             )}
             {pwdMessage && (
-              <p style={{ fontSize: 12, color: 'var(--d5-terracotta)', padding: '8px 12px', borderRadius: 8, background: 'rgba(196,82,46,0.06)' }}>{pwdMessage}</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--d5-terracotta)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(196,82,46,0.06)' }}>{pwdMessage}</p>
             )}
 
             <Button

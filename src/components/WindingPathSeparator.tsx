@@ -1,5 +1,6 @@
 // Calligraphic winding-path divider — used between dashboard sections.
 // Colour adapts via the --d5-separator CSS custom property (warm in light, muted in dark).
+// Opacity adapts via --d5-separator-opacity / --d5-separator-echo-opacity tokens.
 export function WindingPathSeparator() {
   return (
     <div className="px-3 my-2" aria-hidden="true">
@@ -16,7 +17,7 @@ export function WindingPathSeparator() {
           strokeWidth={1.2}
           strokeLinecap="round"
           fill="none"
-          opacity={0.50}
+          style={{ opacity: 'var(--d5-separator-opacity)' as unknown as number }}
         />
         {/* Echo stroke — thick, low opacity, adds depth */}
         <path
@@ -25,7 +26,7 @@ export function WindingPathSeparator() {
           strokeWidth={3}
           strokeLinecap="round"
           fill="none"
-          opacity={0.10}
+          style={{ opacity: 'var(--d5-separator-echo-opacity)' as unknown as number }}
         />
       </svg>
     </div>

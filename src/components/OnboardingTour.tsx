@@ -36,11 +36,12 @@ export function OnboardingTour() {
       onClick={dismiss}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
+      <div className="absolute inset-0 bg-[#1A1108]/20 backdrop-blur-sm" aria-hidden="true" />
 
       {/* Callout bubble */}
       <div
-        className="relative z-10 max-w-sm w-full bg-card border border-border rounded-2xl shadow-xl p-5 space-y-3 animate-in slide-in-from-bottom-4 duration-300"
+        className="relative z-10 max-w-sm w-full bg-[var(--d5-paper)] dark:bg-[#241910] rounded-2xl p-5 space-y-3 animate-in slide-in-from-bottom-4 duration-300"
+        style={{ boxShadow: '0 20px 40px -10px rgba(26, 17, 8, 0.15)' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
@@ -48,20 +49,20 @@ export function OnboardingTour() {
           <button
             onClick={dismiss}
             aria-label="Dismiss tour"
-            className="text-muted-foreground hover:text-foreground transition-colors ml-auto"
+            className="text-[var(--d5-muted)] hover:text-[var(--d5-ink)] dark:hover:text-[var(--d5-paper)] transition-colors ml-auto"
           >
             <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
         <div>
-          <p className="font-bold text-base">You&apos;re set up.</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Your first exercises are ready — hit <span className="font-semibold text-foreground">Start review</span> and the app takes care of the rest. No planning, just practice.
+          <p className="font-bold text-base text-[var(--d5-ink)] dark:text-[var(--d5-paper)]" style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic' }}>You&apos;re set up.</p>
+          <p className="text-sm text-[var(--d5-muted)] mt-1">
+            Your first exercises are ready — hit <span className="font-semibold text-[var(--d5-ink)] dark:text-[var(--d5-paper)]">Start review</span> and the app takes care of the rest. No planning, just practice.
           </p>
         </div>
         <button
           onClick={dismiss}
-          className="w-full rounded-xl bg-primary text-primary-foreground py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors active:scale-95"
+          className="w-full rounded-xl bg-primary text-primary-foreground py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors"
         >
           Got it →
         </button>

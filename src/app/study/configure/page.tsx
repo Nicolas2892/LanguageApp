@@ -106,7 +106,7 @@ export default async function ConfigurePage() {
       <div className="px-[18px] pt-1 pb-[10px]">
         <h1
           style={{
-            fontFamily: 'var(--font-dm-serif), serif',
+            fontFamily: 'var(--font-lora), serif',
             fontStyle: 'italic',
             fontSize: 22,
             lineHeight: 1.2,

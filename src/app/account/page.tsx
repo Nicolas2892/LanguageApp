@@ -26,48 +26,41 @@ export default async function AccountPage() {
   const initials = getInitials(profile.display_name, user.email!)
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10" style={{ position: 'relative' }}>
+    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 relative">
       <BackgroundMagicS opacity={0.03} style={{ position: 'fixed', right: 0, top: '8%', width: 480, height: 624 }} />
       {/* Header */}
       <div>
         <h1
+          className="senda-heading"
           style={{
-            fontFamily: 'var(--font-dm-serif), serif',
-            fontStyle: 'italic',
-            fontSize: 22,
+            fontSize: '1.375rem',
             fontWeight: 700,
-            color: 'var(--d5-ink)',
             lineHeight: 1.15,
-            marginBottom: 12,
+            marginBottom: '0.75rem',
           }}
         >
           Mi Cuenta
         </h1>
         {/* Inline avatar row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{
-            width: 44,
-            height: 44,
-            borderRadius: '50%',
-            background: 'rgba(26,17,8,0.08)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            fontSize: 15,
+        <div className="flex items-center" style={{ gap: '0.875rem' }}>
+          <div className="flex items-center justify-center shrink-0 rounded-full" style={{
+            width: '2.75rem',
+            height: '2.75rem',
+            background: 'rgba(140,106,63,0.10)',
+            fontSize: '0.9375rem',
             fontWeight: 700,
-            color: 'rgba(26,17,8,0.40)',
+            color: 'var(--d5-warm)',
             letterSpacing: '0.02em',
           }}>
             {initials}
           </div>
           <div>
             {profile.display_name && (
-              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--d5-ink)', lineHeight: 1.3 }}>
+              <p style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--d5-ink)', lineHeight: 1.3 }} className="dark:text-[var(--d5-paper)]">
                 {profile.display_name}
               </p>
             )}
-            <p style={{ fontSize: 11, color: 'var(--d5-muted)', marginTop: 2 }}>{user.email}</p>
+            <p style={{ fontSize: '0.6875rem', color: 'var(--d5-muted)', marginTop: '0.125rem' }}>{user.email}</p>
           </div>
         </div>
       </div>
@@ -75,30 +68,19 @@ export default async function AccountPage() {
       <WindingPathSeparator />
 
       {/* Perfil */}
-      <div>
-        <AccountForm profile={profile} />
-      </div>
+      <AccountForm profile={profile} />
 
       <WindingPathSeparator />
 
       {/* Seguridad */}
-      <div>
-        <SecurityForm userEmail={user.email!} isOAuthUser={isOAuthUser} />
-      </div>
+      <SecurityForm userEmail={user.email!} isOAuthUser={isOAuthUser} />
 
       <WindingPathSeparator />
 
-      {/* Notificaciones */}
-      <div>
-        <NotificationSettings />
-      </div>
-
-      <WindingPathSeparator />
-
-      {/* Eliminar cuenta */}
-      <div>
-        <DangerZone />
-      </div>
+      {/* Notificaciones + Sesión + Danger Zone — grouped */}
+      <NotificationSettings />
+      <div style={{ height: '0.5rem' }} />
+      <DangerZone />
 
       {profile.is_admin && (
         <>
@@ -106,7 +88,7 @@ export default async function AccountPage() {
           <div className="senda-card flex items-center justify-between">
             <div>
               <p className="senda-eyebrow mb-1">Admin</p>
-              <p style={{ fontSize: 13, color: 'var(--d5-warm)' }}>Gestión de contenido</p>
+              <p style={{ fontSize: '0.8125rem', color: 'var(--d5-warm)' }}>Gestión de contenido</p>
             </div>
             <Button asChild variant="outline" size="sm">
               <Link href="/admin">Abrir →</Link>

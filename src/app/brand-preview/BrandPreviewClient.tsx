@@ -195,7 +195,7 @@ function D5SideNav() {
           <path d="M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2"
             stroke={D5.terracotta} strokeWidth={3} strokeLinecap="round" fill="none" />
         </svg>
-        <span style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 18, color: D5.ink }}>Senda</span>
+        <span style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 18, color: D5.ink }}>Senda</span>
       </div>
       {[{ label: 'Dashboard', active: true }, { label: 'Study', active: false }].map((item) => (
         <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, marginBottom: 4, background: item.active ? `${D5.muted}25` : 'transparent', color: item.active ? D5.terracotta : D5.warm, fontWeight: item.active ? 600 : 400, fontSize: 14 }}>
@@ -308,8 +308,8 @@ function BackgroundMagicS({ opacity = 0.07 }: { opacity?: number }) {
 }
 
 function D5DashboardLight({ data }: { data?: D5Data | null }) {
-  const grot  = 'var(--font-plus-jakarta), system-ui, sans-serif'
-  const serif = 'var(--font-dm-serif), serif'
+  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
+  const serif = 'var(--font-lora), serif'
 
   const name          = data?.displayName ?? 'Nicolás'
   const level         = data?.level ?? 'B2'
@@ -422,8 +422,8 @@ function D5DashboardDark({ data }: { data?: D5Data | null }) {
   // Fix 5: Warm Cream #E8E6E1 text — explicitly NOT #FFF
   const cream = '#E8E6E1'  // D5.warmCream
   const bg    = '#1A1108'  // D5.ink — deep brown-black, not pure black
-  const grot  = 'var(--font-plus-jakarta), system-ui, sans-serif'
-  const serif = 'var(--font-dm-serif), serif'
+  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
+  const serif = 'var(--font-lora), serif'
 
   const name          = data?.displayName ?? 'Nicolás'
   const level         = data?.level ?? 'B2'
@@ -543,8 +543,8 @@ function D5CurriculumTimeline({ data }: { data?: D5Data | null }) {
       progressLabel: m.state === 'active' ? `${m.mastered} / ${m.total} dominados` : undefined,
     })) ?? FALLBACK_MODULES
 
-  const grot  = 'var(--font-plus-jakarta), system-ui, sans-serif'
-  const serif = 'var(--font-dm-serif), serif'
+  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
+  const serif = 'var(--font-lora), serif'
   return (
     <div style={{ padding: 0, background: D5.paper, minHeight: '100%', fontFamily: grot }}>
       {/* Header */}
@@ -669,8 +669,8 @@ const D5_LEVEL_CHIP: Record<string, { bg: string; text: string }> = {
 // ─── D5 Progress Page ──────────────────────────────────────────────────────────
 
 function D5ProgressPage({ data }: { data?: D5ProgressData | null }) {
-  const grot  = 'var(--font-plus-jakarta), system-ui, sans-serif'
-  const serif = 'var(--font-dm-serif), serif'
+  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
+  const serif = 'var(--font-lora), serif'
 
   const streak   = data?.streak ?? 7
   const mastered = data?.masteredCount ?? 12
@@ -796,8 +796,8 @@ function D5ProgressPage({ data }: { data?: D5ProgressData | null }) {
 // ─── D5 Study Configure Page ───────────────────────────────────────────────────
 
 function D5StudyConfigurePage({ data }: { data?: D5Data | null }) {
-  const grot  = 'var(--font-plus-jakarta), system-ui, sans-serif'
-  const serif = 'var(--font-dm-serif), serif'
+  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
+  const serif = 'var(--font-lora), serif'
 
   const dueCount = data?.dueCount ?? 5
   const modules  = data?.modules ?? [
@@ -906,8 +906,8 @@ function D5StudyConfigurePage({ data }: { data?: D5Data | null }) {
 // ─── D5 Concept Detail Page ────────────────────────────────────────────────────
 
 function D5ConceptDetailPage({ data }: { data?: D5ConceptData | null }) {
-  const grot  = 'var(--font-plus-jakarta), system-ui, sans-serif'
-  const serif = 'var(--font-dm-serif), serif'
+  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
+  const serif = 'var(--font-lora), serif'
 
   const title        = data?.title       ?? 'aunque + subjuntivo vs. indicativo'
   const explanation  = data?.explanation ?? 'En español, aunque puede usarse tanto con indicativo como con subjuntivo. Con indicativo presenta un hecho real; con subjuntivo una concesión hipotética o subjetiva.'
@@ -993,8 +993,8 @@ function D5ConceptDetailPage({ data }: { data?: D5ConceptData | null }) {
 // ─── D5 Verb Detail Page ───────────────────────────────────────────────────────
 
 function D5VerbDetailPage({ data }: { data?: D5VerbData | null }) {
-  const grot  = 'var(--font-plus-jakarta), system-ui, sans-serif'
-  const serif = 'var(--font-dm-serif), serif'
+  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
+  const serif = 'var(--font-lora), serif'
 
   const FALLBACK_ROWS = [
     { pronoun: 'yo',       form: 'hablo'   },
@@ -1122,8 +1122,8 @@ function D5VerbDetailPage({ data }: { data?: D5VerbData | null }) {
 // ─── D5 Exercise Full Screen (two frames: answering + feedback) ────────────────
 
 function D5ExerciseFullScreen() {
-  const grot  = 'var(--font-plus-jakarta), system-ui, sans-serif'
-  const serif = 'var(--font-dm-serif), serif'
+  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
+  const serif = 'var(--font-lora), serif'
 
   const Tilde = () => (
     <svg viewBox="0 0 48 20" width={48} height={20}>
@@ -1217,8 +1217,8 @@ function D5ExerciseFullScreen() {
 // ─── D5 Account Page ───────────────────────────────────────────────────────────
 
 function D5AccountPage() {
-  const grot  = 'var(--font-plus-jakarta), system-ui, sans-serif'
-  const serif = 'var(--font-dm-serif), serif'
+  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
+  const serif = 'var(--font-lora), serif'
 
   return (
     <div style={{ padding: 0, background: D5.paper, minHeight: '100%', fontFamily: grot }}>
@@ -1322,7 +1322,7 @@ function Direction5Panel({
         <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
           <D5Icon />
           <div>
-            <div style={{ fontFamily: 'var(--font-dm-serif), serif', fontStyle: 'italic', fontSize: 36, color: D5.terracotta, lineHeight: 1.1 }}>Senda</div>
+            <div style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 36, color: D5.terracotta, lineHeight: 1.1 }}>Senda</div>
             <div style={{ fontSize: 13, color: '#6b7280', marginTop: 6, maxWidth: 260, lineHeight: 1.5 }}>The winding trail — terracotta on paper. Warm, craft-forward, unmistakably human.</div>
           </div>
         </div>
