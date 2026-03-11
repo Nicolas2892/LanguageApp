@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Eye, EyeOff } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 
 interface Props {
   userEmail: string
@@ -23,20 +22,23 @@ const eyebrowStyle: React.CSSProperties = {
 
 const fieldLabelStyle: React.CSSProperties = {
   fontSize: 10,
+  fontWeight: 500,
+  color: 'rgba(26,17,8,0.5)',
+}
+
+const subHeaderStyle: React.CSSProperties = {
+  fontSize: 12,
   fontWeight: 600,
-  color: 'var(--d5-warm)',
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
+  color: 'rgba(26,17,8,0.6)',
 }
 
 const bareInputStyle: React.CSSProperties = {
-  background: 'transparent',
-  border: 'none',
-  borderBottom: '1px solid rgba(184,170,153,0.4)',
-  borderRadius: 0,
+  background: 'rgba(26,17,8,0.04)',
+  border: '1px solid rgba(26,17,8,0.08)',
+  borderRadius: 8,
   fontSize: 13,
   color: 'var(--d5-ink)',
-  padding: '4px 0',
+  padding: '8px 12px',
   outline: 'none',
   width: '100%',
 }
@@ -124,9 +126,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
 
       {/* ── Change Email ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingBottom: 16 }}>
-        <span style={{ fontSize: 11, color: 'var(--d5-warm)', fontWeight: 500 }}>
-          Cambiar correo
-        </span>
+        <span style={subHeaderStyle}>Cambiar correo</span>
         <p style={{ fontSize: 11, color: 'var(--d5-muted)', marginTop: -8 }}>Actual: {userEmail}</p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -157,13 +157,9 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
         </Button>
       </div>
 
-      <WindingPathSeparator />
-
       {/* ── Change Password ── */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 16 }}>
-        <span style={{ fontSize: 11, color: 'var(--d5-warm)', fontWeight: 500 }}>
-          Cambiar contraseña
-        </span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, paddingTop: 8 }}>
+        <span style={subHeaderStyle}>Cambiar contraseña</span>
 
         {isOAuthUser ? (
           <p style={{ fontSize: 12, color: 'var(--d5-muted)' }}>
@@ -180,13 +176,13 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   type={showCurrentPwd ? 'text' : 'password'}
                   value={currentPwd}
                   onChange={(e) => setCurrentPwd(e.target.value)}
-                  style={{ ...bareInputStyle, paddingRight: 28 }}
+                  style={{ ...bareInputStyle, paddingRight: 40 }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowCurrentPwd(!showCurrentPwd)}
-                  style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                   aria-label={showCurrentPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showCurrentPwd
@@ -205,13 +201,13 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   type={showNewPwd ? 'text' : 'password'}
                   value={newPwd}
                   onChange={(e) => setNewPwd(e.target.value)}
-                  style={{ ...bareInputStyle, paddingRight: 28 }}
+                  style={{ ...bareInputStyle, paddingRight: 40 }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowNewPwd(!showNewPwd)}
-                  style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                   aria-label={showNewPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showNewPwd
@@ -240,13 +236,13 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   type={showConfirmPwd ? 'text' : 'password'}
                   value={confirmPwd}
                   onChange={(e) => setConfirmPwd(e.target.value)}
-                  style={{ ...bareInputStyle, paddingRight: 28 }}
+                  style={{ ...bareInputStyle, paddingRight: 40 }}
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowConfirmPwd(!showConfirmPwd)}
-                  style={{ position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                   aria-label={showConfirmPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showConfirmPwd

@@ -82,7 +82,7 @@ export function NotificationSettings() {
     <div className="space-y-3">
       <div className="flex items-center gap-2">
         <BellRing size={15} strokeWidth={1.5} style={{ color: 'var(--d5-ink)', flexShrink: 0 }} />
-        <h2 style={{ fontSize: 13, fontWeight: 600, color: 'var(--d5-ink)' }}>Notificaciones push</h2>
+        <h2 style={{ fontSize: 13, fontWeight: 600, color: 'rgba(26,17,8,0.6)' }}>Notificaciones push</h2>
       </div>
 
       {notifState === 'loading' && (

@@ -28,20 +28,17 @@ const eyebrowStyle: React.CSSProperties = {
 
 const fieldLabelStyle: React.CSSProperties = {
   fontSize: 10,
-  fontWeight: 600,
-  color: 'var(--d5-warm)',
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
+  fontWeight: 500,
+  color: 'rgba(26,17,8,0.5)',
 }
 
 const bareInputStyle: React.CSSProperties = {
-  background: 'transparent',
-  border: 'none',
-  borderBottom: '1px solid rgba(184,170,153,0.4)',
-  borderRadius: 0,
+  background: 'rgba(26,17,8,0.04)',
+  border: '1px solid rgba(26,17,8,0.08)',
+  borderRadius: 8,
   fontSize: 13,
   color: 'var(--d5-ink)',
-  padding: '4px 0',
+  padding: '8px 12px',
   outline: 'none',
   width: '100%',
 }
@@ -224,16 +221,14 @@ export function AccountForm({ profile }: Props) {
         </span>
       </div>
 
-      <WindingPathSeparator />
-
       {/* ── Section 4: Guardar ── */}
       <div style={{ padding: '4px 0 0' }}>
         {error && (
-          <p className="text-sm text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">{error}</p>
+          <p style={{ fontSize: 12, color: '#dc2626', padding: '8px 12px', borderRadius: 8, background: 'rgba(220,38,38,0.06)', marginBottom: 16 }}>{error}</p>
         )}
         {saved && (
-          <div className="flex items-center gap-2 text-sm border rounded-lg p-3 mb-4" style={{ color: 'var(--d5-terracotta)', borderColor: 'rgba(196,82,46,0.30)' }}>
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--d5-terracotta)', padding: '8px 12px', borderRadius: 8, background: 'rgba(196,82,46,0.06)', marginBottom: 16 }}>
+            <CheckCircle2 size={14} strokeWidth={1.5} style={{ flexShrink: 0 }} />
             <span>Cambios guardados.</span>
           </div>
         )}
