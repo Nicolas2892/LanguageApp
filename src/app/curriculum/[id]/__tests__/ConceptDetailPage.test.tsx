@@ -76,6 +76,10 @@ vi.mock('@/components/BackgroundMagicS', () => ({
   BackgroundMagicS: () => null,
 }))
 
+vi.mock('../ConceptDetailClient', () => ({
+  ExpandableExplanation: ({ text }: { text: string }) => <p>{text}</p>,
+}))
+
 // Concept fixture
 const CONCEPT_BASE = {
   id: 'con-1',
@@ -174,7 +178,7 @@ describe('ConceptDetailPage', () => {
     expect(screen.queryByText('Conjugación de ejemplo')).not.toBeInTheDocument()
   })
 
-  it('renders Ejemplos card when concept has examples', async () => {
+  it('renders Ejemplos section when concept has examples', async () => {
     vi.mocked(createClient).mockResolvedValue(makeMockSupabase() as never)
     const el = await ConceptDetailPage({
       params: Promise.resolve({ id: 'con-1' }),
@@ -185,18 +189,18 @@ describe('ConceptDetailPage', () => {
     expect(screen.getByText('Sin embargo, no pudo.')).toBeInTheDocument()
   })
 
-  it('renders Tu Progreso card with SRS status', async () => {
+  it('renders SRS status section', async () => {
     vi.mocked(createClient).mockResolvedValue(makeMockSupabase() as never)
     const el = await ConceptDetailPage({
       params: Promise.resolve({ id: 'con-1' }),
       searchParams: Promise.resolve({}),
     })
     render(el)
-    expect(screen.getByText('Tu Progreso')).toBeInTheDocument()
+    expect(screen.getByText('Próxima revisión')).toBeInTheDocument()
     expect(screen.getByText('No comenzado')).toBeInTheDocument()
   })
 
-  it('renders conjugation insight card when concept is tense-mapped and hablar found', async () => {
+  it('renders conjugation insight section when concept is tense-mapped and hablar found', async () => {
     vi.mocked(createClient).mockResolvedValue(
       makeMockSupabase({
         conceptData: CONCEPT_TENSE,
@@ -222,7 +226,7 @@ describe('ConceptDetailPage', () => {
     expect(screen.getByText('yo')).toBeInTheDocument()
   })
 
-  it('does not render conjugation card when hablar not found in DB', async () => {
+  it('does not render conjugation section when hablar not found in DB', async () => {
     vi.mocked(createClient).mockResolvedValue(
       makeMockSupabase({
         conceptData: CONCEPT_TENSE,
@@ -236,5 +240,27 @@ describe('ConceptDetailPage', () => {
     })
     render(el)
     expect(screen.queryByText('Conjugación de ejemplo')).not.toBeInTheDocument()
+  })
+
+  it('renders explanation section with Cómo funciona eyebrow', async () => {
+    vi.mocked(createClient).mockResolvedValue(makeMockSupabase() as never)
+    const el = await ConceptDetailPage({
+      params: Promise.resolve({ id: 'con-1' }),
+      searchParams: Promise.resolve({}),
+    })
+    render(el)
+    expect(screen.getByText('Cómo funciona')).toBeInTheDocument()
+  })
+
+  it('renders stacked CTA buttons', async () => {
+    vi.mocked(createClient).mockResolvedValue(makeMockSupabase() as never)
+    const el = await ConceptDetailPage({
+      params: Promise.resolve({ id: 'con-1' }),
+      searchParams: Promise.resolve({}),
+    })
+    render(el)
+    expect(screen.getByText('Practicar este concepto →')).toBeInTheDocument()
+    expect(screen.getByText('Escritura libre')).toBeInTheDocument()
+    expect(screen.getByText('Consultar tutor')).toBeInTheDocument()
   })
 })

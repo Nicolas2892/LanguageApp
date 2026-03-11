@@ -13,6 +13,7 @@ import type { Concept } from '@/lib/supabase/types'
 import type { VerbTense } from '@/lib/verbs/constants'
 import { TENSE_LABELS } from '@/lib/verbs/constants'
 import { ConjugationInsightTable, type ConjugationRow } from './ConjugationInsightTable'
+import { ExpandableExplanation } from './ConceptDetailClient'
 
 type Example = { es: string; en: string }
 
@@ -171,7 +172,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
 
   return (
     <main
-      className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 animate-page-in"
+      className="max-w-2xl mx-auto px-6 pt-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] md:px-10 md:pt-10 lg:pb-10 animate-page-in"
       style={{ position: 'relative', overflow: 'hidden' }}
     >
       <BackgroundMagicS opacity={0.05} />
@@ -179,193 +180,183 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
       {/* Back navigation */}
       <Link
         href={backHref}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 4,
-          fontSize: 13,
-          color: 'var(--d5-warm)',
-          marginBottom: 24,
-        }}
+        className="inline-flex items-center gap-1 text-sm mb-6"
+        style={{ color: 'var(--d5-warm)' }}
       >
         <ChevronLeft size={16} strokeWidth={1.5} />
         Currículo
       </Link>
 
-      {/* Card 1 — The Narrative */}
-      <div
-        className="senda-card"
-        style={{ position: 'relative', overflow: 'hidden', marginBottom: 16 }}
-      >
-        {/* Eyebrow + breadcrumb */}
-        <div style={{ marginBottom: 12 }}>
-          <span className="senda-eyebrow">Concepto</span>
-          {moduleName && unit && (
-            <p style={{ fontSize: 11, color: 'var(--d5-warm)', marginTop: 4 }}>
-              {moduleName} · {unit.title}
-            </p>
-          )}
+      {/* ── Header section ── */}
+      <div className="mb-4">
+        {/* Level chip — above title (mockup pattern) */}
+        <div className="mb-2">
+          <LevelChip level={concept.level} />
         </div>
 
-        {/* Title */}
-        <h1 className="senda-heading" style={{ fontSize: 22, marginBottom: 10 }}>
-          {concept.title}
-        </h1>
-
-        {/* Chips row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-          <LevelChip level={concept.level} />
-          <GrammarFocusChip focus={concept.grammar_focus} />
-          <span style={badge.style}>{badge.label}</span>
+        {/* Title + hard flag */}
+        <div className="flex items-start gap-2">
+          <h1 className="senda-heading text-xl flex-1">
+            {concept.title}
+          </h1>
           <HardFlagButton conceptId={id} initialIsHard={isHard} />
         </div>
 
-        {/* Explanation */}
-        <p className="text-foreground" style={{ fontSize: 14, lineHeight: 1.6 }}>
-          {concept.explanation}
-        </p>
+        {/* Metadata row */}
+        <div className="flex items-center gap-2 flex-wrap mt-2">
+          <GrammarFocusChip focus={concept.grammar_focus} />
+          <span style={badge.style}>{badge.label}</span>
+          {moduleName && unit && (
+            <span className="text-xs" style={{ color: 'var(--d5-warm)' }}>
+              {moduleName} · {unit.title}
+            </span>
+          )}
+        </div>
+      </div>
 
-        {/* Attempt count */}
+      <WindingPathSeparator />
+
+      {/* ── Explanation (tinted container, clamped) ── */}
+      <div
+        className="rounded-2xl"
+        style={{
+          background: 'rgba(26,17,8,0.05)',
+          padding: '1rem 1.25rem',
+        }}
+      >
+        <span className="senda-eyebrow block mb-2">Cómo funciona</span>
+        <ExpandableExplanation text={concept.explanation} />
         {attemptCount > 0 && (
-          <p style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--d5-warm)', marginTop: 12 }}>
+          <p className="flex items-center gap-1.5 text-xs mt-3" style={{ color: 'var(--d5-warm)' }}>
             <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
             {attemptCount} ejercicio{attemptCount !== 1 ? 's' : ''} completado{attemptCount !== 1 ? 's' : ''}
           </p>
         )}
       </div>
 
-      {/* Card 2 — The Golden Sentence */}
+      {/* ── Examples ── */}
       {examples.length > 0 && (
-        <div className="senda-card" style={{ marginBottom: 16 }}>
-          <span className="senda-eyebrow" style={{ display: 'block', marginBottom: 14 }}>Ejemplos</span>
-          {examples.map((ex, i) => (
-            <div key={i}>
-              <div
-                style={{
-                  borderLeft: '2px solid var(--d5-terracotta)',
-                  paddingLeft: 12,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span className="text-foreground" style={{ fontSize: 16, fontWeight: 500 }}>{ex.es}</span>
-                  <SpeakButton text={ex.es} />
+        <>
+          <WindingPathSeparator />
+          <div>
+            <span className="senda-eyebrow block mb-3">Ejemplos</span>
+            <div className="flex flex-col gap-4">
+              {examples.map((ex, i) => (
+                <div
+                  key={i}
+                  style={{
+                    borderLeft: '2px solid var(--d5-terracotta)',
+                    paddingLeft: '0.75rem',
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-foreground text-base font-medium">{ex.es}</span>
+                    <SpeakButton text={ex.es} />
+                  </div>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>{ex.en}</p>
                 </div>
-                <p style={{ fontSize: 13, color: 'var(--d5-warm)', marginTop: 2 }}>{ex.en}</p>
-              </div>
-              {i < examples.length - 1 && <WindingPathSeparator />}
+              ))}
             </div>
+          </div>
+        </>
+      )}
+
+      {/* ── Conjugation Insight (only for tense-mapped concepts) ── */}
+      {insightRows && tenseKey && (
+        <>
+          <WindingPathSeparator />
+          <div>
+            <span className="senda-eyebrow block mb-1.5">
+              Conjugación de ejemplo
+            </span>
+            <p className="text-xs mb-3" style={{ color: 'var(--d5-muted)' }}>
+              hablar · {TENSE_LABELS[tenseKey]}
+            </p>
+            <ConjugationInsightTable rows={insightRows} />
+          </div>
+        </>
+      )}
+
+      <WindingPathSeparator />
+
+      {/* ── SRS Status ── */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <p className="text-foreground text-sm font-medium">Próxima revisión</p>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>{srsStatus}</p>
+        </div>
+        {progress && (
+          <div className="text-right">
+            <p className="text-foreground text-xl font-bold leading-none">{progress.repetitions}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>
+              {progress.repetitions === 1 ? 'sesión' : 'sesiones'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* ── CTAs (stacked full-width) ── */}
+      <div className="flex flex-col gap-3">
+        {/* Primary CTA */}
+        <Link
+          href={`/study?practice=true&concept=${id}`}
+          className="block w-full text-center rounded-full text-sm font-semibold transition-colors duration-200"
+          style={{
+            background: 'var(--d5-terracotta)',
+            color: 'var(--d5-paper)',
+            padding: '0.75rem 1rem',
+          }}
+        >
+          Practicar este concepto →
+        </Link>
+
+        {/* Secondary CTAs */}
+        <Link
+          href={`/write?suggested=${id}`}
+          className="block w-full text-center rounded-full text-sm font-medium transition-colors duration-200 hover:bg-[#C4522E]/10"
+          style={{
+            border: '1.5px solid rgba(196,82,46,0.3)',
+            color: 'var(--d5-terracotta)',
+            padding: '0.625rem 1rem',
+          }}
+        >
+          Escritura libre
+        </Link>
+        <Link
+          href={`/tutor?concept=${id}`}
+          className="block w-full text-center rounded-full text-sm font-medium transition-colors duration-200 hover:bg-[#C4522E]/10"
+          style={{
+            border: '1.5px solid rgba(196,82,46,0.3)',
+            color: 'var(--d5-terracotta)',
+            padding: '0.625rem 1rem',
+          }}
+        >
+          Consultar tutor
+        </Link>
+      </div>
+
+      {/* Exercise type pills (below CTAs, less prominent) */}
+      {availableTypes.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-4">
+          {availableTypes.map(({ type, label }) => (
+            <Link
+              key={type}
+              href={`/study?concept=${id}&types=${type}&practice=true`}
+              className="text-xs font-medium rounded-full transition-colors duration-200 hover:bg-[#C4522E]/10"
+              style={{
+                color: 'var(--d5-terracotta)',
+                border: '1.5px solid rgba(196,82,46,0.3)',
+                padding: '0.375rem 0.75rem',
+                minHeight: '2.75rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+              }}
+            >
+              {label}
+            </Link>
           ))}
         </div>
       )}
-
-      {/* Card 3 — Conjugation Insight (only for tense-mapped concepts) */}
-      {insightRows && tenseKey && (
-        <div className="senda-card" style={{ marginBottom: 16 }}>
-          <span className="senda-eyebrow" style={{ display: 'block', marginBottom: 6 }}>
-            Conjugación de ejemplo
-          </span>
-          <p style={{ fontSize: 11, color: 'var(--d5-muted)', marginBottom: 12 }}>
-            hablar · {TENSE_LABELS[tenseKey]}
-          </p>
-          <ConjugationInsightTable rows={insightRows} />
-        </div>
-      )}
-
-      {/* Card 4 — SRS Status + Practice */}
-      <div className="senda-card">
-        <span className="senda-eyebrow" style={{ display: 'block', marginBottom: 14 }}>Tu Progreso</span>
-
-        {/* SRS row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div>
-            <p className="text-foreground" style={{ fontSize: 13, fontWeight: 500 }}>Estado de repaso</p>
-            <p style={{ fontSize: 12, color: 'var(--d5-warm)', marginTop: 2 }}>{srsStatus}</p>
-          </div>
-          {progress && (
-            <div style={{ textAlign: 'right' }}>
-              <p className="text-foreground" style={{ fontSize: 20, fontWeight: 700, lineHeight: 1 }}>{progress.repetitions}</p>
-              <p style={{ fontSize: 11, color: 'var(--d5-warm)', marginTop: 2 }}>
-                {progress.repetitions === 1 ? 'sesión' : 'sesiones'}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Practice all button */}
-        <Link
-          href={`/study?practice=true&concept=${id}`}
-          style={{
-            display: 'block',
-            width: '100%',
-            textAlign: 'center',
-            background: 'var(--d5-terracotta)',
-            color: 'var(--d5-paper)',
-            borderRadius: 9999,
-            padding: '10px 16px',
-            fontSize: 14,
-            fontWeight: 600,
-            marginBottom: 12,
-          }}
-        >
-          Practicar todo →
-        </Link>
-
-        {/* Exercise type pills */}
-        {availableTypes.length > 0 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-            {availableTypes.map(({ type, label }) => (
-              <Link
-                key={type}
-                href={`/study?concept=${id}&types=${type}&practice=true`}
-                style={{
-                  fontSize: 11,
-                  fontWeight: 500,
-                  color: 'var(--d5-terracotta)',
-                  border: '1px solid rgba(196,82,46,0.3)',
-                  borderRadius: 9999,
-                  padding: '4px 10px',
-                }}
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* Secondary actions */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <Link
-            href={`/write?suggested=${id}`}
-            style={{
-              display: 'block',
-              textAlign: 'center',
-              border: '1px solid rgba(196,82,46,0.3)',
-              color: 'var(--d5-terracotta)',
-              borderRadius: 9999,
-              padding: '8px 12px',
-              fontSize: 13,
-              fontWeight: 500,
-            }}
-          >
-            Escritura libre
-          </Link>
-          <Link
-            href={`/tutor?concept=${id}`}
-            style={{
-              display: 'block',
-              textAlign: 'center',
-              border: '1px solid rgba(196,82,46,0.3)',
-              color: 'var(--d5-terracotta)',
-              borderRadius: 9999,
-              padding: '8px 12px',
-              fontSize: 13,
-              fontWeight: 500,
-            }}
-          >
-            Consultar tutor
-          </Link>
-        </div>
-      </div>
     </main>
   )
 }

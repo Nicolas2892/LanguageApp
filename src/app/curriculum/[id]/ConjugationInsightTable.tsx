@@ -23,18 +23,11 @@ export function ConjugationInsightTable({ rows }: { rows: ConjugationRow[] }) {
     <div>
       {rows.map((row, i) => (
         <div key={row.pronoun}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '8px 0',
-            }}
-          >
-            <span style={{ fontSize: 12, color: 'var(--d5-muted)', minWidth: 80 }}>
+          <div className="flex justify-between items-center py-2">
+            <span className="text-xs" style={{ color: 'var(--d5-muted)', minWidth: '5rem' }}>
               {row.pronoun}
             </span>
-            <span style={{ fontSize: 15 }}>
+            <span className="text-sm">
               <ColouredForm form={row.form} stem={row.stem} />
             </span>
           </div>
