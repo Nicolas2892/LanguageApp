@@ -519,11 +519,125 @@ Centered italic serif text at bottom: "tu senda continúa…" with `color-mix(in
 
 ---
 
+## Concept Detail Page — D5 Mockup Alignment + Master Spec Compliance (2026-03-11)
+
+**Files changed:** `src/app/curriculum/[id]/page.tsx`, `src/app/curriculum/[id]/ConceptDetailClient.tsx` (new), `src/app/curriculum/[id]/ConjugationInsightTable.tsx`, `src/app/globals.css`, `src/app/curriculum/[id]/__tests__/ConceptDetailPage.test.tsx`
+
+Audited against `docs/senda-master-specs.md` and the D5 brand preview mockup (`D5ConceptDetailPage` in `src/app/brand-preview/BrandPreviewClient.tsx`). Hybrid redesign combining the mockup's flat "Vellum & Ink" layout with live-only pedagogical elements.
+
+### Restructure 1: Cards → flat sections with WindingPathSeparator (Spec §1, §5)
+
+Removed all 4 `senda-card` wrappers. Content now floats on the continuous vellum surface, separated by `WindingPathSeparator` between macro-sections (matching the mockup pattern and spec §5 "macro-sections only" rule):
+1. Header → separator → Explanation
+2. Explanation → separator → Examples
+3. Examples → separator → Conjugation insight (if tense-mapped)
+4. Last content section → separator → SRS status + CTAs
+
+### Restructure 2: Level chip above title (mockup pattern)
+
+Moved `LevelChip` from inline with metadata chips to its own row above the title. Creates cleaner hierarchy: metadata tag → editorial serif title → secondary chips below.
+
+### Restructure 3: Title row with HardFlagButton
+
+Title `<h1>` and `HardFlagButton` now share a flex row with `items-start gap-2`. Previously the flag was inline with chips below the title.
+
+### Restructure 4: Explanation in tinted container with clamp
+
+New `ExpandableExplanation` client component (`ConceptDetailClient.tsx`):
+- Tinted container: `rgba(26,17,8,0.05)` bg, `rounded-2xl`, `1rem 1.25rem` padding (matching mockup)
+- 4-line `-webkit-line-clamp` with "Leer más…" / "Mostrar menos" toggle
+- Eyebrow changed from "Concepto" to "Cómo funciona" (matching mockup)
+- Attempt count moved inside this container
+
+### Restructure 5: Examples — gap spacing replaces WindingPathSeparator
+
+Removed `WindingPathSeparator` between individual example sentences (violated spec §5 — separator was between tightly coupled elements). Replaced with `flex flex-col gap-4`. Examples section is now a bare section (no card wrapper), with border-left accent preserved.
+
+### Restructure 6: CTAs — stacked full-width (mockup pattern)
+
+Replaced 2-column grid + pill grid layout with stacked full-width buttons (matching mockup):
+1. Primary: "Practicar este concepto →" (solid terracotta)
+2. Secondary: "Escritura libre" (outline)
+3. Secondary: "Consultar tutor" (outline)
+
+Exercise type pills moved below CTAs as a less prominent row.
+
+### Fix 1: Hardcoded px → Tailwind rem classes (Spec §3)
+
+All inline `fontSize` px values replaced with Tailwind classes:
+| Before | After |
+|---|---|
+| `fontSize: 22` | `text-xl` (1.25rem) |
+| `fontSize: 20` | `text-xl` |
+| `fontSize: 16` | `text-base` |
+| `fontSize: 14` | `text-sm` |
+| `fontSize: 13` | `text-sm` or `text-xs` |
+| `fontSize: 12` | `text-xs` |
+| `fontSize: 11` | `text-xs` |
+
+Also applied to `ConjugationInsightTable.tsx`: `fontSize: 12` → `text-xs`, `fontSize: 15` → `text-sm`, `padding: '8px 0'` → `py-2`, `minWidth: 80` → `5rem`.
+
+### Fix 2: Off-grid margins → base-4 (Spec §9)
+
+Three `marginBottom: 14` (off-grid) replaced:
+- Chips row: `14` → `mb-2` (8px) — tighter coupling to title
+- Examples eyebrow: `14` → `mb-3` (12px)
+- SRS eyebrow: `14` → `mb-4` (16px)
+
+### Fix 3: Secondary button borders 1px → 1.5px (Spec §6)
+
+All outline buttons changed from `border: '1px solid rgba(196,82,46,0.3)'` to `border: '1.5px solid rgba(196,82,46,0.3)'`.
+
+### Fix 4: Hover states on outline buttons (Spec §6)
+
+Added `hover:bg-[#C4522E]/10` class to all secondary outline buttons (Escritura libre, Consultar tutor, exercise type pills). Added `transition-colors duration-200` for spec §8 compliance.
+
+### Fix 5: `.senda-card` padding p-6 (Spec §7 — global)
+
+`globals.css` `.senda-card` padding changed from `padding: 16px 20px` to `padding: 1.5rem` (24px). Spec §7 requires p-6 (24px) or p-8 (32px). This is a global change affecting all pages using `.senda-card`.
+
+### Fix 6: 44px touch targets on exercise pills (Spec §9)
+
+Exercise type pills: added `minHeight: '2.75rem'` (44px) + `display: inline-flex` + `alignItems: center` to ensure minimum touch target size.
+
+### Test updates
+
+- Added mock for `ConceptDetailClient` (`ExpandableExplanation`)
+- Updated assertions: "Tu Progreso" → "Próxima revisión", "card" → "section"
+- Added new tests: "Cómo funciona" eyebrow, stacked CTA buttons
+- **10 tests, all passing**
+
+---
+
+## GrammarFocusChip — D5 Warm Earth Tones (2026-03-11)
+
+**Files changed:** `src/components/GrammarFocusChip.tsx`
+
+Replaced cold Tailwind palette colours (sky/violet/amber) with warm earth tones complementary to the D5 palette:
+
+| Mood | Before | After (text) | After (bg) |
+|---|---|---|---|
+| Indicative | `bg-sky-100 text-sky-700` | `#4A6741` (sage) | `rgba(74,103,65,0.10)` |
+| Subjunctive | `bg-violet-100 text-violet-700` | `#7B5272` (dusty mauve) | `rgba(123,82,114,0.10)` |
+| Both moods | `bg-amber-100 text-amber-700` | `#8B7332` (warm ochre) | `rgba(139,115,50,0.10)` |
+
+Dark mode variants: 20% bg opacity, lighter text (`#8BB880` sage, `#C49AB8` mauve, `#C4AD6A` ochre), 35% border opacity.
+
+---
+
+## SessionConfig — Build Fix (2026-03-11)
+
+**Files changed:** `src/app/study/configure/SessionConfig.tsx`
+
+Removed unused `boldNum` property from mode array objects (lines 77, 80). Property was set but not in the type definition (`{ id: SessionMode; title: string; subtitle: string }`) and never consumed in rendering. Caused Vercel build failure (TypeScript strict mode).
+
+---
+
 ## Spec Sections Not Yet Implemented
 
 | Spec Section | Status | Notes |
 |---|---|---|
-| §3 rem-only typography | Partial | Account page fully converted; study configure still uses px inline styles for font-size |
+| §3 rem-only typography | Partial | Account page + concept detail fully converted; study configure still uses px inline styles for font-size |
 | §6 Form fills (Dark Cream) | Partial | Account page fully converted (`.senda-input` class); auth + onboarding forms not audited |
 | §7 Accordion chevrons | Not started | Curriculum accordions lack right-aligned chevron affordance |
 | §7 Modal shadows | Not audited | Need to verify modals use deeper shadow formula |
