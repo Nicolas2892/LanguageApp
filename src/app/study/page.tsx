@@ -239,14 +239,11 @@ export default async function StudyPage({
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 8a2 2 0 012-2h32a2 2 0 012 2v32a2 2 0 01-2 2H8a2 2 0 01-2-2V8z" />
         </svg>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">All caught up!</h1>
-          <p className="text-muted-foreground mt-1.5 text-sm">No concepts are due for review today. Great work!</p>
+          <h1 className="senda-heading text-2xl">¡Todo al día!</h1>
+          <p className="text-muted-foreground mt-1.5 text-sm">No hay conceptos pendientes hoy. ¡Buen trabajo!</p>
         </div>
-        <Link
-          href="/study/configure?mode=practice"
-          className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
-        >
-          Practice anyway →
+        <Link href="/study/configure?mode=practice" className="senda-cta">
+          Practicar de Todos Modos →
         </Link>
       </main>
     )
@@ -275,16 +272,13 @@ export default async function StudyPage({
           <path strokeLinecap="round" d="M24 16v8m0 8h.01" />
         </svg>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">No exercises found</h1>
+          <h1 className="senda-heading text-2xl">Sin ejercicios</h1>
           <p className="text-muted-foreground mt-1.5 text-sm">
-            No {filterTypes.length > 0 ? filterTypes.join(', ').replace(/_/g, ' ') : ''} exercises exist for this selection.
+            No hay ejercicios {filterTypes.length > 0 ? `de tipo ${filterTypes.join(', ').replace(/_/g, ' ')}` : ''} para esta selección.
           </p>
         </div>
-        <Link
-          href="/study/configure"
-          className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
-        >
-          Change filters →
+        <Link href="/study/configure" className="senda-cta">
+          Cambiar Filtros →
         </Link>
       </main>
     )
@@ -358,9 +352,9 @@ export default async function StudyPage({
     : 'Review session'
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 pb-24 lg:pb-10">
+    <main className="max-w-xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Study session</h1>
+        <h1 className="senda-heading text-2xl">Sesión de Estudio</h1>
       </div>
       <ErrorBoundary>
         <StudySession

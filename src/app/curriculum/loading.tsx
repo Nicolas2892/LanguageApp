@@ -7,7 +7,7 @@ function Bone({ className, style }: { className: string; style?: React.CSSProper
 
 export default function CurriculumLoading() {
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-6 pb-24 lg:pb-10">
+    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
       {/* Header skeleton */}
       <div className="space-y-2">
         <Bone className="h-8 w-40" />

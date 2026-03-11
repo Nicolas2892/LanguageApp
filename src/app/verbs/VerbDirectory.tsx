@@ -52,7 +52,7 @@ export function VerbDirectory({ verbs }: Props) {
         <Search className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors ${query.trim() ? 'text-primary' : 'text-muted-foreground'}`} />
         <input
           type="search"
-          placeholder="Buscar verbos..."
+          placeholder="Buscar Verbos..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="senda-input pl-9 pr-4 py-2.5 rounded-xl"

@@ -19,49 +19,49 @@ export function HintPanel({ hint1, hint2, claudeHint, wrongAttempts, loadingHint
   return (
     <div className="space-y-2 text-sm">
       {/* Dots indicator — always visible when hints exist */}
-      <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-3">
-        <span>Hints:</span>
+      <div className="flex items-center gap-1.5 text-xs text-[var(--d5-muted)] mt-3">
+        <span>Pistas:</span>
         {hint1 && (
           <span
             className={`h-2 w-2 rounded-full transition-colors duration-500 ${
-              hint1Revealed ? 'bg-amber-400' : 'bg-border'
+              hint1Revealed ? 'bg-[var(--d5-warm)]' : 'bg-border'
             }`}
           />
         )}
         {hint2 && (
           <span
             className={`h-2 w-2 rounded-full transition-colors duration-500 ${
-              hint2Revealed ? 'bg-amber-400' : 'bg-border'
+              hint2Revealed ? 'bg-[var(--d5-warm)]' : 'bg-border'
             }`}
           />
         )}
-        {claudeHint && <span className="text-blue-500 ml-1">✦ Example</span>}
+        {claudeHint && <span className="text-primary ml-1">✦ Ejemplo</span>}
       </div>
 
       {hint1Revealed && hint1 && (
-        <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md p-3 text-amber-900 dark:text-amber-300">
-          <span className="font-semibold">Hint: </span>{hint1}
+        <div className="senda-card-sm border border-[var(--d5-pill-border)] text-foreground">
+          <span className="font-semibold text-[var(--d5-warm)]">Pista: </span>{hint1}
         </div>
       )}
       {hint2Revealed && hint2 && (
-        <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md p-3 text-amber-900 dark:text-amber-300">
-          <span className="font-semibold">Extra hint: </span>{hint2}
+        <div className="senda-card-sm border border-[var(--d5-pill-border)] text-foreground">
+          <span className="font-semibold text-[var(--d5-warm)]">Pista extra: </span>{hint2}
         </div>
       )}
       {hint2Revealed && !claudeHint && !loadingHint && (
         <button
           onClick={onRequestHint}
-          className="text-xs text-muted-foreground underline hover:text-foreground"
+          className="text-xs text-[var(--d5-muted)] underline hover:text-foreground"
         >
-          Show worked example
+          Mostrar ejemplo resuelto
         </button>
       )}
       {loadingHint && (
-        <p className="text-xs text-muted-foreground animate-pulse">Generating example…</p>
+        <p className="text-xs text-[var(--d5-muted)] animate-pulse">Generando ejemplo…</p>
       )}
       {claudeHint && (
-        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-md p-3 text-blue-900 dark:text-blue-300">
-          <span className="font-semibold">Worked example: </span>{claudeHint}
+        <div className="senda-card-sm border border-[var(--d5-pill-border)] text-foreground">
+          <span className="font-semibold text-primary">Ejemplo resuelto: </span>{claudeHint}
         </div>
       )}
     </div>

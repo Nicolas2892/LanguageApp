@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { WriteSession } from './WriteSession'
 import { ConceptPicker } from './ConceptPicker'
 import type { Concept, Module, Unit } from '@/lib/supabase/types'
@@ -41,18 +42,19 @@ export default async function WritePage({ searchParams }: Props) {
     const pageTitle = conceptInfos.map((c) => c.title).join(' + ')
 
     return (
-      <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
-        <div className="flex items-center gap-3">
+      <main className="relative overflow-hidden max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+        <BackgroundMagicS />
+        <div className="relative flex items-center gap-3">
           <Link
             href="/write"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm text-[var(--d5-warm)] hover:text-foreground transition-colors"
           >
-            ← Back
+            ← Atrás
           </Link>
         </div>
-        <div>
-          <h1 className="text-xl font-bold">Free write</h1>
-          <p className="text-sm text-muted-foreground mt-1">{pageTitle}</p>
+        <div className="relative">
+          <h1 className="senda-heading text-2xl">Escritura Libre</h1>
+          <p className="senda-eyebrow mt-1">{pageTitle}</p>
         </div>
         <ErrorBoundary>
           <WriteSession conceptIds={conceptIds} conceptInfos={conceptInfos} />
@@ -92,18 +94,19 @@ export default async function WritePage({ searchParams }: Props) {
     : null
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+    <main className="relative overflow-hidden max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+      <BackgroundMagicS />
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="relative inline-flex items-center gap-1 text-sm text-[var(--d5-warm)] hover:text-foreground transition-colors"
       >
         <ChevronLeft className="h-4 w-4" />
-        Dashboard
+        Inicio
       </Link>
-      <div>
-        <h1 className="text-xl font-bold">Free write</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Choose one or more concepts to write about.
+      <div className="relative">
+        <h1 className="senda-heading text-2xl">Escritura Libre</h1>
+        <p className="text-sm text-[var(--d5-muted)] mt-1">
+          Elige uno o más conceptos para escribir
         </p>
       </div>
       <ConceptPicker

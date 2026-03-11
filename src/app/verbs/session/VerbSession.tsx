@@ -3,6 +3,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { X } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { gradeConjugation } from '@/lib/verbs/grader'
 import type { VerbGradeResult } from '@/lib/verbs/grader'
 import { TENSE_LABELS } from '@/lib/verbs/constants'
@@ -54,6 +62,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
   const [answer, setAnswer] = useState('')
   const [phase, setPhase] = useState<Phase>({ kind: 'answering' })
   const [flashClass, setFlashClass] = useState('')
+  const [showExitDialog, setShowExitDialog] = useState(false)
 
   // Track correct/total per tense
   const [scores, setScores] = useState<Map<number, boolean>>(new Map())
@@ -159,10 +168,6 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
     setPhase({ kind: 'answering' })
   }
 
-  function handleExit() {
-    router.push('/verbs')
-  }
-
   // ── Done screen ────────────────────────────────────────────────────────────
   if (phase.kind === 'done') {
     const correctCount = Array.from(scores.values()).filter(Boolean).length
@@ -187,92 +192,127 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
   const pronounLabel = PRONOUN_LABELS[current.pronoun] ?? current.pronoun
 
   return (
-    <main className={`max-w-lg mx-auto p-6 md:p-10 space-y-6 pb-24 lg:pb-10 ${flashClass}`}>
-      {/* Header row */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={handleExit}
-          className="p-2 -ml-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          aria-label="Exit session"
-        >
-          <X className="h-5 w-5" />
-        </button>
-        <div className="flex-1 mx-4">
-          <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-            <div
-              className="h-full rounded-full bg-primary transition-all duration-300"
-              style={{ width: `${((index + 1) / items.length) * 100}%` }}
-            />
+    <>
+      {/* Exit confirmation dialog */}
+      <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>¿Salir de la Sesión?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Tu progreso de esta sesión no se guardará.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExitDialog(false)}>
+              Seguir
+            </Button>
+            <Button variant="destructive" onClick={() => router.push('/verbs')}>
+              Salir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <div className="space-y-4">
+        {/* Row 1: segmented progress dots + X exit button */}
+        <div className="flex items-center gap-2">
+          <div className="flex flex-1 gap-1">
+            {Array.from({ length: items.length }, (_, i) => (
+              <div
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                  i <= index ? 'bg-primary' : 'bg-[var(--d5-muted)]/30'
+                }`}
+              />
+            ))}
           </div>
-        </div>
-        <p className="text-xs font-medium text-muted-foreground shrink-0">
-          {index + 1}/{items.length}
-        </p>
-      </div>
-
-      {/* Sentence card */}
-      <div className="bg-card rounded-xl border p-6 shadow-sm space-y-4">
-        <p className="text-base leading-relaxed">
-          {beforeBlank}
-          <span className="inline-block min-w-[4rem] border-b-2 border-primary mx-1 align-bottom" />
-          {afterBlank}
-        </p>
-
-        {/* Hint row */}
-        {showHint && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className="px-2 py-1 rounded bg-muted font-mono font-medium">[{current.infinitive}]</span>
-            <span>·</span>
-            <span>{tenseLabel}</span>
-            <span>·</span>
-            <span>{pronounLabel}</span>
-          </div>
-        )}
-        {!showHint && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{tenseLabel}</span>
-            <span>·</span>
-            <span>{pronounLabel}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Input */}
-      <div className="space-y-3">
-        <input
-          ref={inputRef}
-          type="text"
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-          onKeyDown={(e) => { if (e.key === 'Enter' && phase.kind === 'answering') handleCheck() }}
-          disabled={phase.kind === 'feedback'}
-          placeholder="Type the conjugated form..."
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck={false}
-          className="w-full rounded-xl border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
-        />
-
-        {phase.kind === 'answering' && (
           <button
-            onClick={handleCheck}
-            disabled={!answer.trim()}
-            className="w-full rounded-xl bg-primary text-primary-foreground py-3 text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-40"
+            onClick={() => setShowExitDialog(true)}
+            aria-label="Exit session"
+            className="text-[var(--d5-muted)] hover:text-foreground transition-colors shrink-0"
           >
-            Check →
+            <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
-        )}
-      </div>
+        </div>
 
-      {/* Feedback */}
-      {phase.kind === 'feedback' && (
-        <VerbFeedbackPanel
-          result={phase.result}
-          onNext={handleNext}
-          onTryAgain={handleTryAgain}
-          isLast={isLast}
-        />
-      )}
-    </main>
+        {/* Row 2: metadata eyebrow */}
+        <div className="flex items-center gap-1.5 text-xs flex-wrap">
+          <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>Conjugación</span>
+          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+          <span className="text-[var(--d5-muted)]">{current.infinitive}</span>
+          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+          <span className="text-[var(--d5-muted)]">{tenseLabel}</span>
+          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+          <span className="text-[var(--d5-muted)]">{index + 1}/{items.length}</span>
+        </div>
+
+        {/* Exercise area with flash + entrance animation */}
+        <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 animate-exercise-in ${flashClass}`}>
+          {/* Sentence card */}
+          <div className="senda-card space-y-4">
+            <p className="text-base leading-relaxed">
+              {beforeBlank}
+              <span className="inline-block min-w-[4rem] border-b-2 border-primary mx-1 align-bottom" />
+              {afterBlank}
+            </p>
+
+            {/* Hint row */}
+            {showHint && (
+              <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
+                <span className="px-2 py-1 rounded bg-muted font-mono font-medium">[{current.infinitive}]</span>
+                <span>·</span>
+                <span>{tenseLabel}</span>
+                <span>·</span>
+                <span>{pronounLabel}</span>
+              </div>
+            )}
+            {!showHint && (
+              <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
+                <span>{tenseLabel}</span>
+                <span>·</span>
+                <span>{pronounLabel}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Input */}
+          <div className="space-y-3">
+            <input
+              ref={inputRef}
+              type="text"
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter' && phase.kind === 'answering') handleCheck() }}
+              disabled={phase.kind === 'feedback'}
+              placeholder="Type the conjugated form..."
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              className="w-full rounded-xl border border-[var(--d5-muted)]/30 bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+            />
+
+            {phase.kind === 'answering' && (
+              <Button
+                onClick={handleCheck}
+                disabled={!answer.trim()}
+                className="w-full rounded-full active:scale-95 transition-transform"
+              >
+                Comprobar →
+              </Button>
+            )}
+          </div>
+
+          {/* Feedback */}
+          {phase.kind === 'feedback' && (
+            <VerbFeedbackPanel
+              result={phase.result}
+              onNext={handleNext}
+              onTryAgain={handleTryAgain}
+              isLast={isLast}
+            />
+          )}
+        </div>
+      </div>
+    </>
   )
 }

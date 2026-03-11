@@ -1,6 +1,6 @@
 export default function AccountLoading() {
   return (
-    <main className="max-w-lg mx-auto p-6 md:p-8 space-y-8 pb-24 lg:pb-10">
+    <main className="max-w-lg mx-auto p-6 md:p-8 space-y-8 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
       {/* Header skeleton */}
       <div className="space-y-2">
         <div className="h-8 w-32 rounded-lg senda-skeleton-fill animate-senda-pulse" />

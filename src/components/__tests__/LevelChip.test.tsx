@@ -10,18 +10,18 @@ describe('LevelChip', () => {
     expect(chip.className).toContain('#fef9c3')
   })
 
-  it('renders "B2" chip with warm yellow background', () => {
+  it('renders "B2" chip with warm peach background', () => {
     render(<LevelChip level="B2" />)
     const chip = screen.getByText('B2')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('#fef9c3')
+    expect(chip.className).toContain('#fde4d6')
   })
 
-  it('renders "C1" chip with warm yellow background', () => {
+  it('renders "C1" chip with dusty blue background', () => {
     render(<LevelChip level="C1" />)
     const chip = screen.getByText('C1')
     expect(chip).toBeDefined()
-    expect(chip.className).toContain('#fef9c3')
+    expect(chip.className).toContain('#dbeafe')
   })
 
   it('renders nothing when level is null', () => {

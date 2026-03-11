@@ -104,16 +104,7 @@ export default async function ConfigurePage() {
 
       {/* Title */}
       <div className="px-4 pt-1 pb-3">
-        <h1
-          style={{
-            fontFamily: 'var(--font-lora), serif',
-            fontWeight: 600,
-            fontStyle: 'italic',
-            fontSize: 22,
-            lineHeight: 1.2,
-            color: 'var(--d5-ink)',
-          }}
-        >
+        <h1 className="senda-heading text-xl">
           Configura tu Sesión
         </h1>
       </div>

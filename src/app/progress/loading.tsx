@@ -5,7 +5,7 @@ function Bone({ className }: { className: string }) {
 
 export default function ProgressLoading() {
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-24 lg:pb-10">
+    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
       {/* Header skeleton */}
       <div className="flex items-start justify-between">
         <div className="space-y-2">

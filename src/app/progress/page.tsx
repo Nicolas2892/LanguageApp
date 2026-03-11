@@ -173,7 +173,7 @@ export default async function ProgressPage() {
   const hasAnyData = totalAttempts > 0
 
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-24 lg:pb-10 relative overflow-hidden">
+    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 relative overflow-hidden">
       {/* BackgroundMagicS watermark */}
       <div style={{ position: 'absolute', top: '15%', right: -20, opacity: 0.025, pointerEvents: 'none', zIndex: 0 }} aria-hidden="true">
         <BackgroundMagicS opacity={1} />
@@ -184,9 +184,7 @@ export default async function ProgressPage() {
 
         {/* Header */}
         <div>
-          <h1
-            style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-ink)' }}
-          >
+          <h1 className="senda-heading text-2xl">
             Tu Progreso
           </h1>
           <p className="text-sm mt-1" style={{ color: 'var(--d5-warm)' }}>
@@ -209,14 +207,7 @@ export default async function ProgressPage() {
             <div className="grid grid-cols-3 gap-3">
 
               {/* Streak */}
-              <div
-                style={{
-                  background: 'rgba(26,17,8,0.04)',
-                  borderRadius: 14,
-                  padding: '10px',
-                  textAlign: 'center',
-                }}
-              >
+              <div className="senda-card-sm text-center">
                 <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-terracotta)', lineHeight: 1.2 }}>{currentStreak}</p>
                 <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2, lineHeight: 1.3 }}>
                   días{'\n'}seguidos
@@ -224,14 +215,7 @@ export default async function ProgressPage() {
               </div>
 
               {/* Mastered */}
-              <div
-                style={{
-                  background: 'rgba(26,17,8,0.04)',
-                  borderRadius: 14,
-                  padding: '10px',
-                  textAlign: 'center',
-                }}
-              >
+              <div className="senda-card-sm text-center">
                 <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-ink)', lineHeight: 1.2 }}>{totalMastered}</p>
                 <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2, lineHeight: 1.3, whiteSpace: 'pre-line' }}>
                   {`de ${totalConcepts}\ndominados`}
@@ -239,14 +223,7 @@ export default async function ProgressPage() {
               </div>
 
               {/* Accuracy */}
-              <div
-                style={{
-                  background: 'rgba(26,17,8,0.04)',
-                  borderRadius: 14,
-                  padding: '10px',
-                  textAlign: 'center',
-                }}
-              >
+              <div className="senda-card-sm text-center">
                 <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-ink)', lineHeight: 1.2 }}>{overallAccuracy}%</p>
                 <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2, lineHeight: 1.3, whiteSpace: 'pre-line' }}>
                   {`precisión\nglobal`}

@@ -298,12 +298,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
       {/* ── Tier 1: Primary CTA ── */}
       <Link
         href={`/study?practice=true&concept=${id}`}
-        className="block w-full text-center rounded-full text-sm font-semibold transition-colors duration-200"
-        style={{
-          background: 'var(--d5-terracotta)',
-          color: 'var(--d5-paper)',
-          padding: '0.75rem 1rem',
-        }}
+        className="senda-cta w-full"
       >
         Practicar este concepto →
       </Link>
@@ -317,12 +312,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
               <Link
                 key={type}
                 href={`/study?concept=${id}&types=${type}&practice=true`}
-                className="inline-flex items-center rounded-full text-xs font-medium transition-colors duration-200 hover:bg-[#C4522E]/15"
-                style={{
-                  color: 'var(--d5-terracotta)',
-                  background: 'rgba(196,82,46,0.08)',
-                  padding: '0.375rem 0.75rem',
-                }}
+                className="senda-cta-ghost"
               >
                 {label}
               </Link>

@@ -4,6 +4,461 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## D5-Audit-3: Pills, LevelChip, Mastery Badge, Container & Dark Mode ✓ (2026-03-11)
+
+1410 tests across 63 files, all passing. Completes `docs/design-audit.md` items VIII–XII + separator fix.
+
+### Item VIII — Pill Sizes Unified to 2 Tiers
+
+Two standard tiers defined:
+- **Touch pill** (minHeight: 44, `0 16px`, 12px/700) — all selection pills on configure/detail pages
+- **Filter chip** (auto height, `px-3 py-1.5`, text-xs/semibold) — all filter/tag rows
+
+| File | Change |
+|---|---|
+| `src/app/verbs/configure/VerbConfig.tsx` TenseChip | 36px/12px/11px → 44px/16px/12px |
+| `src/app/write/ConceptPicker.tsx` mastery filter | `py-1` → `py-1.5` |
+
+### Item IX — LevelChip Distinct Colours per Level
+
+`src/lib/constants.ts` LEVEL_CHIP updated — three distinct pastels:
+- B1: warm yellow `#fef9c3` / `#92400e` (kept)
+- B2: warm peach `#fde4d6` / `#9a3412` (new)
+- C1: dusty blue `#dbeafe` / `#1e3a5f` (new)
+
+Tests updated in `src/components/__tests__/LevelChip.test.tsx`.
+
+### Item X — Mastery Badge Consolidated
+
+Deleted local `MASTERY_BADGE` duplicate in `src/app/write/ConceptPicker.tsx` (Tailwind class strings). Now imports from `src/lib/mastery/badge.ts` and renders with the canonical inline style objects. Badges now identical on Curriculum and Write pages.
+
+### Item XI — Container Max-Width Standardised
+
+Dashboard `max-w-lg` (32rem) → `max-w-xl` (36rem). Container tiers now 4:
+- `max-w-md` (28rem) — config forms (StudyConfigure, VerbConfigure)
+- `max-w-xl` (36rem) — dashboard, session, account, write
+- `max-w-2xl` (42rem) — content/detail pages (curriculum, progress, concept detail, verb detail)
+- `max-w-3xl` (48rem) — grid directory (verbs list)
+
+### WindingPathSeparator Width Fix
+
+`src/components/WindingPathSeparator.tsx`: `px-3` (12px inset) → `-mx-2` (8px bleed outward). Separator now extends wider than card content on each side, matching the brand preview mockup layout.
+
+### Item XII — Dark Mode Gaps
+
+| File | Before | After |
+|---|---|---|
+| `src/app/account/page.tsx` avatar circle | Hardcoded `rgba(140,106,63,0.10)` — near-invisible in dark | `.senda-card-sm` (auto dark override to `#241910`) |
+| `src/app/write/ConceptPicker.tsx` checkbox | `accent-[#C4522E]` (hardcoded hex) | `accent-primary` (CSS token) |
+
+VerbDetail h1 terracotta colour intentionally kept (user preference for entity hero pages).
+
+---
+
+## D5-Audit-2: Spacing, Card & CTA Consolidation ✓ (2026-03-11)
+
+1410 tests across 63 files, all passing. Continues `docs/design-audit.md` items V, VI, VII.
+
+### Item V — Section Spacing Standardisation
+
+- **Dashboard** (`page.tsx`): `mt-2` → `mt-4` after WindingPathSeparators (×2) — breathing room between separator and card.
+- **VerbDetailClient**: All inline `style={{ gap: N }}` converted to Tailwind — `gap-5` (main), `gap-3` (mood groups), `gap-2` (tense pills, tense header). Also converted inline `display: flex; flexDirection: column` to Tailwind `flex flex-col`.
+- **Account** (`page.tsx`): `mt-12` → `mt-8` before all WindingPathSeparators + DangerZone (×5) — reduces excessive gap between sections.
+
+### Item VI — `.senda-card-sm` & Card Consolidation
+
+New CSS utility in `globals.css`:
+```css
+.senda-card-sm { background: rgba(140,106,63,0.07); border-radius: 14px; padding: 0.75rem; }
+.dark .senda-card-sm { background: #241910; }
+```
+
+| File | Before | After |
+|---|---|---|
+| `progress/page.tsx` (×3 stat cards) | Inline `background/borderRadius/padding` | `.senda-card-sm text-center` |
+| `VerbDetailClient` conjugation table | Inline `background/borderRadius/padding` | `.senda-card-sm` + padding override |
+| `HintPanel.tsx` (×3 hint boxes) | Repeated `rounded-xl bg-[rgba(...)] dark:bg-[...] border p-3` | `.senda-card-sm border border-[var(--d5-pill-border)]` |
+
+### Item VII — `.senda-cta` / `.senda-cta-outline` / `.senda-cta-ghost`
+
+Three new CTA utility classes in `globals.css`:
+- `.senda-cta` — solid terracotta pill (bg, paper text, 99px radius, 700 weight, hover opacity)
+- `.senda-cta-outline` — terracotta border pill (1.5px border, transparent bg, hover tint)
+- `.senda-cta-ghost` — light terracotta tint chip (8% bg, 500 weight, 0.75rem font, hover 15%)
+
+| File | Before | After |
+|---|---|---|
+| `dashboard/page.tsx` | `Button + inline style` (×3) | `senda-cta` / `senda-cta-outline`; `Button` import removed |
+| `curriculum/[id]/page.tsx` | Tier 1 inline solid + Tier 2 inline tint | `senda-cta` + `senda-cta-ghost` |
+| `VerbDetailClient` | Inline solid CTA | `senda-cta w-full` |
+| `DashboardDeferredSection.tsx` | `Button outline + inline style` (×2) | `senda-cta-outline w-full` |
+| `VerbSummary.tsx` | `Button` default + `Button outline` | `senda-cta` + `senda-cta-outline`; `Button` import removed |
+| `study/page.tsx` | Long Tailwind class string (×2) | `senda-cta` |
+
+---
+
+## D5-Audit-1: Heading Standardisation, Bottom Padding & Title Case ✓ (2026-03-11)
+
+1410 tests across 63 files, all passing. Full UX audit captured in `docs/design-audit.md`.
+
+Addressed audit items I (heading fragmentation), II (bottom safe-area padding), III (English fallbacks), and V (Title Case Spanish).
+
+### Item I — Heading Standardisation
+
+Replaced all inline `fontFamily`/`fontStyle`/`fontSize` heading hacks and generic Tailwind headings with `.senda-heading` + Tailwind size class. VerbDetailClient heading intentionally kept as-is (terracotta, 28px inline — preferred brand style for entity hero pages).
+
+| File | Before | After |
+|---|---|---|
+| `src/app/study/page.tsx` (×3) | `text-2xl font-bold tracking-tight` + English | `.senda-heading text-2xl` + Spanish |
+| `src/app/study/configure/page.tsx` | 7-line inline style (`fontSize: 22`) | `.senda-heading text-xl` |
+| `src/app/progress/page.tsx` | Inline style (`fontSize: 28`) | `.senda-heading text-2xl` |
+| `src/app/write/ConceptPicker.tsx` | `text-base font-bold` | `.senda-heading text-base` |
+
+**Type scale (standardised):** Page title = `text-2xl` (24px), section heading = `text-xl` (20px), card heading = `text-base` (16px). Exception: VerbDetail hero = `text-[28px]` terracotta (inline, intentional).
+
+### Item II — Bottom Safe-Area Padding
+
+Replaced all hardcoded `pb-24` and `pb-36` with the canonical `pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10` pattern that accounts for bottom nav height + iOS notch.
+
+| File | Before |
+|---|---|
+| `src/app/study/page.tsx` | `pb-24 lg:pb-10` |
+| `src/app/progress/page.tsx` | `pb-24 lg:pb-10` |
+| `src/app/progress/loading.tsx` | `pb-24 lg:pb-10` |
+| `src/app/verbs/[infinitive]/VerbDetailClient.tsx` | `pb-24 lg:pb-10` |
+| `src/app/account/loading.tsx` | `pb-24 lg:pb-10` |
+| `src/app/curriculum/loading.tsx` | `pb-24 lg:pb-10` |
+| `src/app/write/ConceptPicker.tsx` | `pb-36` |
+
+### Item III — English Fallback Strings (Study Page)
+
+All English strings in `src/app/study/page.tsx` replaced with Spanish:
+- "All caught up!" → "¡Todo al día!"
+- "No concepts are due for review today. Great work!" → "No hay conceptos pendientes hoy. ¡Buen trabajo!"
+- "Practice anyway →" → "Practicar de Todos Modos →"
+- "No exercises found" → "Sin ejercicios"
+- "No … exercises exist for this selection." → "No hay ejercicios … para esta selección."
+- "Change filters →" → "Cambiar Filtros →"
+- "Study session" → "Sesión de Estudio"
+
+### Item V — Title Case Spanish
+
+Fixed inconsistent capitalisation across CTAs, dialog titles, and placeholders. Rule: lowercase articles/prepositions (a, de, en, por, para) unless first word.
+
+| File | Before | After |
+|---|---|---|
+| `src/app/write/ConceptPicker.tsx` | "Empezar a escribir →" | "Empezar a Escribir →" |
+| `src/app/write/page.tsx` | "Elige uno o más conceptos para escribir." | "Elige uno o más conceptos para escribir" |
+| `src/components/verbs/VerbSummary.tsx` | "sigue practicando." | "Sigue Practicando." |
+| `src/app/verbs/VerbDirectory.tsx` | "Buscar verbos..." | "Buscar Verbos..." |
+| `src/app/study/StudySession.tsx` | "¿Salir de la sesión?" | "¿Salir de la Sesión?" |
+| `src/app/verbs/session/VerbSession.tsx` | "¿Salir de la sesión?" | "¿Salir de la Sesión?" |
+
+Tests updated: `ConceptPicker.test.tsx` (×8), `VerbDirectory.test.tsx` (×3), `VerbSession.test.tsx` (×1).
+
+---
+
+## D5-Write-Onboarding-Auth: Write, Onboarding & Auth Pages Brand Alignment ✓ (2026-03-11)
+
+1410 tests across 63 files, all passing. TypeScript clean. Lint unchanged (4 pre-existing errors in brand-preview + VerbDetailClient).
+
+Full D5 restyle of the three remaining unaudited page groups: `/write` (FreeWritePrompt, ConceptPicker, WriteSession), `/onboarding` (DiagnosticSession), and `/auth/*` (login + signup). All English labels replaced with Spanish, all green hardcodes replaced with D5 terracotta tokens, and brand CSS classes applied throughout.
+
+### Write Page (`/write`)
+
+#### `src/app/write/page.tsx`
+- `BackgroundMagicS` watermark added (parent `relative overflow-hidden`).
+- Heading: `text-xl font-bold` "Free write" → `senda-heading text-2xl` "Escritura Libre".
+- Subtitle (picker): "Choose one or more concepts…" → "Elige uno o más conceptos para escribir." in `text-[var(--d5-muted)]`.
+- Back link: "← Back" → `text-[var(--d5-warm)]` "← Atrás"; "Dashboard" → "Inicio".
+
+#### `src/components/exercises/FreeWritePrompt.tsx`
+- **Concept label**: Removed green pill (`bg-green-100 text-green-800`). Replaced with `senda-eyebrow` "Concepto" + concept title in `text-[var(--d5-muted)]`.
+- **Prompt card**: `border rounded-lg bg-muted/40` → `senda-card`. "Writing prompt" → `senda-eyebrow` "Tema de escritura".
+- **Prompt text**: `text-sm` → `senda-heading text-base` (serif italic).
+- **Loading skeleton**: `animate-pulse bg-muted` → `animate-senda-pulse senda-skeleton-fill`.
+- **Textarea**: Shadcn `<Textarea>` → native `<textarea>` with `senda-dashed-input` class.
+- **Placeholder**: "Write your answer in Spanish…" → "Escribe tu respuesta en español…".
+- **Word count bar**: `bg-orange-500` → `bg-primary`; kept `bg-red-500` for over-limit (semantic).
+- **Word count text**: "X / 200 words" → "X / 200 palabras".
+- **Buttons**: "Generate different prompt" → "Generar otro tema" (`rounded-full`); "Submit →" → "Enviar →" (`rounded-full`).
+
+#### `src/app/write/WriteSession.tsx`
+- "Write another →" → "Escribir otro →" (`rounded-full`).
+- Error messages → Spanish.
+
+#### `src/app/write/ConceptPicker.tsx`
+- **Filter chips**: `bg-foreground/text-background` active → `bg-[var(--d5-terracotta)] text-[var(--d5-paper)]`; inactive → `bg-[var(--d5-pill-bg)] text-[var(--d5-pill-text)] border-[var(--d5-pill-border)]`.
+- **"Surprise me" card**: `border rounded-xl bg-card` → `senda-card`. Spanish labels: "¿No sabes por dónde empezar?" / "Elegimos 1–3 conceptos por ti" / "Sorpréndeme".
+- **Module accordion**: `border rounded-xl bg-card shadow-sm` → `senda-card !p-0`. Mastery count: "X/Y mastered" → "X/Y dominados".
+- **Concept checkbox selected**: `border-green-600 bg-green-50` → `border-primary bg-primary/10`; `accent-green-700` → `accent-[#C4522E]`.
+- **Mastery badges**: green mastery → `bg-primary/10 text-primary border-primary/20`; "Mastered" → "Dominado", "Learning" → "Aprendiendo".
+- **Filter labels**: "All" → "Todos", "New" → "Nuevo", "Learning" → "Aprendiendo", "Mastered" → "Dominado".
+- **Empty state**: "No X concepts yet." → "Aún no hay conceptos {filter}." / "Show all" → "Mostrar todos".
+- **"Clear all"** → "Borrar todo".
+- **Difficulty labels**: "Focused — one concept" → "Enfocado — un concepto", "Synthesis — two structures" → "Síntesis — dos estructuras", "Challenge — multiple structures" → "Desafío — varias estructuras".
+- **Footer**: "X concept(s) selected" → "X concepto(s) seleccionado(s)"; `text-green-800` → `text-primary`; `border-t` → `border-[var(--d5-line)]`.
+- **Start button**: "Start writing →" → "Empezar a escribir →" (`rounded-full`).
+
+### Onboarding (`/onboarding`)
+
+#### `src/app/onboarding/page.tsx`
+- `SvgSendaPath size={28}` brand mark above heading.
+- `BackgroundMagicS` watermark (parent `relative overflow-hidden`).
+- Heading: `text-2xl font-bold` English → `senda-heading text-2xl` "¡Bienvenido! Veamos tu nivel."
+- Subtitle: → "Responde estas {n} preguntas — sin pistas, sin presión. Tus resultados personalizarán tu repaso desde el inicio."
+- "Takes about 3 minutes." → "Tarda unos 3 minutos." in `text-[var(--d5-muted)]`.
+
+#### `src/app/onboarding/DiagnosticSession.tsx`
+- **Progress**: Removed `<Progress>` bar + old `h-2 w-2` dots. Replaced with D5 segmented flex dots: `h-1 flex-1 rounded-full`, `bg-primary` completed, `bg-[var(--d5-muted)]/30` remaining.
+- **Concept context**: `bg-muted/50 rounded-lg` → `senda-card`. "Concept" → `senda-eyebrow` "Concepto".
+- **Feedback card**: Inline `config.className` → `senda-feedback-card` + `senda-score-pill` + `SvgTilde` ornament.
+- **Answer labels**: "Your answer:" → "Tu respuesta:", "Correct:" → "Correcto:". Colours kept semantic (green-700/red-700).
+- **Explanation border**: `border-l-2` → `border-l-primary`.
+- **Next button**: `rounded-md` → `rounded-full` pill; "Next →" → "Siguiente →"; "Finish diagnostic" → "Finalizar diagnóstico".
+- **Done screen**: 🎉 emoji → `SvgTilde size={56}` + `senda-heading` "¡Listo! Tu repaso se está construyendo." / "Personalizando tu repaso…" / "Redirigiendo al inicio…".
+- **Empty state**: English → Spanish.
+- **"Thinking…"** → "Evaluando…".
+- **Error**: "Something went wrong…" → "Algo salió mal. Inténtalo de nuevo."
+
+### Auth (`/auth/login`, `/auth/signup`)
+
+#### `src/app/auth/login/page.tsx`
+- **Left panel**: `bg-foreground` → `bg-[var(--d5-ink)]` + `BackgroundMagicS` (replaces Ñ watermark).
+- **Left heading**: `text-3xl font-bold` → `senda-heading text-3xl text-[var(--d5-paper)]`.
+- **Tagline**: "Advanced Spanish. Beautifully structured." → "Español avanzado. Hermosamente estructurado."
+- **Card title**: `text-2xl font-bold` "Sign in" → `senda-heading text-2xl` "Iniciar Sesión".
+- **Card description**: "Pick up where you left off." → "Retoma donde lo dejaste."
+- **Labels**: "Email" → "Correo electrónico", "Password" → "Contraseña".
+- **Inputs**: `senda-input` class added.
+- **"or"** → "o".
+- **Submit**: "Sign in" / "Signing in…" → "Iniciar sesión" / "Iniciando sesión…".
+- **Link**: `text-green-800` → `text-primary`; "No account?" → "¿Sin cuenta?"; "Sign up" → "Regístrate".
+- **Validation**: Spanish error messages in Zod schema.
+
+#### `src/app/auth/signup/page.tsx`
+- Same left panel changes as login.
+- **Card title**: "Create account" → `senda-heading` "Crear Cuenta".
+- **Card desc**: "B2 doesn't happen by accident." → "El B2 no sucede por accidente."
+- **Labels**: "Name" → "Nombre", "Confirm password" → "Confirmar contraseña" (plus same as login).
+- **Submit**: "Create account" / "Creating account…" → "Crear cuenta" / "Creando cuenta…".
+- **Link**: `text-green-800` → `text-primary`; "Already have an account?" → "¿Ya tienes cuenta?"; "Sign in" → "Inicia sesión".
+- **Success screen**: "One more step" → `senda-heading` "Un paso más"; description → Spanish; "Back to sign in" → "Volver a iniciar sesión".
+- **Validation**: Spanish error messages in Zod schema.
+
+### Test Updates
+- `src/components/exercises/__tests__/FreeWritePrompt.test.tsx` — All string assertions updated: palabras, Enviar →, Generar otro tema, Escribe tu respuesta en español…
+- `src/app/write/__tests__/ConceptPicker.test.tsx` — All string assertions updated: Empezar a escribir →, concepto(s) seleccionado(s), Enfocado/Síntesis/Desafío, Dominado, Sorpréndeme, Borrar todo, Mostrar todos, ¿No sabes por dónde empezar?
+
+### Files Changed
+- `src/app/write/page.tsx` — BackgroundMagicS, senda-heading, Spanish labels
+- `src/components/exercises/FreeWritePrompt.tsx` — full D5 restyle
+- `src/app/write/WriteSession.tsx` — Spanish labels, rounded-full button
+- `src/app/write/ConceptPicker.tsx` — full D5 restyle (chips, cards, badges, Spanish)
+- `src/app/onboarding/page.tsx` — SvgSendaPath, BackgroundMagicS, senda-heading, Spanish
+- `src/app/onboarding/DiagnosticSession.tsx` — segmented dots, senda-feedback-card, SvgTilde, Spanish
+- `src/app/auth/login/page.tsx` — D5 ink panel, BackgroundMagicS, senda-input, Spanish
+- `src/app/auth/signup/page.tsx` — same D5 treatment, Spanish
+- `src/components/exercises/__tests__/FreeWritePrompt.test.tsx` — Spanish assertions
+- `src/app/write/__tests__/ConceptPicker.test.tsx` — Spanish assertions
+
+---
+
+## D5-VerbSession: Verb Session Page Brand Alignment ✓ (2026-03-11)
+
+1410 tests across 63 files, all passing. TypeScript clean.
+
+Full D5 restyle of `/verbs/session` — the verb conjugation drill page. Previously used generic Shadcn/Tailwind styling with English labels. Now fully aligned with the D5 brand direction and matches the StudySession in-exercise layout.
+
+### Files Modified
+- `src/app/verbs/session/VerbSession.tsx` — main session component
+- `src/components/verbs/VerbFeedbackPanel.tsx` — feedback card after grading
+- `src/components/verbs/VerbSummary.tsx` — done/summary screen
+- `src/app/verbs/session/__tests__/VerbSession.test.tsx` — updated tests
+- `src/components/verbs/__tests__/VerbFeedbackPanel.test.tsx` — updated tests
+
+### VerbSession.tsx — Layout & Structure
+- **Segmented progress dots** replacing continuous bar (matching StudySession rows 612–624): `h-1 flex-1 rounded-full`, `bg-primary` for completed, `bg-[var(--d5-muted)]/30` for remaining.
+- **X button moved right** of dots with `text-[var(--d5-muted)]` styling and `strokeWidth={1.5}`.
+- **Exit confirmation dialog** — X opens `Dialog` with "¿Salir de la sesión?" / "Tu progreso de esta sesión no se guardará." / Seguir + Salir buttons. Previously navigated directly without confirmation.
+- **Metadata eyebrow row** below progress dots: `senda-eyebrow` "Conjugación" (terracotta) · verb infinitive · tense label · counter. Dot separators: `w-1 h-1 rounded-full bg-[var(--d5-muted)]`.
+- **Sentence card** → `senda-card` class (was `bg-card rounded-xl border p-6 shadow-sm`).
+- **`animate-exercise-in`** entrance animation via `key={index}` on exercise wrapper.
+- **Input** → warm border `border-[var(--d5-muted)]/30 focus:ring-primary` (was `focus:ring-ring`).
+- **Check button** → "Comprobar →" (was "Check →"), `rounded-full` with `active:scale-95 transition-transform`, uses `<Button>` component.
+- **Removed `<main>` wrapper** — now bare `<div className="space-y-4">` wrapped in fragment with Dialog (matching StudySession pattern).
+
+### VerbFeedbackPanel.tsx — D5 Feedback Card
+- **Unified `senda-feedback-card`** layout for all three outcomes (was three separate styled blocks).
+- **`SvgTilde` ornament** centred at top of card.
+- **Outcome pills** — colour-tinted capsules: green "¡Correcto!", amber "Casi — revisa los acentos", red "Incorrecto".
+- **Correct form** displayed in `senda-heading text-lg text-primary` for all outcomes.
+- **Accent error** shows user answer with line-through in `text-[var(--d5-muted)]` above correct form.
+- **Tense rule** shown as italic explanation in `text-[var(--d5-muted)]` for incorrect only, with separator line.
+- **Buttons** → `rounded-full` with `active:scale-95`, matching FeedbackPanel pattern. Primary: "Siguiente →" / "Finalizar sesión". Secondary (incorrect only): "Intentar de nuevo" with `border-primary text-primary`.
+- **Correct outcome** renders no buttons (auto-advances via 1.5s timer in parent).
+
+### VerbSummary.tsx — Done Screen
+- **`PartyPopper` icon** with orange pulse ring when pct < 70 (matching StudySession done screen).
+- **Spanish session labels** by score tier: "Impecable." (≥90%), "Buen trabajo — sigue practicando." (≥70%), "Las difíciles son las que vale la pena repetir." (≥50%), "Sesión difícil — para eso es el repaso." (<50%).
+- **Correct/missed stats row** using `CheckCircle2` + `XCircle` with `text-primary` / `text-[var(--d5-warm)]`, "{n} correctas" / "{n} por repasar".
+- **Per-tense breakdown** → `senda-card` (was `bg-card border`) + `senda-eyebrow` "Por tiempo verbal" (was "By tense"). Score colours remain semantic (green/amber/rose).
+- **Actions** → "Practicar de nuevo" (primary, `rounded-full`, `active:scale-95`) + "Ver verbos" (outline, `border-primary text-primary`). Was "Practice Again" / "Browse Verbs" with `rounded-xl`.
+
+### Spanish Labels (all English → Spanish)
+- "Check →" → "Comprobar →"
+- "Correct!" → "¡Correcto!"
+- "Almost — check your accents" → "Casi — revisa los acentos"
+- "Not quite" → "Incorrecto"
+- "Try Again" → "Intentar de nuevo"
+- "Next →" → "Siguiente →"
+- "Finish →" → "Finalizar sesión"
+- "correct out of" → "correctas de" / "por repasar"
+- "By tense" → "Por tiempo verbal"
+- "Practice Again" → "Practicar de nuevo"
+- "Browse Verbs" → "Ver verbos"
+
+### Test Updates
+- `VerbSession.test.tsx` — all button queries updated from English to Spanish (`/Comprobar/`, `/Finalizar sesión/`, etc.). Added tests for exit confirmation dialog and "Conjugación" eyebrow label. 11 tests (was 9).
+- `VerbFeedbackPanel.test.tsx` — all text assertions updated to Spanish equivalents. 5 tests, all passing.
+
+---
+
+## D5-Tutor: Tutor Page Brand Alignment ✓ (2026-03-11)
+
+1408 tests across 63 files, all passing. TypeScript clean.
+
+Full D5 restyle of the `/tutor` AI chat page. Previously ~30% compliant (only user bubbles used terracotta). Now fully aligned with D5 brand tokens and Spanish UI labels.
+
+### Header Redesign
+- `SvgSendaPath size={24}` brand mark left-aligned.
+- `senda-eyebrow` "Tu Tutor de Español" above title.
+- `senda-heading text-xl` "Tutor IA" (was plain "AI Tutor").
+- Warm border via `var(--d5-line)` (was generic `border-b`).
+
+### Empty State
+- Removed `💬` emoji.
+- Added `SvgSendaPath size={40}` centred icon + `BackgroundMagicS` watermark (vanishes once first message sent).
+- `senda-heading` "Pregunta lo que Quieras".
+- Spanish body: "Gramática, errores frecuentes, ejemplos… estoy aquí para ayudarte."
+- Spanish hint: "Shift+Enter para nueva línea · Enter para enviar" in `var(--d5-muted)`.
+
+### Concept Badge
+- Warm tint bg `rgba(140,106,63,0.07)` + `var(--d5-line)` border (was `bg-muted/50 border-b`).
+- Label "Contexto:" in `var(--d5-warm)` (was English "Context:").
+
+### Assistant Bubbles
+- New CSS class `.senda-bubble` — `rgba(140,106,63,0.07)` light / `rgba(140,106,63,0.12)` dark (was `bg-muted`).
+
+### Input Area
+- Textarea uses `senda-input` class (cream fill, terracotta focus ring) replacing default shadcn styling.
+- Container border: `var(--d5-line)` (was generic `border-t`).
+- Placeholder: "Pregunta a tu tutor…" (was "Ask your tutor…").
+- Button: "Enviar" (was "Send").
+
+### Error Message
+- "Algo salió mal. Inténtalo de nuevo." (was "Something went wrong. Please try again.").
+
+### CSS Additions (`globals.css`)
+- `.senda-bubble` — warm-tint assistant bubble surface + dark override.
+
+### Files Changed
+- `src/app/globals.css` — 1 new utility class
+- `src/app/tutor/page.tsx` — D5 header with SvgSendaPath + eyebrow + heading
+- `src/app/tutor/TutorChat.tsx` — full D5 restyle (empty state, bubbles, input, concept badge, Spanish labels)
+
+### New Tests
+- `src/app/tutor/__tests__/TutorPage.test.tsx` — 6 tests (redirect, D5 header elements, concept prop passing, border token)
+- `src/app/tutor/__tests__/TutorChat.test.tsx` — 14 tests (empty state SVG/heading/text/vanish, concept badge, bubble classes, input labels, keyboard send, streaming, error message)
+
+---
+
+## D5-Exercise: In-Exercise Page Brand Alignment ✓ (2026-03-11)
+
+1388 tests across 61 files, all passing. TypeScript clean. Lint unchanged (4 pre-existing errors in brand preview + VerbDetailClient).
+
+Full rework of the study session exercise page to match the D5 brand preview mockup. All existing functionality preserved (NDJSON streaming, sprint timer, mastery overlay, hint gating, keyboard shortcuts, confetti, exit dialog, auto-generate).
+
+### Progress Bar → Segmented Dots
+- Replaced continuous `h-1 bg-primary` bar with segmented flex dots (one per exercise, `bg-primary` for completed, `bg-[var(--d5-muted)]/30` for remaining).
+- Sprint time mode retains continuous bar (segments don't map to elapsed time).
+
+### Exercise Prompts → Serif Italic
+- All 4 exercise components now use `senda-heading text-base leading-relaxed` for prompt text (DM Serif Display italic).
+- GapFill inline inputs override back to sans-serif via inline `fontFamily` + `fontStyle: 'normal'`.
+
+### Answer Inputs → Dashed Frame
+- New CSS class `.senda-dashed-input` (1.5px dashed `var(--d5-muted)`, 12px radius, paper bg, dark mode override).
+- Applied to: GapFill fallback input, TextAnswer textarea, SentenceBuilder construction area, ErrorCorrection textarea.
+- Inputs inside the frame use `border-0 shadow-none bg-transparent focus-visible:ring-0` to remove double-border.
+
+### FeedbackPanel → Centered Terracotta-Tint Card
+- New CSS classes: `.senda-feedback-card` (terracotta 6% tint, 20px radius, centered), `.senda-score-pill` (terracotta capsule).
+- New component: `SvgTilde.tsx` — calligraphic tilde ornament at top of feedback card.
+- Score shown as pill: `"3/3 · Perfecto"` with Sparkles icon for perfect scores.
+- Correct answer in `senda-heading text-lg text-primary` (serif italic terracotta).
+- Wrong answer with strikethrough + corrected version in serif italic.
+- Thin `h-px bg-[var(--d5-muted)] opacity-25` separator before explanation.
+- Buttons: primary CTA first (`Siguiente →`, rounded-full), secondary below (`Intentar de nuevo`, outline with terracotta border).
+- Next review: "Próxima revisión en N día(s)" replaces "Back in N day(s)".
+
+### Metadata Row Reorder
+- Order changed: **Type eyebrow** (uppercase terracotta, `senda-eyebrow`) · dot · **Concept title** (muted) · dot · Grammar chip · dot · Counter · dot · Notas toggle.
+- Dot separators: `w-1 h-1 rounded-full bg-[var(--d5-muted)]` (was `·` text).
+
+### Color Token Fixes
+- GapFill inline focus: `focus:border-primary` (was `focus:border-violet-600`).
+- SentenceBuilder selected chips: `bg-primary text-primary-foreground` (was `bg-green-800`).
+- SentenceBuilder bank chips: `bg-[var(--d5-pill-bg)]` + `border-[var(--d5-pill-border)]` (was `bg-gray-100`).
+- Done screen: correct count `text-primary` (was `text-green-600`), missed count `text-[var(--d5-warm)]` (was `text-orange-500`), practice links `text-primary` (was `text-green-800`).
+
+### HintPanel → D5 Warm Tones
+- Hint cards: `bg-[rgba(140,106,63,0.07)]` + `border-[var(--d5-pill-border)]` (was amber-50/amber-200).
+- Dots: `bg-[var(--d5-warm)]` when revealed (was `bg-amber-400`).
+- Claude hint: `text-primary` label (was `text-blue-500`), same warm card style (was blue-50/blue-200).
+- Spanish labels: "Pistas:", "Pista:", "Pista extra:", "Ejemplo resuelto:", "Mostrar ejemplo resuelto".
+
+### Full Spanish UI Labels
+- **SCORE_CONFIG** (`scoring.ts`): Perfecto, Bien, A mejorar, Incorrecto.
+- **Exercise type labels** (`StudySession.tsx`): Completar Hueco, Traducción, Transformación, Constructor De Frases, Corrección De Errores, Escritura Libre.
+- **Buttons**: Confirmar → (all 4 exercise types), Siguiente →, Finalizar sesión, Intentar de nuevo, Generando…, Reiniciar (SentenceBuilder reset).
+- **Done screen**: Impecable / Buen trabajo / Las difíciles… / Sesión difícil; correctas / por repasar; concepto(s) por repasar; Practicar: / Escritura libre sobre este tema / Generar 3 más / Volver al concepto / Volver al inicio / Hecho.
+- **Dialogs**: ¡Concepto dominado! / Has dominado… / Continuar; ¿Salir de la sesión? / Seguir / Salir.
+- **Inline**: Comprobando…, Algo salió mal, Error al generar ejercicios, Notas ↓/↑.
+- **Placeholders**: Escribe tu respuesta…, Escribe tu respuesta en español…, Escribe la frase corregida…, Construye tu frase…, Toca las palabras para construir tu frase…
+- **ErrorCorrection**: "Frase errónea:" (was "Erroneous sentence:"), "Escribe la frase corregida:" (was "Type the corrected sentence below:").
+
+### New Files
+- `src/components/SvgTilde.tsx` — calligraphic tilde SVG atom (terracotta stroke, 48×20 viewBox).
+
+### CSS Additions (`globals.css`)
+- `.senda-dashed-input` — dashed border frame with paper bg + dark override.
+- `.senda-feedback-card` — centered terracotta-tint surface + dark override.
+- `.senda-score-pill` — terracotta capsule for score display.
+
+### Files Changed
+- `src/app/globals.css` — 3 new utility classes
+- `src/components/SvgTilde.tsx` — new
+- `src/lib/scoring.ts` — Spanish labels
+- `src/components/exercises/FeedbackPanel.tsx` — full rework
+- `src/components/exercises/HintPanel.tsx` — D5 warm tones + Spanish
+- `src/components/exercises/GapFill.tsx` — serif prompt, dashed input, focus fix, Spanish button
+- `src/components/exercises/TextAnswer.tsx` — serif prompt, dashed input, Spanish button
+- `src/components/exercises/SentenceBuilder.tsx` — serif prompt, dashed area, D5 chips, Spanish button
+- `src/components/exercises/ErrorCorrection.tsx` — serif prompt, dashed input, D5 colors, Spanish labels
+- `src/app/study/StudySession.tsx` — segmented dots, metadata reorder, Spanish labels, D5 colors
+
+### Tests Updated
+- `FeedbackPanel.test.tsx` — Spanish labels (Siguiente →, Finalizar sesión, Intentar de nuevo, Próxima revisión)
+- `GapFill.test.tsx` — Confirmar → button, Spanish placeholder
+- `SentenceBuilder.test.tsx` — Confirmar → button, bank chip detection updated for D5 pill classes
+- `ErrorCorrection.test.tsx` — Confirmar → button, Frase errónea, Spanish placeholder
+- `ExerciseRenderer.test.tsx` — Confirmar → button, Frase errónea, Spanish placeholders
+- `HintPanel.test.tsx` — Pistas: label, bg-[var(--d5-warm)] dot class
+- `StudySession.test.tsx` — Notas ↓/↑, ¡Concepto dominado!, Continuar, Generar 3 más, Generando…, mock FeedbackPanel Spanish labels
+
+---
+
 ## Fix-K: PWA Performance Improvements ✓ (2026-03)
 
 Updated `public/sw.js` (bumped to `spanish-app-v2`):
@@ -955,3 +1410,69 @@ Aligned `/verbs` directory page with D5 brand system. Added UX improvements for 
 - `VerbCard.test.tsx` — 8 tests (rendering, link, senda-card, primary dots, style prop)
 - `VerbDirectory.test.tsx` — 12 tests (all filters, search, empty state, stagger, chip rendering)
 - Fixed 3 pre-existing failures in `GrammarFocusChip.test.tsx` (updated assertions from old Tailwind names to current rgba colours)
+
+---
+
+## D5-VerbConfigure-SecurityForm: Verb Configure Page + SecurityForm Spanish Strings ✓ (2026-03-11)
+
+1410 tests across 63 files, all passing. TypeScript clean.
+
+Full D5 brand alignment of `/verbs/configure` — the last production page with significant D5 gaps. Previously used generic Shadcn card styling (`bg-card rounded-xl border shadow-sm`), English labels, and hardcoded green chip colours. Now matches the UX structure and visual language of `/study/configure` (SessionConfig). Also translated remaining English validation/feedback strings in `SecurityForm.tsx`.
+
+### `src/app/verbs/configure/page.tsx` — Server Wrapper
+- **Compact header row**: `← Verbos` back link (left, `var(--d5-warm)`) + `SvgSendaPath size={22}` centred + spacer (right).
+- **Title**: Lora serif italic 22px `var(--d5-ink)` "Práctica de Conjugación" (was `text-2xl font-bold` "Verb Drills").
+- **Subtitle removed** (was `text-sm text-muted-foreground` "In-sentence conjugation practice").
+- **`WindingPathSeparator`** below title, before VerbConfig.
+- **Layout**: `max-w-md` with bottom-nav-aware padding (matching study/configure).
+
+### `src/app/verbs/configure/VerbConfig.tsx` — Full Rework
+- **Removed** Shadcn `Button` import and all four `bg-card rounded-xl border p-5 shadow-sm` card wrappers.
+- **Removed** old `TenseChip` (green hardcoded) and `RadioOption` (radio dot) sub-components.
+- **Added** `EYEBROW` + `pillBase` shared style constants (identical to SessionConfig pattern).
+- **Added** `WindingPathSeparator` dividers between sections.
+
+#### Section: Tenses
+- Eyebrow: `"Tiempos verbales"` (was `"Tenses"`).
+- Mood group subheadings: `"Indicativo"`, `"Subjuntivo"`, `"Imperativo"` — 10px `var(--d5-muted)` DM Sans (was `text-xs text-muted-foreground` English).
+- TenseChip: Terracotta active (`var(--d5-terracotta)` bg + `var(--d5-paper)` text) / `var(--d5-pill-bg/text)` inactive, `borderRadius: 99`, `minHeight: 36` (was green-100/green-800 with Tailwind classes).
+- `TENSE_LABELS` kept as-is (already Spanish).
+
+#### Section: Verbs
+- Eyebrow: `"Verbos"` (was `"Verbs"`).
+- RadioOption → terracotta-tinted mode cards (matching SessionConfig mode cards): active `var(--d5-terracotta)` bg with Lora serif italic title + `var(--d5-paper-75)` subtitle; inactive `var(--d5-pill-bg)` with ink title + muted subtitle.
+- Mini tilde SVG in top-right when active (same as SessionConfig).
+- Spanish labels: "My Favorites (N)" → "Mis Favoritos (N)", "Top 25 most common" → "Top 25 / más comunes", "Top 50 most common" → "Top 50 / más comunes", "Top 100 most common" → "Top 100 / más comunes", "Only: {verb}" → "Solo: {verb}".
+
+#### Section: Length
+- Eyebrow: `"¿Cuántas frases?"` (was `"Length"`).
+- Shadcn `Button` pills → inline-styled terracotta pills using `pillBase` (matching SessionConfig session-size pills).
+
+#### Section: Hint Toggle
+- Removed card wrapper. Inline row with checkbox.
+- `"Show infinitive hint"` → `"Mostrar pista del infinitivo"`.
+- `"Displays the verb in brackets next to the blank as a reminder."` → `"Muestra el verbo entre corchetes junto al espacio en blanco."`.
+- Checkbox kept `accent-primary`.
+
+#### CTA
+- Shadcn `Button` → full-width terracotta pill button (inline style matching SessionConfig CTA).
+- `"Start Practice"` → `"Empezar Práctica →"`.
+
+### `src/app/account/SecurityForm.tsx` — Spanish Strings
+- `"Please enter a valid email address."` → `"Introduce un correo válido."`
+- `"Confirmation email sent — check your inbox."` → `"Correo de confirmación enviado — revisa tu bandeja."`
+- `"Something went wrong."` → `"Algo salió mal."` (both email and password catch blocks)
+- `"New password must be at least 6 characters."` → `"La nueva contraseña debe tener al menos 6 caracteres."`
+- `"Passwords do not match."` → `"Las contraseñas no coinciden."`
+- `"Current password is incorrect."` → `"La contraseña actual es incorrecta."`
+- `"Password updated."` → `"Contraseña actualizada."`
+
+### `src/app/account/__tests__/SecurityForm.test.tsx` — Test String Updates
+- All 5 affected assertions updated to match new Spanish strings.
+- 16 tests, all passing.
+
+### Files Changed
+- `src/app/verbs/configure/page.tsx` — SvgSendaPath, WindingPathSeparator, Lora heading, Spanish
+- `src/app/verbs/configure/VerbConfig.tsx` — full D5 rework (inline styles, terracotta pills/cards, Spanish)
+- `src/app/account/SecurityForm.tsx` — 8 English strings → Spanish
+- `src/app/account/__tests__/SecurityForm.test.tsx` — 5 assertion strings → Spanish

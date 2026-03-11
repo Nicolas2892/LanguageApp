@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { PartyPopper, CheckCircle2, XCircle } from 'lucide-react'
 import { TENSE_LABELS } from '@/lib/verbs/constants'
 import type { VerbTense } from '@/lib/verbs/constants'
 
@@ -17,6 +18,7 @@ interface Props {
 
 export function VerbSummary({ correct, total, tenseStats, onPracticeAgain }: Props) {
   const pct = total > 0 ? Math.round((correct / total) * 100) : 0
+  const missed = total - correct
 
   // Sort tense stats worst first
   const sorted = [...tenseStats]
@@ -27,25 +29,47 @@ export function VerbSummary({ correct, total, tenseStats, onPracticeAgain }: Pro
       return pctA - pctB
     })
 
-  const scoreColor =
-    pct >= 80 ? 'text-green-600 dark:text-green-400'
-    : pct >= 50 ? 'text-amber-600 dark:text-amber-400'
-    : 'text-rose-600 dark:text-rose-400'
+  const sessionLabel = pct >= 90
+    ? 'Impecable.'
+    : pct >= 70
+    ? 'Buen trabajo — Sigue Practicando.'
+    : pct >= 50
+    ? 'Las difíciles son las que vale la pena repetir.'
+    : 'Sesión difícil — para eso es el repaso.'
 
   return (
-    <main className="max-w-lg mx-auto p-6 md:p-10 space-y-6 pb-24 lg:pb-10">
+    <div className="space-y-6 text-center py-8">
+      {/* Party icon */}
+      <div className="flex justify-center">
+        <div className={pct < 70 ? 'rounded-full ring-2 ring-orange-400 ring-offset-2 animate-pulse p-2' : ''}>
+          <PartyPopper className="h-14 w-14 text-orange-500 animate-in zoom-in-50 duration-500" strokeWidth={1.5} />
+        </div>
+      </div>
+
       {/* Score */}
-      <div className="text-center space-y-1 py-4">
-        <p className={`text-6xl font-extrabold ${scoreColor}`}>{pct}%</p>
-        <p className="text-sm text-muted-foreground">
-          {correct} correct out of {total}
-        </p>
+      <div>
+        <p className="text-5xl font-extrabold">{pct}%</p>
+        <p className="text-muted-foreground mt-1 text-sm">{sessionLabel}</p>
+      </div>
+
+      {/* Correct / missed stats */}
+      <div className="flex justify-center gap-6">
+        <div className="flex items-center gap-1.5">
+          <CheckCircle2 className="h-4 w-4 text-primary" strokeWidth={1.5} />
+          <span className="text-sm font-medium text-primary">{correct} correctas</span>
+        </div>
+        {missed > 0 && (
+          <div className="flex items-center gap-1.5">
+            <XCircle className="h-4 w-4 text-[var(--d5-warm)]" strokeWidth={1.5} />
+            <span className="text-sm font-medium text-[var(--d5-warm)]">{missed} por repasar</span>
+          </div>
+        )}
       </div>
 
       {/* Per-tense breakdown */}
       {sorted.length > 0 && (
-        <section className="bg-card rounded-xl border p-5 shadow-sm space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">By tense</p>
+        <section className="senda-card text-left space-y-3">
+          <p className="senda-eyebrow">Por tiempo verbal</p>
           <div className="space-y-2">
             {sorted.map((s) => {
               const tensePct = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0
@@ -72,20 +96,17 @@ export function VerbSummary({ correct, total, tenseStats, onPracticeAgain }: Pro
       )}
 
       {/* Actions */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col items-center gap-3">
         <button
           onClick={onPracticeAgain}
-          className="w-full rounded-xl bg-primary text-primary-foreground py-3.5 text-sm font-semibold hover:bg-primary/90 transition-colors"
+          className="senda-cta w-full active:scale-95 transition-transform"
         >
-          Practice Again
+          Practicar de nuevo
         </button>
-        <Link
-          href="/verbs"
-          className="w-full rounded-xl border border-border py-3.5 text-sm font-medium text-center hover:bg-muted transition-colors"
-        >
-          Browse Verbs
+        <Link href="/verbs" className="senda-cta-outline">
+          Ver verbos
         </Link>
       </div>
-    </main>
+    </div>
   )
 }

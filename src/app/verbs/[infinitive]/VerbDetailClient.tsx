@@ -124,7 +124,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
   const attempts = activeData?.attempts ?? 0
 
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-24 lg:pb-10" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 flex flex-col gap-5">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Link
@@ -155,7 +155,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
       </div>
 
       {/* Mood-grouped tense selector */}
-      <div role="tablist" aria-label="Tense selector" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div role="tablist" aria-label="Tense selector" className="flex flex-col gap-3">
         {MOOD_GROUPS.map((group) => (
           <div key={group.label}>
             <p
@@ -164,7 +164,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
             >
               {group.label}
             </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <div className="flex flex-wrap gap-2">
               {group.tenses.map((tense) => {
                 const active = tense === selectedTense
                 return (
@@ -197,7 +197,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
       </div>
 
       {/* Tense header — label + description + colour toggle */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+      <div className="flex items-start justify-between gap-2">
         <div>
           <p className="senda-eyebrow" style={{ marginBottom: 4 }}>{TENSE_LABELS[selectedTense]}</p>
           <p className="text-[11px]" style={{ color: 'var(--d5-muted)' }}>{TENSE_DESCRIPTIONS[selectedTense]}</p>
@@ -221,13 +221,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
 
       {/* Conjugation table */}
       {rows.length > 0 ? (
-        <div
-          style={{
-            background: 'rgba(26,17,8,0.025)',
-            borderRadius: 14,
-            padding: '4px 14px',
-          }}
-        >
+        <div className="senda-card-sm" style={{ padding: '4px 14px' }}>
           <table className="w-full" role="table">
             <tbody>
               {PRONOUN_ORDER.map((pronoun, idx) => {
@@ -302,8 +296,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
       {/* CTA */}
       <Link
         href={`/verbs/configure?verb=${infinitive}`}
-        className="flex items-center justify-center rounded-full px-5 py-3 text-sm font-bold transition-colors hover:opacity-90"
-        style={{ background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', width: '100%' }}
+        className="senda-cta w-full"
       >
         Practicar este verbo →
       </Link>

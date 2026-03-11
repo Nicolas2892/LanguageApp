@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { TENSE_LABELS } from '@/lib/verbs/constants'
-import { Button } from '@/components/ui/button'
+import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 
 interface Props {
   favoriteCount: number
@@ -16,6 +16,30 @@ const IMPERATIVE_TENSES = ['imperative_affirmative', 'imperative_negative'] as c
 const LENGTHS = [10, 20, 30] as const
 
 type VerbSet = 'favorites' | 'top25' | 'top50' | 'top100' | 'single'
+
+// Shared eyebrow style — uses adaptive --d5-eyebrow token
+const EYEBROW: React.CSSProperties = {
+  fontSize: 9, fontWeight: 700, letterSpacing: '0.12em',
+  textTransform: 'uppercase', color: 'var(--d5-eyebrow)',
+  marginBottom: 8,
+  fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
+}
+
+const pillBase: React.CSSProperties = {
+  borderRadius: 99, border: 'none', cursor: 'pointer',
+  fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
+  whiteSpace: 'nowrap', flexShrink: 0,
+  minHeight: 44, display: 'flex', alignItems: 'center',
+  transition: 'background 200ms ease-out, color 200ms ease-out',
+}
+
+const VERB_SET_OPTIONS: Array<{ id: VerbSet; title: string; subtitle: string; requiresFavorites?: boolean; requiresSingle?: boolean }> = [
+  { id: 'favorites', title: 'Mis Favoritos', subtitle: '', requiresFavorites: true },
+  { id: 'top25',  title: 'Top 25',  subtitle: 'más comunes' },
+  { id: 'top50',  title: 'Top 50',  subtitle: 'más comunes' },
+  { id: 'top100', title: 'Top 100', subtitle: 'más comunes' },
+  { id: 'single', title: 'Solo', subtitle: '', requiresSingle: true },
+]
 
 export function VerbConfig({ favoriteCount, singleVerb }: Props) {
   const router = useRouter()
@@ -50,91 +74,149 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
     router.push(`/verbs/session?${params.toString()}`)
   }
 
+  // Build visible verb set options
+  const visibleOptions = VERB_SET_OPTIONS.filter((opt) => {
+    if (opt.requiresFavorites && favoriteCount === 0) return false
+    if (opt.requiresSingle && !singleVerb) return false
+    return true
+  })
+
   return (
-    <div className="space-y-6">
-      {/* Tenses */}
-      <section className="bg-card rounded-xl border p-5 shadow-sm space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Tenses</p>
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Indicative</p>
-          <div className="flex flex-wrap gap-2">
-            {INDICATIVE_TENSES.map((tense) => (
-              <TenseChip
-                key={tense}
-                label={TENSE_LABELS[tense]}
-                selected={selectedTenses.has(tense)}
-                onToggle={() => toggleTense(tense)}
-              />
-            ))}
-          </div>
-          <p className="text-xs font-medium text-muted-foreground pt-1">Subjunctive</p>
-          <div className="flex flex-wrap gap-2">
-            {SUBJUNCTIVE_TENSES.map((tense) => (
-              <TenseChip
-                key={tense}
-                label={TENSE_LABELS[tense]}
-                selected={selectedTenses.has(tense)}
-                onToggle={() => toggleTense(tense)}
-              />
-            ))}
-          </div>
-          <p className="text-xs font-medium text-muted-foreground pt-1">Imperative</p>
-          <div className="flex flex-wrap gap-2">
-            {IMPERATIVE_TENSES.map((tense) => (
-              <TenseChip
-                key={tense}
-                label={TENSE_LABELS[tense]}
-                selected={selectedTenses.has(tense)}
-                onToggle={() => toggleTense(tense)}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+    <div>
+      {/* ── Tenses ─────────────────────────────────────────────────── */}
+      <div className="px-4">
+        <p style={EYEBROW}>Tiempos verbales</p>
 
-      {/* Verb set */}
-      <section className="bg-card rounded-xl border p-5 shadow-sm space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Verbs</p>
-        <div className="space-y-2">
-          {favoriteCount > 0 && (
-            <RadioOption
-              selected={verbSet === 'favorites'}
-              onSelect={() => setVerbSet('favorites')}
-              label={`My Favorites (${favoriteCount})`}
+        <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--d5-muted)', marginBottom: 6, fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+          Indicativo
+        </p>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+          {INDICATIVE_TENSES.map((tense) => (
+            <TenseChip
+              key={tense}
+              label={TENSE_LABELS[tense]}
+              selected={selectedTenses.has(tense)}
+              onToggle={() => toggleTense(tense)}
             />
-          )}
-          <RadioOption selected={verbSet === 'top25'}  onSelect={() => setVerbSet('top25')}  label="Top 25 most common" />
-          <RadioOption selected={verbSet === 'top50'}  onSelect={() => setVerbSet('top50')}  label="Top 50 most common" />
-          <RadioOption selected={verbSet === 'top100'} onSelect={() => setVerbSet('top100')} label="Top 100 most common" />
-          {singleVerb && (
-            <RadioOption
-              selected={verbSet === 'single'}
-              onSelect={() => setVerbSet('single')}
-              label={`Only: ${singleVerb}`}
-            />
-          )}
-        </div>
-      </section>
-
-      {/* Session length */}
-      <section className="bg-card rounded-xl border p-5 shadow-sm space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Length</p>
-        <div className="flex gap-3">
-          {LENGTHS.map((l) => (
-            <Button
-              key={l}
-              onClick={() => setLength(l)}
-              variant={length === l ? 'default' : 'outline'}
-              className="flex-1 rounded-full"
-            >
-              {l}
-            </Button>
           ))}
         </div>
-      </section>
 
-      {/* Hint toggle */}
-      <section className="bg-card rounded-xl border p-5 shadow-sm">
+        <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--d5-muted)', marginBottom: 6, fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+          Subjuntivo
+        </p>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+          {SUBJUNCTIVE_TENSES.map((tense) => (
+            <TenseChip
+              key={tense}
+              label={TENSE_LABELS[tense]}
+              selected={selectedTenses.has(tense)}
+              onToggle={() => toggleTense(tense)}
+            />
+          ))}
+        </div>
+
+        <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--d5-muted)', marginBottom: 6, fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+          Imperativo
+        </p>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {IMPERATIVE_TENSES.map((tense) => (
+            <TenseChip
+              key={tense}
+              label={TENSE_LABELS[tense]}
+              selected={selectedTenses.has(tense)}
+              onToggle={() => toggleTense(tense)}
+            />
+          ))}
+        </div>
+      </div>
+
+      <WindingPathSeparator />
+
+      {/* ── Verb set ───────────────────────────────────────────────── */}
+      <div className="px-4">
+        <p style={EYEBROW}>Verbos</p>
+        <div className="flex flex-col gap-2">
+          {visibleOptions.map((opt) => {
+            const active = verbSet === opt.id
+            const displayTitle = opt.id === 'favorites'
+              ? `${opt.title} (${favoriteCount})`
+              : opt.id === 'single'
+                ? `${opt.title}: ${singleVerb}`
+                : opt.title
+            return (
+              <button
+                key={opt.id}
+                onClick={() => setVerbSet(opt.id)}
+                className="senda-focus-ring"
+                style={{
+                  position: 'relative', textAlign: 'left',
+                  borderRadius: '0.75rem', padding: '12px 16px', border: 'none', cursor: 'pointer',
+                  background: active ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
+                  transition: 'background 200ms ease-out, color 200ms ease-out',
+                }}
+              >
+                {active && (
+                  <div style={{ position: 'absolute', top: 12, right: 12 }}>
+                    <svg viewBox="0 0 18 8" width={13} height={6}>
+                      <path
+                        d="M 1 5 C 4 2, 7 6, 11 4 C 14 2, 17 4, 17 4"
+                        stroke="var(--d5-paper)" strokeWidth={2} strokeLinecap="round" fill="none"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div style={{
+                  fontFamily: 'var(--font-lora), serif', fontWeight: 600, fontStyle: 'italic', fontSize: 14,
+                  color: active ? 'var(--d5-paper)' : 'var(--d5-ink)',
+                  marginBottom: opt.subtitle ? 2 : 0,
+                }}>
+                  {displayTitle}
+                </div>
+                {opt.subtitle && (
+                  <div style={{
+                    fontSize: 10,
+                    color: active ? 'var(--d5-paper-75)' : 'var(--d5-muted)',
+                    fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
+                  }}>
+                    {opt.subtitle}
+                  </div>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <WindingPathSeparator />
+
+      {/* ── Length ──────────────────────────────────────────────────── */}
+      <div className="px-4">
+        <p style={EYEBROW}>¿Cuántas frases?</p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {LENGTHS.map((l) => {
+            const active = length === l
+            return (
+              <button
+                key={l}
+                onClick={() => setLength(l)}
+                className="senda-focus-ring"
+                style={{
+                  ...pillBase,
+                  padding: '0 16px',
+                  background: active ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
+                  color: active ? 'var(--d5-paper)' : 'var(--d5-pill-text)',
+                  fontSize: 12, fontWeight: active ? 700 : 500,
+                }}
+              >
+                {l}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* ── Hint toggle ────────────────────────────────────────────── */}
+      <div className="px-4 mt-4">
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -142,17 +224,33 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
             onChange={(e) => setShowHint(e.target.checked)}
             className="h-4 w-4 rounded accent-primary"
           />
-          <span className="text-sm font-medium">Show infinitive hint</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--d5-ink)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+            Mostrar pista del infinitivo
+          </span>
         </label>
-        <p className="text-xs text-muted-foreground mt-1 ml-7">
-          Displays the verb in brackets next to the blank as a reminder.
+        <p style={{ fontSize: 10, color: 'var(--d5-muted)', marginTop: 4, marginLeft: 28, fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+          Muestra el verbo entre corchetes junto al espacio en blanco.
         </p>
-      </section>
+      </div>
 
-      {/* Start button */}
-      <Button onClick={handleStart} className="w-full rounded-full" size="lg">
-        Start Practice
-      </Button>
+      <WindingPathSeparator />
+
+      {/* ── CTA ────────────────────────────────────────────────────── */}
+      <div className="px-4 pt-2 pb-5">
+        <button
+          onClick={handleStart}
+          className="senda-focus-ring"
+          style={{
+            background: 'var(--d5-terracotta)', color: 'var(--d5-paper)',
+            border: 'none', borderRadius: 99, padding: '12px 0', width: '100%',
+            fontWeight: 700, fontSize: 14, cursor: 'pointer',
+            fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
+            transition: 'opacity 200ms ease-out',
+          }}
+        >
+          Empezar Práctica →
+        </button>
+      </div>
     </div>
   )
 }
@@ -161,29 +259,19 @@ function TenseChip({ label, selected, onToggle }: { label: string; selected: boo
   return (
     <button
       onClick={onToggle}
-      className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-        selected
-          ? 'bg-green-100 dark:bg-green-950/40 text-green-800 dark:text-green-400 border-green-300 dark:border-green-800'
-          : 'bg-background hover:bg-muted border-border text-muted-foreground'
-      }`}
+      className="senda-focus-ring"
+      style={{
+        borderRadius: 99, border: 'none', cursor: 'pointer',
+        padding: '0 16px', minHeight: 44,
+        display: 'flex', alignItems: 'center',
+        fontSize: 12, fontWeight: selected ? 700 : 500,
+        fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
+        background: selected ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
+        color: selected ? 'var(--d5-paper)' : 'var(--d5-pill-text)',
+        transition: 'background 200ms ease-out, color 200ms ease-out',
+      }}
     >
       {label}
     </button>
-  )
-}
-
-function RadioOption({ selected, onSelect, label }: { selected: boolean; onSelect: () => void; label: string }) {
-  return (
-    <label className="flex items-center gap-3 cursor-pointer py-1">
-      <span
-        className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-          selected ? 'border-primary' : 'border-muted-foreground/40'
-        }`}
-        onClick={onSelect}
-      >
-        {selected && <span className="h-2 w-2 rounded-full bg-primary" />}
-      </span>
-      <span className="text-sm">{label}</span>
-    </label>
   )
 }

@@ -55,12 +55,12 @@ type SessionState =
   | { phase: 'done'; correct: number; total: number; elapsedSeconds?: number }
 
 const EXERCISE_TYPE_META: Record<string, { label: string; Icon: React.ElementType }> = {
-  gap_fill:         { label: 'Gap fill',         Icon: Type          },
-  translation:      { label: 'Translation',      Icon: Languages     },
-  transformation:   { label: 'Transformation',   Icon: ArrowLeftRight },
-  sentence_builder: { label: 'Sentence builder', Icon: Shuffle       },
-  error_correction: { label: 'Error correction', Icon: AlertTriangle },
-  free_write:       { label: 'Free write',       Icon: PenLine       },
+  gap_fill:         { label: 'Completar Hueco',         Icon: Type          },
+  translation:      { label: 'Traducción',              Icon: Languages     },
+  transformation:   { label: 'Transformación',          Icon: ArrowLeftRight },
+  sentence_builder: { label: 'Constructor De Frases',   Icon: Shuffle       },
+  error_correction: { label: 'Corrección De Errores',   Icon: AlertTriangle },
+  free_write:       { label: 'Escritura Libre',         Icon: PenLine       },
 }
 
 function formatTime(totalSeconds: number): string {
@@ -170,7 +170,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     ]).then(([r1, r2, r3]) => {
       const exercises = [r1, r2, r3].filter((ex) => ex && typeof ex.id === 'string')
       if (exercises.length === 0) {
-        setGenerateError('Failed to generate exercises. Please try again.')
+        setGenerateError('Error al generar ejercicios. Inténtalo de nuevo.')
         return
       }
       setDynamicItems((prev) => [
@@ -178,7 +178,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         ...exercises.map((ex) => ({ concept: generateConfig.concept, exercise: ex as Exercise })),
       ])
     }).catch(() => {
-      setGenerateError('Failed to generate exercises. Please try again.')
+      setGenerateError('Error al generar ejercicios. Inténtalo de nuevo.')
     }).finally(() => {
       setGeneratingMore(false)
     })
@@ -245,7 +245,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       })
 
       if (!res.ok || !res.body) {
-        setSubmitError('Something went wrong. Please try again.')
+        setSubmitError('Algo salió mal. Inténtalo de nuevo.')
         setSubmitting(false)
         return
       }
@@ -352,7 +352,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         }
       }
     } catch {
-      setSubmitError('Something went wrong. Please try again.')
+      setSubmitError('Algo salió mal. Inténtalo de nuevo.')
       setSubmitting(false)
     }
   }
@@ -427,7 +427,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         (ex) => ex && typeof ex.id === 'string'
       )
       if (exercises.length === 0) {
-        setGenerateError('Failed to generate exercises. Please try again.')
+        setGenerateError('Error al generar ejercicios. Inténtalo de nuevo.')
         return
       }
       const newItems: StudyItem[] = exercises.map((ex) => ({
@@ -441,7 +441,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       setWrongAttempts(0)
       setClaudeHint(null)
     } catch {
-      setGenerateError('Failed to generate exercises. Please try again.')
+      setGenerateError('Error al generar ejercicios. Inténtalo de nuevo.')
     } finally {
       setGeneratingMore(false)
     }
@@ -451,14 +451,14 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   if (state.phase === 'done') {
     const pct = state.total > 0 ? Math.round((state.correct / state.total) * 100) : 0
     const missed = state.total - state.correct
-    const backLabel = returnHref ? 'Back to concept' : sprintConfig ? 'Back to Home' : 'Done'
+    const backLabel = returnHref ? 'Volver al concepto' : sprintConfig ? 'Volver al inicio' : 'Hecho'
     const sessionLabel = pct >= 90
-      ? "That's as clean as it gets."
+      ? 'Impecable.'
       : pct >= 70
-      ? "Solid work — the gaps are already queued for next time."
+      ? 'Buen trabajo — los huecos ya están en cola.'
       : pct >= 50
-      ? "The tough ones are the ones worth repeating."
-      : "Rough session — that's exactly what review is for."
+      ? 'Las difíciles son las que vale la pena repetir.'
+      : 'Sesión difícil — para eso es el repaso.'
     return (
       <div className="space-y-6 text-center py-8">
         <div className="flex justify-center">
@@ -472,24 +472,24 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         </div>
         <div className="flex justify-center gap-6">
           <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" strokeWidth={1.5} />
-            <span className="text-sm font-medium text-green-600 dark:text-green-400">{state.correct} correct</span>
+            <CheckCircle2 className="h-4 w-4 text-primary" strokeWidth={1.5} />
+            <span className="text-sm font-medium text-primary">{state.correct} correctas</span>
           </div>
           {missed > 0 && (
             <div className="flex items-center gap-1.5">
-              <XCircle className="h-4 w-4 text-orange-500" strokeWidth={1.5} />
-              <span className="text-sm font-medium text-orange-500">{missed} to review</span>
+              <XCircle className="h-4 w-4 text-[var(--d5-warm)]" strokeWidth={1.5} />
+              <span className="text-sm font-medium text-[var(--d5-warm)]">{missed} por repasar</span>
             </div>
           )}
         </div>
         {sprintConfig?.limitType === 'time' && state.elapsedSeconds !== undefined && (
           <p className="text-muted-foreground text-sm">
-            Reviewed {state.total} exercise{state.total !== 1 ? 's' : ''} in {formatTime(state.elapsedSeconds)}
+            {state.total} ejercicio{state.total !== 1 ? 's' : ''} en {formatTime(state.elapsedSeconds)}
           </p>
         )}
         {!practiceMode && !sprintConfig && (
           <p className="text-muted-foreground text-sm">
-            Your next sessions are already lined up — the hard work is remembering when it counts.
+            Tus próximas sesiones ya están programadas — lo difícil es recordar cuando importa.
           </p>
         )}
 
@@ -497,16 +497,16 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         {missedConcepts.length > 0 && (
           <details className="w-full text-left border rounded-xl p-3 mt-2">
             <summary className="text-sm font-semibold cursor-pointer">
-              {missedConcepts.length} concept{missedConcepts.length !== 1 ? 's' : ''} to revisit
+              {missedConcepts.length} concepto{missedConcepts.length !== 1 ? 's' : ''} por repasar
             </summary>
             <ul className="mt-2 space-y-1.5">
               {missedConcepts.map((c) => (
                 <li key={c.id}>
                   <a
                     href={`/study?practice=true&concept=${c.id}`}
-                    className="text-sm text-green-800 hover:underline"
+                    className="text-sm text-primary hover:underline"
                   >
-                    Practice: {c.title} →
+                    Practicar: {c.title} →
                   </a>
                 </li>
               ))}
@@ -523,7 +523,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-border text-muted-foreground px-6 py-2.5 text-sm font-medium hover:bg-muted/50 active:scale-95 transition-transform"
             >
               <PenLine className="h-4 w-4" strokeWidth={1.5} />
-              Free write about this topic
+              Escritura libre sobre este tema
             </button>
           )}
           {practiceMode && generateConfig && (
@@ -533,7 +533,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary text-primary px-6 py-2.5 text-sm font-semibold hover:bg-primary/5 active:scale-95 transition-transform disabled:opacity-60"
             >
               <Sparkles className="h-4 w-4" strokeWidth={1.5} />
-              {generatingMore ? 'Generating…' : 'Generate 3 more'}
+              {generatingMore ? 'Generando…' : 'Generar 3 más'}
             </button>
           )}
           <button
@@ -561,16 +561,16 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         <DialogContent className="text-center max-w-sm">
           <DialogHeader className="items-center gap-3">
             <div className="text-4xl">🏆</div>
-            <DialogTitle className="text-xl">Concept mastered!</DialogTitle>
+            <DialogTitle className="text-xl">¡Concepto dominado!</DialogTitle>
           </DialogHeader>
           <p className="text-muted-foreground text-sm">
-            You&apos;ve mastered{' '}
+            Has dominado{' '}
             <span className="font-semibold text-foreground">{masteredConceptTitle}</span>.
-            It&apos;s now in your long-term memory.
+            Ya está en tu memoria a largo plazo.
           </p>
           <DialogFooter className="sm:justify-center">
             <Button onClick={() => setMasteryOverlayOpen(false)} className="w-full sm:w-auto">
-              Continue
+              Continuar
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -580,69 +580,84 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       <Dialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Leave session?</DialogTitle>
+            <DialogTitle>¿Salir de la Sesión?</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Your progress this session won&apos;t be saved.
+            Tu progreso de esta sesión no se guardará.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowExitDialog(false)}>
-              Keep going
+              Seguir
             </Button>
             <Button variant="destructive" onClick={() => router.push(returnHref ?? '/dashboard')}>
-              Leave
+              Salir
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <div className="space-y-4">
-        {/* Row 1: thin progress bar + X exit button */}
+        {/* Row 1: segmented progress dots + X exit button */}
         <div className="flex items-center gap-2">
-          <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full transition-all duration-1000 ${
-                isTimeLow ? 'bg-amber-500 animate-pulse' : 'bg-primary'
-              }`}
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
+          {sprintConfig?.limitType === 'time' ? (
+            /* Sprint time mode: continuous bar (segments don't map to time) */
+            <div className="flex-1 h-1 bg-[var(--d5-muted)]/30 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-1000 ${
+                  isTimeLow ? 'bg-amber-500 animate-pulse' : 'bg-primary'
+                }`}
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          ) : (
+            /* Count mode: segmented dots */
+            <div className="flex flex-1 gap-1">
+              {Array.from({ length: effectiveLength }, (_, i) => (
+                <div
+                  key={i}
+                  className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                    i <= index ? 'bg-primary' : 'bg-[var(--d5-muted)]/30'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
           <button
             onClick={() => setShowExitDialog(true)}
             aria-label="Exit session"
-            className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+            className="text-[var(--d5-muted)] hover:text-foreground transition-colors shrink-0"
           >
             <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
 
-        {/* Row 2: concept title · exercise type · counter/timer · Notes toggle */}
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground flex-wrap">
-          <span className="text-sm font-medium text-foreground">{current.concept.title}</span>
-          <span aria-hidden>·</span>
-          <span>{typeMeta.label}</span>
+        {/* Row 2: type eyebrow · concept · counter/timer · Notes toggle */}
+        <div className="flex items-center gap-1.5 text-xs flex-wrap">
+          <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>{typeMeta.label}</span>
+          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+          <span className="text-[var(--d5-muted)]">{current.concept.title}</span>
           {current.concept.grammar_focus && (
             <>
-              <span aria-hidden>·</span>
+              <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
               <GrammarFocusChip focus={current.concept.grammar_focus} />
             </>
           )}
-          <span aria-hidden>·</span>
+          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
           {sprintConfig?.limitType === 'time' ? (
-            <span className={`font-mono font-semibold flex items-center gap-0.5 ${isTimeLow ? 'text-amber-500 dark:text-amber-400' : ''}`}>
+            <span className={`font-mono font-semibold flex items-center gap-0.5 ${isTimeLow ? 'text-amber-500 dark:text-amber-400' : 'text-[var(--d5-muted)]'}`}>
               <Timer className="h-3 w-3" />
               {formatTime(secondsLeft)}
             </span>
           ) : (
-            <span>{index + 1}/{effectiveLength}</span>
+            <span className="text-[var(--d5-muted)]">{index + 1}/{effectiveLength}</span>
           )}
-          <span aria-hidden>·</span>
+          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
           <button
             onClick={() => setIsConceptExpanded((e) => !e)}
             aria-expanded={isConceptExpanded}
-            className="hover:text-foreground transition-colors"
+            className="text-[var(--d5-muted)] hover:text-foreground transition-colors"
           >
-            Notes {isConceptExpanded ? '↑' : '↓'}
+            Notas {isConceptExpanded ? '↑' : '↓'}
           </button>
         </div>
 
@@ -664,7 +679,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
               {submitting && (
                 <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Checking…</span>
+                  <span>Comprobando…</span>
                 </div>
               )}
               {submitError && (

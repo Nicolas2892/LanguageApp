@@ -24,7 +24,7 @@ vi.mock('@/components/exercises/FeedbackPanel', () => ({
   FeedbackPanel: ({ onNext, onTryAgain, isLast, isGenerating }: { onNext: () => void; onTryAgain?: () => void; isLast: boolean; isGenerating?: boolean }) => (
     <div>
       <button data-testid="next-btn" onClick={onNext} disabled={isGenerating}>
-        {isGenerating ? 'Generating…' : isLast ? 'Finish session' : 'Next →'}
+        {isGenerating ? 'Generando…' : isLast ? 'Finalizar sesión' : 'Siguiente →'}
       </button>
       {onTryAgain && <button data-testid="try-again-btn" onClick={onTryAgain}>Try again</button>}
     </div>
@@ -231,7 +231,7 @@ describe('StudySession — Perf-A #4 prefetch & auto-generation', () => {
     await submitAndWaitForFeedback()
     // Click next to reach done screen (generate failed → no extra items)
     await userEvent.click(screen.getByTestId('next-btn'))
-    await waitFor(() => screen.getByText('Generate 3 more'))
+    await waitFor(() => screen.getByText('Generar 3 más'))
   })
 
   it('does not call /api/exercises/generate in a normal (non-practice) session', async () => {
@@ -249,30 +249,30 @@ describe('StudySession — Perf-A #4 prefetch & auto-generation', () => {
 describe('StudySession — UX-AB concept collapse', () => {
   it('shows "Notes ↓" toggle collapsed by default on every exercise', () => {
     render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
-    const toggle = screen.getByRole('button', { name: /Notes/i })
-    expect(toggle.textContent).toContain('Notes ↓')
+    const toggle = screen.getByRole('button', { name: /Notas/i })
+    expect(toggle.textContent).toContain('Notas ↓')
     // Collapsed: aria-expanded is false
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
   })
 
   it('clicking toggle expands explanation and changes label to "Notes ↑"', async () => {
     render(<StudySession items={[makeItem()]} />)
-    const toggle = screen.getByRole('button', { name: /Notes/i })
+    const toggle = screen.getByRole('button', { name: /Notas/i })
     expect(toggle.getAttribute('aria-expanded')).toBe('false')
     await userEvent.click(toggle)
-    expect(screen.getByText('Notes ↑')).toBeTruthy()
+    expect(screen.getByText('Notas ↑')).toBeTruthy()
   })
 
   it('collapses again after moving to the next exercise', async () => {
     render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
     // Expand on exercise 1
-    await userEvent.click(screen.getByRole('button', { name: /Notes/i }))
-    expect(screen.getByText('Notes ↑')).toBeTruthy()
+    await userEvent.click(screen.getByRole('button', { name: /Notas/i }))
+    expect(screen.getByText('Notas ↑')).toBeTruthy()
     // Submit and advance
     await submitAndWaitForFeedback()
     await userEvent.click(screen.getByTestId('next-btn'))
     // Exercise 2 should be collapsed again
-    await waitFor(() => expect(screen.getByText('Notes ↓')).toBeTruthy())
+    await waitFor(() => expect(screen.getByText('Notas ↓')).toBeTruthy())
   })
 })
 
@@ -281,7 +281,7 @@ describe('StudySession — UX-AA mastery overlay', () => {
   it('does not show overlay when just_mastered is false', async () => {
     render(<StudySession items={[makeItem()]} />)
     await submitAndWaitForFeedback()
-    expect(screen.queryByText('Concept mastered!')).toBeNull()
+    expect(screen.queryByText('¡Concepto dominado!')).toBeNull()
   })
 
   it('shows overlay with concept title when just_mastered is true', async () => {
@@ -293,7 +293,7 @@ describe('StudySession — UX-AA mastery overlay', () => {
     })
     render(<StudySession items={[makeItem()]} />)
     await submitAndWaitForFeedback()
-    await waitFor(() => expect(screen.getByText('Concept mastered!')).toBeTruthy())
+    await waitFor(() => expect(screen.getByText('¡Concepto dominado!')).toBeTruthy())
     // The mastery overlay contains the concept title in a <span>
     expect(screen.getByText('El Subjuntivo')).toBeTruthy()
   })
@@ -307,9 +307,9 @@ describe('StudySession — UX-AA mastery overlay', () => {
     })
     render(<StudySession items={[makeItem()]} />)
     await submitAndWaitForFeedback()
-    await waitFor(() => screen.getByText('Concept mastered!'))
-    await userEvent.click(screen.getByRole('button', { name: /continue/i }))
-    await waitFor(() => expect(screen.queryByText('Concept mastered!')).toBeNull())
+    await waitFor(() => screen.getByText('¡Concepto dominado!'))
+    await userEvent.click(screen.getByRole('button', { name: /continuar/i }))
+    await waitFor(() => expect(screen.queryByText('¡Concepto dominado!')).toBeNull())
   })
 
   it('schedules a 4-second auto-dismiss timer when overlay opens', async () => {
@@ -322,7 +322,7 @@ describe('StudySession — UX-AA mastery overlay', () => {
     })
     render(<StudySession items={[makeItem()]} />)
     await submitAndWaitForFeedback()
-    await waitFor(() => screen.getByText('Concept mastered!'))
+    await waitFor(() => screen.getByText('¡Concepto dominado!'))
     // Verify that a 4000ms dismiss timer was scheduled by the useEffect
     const dismissTimers = setTimeoutSpy.mock.calls.filter(([, ms]) => ms === 4000)
     expect(dismissTimers.length).toBeGreaterThan(0)
@@ -340,10 +340,10 @@ describe('StudySession — UX-AA mastery overlay', () => {
     render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
     // First submission — overlay should show
     await submitAndWaitForFeedback()
-    await waitFor(() => screen.getByText('Concept mastered!'))
+    await waitFor(() => screen.getByText('¡Concepto dominado!'))
     // Close it
-    await userEvent.click(screen.getByRole('button', { name: /continue/i }))
-    await waitFor(() => expect(screen.queryByText('Concept mastered!')).toBeNull())
+    await userEvent.click(screen.getByRole('button', { name: /continuar/i }))
+    await waitFor(() => expect(screen.queryByText('¡Concepto dominado!')).toBeNull())
     // Move to next exercise (same concept) via next-btn on feedback panel
     const nextBtn = screen.getByTestId('next-btn')
     await userEvent.click(nextBtn)
@@ -352,7 +352,7 @@ describe('StudySession — UX-AA mastery overlay', () => {
     await submitAndWaitForFeedback()
     await act(async () => { await new Promise((r) => setTimeout(r, 50)) })
     expect(callCount).toBeGreaterThanOrEqual(2)
-    expect(screen.queryByText('Concept mastered!')).toBeNull()
+    expect(screen.queryByText('¡Concepto dominado!')).toBeNull()
   })
 })
 
@@ -389,7 +389,7 @@ describe('StudySession — Fix-I drill generation disables Next button', () => {
       const btn = screen.getByTestId('next-btn')
       expect(btn).toBeDisabled()
     })
-    expect(screen.getByTestId('next-btn').textContent).toBe('Generating…')
+    expect(screen.getByTestId('next-btn').textContent).toBe('Generando…')
   })
 
   it('re-enables Next button when generation completes successfully', async () => {

@@ -222,6 +222,67 @@
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
 }
 
+/* D5 card surface — compact variant for stats, hints, tables */
+.senda-card-sm {
+  background: rgba(140, 106, 63, 0.07);
+  border-radius: 14px;
+  padding: 0.75rem;
+}
+.dark .senda-card-sm {
+  background: #241910;
+}
+
+/* D5 CTA — solid terracotta pill */
+.senda-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--d5-terracotta);
+  color: var(--d5-paper);
+  border: none;
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  transition: opacity 200ms ease-out;
+  text-decoration: none;
+}
+.senda-cta:hover { opacity: 0.9; }
+
+/* D5 CTA — terracotta outline pill */
+.senda-cta-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--d5-terracotta);
+  border: 1.5px solid var(--d5-terracotta);
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  transition: background 200ms ease-out;
+  text-decoration: none;
+}
+.senda-cta-outline:hover { background: rgba(196, 82, 46, 0.06); }
+
+/* D5 CTA — terracotta ghost tint chip */
+.senda-cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(196, 82, 46, 0.08);
+  color: var(--d5-terracotta);
+  border: none;
+  border-radius: 99px;
+  font-weight: 500;
+  font-size: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  transition: background 200ms ease-out;
+  text-decoration: none;
+}
+.senda-cta-ghost:hover { background: rgba(196, 82, 46, 0.15); }
+
 /* Senda form input — borderless, Dark Cream fill (Spec §6) */
 .senda-input {
   background: var(--d5-cream);
@@ -267,6 +328,42 @@
 .senda-focus-ring:focus-visible {
   outline: 2px solid var(--d5-terracotta);
   outline-offset: 2px;
+}
+
+/* Dashed input frame — exercise answer areas (D5 mockup §Exercise) */
+.senda-dashed-input {
+  border: 1.5px dashed var(--d5-muted);
+  border-radius: 12px;
+  background: var(--d5-paper);
+  padding: 12px 14px;
+}
+.dark .senda-dashed-input {
+  background: rgba(26, 17, 8, 0.30);
+}
+
+/* Feedback card — centered terracotta-tint surface */
+.senda-feedback-card {
+  background: rgba(196, 82, 46, 0.06);
+  border-radius: 20px;
+  padding: 20px 16px;
+  text-align: center;
+}
+.dark .senda-feedback-card {
+  background: rgba(196, 82, 46, 0.10);
+}
+
+/* Score pill — terracotta capsule in feedback */
+.senda-score-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--d5-terracotta);
+  color: var(--d5-paper);
+  border-radius: 99px;
+  padding: 5px 16px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
 }
 
 /* Senda motion tempo — snappy academic easing */
@@ -334,6 +431,14 @@
 }
 .dark .review-card-warm {
   background-color: var(--card); /* resolves to warm dark surface in dark mode */
+}
+
+/* D5 assistant chat bubble — warm tint surface */
+.senda-bubble {
+  background: rgba(140, 106, 63, 0.07);
+}
+.dark .senda-bubble {
+  background: rgba(140, 106, 63, 0.12);
 }
 
 /* Accessibility: suppress non-essential animations for reduced-motion users */

@@ -42,10 +42,10 @@ describe('VerbSession', () => {
     )
     expect(screen.getByText(/español todos los días/)).toBeInTheDocument()
     expect(screen.getByText('[hablar]')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Check/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Comprobar/ })).toBeInTheDocument()
   })
 
-  it('disables Check button when input is empty', () => {
+  it('disables Comprobar button when input is empty', () => {
     render(
       <VerbSession
         items={[makeItem()]}
@@ -53,7 +53,7 @@ describe('VerbSession', () => {
         sessionUrl="/verbs/session?test"
       />
     )
-    expect(screen.getByRole('button', { name: /Check/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Comprobar/ })).toBeDisabled()
   })
 
   it('shows correct feedback on right answer', async () => {
@@ -68,9 +68,9 @@ describe('VerbSession', () => {
     )
 
     await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablo')
-    await user.click(screen.getByRole('button', { name: /Check/ }))
+    await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
-    expect(screen.getByText('Correct!')).toBeInTheDocument()
+    expect(screen.getByText('¡Correcto!')).toBeInTheDocument()
   })
 
   it('shows accent_error feedback for missing accent', async () => {
@@ -85,9 +85,9 @@ describe('VerbSession', () => {
     )
 
     await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablo')
-    await user.click(screen.getByRole('button', { name: /Check/ }))
+    await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
-    expect(screen.getByText(/Almost — check your accents/)).toBeInTheDocument()
+    expect(screen.getByText(/Casi — revisa los acentos/)).toBeInTheDocument()
   })
 
   it('shows incorrect feedback on wrong answer', async () => {
@@ -102,9 +102,9 @@ describe('VerbSession', () => {
     )
 
     await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablas')
-    await user.click(screen.getByRole('button', { name: /Check/ }))
+    await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
-    expect(screen.getByText(/Not quite/)).toBeInTheDocument()
+    expect(screen.getByText('Incorrecto')).toBeInTheDocument()
     expect(screen.getByTestId('try-again-btn')).toBeInTheDocument()
   })
 
@@ -120,14 +120,14 @@ describe('VerbSession', () => {
     )
 
     await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablas')
-    await user.click(screen.getByRole('button', { name: /Check/ }))
+    await user.click(screen.getByRole('button', { name: /Comprobar/ }))
     await user.click(screen.getByTestId('try-again-btn'))
 
     expect(screen.getByPlaceholderText(/Type the conjugated form/)).toHaveValue('')
-    expect(screen.getByRole('button', { name: /Check/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Comprobar/ })).toBeInTheDocument()
   })
 
-  it('shows done screen after last item is answered incorrectly and Next is clicked', async () => {
+  it('shows done screen after last item is answered incorrectly and Finalizar is clicked', async () => {
     const user = userEvent.setup()
 
     render(
@@ -140,16 +140,16 @@ describe('VerbSession', () => {
 
     // Give a wrong answer so we get manual Next (not auto-advance)
     await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablas')
-    await user.click(screen.getByRole('button', { name: /Check/ }))
+    await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
-    // Click "Finish →" on the last item
-    await user.click(screen.getByRole('button', { name: /Finish/ }))
+    // Click "Finalizar sesión" on the last item
+    await user.click(screen.getByRole('button', { name: /Finalizar sesión/ }))
 
     expect(screen.getByText('0%')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Practice Again/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Practicar de nuevo/ })).toBeInTheDocument()
   })
 
-  it('shows progress counter', () => {
+  it('shows segmented progress dots', () => {
     render(
       <VerbSession
         items={[makeItem(), makeItem({ pronoun: 'tu' })]}
@@ -172,7 +172,7 @@ describe('VerbSession', () => {
     )
 
     await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablo')
-    await user.click(screen.getByRole('button', { name: /Check/ }))
+    await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/verbs/grade',
@@ -189,5 +189,35 @@ describe('VerbSession', () => {
       />
     )
     expect(screen.queryByText('[hablar]')).not.toBeInTheDocument()
+  })
+
+  it('shows exit confirmation dialog when X is clicked', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <VerbSession
+        items={[makeItem()]}
+        showHint={false}
+        sessionUrl="/verbs/session?test"
+      />
+    )
+
+    await user.click(screen.getByRole('button', { name: /Exit session/ }))
+
+    expect(screen.getByText('¿Salir de la Sesión?')).toBeInTheDocument()
+    expect(screen.getByText('Tu progreso de esta sesión no se guardará.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Seguir/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Salir/ })).toBeInTheDocument()
+  })
+
+  it('shows Conjugación eyebrow label', () => {
+    render(
+      <VerbSession
+        items={[makeItem()]}
+        showHint={false}
+        sessionUrl="/verbs/session?test"
+      />
+    )
+    expect(screen.getByText('Conjugación')).toBeInTheDocument()
   })
 })

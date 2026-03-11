@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { LevelChip } from '@/components/LevelChip'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { MASTERY_BADGE } from '@/lib/mastery/badge'
+import type { MasteryState } from '@/lib/mastery/badge'
 import { Dices, ChevronRight } from 'lucide-react'
 
 interface ConceptRow {
@@ -38,16 +40,19 @@ interface Props {
 
 type MasteryFilter = 'all' | 'new' | 'learning' | 'mastered'
 
-function getDifficultyLabel(count: number): string {
-  if (count === 1) return 'Focused — one concept'
-  if (count === 2) return 'Synthesis — two structures'
-  return 'Challenge — multiple structures'
+const FILTER_LABELS: Record<MasteryFilter, string> = {
+  all: 'Todos',
+  new: 'Nuevo',
+  learning: 'Aprendiendo',
+  mastered: 'Dominado',
 }
 
-const MASTERY_BADGE: Record<'mastered' | 'learning', string> = {
-  mastered: 'bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400 border-green-100 dark:border-green-800',
-  learning: 'bg-blue-50 dark:bg-blue-950/40 text-blue-500 dark:text-blue-400 border-blue-100 dark:border-blue-800',
+function getDifficultyLabel(count: number): string {
+  if (count === 1) return 'Enfocado — un concepto'
+  if (count === 2) return 'Síntesis — dos estructuras'
+  return 'Desafío — varias estructuras'
 }
+
 
 export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) {
   const router = useRouter()
@@ -127,20 +132,20 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
     )
 
   return (
-    <div className="space-y-4 pb-36">
+    <div className="space-y-4 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
       {/* Mastery filter chip row */}
       <div className="flex gap-2 flex-wrap items-center">
         {(['all', 'new', 'learning', 'mastered'] as MasteryFilter[]).map((f) => (
           <button
             key={f}
             onClick={() => setMasteryFilter(f)}
-            className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
               masteryFilter === f
-                ? 'bg-foreground text-background border-foreground'
-                : 'bg-background text-muted-foreground border-border hover:border-foreground hover:text-foreground'
+                ? 'bg-[var(--d5-terracotta)] text-[var(--d5-paper)] border-[var(--d5-terracotta)]'
+                : 'bg-[var(--d5-pill-bg)] text-[var(--d5-pill-text)] border-[var(--d5-pill-border)] hover:border-foreground hover:text-foreground'
             }`}
           >
-            {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+            {FILTER_LABELS[f]}
           </button>
         ))}
         {selectedCount > 0 && (
@@ -148,29 +153,29 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
             onClick={clearAll}
             className="ml-auto text-xs text-muted-foreground hover:text-foreground underline"
           >
-            Clear all
+            Borrar todo
           </button>
         )}
       </div>
 
       {/* "Surprise me" prominent card */}
-      <div className="border rounded-xl bg-card p-4 flex items-center justify-between gap-3">
+      <div className="senda-card flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold">Not sure where to start?</p>
-          <p className="text-xs text-muted-foreground mt-0.5">We&apos;ll pick 1–3 concepts for you</p>
+          <p className="text-sm font-semibold">¿No sabes por dónde empezar?</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Elegimos 1–3 conceptos por ti</p>
         </div>
-        <Button variant="outline" onClick={surpriseMe} className="shrink-0 gap-1.5">
+        <Button variant="outline" onClick={surpriseMe} className="shrink-0 gap-1.5 rounded-full">
           <Dices className="h-4 w-4" />
-          Surprise me
+          Sorpréndeme
         </Button>
       </div>
 
       {/* Global empty state when filter active and nothing matches */}
       {globalEmptyState && (
         <p className="text-center text-sm text-muted-foreground py-8">
-          No {masteryFilter} concepts yet.{' '}
+          Aún no hay conceptos {FILTER_LABELS[masteryFilter].toLowerCase()}.{' '}
           <button onClick={() => setMasteryFilter('all')} className="underline">
-            Show all
+            Mostrar todos
           </button>
         </p>
       )}
@@ -190,21 +195,21 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
           <details
             key={mod.id}
             open={suggestedModuleId === mod.id}
-            className="group border rounded-xl bg-card shadow-sm overflow-hidden"
+            className="group senda-card !p-0 overflow-hidden"
           >
             <summary className="list-none [&::-webkit-details-marker]:hidden cursor-pointer p-4">
               <div className="flex items-center gap-2">
                 <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-200 group-open:rotate-90 text-muted-foreground" />
                 <div>
-                  <h2 className="text-base font-bold leading-snug">{mod.title}</h2>
+                  <h2 className="senda-heading text-base leading-snug">{mod.title}</h2>
                   <p className="text-xs text-muted-foreground">
-                    {masteredCount}/{allModConcepts.length} mastered
+                    {masteredCount}/{allModConcepts.length} dominados
                   </p>
                 </div>
               </div>
             </summary>
 
-            <div className="px-4 pb-4 pt-2 space-y-4 border-t">
+            <div className="px-4 pb-4 pt-2 space-y-4 border-t border-[var(--d5-line)]">
               {modUnits.map((unit) => {
                 const unitConcepts = (conceptsByUnit.get(unit.id) ?? []).filter(
                   matchesMasteryFilter
@@ -212,7 +217,7 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
                 if (unitConcepts.length === 0) return null
                 return (
                   <div key={unit.id} className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground py-1">
+                    <p className="senda-eyebrow py-1">
                       {unit.title}
                     </p>
                     <div className="space-y-2">
@@ -224,13 +229,13 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
                             key={concept.id}
                             className={`flex items-start gap-3 border rounded-xl p-3.5 cursor-pointer transition-colors ${
                               isChecked
-                                ? 'border-green-600 bg-green-50 dark:bg-green-950/20'
+                                ? 'border-primary bg-primary/10'
                                 : 'border-border bg-background hover:bg-muted/40'
                             }`}
                           >
                             <input
                               type="checkbox"
-                              className="mt-0.5 shrink-0 accent-green-700"
+                              className="mt-0.5 shrink-0 accent-primary"
                               checked={isChecked}
                               onChange={() => toggle(concept.id)}
                             />
@@ -241,10 +246,8 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
                               <LevelChip level={concept.level} />
                               <GrammarFocusChip focus={concept.grammar_focus} />
                               {masteryState !== 'new' && (
-                                <span
-                                  className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${MASTERY_BADGE[masteryState]}`}
-                                >
-                                  {masteryState === 'mastered' ? 'Mastered' : 'Learning'}
+                                <span style={MASTERY_BADGE[masteryState as Exclude<MasteryState, 'new'>].style}>
+                                  {MASTERY_BADGE[masteryState as Exclude<MasteryState, 'new'>].label}
                                 </span>
                               )}
                             </div>
@@ -261,22 +264,22 @@ export function ConceptPicker({ modules, units, concepts, suggestedId }: Props) 
       })}
 
       {/* Sticky footer */}
-      <div className="fixed bottom-0 left-0 right-0 lg:left-[220px] bg-background/95 backdrop-blur-sm border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="fixed bottom-0 left-0 right-0 lg:left-[220px] bg-background/95 backdrop-blur-sm border-t border-[var(--d5-line)] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="max-w-xl mx-auto flex flex-col gap-2">
           {selectedCount > 0 && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                {selectedCount} concept{selectedCount !== 1 ? 's' : ''} selected
+                {selectedCount} concepto{selectedCount !== 1 ? 's' : ''} seleccionado{selectedCount !== 1 ? 's' : ''}
               </span>
-              <span className="font-semibold text-green-800">{getDifficultyLabel(selectedCount)}</span>
+              <span className="font-semibold text-primary">{getDifficultyLabel(selectedCount)}</span>
             </div>
           )}
           <Button
             onClick={handleStart}
             disabled={selectedCount === 0}
-            className="w-full active:scale-95 transition-transform"
+            className="w-full rounded-full active:scale-95 transition-transform"
           >
-            Start writing →
+            Empezar a Escribir →
           </Button>
         </div>
       </div>

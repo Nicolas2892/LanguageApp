@@ -35,10 +35,10 @@ export default async function AccountPage() {
         </h1>
         {/* Inline avatar row */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center shrink-0 rounded-full" style={{
+          <div className="flex items-center justify-center shrink-0 rounded-full senda-card-sm" style={{
             width: '2.75rem',
             height: '2.75rem',
-            background: 'rgba(140,106,63,0.10)',
+            padding: 0,
             fontSize: '0.875rem',
             fontWeight: 700,
             color: 'var(--d5-warm)',
@@ -64,7 +64,7 @@ export default async function AccountPage() {
         <AccountForm profile={profile} />
       </div>
 
-      <div className="mt-12">
+      <div className="mt-8">
         <WindingPathSeparator />
       </div>
 
@@ -73,7 +73,7 @@ export default async function AccountPage() {
         <SecurityForm userEmail={user.email!} isOAuthUser={isOAuthUser} />
       </div>
 
-      <div className="mt-12">
+      <div className="mt-8">
         <WindingPathSeparator />
       </div>
 
@@ -81,7 +81,7 @@ export default async function AccountPage() {
       <div className="mt-6">
         <NotificationSettings />
       </div>
-      <div className="mt-12">
+      <div className="mt-8">
         <DangerZone />
       </div>
 
@@ -102,7 +102,7 @@ export default async function AccountPage() {
         </>
       )}
 
-      <div className="mt-12">
+      <div className="mt-8">
         <WindingPathSeparator />
       </div>
 

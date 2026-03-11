@@ -126,14 +126,9 @@ export async function DashboardDeferredSection({
           <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-muted)' }}>
             Concepto sugerido: {writeConcept.title}
           </p>
-          <Button
-            asChild
-            variant="outline"
-            className="w-full rounded-full font-bold"
-            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
-          >
-            <Link href={`/write?suggested=${writeConcept.id}`}>Empezar a Escribir</Link>
-          </Button>
+          <Link href={`/write?suggested=${writeConcept.id}`} className="senda-cta-outline w-full">
+            Empezar a Escribir
+          </Link>
           <Button asChild variant="ghost" className="w-full text-xs h-8" style={{ color: 'var(--d5-muted)' }}>
             <Link href="/write">Cambiar Concepto</Link>
           </Button>
@@ -156,14 +151,9 @@ export async function DashboardDeferredSection({
           <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
             Expresa tus ideas. Sin límites, solo práctica.
           </p>
-          <Button
-            asChild
-            variant="outline"
-            className="w-full rounded-full font-bold"
-            style={{ borderColor: 'var(--d5-terracotta)', color: 'var(--d5-terracotta)' }}
-          >
-            <Link href="/write">Empezar a Escribir</Link>
-          </Button>
+          <Link href="/write" className="senda-cta-outline w-full">
+            Empezar a Escribir
+          </Link>
         </div>
       )}
 

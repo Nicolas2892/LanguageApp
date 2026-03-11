@@ -39,7 +39,7 @@ describe('VerbDirectory', () => {
   it('filters by search query (infinitive)', async () => {
     const user = userEvent.setup()
     render(<VerbDirectory verbs={makeVerbs()} />)
-    await user.type(screen.getByPlaceholderText('Buscar verbos...'), 'hab')
+    await user.type(screen.getByPlaceholderText('Buscar Verbos...'), 'hab')
     expect(screen.getByTestId('card-hablar')).toBeInTheDocument()
     expect(screen.queryByTestId('card-comer')).not.toBeInTheDocument()
   })
@@ -47,7 +47,7 @@ describe('VerbDirectory', () => {
   it('filters by search query (english)', async () => {
     const user = userEvent.setup()
     render(<VerbDirectory verbs={makeVerbs()} />)
-    await user.type(screen.getByPlaceholderText('Buscar verbos...'), 'eat')
+    await user.type(screen.getByPlaceholderText('Buscar Verbos...'), 'eat')
     expect(screen.getByTestId('card-comer')).toBeInTheDocument()
     expect(screen.queryByTestId('card-hablar')).not.toBeInTheDocument()
   })
@@ -101,7 +101,7 @@ describe('VerbDirectory', () => {
   it('shows empty state in Spanish when no matches', async () => {
     const user = userEvent.setup()
     render(<VerbDirectory verbs={makeVerbs()} />)
-    await user.type(screen.getByPlaceholderText('Buscar verbos...'), 'zzzzz')
+    await user.type(screen.getByPlaceholderText('Buscar Verbos...'), 'zzzzz')
     expect(screen.getByText('No se encontraron verbos.')).toBeInTheDocument()
     expect(screen.getByText('¡Prueba con otra búsqueda!')).toBeInTheDocument()
   })
