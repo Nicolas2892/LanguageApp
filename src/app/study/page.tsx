@@ -233,7 +233,7 @@ export default async function StudyPage({
 
   if (conceptIds.length === 0) {
     return (
-      <main className="max-w-xl mx-auto p-8 text-center space-y-5">
+      <main className="max-w-2xl mx-auto p-8 text-center space-y-5">
         <svg className="mx-auto h-14 w-14 text-muted-foreground/40" fill="none" viewBox="0 0 48 48" stroke="currentColor" strokeWidth="1.5">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h30M9 18h30M9 24h18m9 0l4.5 4.5m0 0L36 24m4.5 4.5L36 33m4.5-4.5H30" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M6 8a2 2 0 012-2h32a2 2 0 012 2v32a2 2 0 01-2 2H8a2 2 0 01-2-2V8z" />
@@ -266,7 +266,7 @@ export default async function StudyPage({
 
   if (!exercises || exercises.length === 0) {
     return (
-      <main className="max-w-xl mx-auto p-8 text-center space-y-5">
+      <main className="max-w-2xl mx-auto p-8 text-center space-y-5">
         <svg className="mx-auto h-14 w-14 text-muted-foreground/40" fill="none" viewBox="0 0 48 48" stroke="currentColor" strokeWidth="1.5">
           <circle cx="24" cy="24" r="18" />
           <path strokeLinecap="round" d="M24 16v8m0 8h.01" />
@@ -352,7 +352,7 @@ export default async function StudyPage({
     : 'Review session'
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
       <div className="mb-8">
         <h1 className="senda-heading text-2xl">Sesión de Estudio</h1>
       </div>

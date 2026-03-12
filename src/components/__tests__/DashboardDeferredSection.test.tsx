@@ -11,14 +11,9 @@ vi.mock('next/navigation', () => ({
 
 import { createClient } from '@/lib/supabase/server'
 
-const THIS_WEEK = new Date('2026-03-02T00:00:00.000Z').toISOString()
-const LAST_WEEK = new Date('2026-02-23T00:00:00.000Z').toISOString()
-
 const defaultProps = {
   userId: 'user-1',
   isNewUser: false,
-  thisWeekStart: THIS_WEEK,
-  lastWeekStart: LAST_WEEK,
 }
 
 function makeSupabaseMock({

@@ -36,34 +36,26 @@ export async function POST(request: Request) {
   }
   const { messages, conceptId } = parsed.data
 
-  // Fetch profile for name + level (explicit columns)
-  const { data: profile } = await supabase
-    .from('profiles').select('display_name, current_level').eq('id', user.id).single()
+  // Fetch profile, concept context, and recent errors in parallel
+  const [{ data: profile }, conceptResult, { data: recentAttempts }] = await Promise.all([
+    supabase.from('profiles').select('display_name, computed_level').eq('id', user.id).single(),
+    conceptId
+      ? supabase.from('concepts').select('title, explanation').eq('id', conceptId).single()
+      : Promise.resolve({ data: null }),
+    supabase
+      .from('exercise_attempts')
+      .select('ai_feedback')
+      .eq('user_id', user.id)
+      .eq('is_correct', false)
+      .order('created_at', { ascending: false })
+      .limit(5),
+  ])
 
-  // Early-return guard: profile may be null for brand-new sessions
-  const typedProfile = profile as { display_name: string | null; current_level: string } | null
+  const typedProfile = profile as { display_name: string | null; computed_level: string } | null
 
-  // Optionally fetch concept context
-  let conceptTitle: string | undefined
-  let conceptExplanation: string | undefined
-  if (conceptId) {
-    const { data: concept } = await supabase
-      .from('concepts').select('title, explanation').eq('id', conceptId).single()
-    const c = concept as { title: string; explanation: string } | null
-    if (c) {
-      conceptTitle = c.title
-      conceptExplanation = c.explanation
-    }
-  }
-
-  // Fetch up to 5 recent wrong attempt feedbacks
-  const { data: recentAttempts } = await supabase
-    .from('exercise_attempts')
-    .select('ai_feedback')
-    .eq('user_id', user.id)
-    .eq('is_correct', false)
-    .order('created_at', { ascending: false })
-    .limit(5)
+  const conceptData = conceptResult.data as { title: string; explanation: string } | null
+  const conceptTitle = conceptData?.title
+  const conceptExplanation = conceptData?.explanation
 
   const recentErrors = (recentAttempts ?? [])
     .map((a) => (a as { ai_feedback: string | null }).ai_feedback)
@@ -71,7 +63,7 @@ export async function POST(request: Request) {
 
   const systemPrompt = buildTutorSystemPrompt({
     displayName: typedProfile?.display_name ?? 'learner',
-    currentLevel: typedProfile?.current_level ?? 'B1',
+    currentLevel: typedProfile?.computed_level ?? 'B1',
     conceptTitle,
     conceptExplanation,
     recentErrors,

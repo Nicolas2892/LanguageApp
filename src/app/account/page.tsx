@@ -26,8 +26,8 @@ export default async function AccountPage() {
   const initials = getInitials(profile.display_name, user.email!)
 
   return (
-    <main className="max-w-xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 relative">
-      <BackgroundMagicS style={{ position: 'fixed', right: 0, top: '8%', width: 480, height: 624 }} />
+    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 relative overflow-hidden animate-page-in">
+      <BackgroundMagicS style={{ right: 0, top: '8%', width: 480, height: 624 }} />
       {/* Header */}
       <div className="mb-6">
         <h1 className="senda-heading text-2xl mb-3">

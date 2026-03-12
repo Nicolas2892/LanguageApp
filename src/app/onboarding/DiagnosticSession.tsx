@@ -142,7 +142,7 @@ export function DiagnosticSession({ items }: Props) {
           <>
             <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
             {submitting && (
-              <p className="text-sm text-[var(--d5-muted)] animate-pulse">Evaluando…</p>
+              <p className="text-sm text-[var(--d5-muted)] animate-senda-pulse">Evaluando…</p>
             )}
             {submitError && (
               <p className="text-sm text-destructive">{submitError}</p>

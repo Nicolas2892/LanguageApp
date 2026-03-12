@@ -71,37 +71,38 @@ export async function POST(request: Request) {
         .map((r) => [r.concept_id, r])
     )
 
-    // 4. Upsert user_progress for each concept with the same holistic score
-    for (const concept_id of concept_ids) {
+    // 4. Batch upsert user_progress for all concepts with the same holistic score
+    const now = new Date().toISOString()
+    const upsertRows = concept_ids.map((concept_id) => {
       const existing = progressMap.get(concept_id) ?? null
       const currentProgress = existing ?? {
         ...DEFAULT_PROGRESS,
         user_id: user.id,
         concept_id,
       }
-
       const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore)
+      return {
+        user_id: user.id,
+        concept_id,
+        ease_factor: newSRS.ease_factor,
+        interval_days: newSRS.interval_days,
+        due_date: newSRS.due_date,
+        repetitions: newSRS.repetitions,
+        last_reviewed_at: now,
+      }
+    })
 
+    await supabase
+      .from('user_progress')
+      .upsert(upsertRows, { onConflict: 'user_id,concept_id' })
+
+    // free_write is Tier 3 — always counts as production evidence
+    if (gradeResult.score >= 2) {
       await supabase
         .from('user_progress')
-        .upsert({
-          user_id: user.id,
-          concept_id,
-          ease_factor: newSRS.ease_factor,
-          interval_days: newSRS.interval_days,
-          due_date: newSRS.due_date,
-          repetitions: newSRS.repetitions,
-          last_reviewed_at: new Date().toISOString(),
-        }, { onConflict: 'user_id,concept_id' })
-
-      // free_write is Tier 3 — always counts as production evidence
-      if (gradeResult.score >= 2) {
-        await supabase
-          .from('user_progress')
-          .update({ production_mastered: true })
-          .eq('user_id', user.id)
-          .eq('concept_id', concept_id)
-      }
+        .update({ production_mastered: true })
+        .eq('user_id', user.id)
+        .in('concept_id', concept_ids)
     }
 
     // 5. Fetch the first concept's SRS interval for the response

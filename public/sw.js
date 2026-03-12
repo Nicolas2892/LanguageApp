@@ -5,7 +5,9 @@
 //   - Stale-while-revalidate for page navigation (non-auth, non-API)
 //   - Network-only for API calls and auth routes
 
-const CACHE = 'senda-v1'
+// Bump CACHE_VERSION on each deploy to purge stale navigation cache
+const CACHE_VERSION = '2026-03-12'
+const CACHE = `senda-${CACHE_VERSION}`
 
 const SHELL_URLS = [
   '/',

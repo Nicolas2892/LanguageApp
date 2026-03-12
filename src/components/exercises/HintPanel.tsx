@@ -57,7 +57,7 @@ export function HintPanel({ hint1, hint2, claudeHint, wrongAttempts, loadingHint
         </button>
       )}
       {loadingHint && (
-        <p className="text-xs text-[var(--d5-muted)] animate-pulse">Generando ejemplo…</p>
+        <p className="text-xs text-[var(--d5-muted)] animate-senda-pulse">Generando ejemplo…</p>
       )}
       {claudeHint && (
         <div className="senda-card-sm border border-[var(--d5-pill-border)] text-foreground">

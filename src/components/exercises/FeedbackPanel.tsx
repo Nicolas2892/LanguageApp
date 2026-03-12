@@ -42,7 +42,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, 
 
       {/* Feedback text — skeleton while streaming */}
       {result.feedback === '' ? (
-        <div className="h-4 w-3/4 mx-auto bg-muted animate-pulse rounded" />
+        <div className="h-4 w-3/4 mx-auto senda-skeleton-fill animate-senda-pulse rounded" />
       ) : (
         <p className="text-sm text-foreground">{result.feedback}</p>
       )}
@@ -55,7 +55,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, 
           </div>
         ) : (
           <>
-            <div className="rounded-xl bg-red-50 dark:bg-red-950/20 px-4 py-2.5 text-foreground/70 line-through decoration-1">
+            <div className="rounded-xl bg-[var(--d5-error-surface)] px-4 py-2.5 text-foreground/70 line-through decoration-1">
               {userAnswer}
             </div>
             {result.corrected_version && (
@@ -75,7 +75,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, 
 
       {/* Explanation — skeleton while streaming */}
       {result.explanation === '' && result.feedback === '' ? (
-        <div className="h-4 w-1/2 mx-auto bg-muted animate-pulse rounded" />
+        <div className="h-4 w-1/2 mx-auto senda-skeleton-fill animate-senda-pulse rounded" />
       ) : result.explanation ? (
         <p className="text-sm text-[var(--d5-muted)] italic">
           {result.explanation}

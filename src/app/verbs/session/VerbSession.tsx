@@ -284,7 +284,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
               onChange={(e) => setAnswer(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && phase.kind === 'answering') handleCheck() }}
               disabled={phase.kind === 'feedback'}
-              placeholder="Type the conjugated form..."
+              placeholder="Escribe la forma conjugada…"
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck={false}

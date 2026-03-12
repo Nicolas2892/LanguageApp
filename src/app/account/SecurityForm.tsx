@@ -109,7 +109,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
         </div>
 
         {emailError && (
-          <p style={{ fontSize: '0.75rem', color: '#dc2626', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(220,38,38,0.06)' }}>{emailError}</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--d5-error)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--d5-error-surface)' }}>{emailError}</p>
         )}
         {emailMessage && (
           <p style={{ fontSize: '0.75rem', color: 'var(--d5-terracotta)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(196,82,46,0.06)' }}>{emailMessage}</p>
@@ -143,8 +143,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   type={showCurrentPwd ? 'text' : 'password'}
                   value={currentPwd}
                   onChange={(e) => setCurrentPwd(e.target.value)}
-                  className="senda-input"
-                  style={{ paddingRight: '2.5rem' }}
+                  className="senda-input pr-10"
                 />
                 <button
                   type="button"
@@ -169,8 +168,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   type={showNewPwd ? 'text' : 'password'}
                   value={newPwd}
                   onChange={(e) => setNewPwd(e.target.value)}
-                  className="senda-input"
-                  style={{ paddingRight: '2.5rem' }}
+                  className="senda-input pr-10"
                 />
                 <button
                   type="button"
@@ -188,7 +186,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                 <p style={{
                   fontSize: '0.75rem',
                   fontWeight: 600,
-                  color: newPwd.length < 6 ? 'var(--destructive)' : newPwd.length < 12 ? '#f59e0b' : 'var(--d5-terracotta)',
+                  color: newPwd.length < 6 ? 'var(--destructive)' : newPwd.length < 12 ? 'var(--d5-warning)' : 'var(--d5-terracotta)',
                   marginTop: '0.125rem',
                 }}>
                   {newPwd.length < 6 ? 'Muy corta' : newPwd.length < 12 ? 'Aceptable' : 'Segura'}
@@ -205,8 +203,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   type={showConfirmPwd ? 'text' : 'password'}
                   value={confirmPwd}
                   onChange={(e) => setConfirmPwd(e.target.value)}
-                  className="senda-input"
-                  style={{ paddingRight: '2.5rem' }}
+                  className="senda-input pr-10"
                 />
                 <button
                   type="button"
@@ -223,7 +220,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
             </div>
 
             {pwdError && (
-              <p style={{ fontSize: '0.75rem', color: '#dc2626', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(220,38,38,0.06)' }}>{pwdError}</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--d5-error)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--d5-error-surface)' }}>{pwdError}</p>
             )}
             {pwdMessage && (
               <p style={{ fontSize: '0.75rem', color: 'var(--d5-terracotta)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(196,82,46,0.06)' }}>{pwdMessage}</p>

@@ -41,7 +41,7 @@ export function SideNav({ userInitials }: Props) {
           style={{
             fontFamily: 'var(--font-lora), serif',
             fontStyle: 'italic',
-            fontSize: 20,
+            fontSize: '1.25rem',
             lineHeight: 1,
             color: 'var(--d5-heading)',
           }}
@@ -72,9 +72,9 @@ export function SideNav({ userInitials }: Props) {
               <span
                 className="shrink-0"
                 style={{
-                  width: 3,
-                  height: 16,
-                  borderRadius: 2,
+                  width: '0.1875rem',
+                  height: '1rem',
+                  borderRadius: '0.125rem',
                   background: active ? 'var(--d5-terracotta)' : 'transparent',
                 }}
               />
@@ -98,9 +98,9 @@ export function SideNav({ userInitials }: Props) {
           <span
             className="shrink-0"
             style={{
-              width: 3,
-              height: 16,
-              borderRadius: 2,
+              width: '0.1875rem',
+              height: '1rem',
+              borderRadius: '0.125rem',
               background: pathname.startsWith('/account') ? 'var(--d5-terracotta)' : 'transparent',
             }}
           />

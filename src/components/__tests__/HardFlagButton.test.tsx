@@ -22,18 +22,18 @@ describe('HardFlagButton', () => {
       expect(btn).toBeDefined()
     })
 
-    it('has orange active class when initialIsHard is true', () => {
+    it('has terracotta active class when initialIsHard is true', () => {
       render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={true} />)
       const classes = screen.getByRole('button').className.split(/\s+/)
-      // Active state uses bare `text-orange-500`, not `hover:text-orange-500`
-      expect(classes).toContain('text-orange-500')
+      // Active state uses bare `text-[var(--d5-terracotta)]`, not hover variant
+      expect(classes).toContain('text-[var(--d5-terracotta)]')
     })
 
-    it('does not have bare orange active class when initialIsHard is false', () => {
+    it('does not have bare terracotta active class when initialIsHard is false', () => {
       render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={false} />)
       const classes = screen.getByRole('button').className.split(/\s+/)
-      // Inactive state only has hover:text-orange-500, not the bare class
-      expect(classes).not.toContain('text-orange-500')
+      // Inactive state only has hover:text-[var(--d5-terracotta)], not the bare class
+      expect(classes).not.toContain('text-[var(--d5-terracotta)]')
     })
   })
 

@@ -8,8 +8,6 @@ import type { Concept } from '@/lib/supabase/types'
 interface Props {
   userId: string
   isNewUser: boolean
-  thisWeekStart: string // ISO string — kept for future use; not used in current queries
-  lastWeekStart: string // ISO string — kept for future use; not used in current queries
 }
 
 type ModuleRow   = { id: string; title: string; order_index: number }
@@ -26,8 +24,6 @@ interface ModuleSummary {
 export async function DashboardDeferredSection({
   userId,
   isNewUser,
-  thisWeekStart,
-  lastWeekStart,
 }: Props) {
   const supabase = await createClient()
 
@@ -110,7 +106,7 @@ export async function DashboardDeferredSection({
         <div className="senda-card space-y-3 relative overflow-hidden">
           {/* Quill icon — top-right decorative mark */}
           <svg
-            style={{ position: 'absolute', top: 16, right: 16, pointerEvents: 'none', opacity: 0.25 }}
+            style={{ position: 'absolute', top: '1rem', right: '1rem', pointerEvents: 'none', opacity: 0.25 }}
             width={28} height={28} viewBox="0 0 24 24" fill="none"
             aria-hidden="true"
           >
@@ -138,7 +134,7 @@ export async function DashboardDeferredSection({
         <div className="senda-card space-y-3 relative overflow-hidden">
           {/* Quill icon — top-right decorative mark */}
           <svg
-            style={{ position: 'absolute', top: 16, right: 16, pointerEvents: 'none', opacity: 0.25 }}
+            style={{ position: 'absolute', top: '1rem', right: '1rem', pointerEvents: 'none', opacity: 0.25 }}
             width={28} height={28} viewBox="0 0 24 24" fill="none"
             aria-hidden="true"
           >

@@ -18,15 +18,6 @@ export default async function DashboardPage() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  // Week boundaries (Mon–Sun)
-  const now = new Date()
-  const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay()
-  const thisWeekStart = new Date(now)
-  thisWeekStart.setDate(now.getDate() - (dayOfWeek - 1))
-  thisWeekStart.setHours(0, 0, 0, 0)
-  const lastWeekStart = new Date(thisWeekStart)
-  lastWeekStart.setDate(thisWeekStart.getDate() - 7)
-
   const [profileRes, dueRes, totalConceptsRes, studiedRes] = await Promise.all([
     supabase.from('profiles').select('computed_level, display_name, streak').eq('id', user.id).single(),
     supabase
@@ -145,8 +136,6 @@ export default async function DashboardPage() {
           <DashboardDeferredSection
             userId={user.id}
             isNewUser={isNewUser}
-            thisWeekStart={thisWeekStart.toISOString()}
-            lastWeekStart={lastWeekStart.toISOString()}
           />
         </Suspense>
       </div>

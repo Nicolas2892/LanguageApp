@@ -5,7 +5,7 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[#C4522E] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--d5-paper)] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[var(--d5-terracotta)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--d5-paper)] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   {
     variants: {
       variant: {
@@ -13,7 +13,7 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border-[1.5px] bg-background shadow-xs hover:bg-[#C4522E]/10 hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-[#FDFCF9]/5",
+          "border-[1.5px] bg-background shadow-xs hover:bg-[var(--d5-terracotta)]/10 hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-[var(--d5-paper)]/5",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:

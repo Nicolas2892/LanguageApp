@@ -114,27 +114,22 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
   const exerciseIds = typedExercises.map((e) => e.id)
   const exerciseTypes = new Set(typedExercises.map((e) => e.type))
 
-  // Count exercise attempts for this concept
-  let attemptCount = 0
-  if (exerciseIds.length > 0) {
-    const { count } = await supabase
-      .from('exercise_attempts')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .in('exercise_id', exerciseIds)
-    attemptCount = count ?? 0
-  }
+  // Fetch attempt count and module name in parallel
+  const [attemptCountResult, moduleResult] = await Promise.all([
+    exerciseIds.length > 0
+      ? supabase
+          .from('exercise_attempts')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .in('exercise_id', exerciseIds)
+      : Promise.resolve({ count: 0 }),
+    unit
+      ? supabase.from('modules').select('title').eq('id', unit.module_id).single()
+      : Promise.resolve({ data: null }),
+  ])
 
-  // Fetch module name
-  let moduleName: string | null = null
-  if (unit) {
-    const { data: moduleData } = await supabase
-      .from('modules')
-      .select('title')
-      .eq('id', unit.module_id)
-      .single()
-    moduleName = (moduleData as { title: string } | null)?.title ?? null
-  }
+  const attemptCount = attemptCountResult.count ?? 0
+  const moduleName = (moduleResult.data as { title: string } | null)?.title ?? null
 
   const isHard = progress?.is_hard ?? false
 

@@ -52,7 +52,7 @@ export function VerbTenseMastery({ summaries }: Props) {
               >
                 <AnimatedBar pct={pct} style={{ background: barColor }} />
               </div>
-              <p style={{ fontSize: 9, color: 'var(--d5-subtle)' }}>
+              <p style={{ fontSize: '0.5625rem', color: 'var(--d5-subtle)' }}>
                 {attempts} intentos
               </p>
             </div>

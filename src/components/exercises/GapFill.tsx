@@ -147,7 +147,7 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
                     aria-label={blankCount > 1 ? `Hueco ${i + 1}` : 'Tu respuesta'}
                     disabled={disabled}
                     autoFocus={i === 0}
-                    className="inline-block border-0 border-b-2 border-[var(--d5-muted)] focus:border-primary focus:outline-none bg-transparent text-base font-medium text-center transition-colors duration-150 py-0.5 align-text-bottom"
+                    className="inline-block border-0 border-b-2 border-[var(--d5-muted)] focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--d5-terracotta)] bg-transparent text-base font-medium text-center transition-colors duration-150 py-0.5 align-text-bottom"
                     style={{ fontFamily: 'var(--font-dm-sans), system-ui, sans-serif', fontStyle: 'normal', width: `${getHintWidth(i)}ch` }}
                   />
                 )}

@@ -4,6 +4,54 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Perf-Audit: VAPID guard, dead code, font cleanup, query parallelisation, N+1 batch, SW versioning ✓ (2026-03-12)
+
+1421 tests across 65 files, all passing. Full PWA performance audit — 8 items addressed.
+
+### Step 1 — Guard VAPID `setVapidDetails` (build-unblocking)
+
+`src/app/api/push/send/route.ts`: moved `webpush.setVapidDetails()` from module top-level into a conditional block guarded by `vapidConfigured` flag. POST handler returns 503 when env vars are missing. Fixes build failures in environments without VAPID keys.
+
+### Step 2 — Delete 3 dead recharts components + test
+
+Removed 4 files:
+- `src/app/progress/AccuracyChart.tsx`
+- `src/app/progress/__tests__/AccuracyChart.test.tsx`
+- `src/components/ExerciseTypeChart.tsx`
+- `src/components/verbs/VerbTenseChart.tsx`
+
+Uninstalled `recharts` from dependencies (−34 packages from node_modules).
+
+### Step 3 — Remove unused `Geist_Mono` font
+
+`src/app/layout.tsx`: deleted `Geist_Mono` import, `geistMono` const, and `${geistMono.variable}` from body className. Saves ~11KB font download. `font-mono` usages fall back to system monospace.
+
+### Step 4 — Remove unused `thisWeekStart`/`lastWeekStart` props
+
+| File | Change |
+|---|---|
+| `src/app/dashboard/page.tsx` | Deleted week boundary computation (6 lines) + removed props from `<DashboardDeferredSection>` |
+| `src/components/DashboardDeferredSection.tsx` | Removed `thisWeekStart`/`lastWeekStart` from Props interface and destructuring |
+| `src/components/__tests__/DashboardDeferredSection.test.tsx` | Removed `THIS_WEEK`/`LAST_WEEK` constants and from test fixtures |
+
+### Step 5 — Parallelise `/api/chat` fetches
+
+`src/app/api/chat/route.ts`: refactored 3 sequential queries (profile → concept → attempts) into a single `Promise.all`. Also fixed `current_level` → `computed_level` to match actual DB schema.
+
+### Step 6 — Parallelise `/curriculum/[id]` secondary fetches
+
+`src/app/curriculum/[id]/page.tsx`: attempt count query and module name query now run in parallel via `Promise.all` instead of sequentially.
+
+### Step 7 — Batch N+1 upserts in `/api/grade`
+
+`src/app/api/grade/route.ts`: replaced per-concept `for` loop (N upserts + N updates) with a single bulk `.upsert()` call and a single conditional `.update()` with `.in('concept_id', concept_ids)` for `production_mastered`.
+
+### Step 8 — SW cache versioning
+
+`public/sw.js`: replaced hardcoded `senda-v1` with date-versioned `senda-2026-03-12`. Added `CACHE_VERSION` constant and comment to bump on each deploy.
+
+---
+
 ## D5-Audit-3: Pills, LevelChip, Mastery Badge, Container & Dark Mode ✓ (2026-03-11)
 
 1410 tests across 63 files, all passing. Completes `docs/design-audit.md` items VIII–XII + separator fix.

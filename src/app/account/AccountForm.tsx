@@ -192,7 +192,7 @@ export function AccountForm({ profile }: Props) {
             padding: '0.125rem 0.625rem',
             borderRadius: 9999,
             background: 'rgba(245,158,11,0.12)',
-            color: '#92400e',
+            color: 'var(--d5-ink)',
           }}>
             {computedLevel}
           </span>
@@ -202,7 +202,7 @@ export function AccountForm({ profile }: Props) {
       {/* ── Section 4: Guardar ── */}
       <div style={{ padding: '0.25rem 0 0' }}>
         {error && (
-          <p style={{ fontSize: '0.75rem', color: '#dc2626', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(220,38,38,0.06)', marginBottom: '1rem' }}>{error}</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--d5-error)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--d5-error-surface)', marginBottom: '1rem' }}>{error}</p>
         )}
         {saved && (
           <div className="flex items-center gap-2" style={{ fontSize: '0.75rem', color: 'var(--d5-terracotta)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(196,82,46,0.06)', marginBottom: '1rem' }}>

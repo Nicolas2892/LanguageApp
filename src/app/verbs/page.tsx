@@ -59,7 +59,7 @@ export default async function VerbsPage() {
   }
 
   return (
-    <main className="relative overflow-hidden max-w-3xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-10">
+    <main className="relative overflow-hidden max-w-3xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-10 animate-page-in">
       <BackgroundMagicS />
 
       <div className="flex items-start justify-between gap-4">

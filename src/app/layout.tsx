@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, DM_Sans, Lora } from "next/font/google";
+import { Geist, DM_Sans, Lora } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { IOSInstallPrompt } from "@/components/IOSInstallPrompt";
@@ -13,11 +13,6 @@ import { getInitials } from "@/lib/utils";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -127,7 +122,7 @@ export default async function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${lora.variable} antialiased`}
+        className={`${geistSans.variable} ${dmSans.variable} ${lora.variable} antialiased`}
       >
         <ThemeProvider initialTheme={themePreference}>
           <SideNav userInitials={userInitials} />

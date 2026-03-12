@@ -61,7 +61,7 @@ export function DangerZone() {
           Eliminar cuenta
         </Button>
       ) : (
-        <div className="space-y-3 rounded-xl p-4" style={{ background: 'rgba(220,38,38,0.04)', boxShadow: '0 10px 30px -10px rgba(26,17,8,0.06)' }}>
+        <div className="space-y-3 rounded-xl p-4" style={{ background: 'var(--d5-error-surface)', boxShadow: '0 10px 30px -10px rgba(26,17,8,0.06)' }}>
           <p className="text-sm text-red-700">
             Esto eliminará permanentemente tu cuenta y todo tu progreso. Esta acción no se puede deshacer.
           </p>
@@ -82,7 +82,7 @@ export function DangerZone() {
             </Button>
           </div>
           {deleteError && (
-            <p className="text-sm text-red-600 rounded-lg p-3" style={{ background: 'rgba(220,38,38,0.06)' }}>{deleteError}</p>
+            <p className="text-sm text-red-600 rounded-lg p-3" style={{ background: 'var(--d5-error-surface)' }}>{deleteError}</p>
           )}
         </div>
       )}

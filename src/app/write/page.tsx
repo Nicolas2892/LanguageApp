@@ -42,7 +42,7 @@ export default async function WritePage({ searchParams }: Props) {
     const pageTitle = conceptInfos.map((c) => c.title).join(' + ')
 
     return (
-      <main className="relative overflow-hidden max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+      <main className="relative overflow-hidden max-w-2xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 animate-page-in">
         <BackgroundMagicS />
         <div className="relative flex items-center gap-3">
           <Link
@@ -94,7 +94,7 @@ export default async function WritePage({ searchParams }: Props) {
     : null
 
   return (
-    <main className="relative overflow-hidden max-w-xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+    <main className="relative overflow-hidden max-w-2xl mx-auto p-6 md:p-10 space-y-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 animate-page-in">
       <BackgroundMagicS />
       <Link
         href="/dashboard"

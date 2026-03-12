@@ -19,9 +19,9 @@ type VerbSet = 'favorites' | 'top25' | 'top50' | 'top100' | 'single'
 
 // Shared eyebrow style — uses adaptive --d5-eyebrow token
 const EYEBROW: React.CSSProperties = {
-  fontSize: 9, fontWeight: 700, letterSpacing: '0.12em',
+  fontSize: '0.5625rem', fontWeight: 700, letterSpacing: '0.12em',
   textTransform: 'uppercase', color: 'var(--d5-eyebrow)',
-  marginBottom: 8,
+  marginBottom: '0.5rem',
   fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
 }
 
@@ -29,7 +29,7 @@ const pillBase: React.CSSProperties = {
   borderRadius: 99, border: 'none', cursor: 'pointer',
   fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
   whiteSpace: 'nowrap', flexShrink: 0,
-  minHeight: 44, display: 'flex', alignItems: 'center',
+  minHeight: '2.75rem', display: 'flex', alignItems: 'center',
   transition: 'background 200ms ease-out, color 200ms ease-out',
 }
 
@@ -87,7 +87,7 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
       <div className="px-4">
         <p style={EYEBROW}>Tiempos verbales</p>
 
-        <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--d5-muted)', marginBottom: 6, fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+        <p style={{ fontSize: '0.625rem', fontWeight: 600, color: 'var(--d5-muted)', marginBottom: '0.375rem', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
           Indicativo
         </p>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
@@ -101,7 +101,7 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
           ))}
         </div>
 
-        <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--d5-muted)', marginBottom: 6, fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+        <p style={{ fontSize: '0.625rem', fontWeight: 600, color: 'var(--d5-muted)', marginBottom: '0.375rem', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
           Subjuntivo
         </p>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
@@ -115,7 +115,7 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
           ))}
         </div>
 
-        <p style={{ fontSize: 10, fontWeight: 600, color: 'var(--d5-muted)', marginBottom: 6, fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+        <p style={{ fontSize: '0.625rem', fontWeight: 600, color: 'var(--d5-muted)', marginBottom: '0.375rem', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
           Imperativo
         </p>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -168,13 +168,13 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
                 <div style={{
                   fontFamily: 'var(--font-lora), serif', fontWeight: 600, fontStyle: 'italic', fontSize: 14,
                   color: active ? 'var(--d5-paper)' : 'var(--d5-ink)',
-                  marginBottom: opt.subtitle ? 2 : 0,
+                  marginBottom: opt.subtitle ? '0.125rem' : 0,
                 }}>
                   {displayTitle}
                 </div>
                 {opt.subtitle && (
                   <div style={{
-                    fontSize: 10,
+                    fontSize: '0.625rem',
                     color: active ? 'var(--d5-paper-75)' : 'var(--d5-muted)',
                     fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
                   }}>
@@ -192,7 +192,7 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
       {/* ── Length ──────────────────────────────────────────────────── */}
       <div className="px-4">
         <p style={EYEBROW}>¿Cuántas frases?</p>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {LENGTHS.map((l) => {
             const active = length === l
             return (
@@ -202,10 +202,10 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
                 className="senda-focus-ring"
                 style={{
                   ...pillBase,
-                  padding: '0 16px',
+                  padding: '0 1rem',
                   background: active ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
                   color: active ? 'var(--d5-paper)' : 'var(--d5-pill-text)',
-                  fontSize: 12, fontWeight: active ? 700 : 500,
+                  fontSize: '0.75rem', fontWeight: active ? 700 : 500,
                 }}
               >
                 {l}
@@ -224,11 +224,11 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
             onChange={(e) => setShowHint(e.target.checked)}
             className="h-4 w-4 rounded accent-primary"
           />
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--d5-ink)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--d5-ink)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
             Mostrar pista del infinitivo
           </span>
         </label>
-        <p style={{ fontSize: 10, color: 'var(--d5-muted)', marginTop: 4, marginLeft: 28, fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+        <p style={{ fontSize: '0.625rem', color: 'var(--d5-muted)', marginTop: '0.25rem', marginLeft: '1.75rem', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
           Muestra el verbo entre corchetes junto al espacio en blanco.
         </p>
       </div>
@@ -242,7 +242,7 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
           className="senda-focus-ring"
           style={{
             background: 'var(--d5-terracotta)', color: 'var(--d5-paper)',
-            border: 'none', borderRadius: 99, padding: '12px 0', width: '100%',
+            border: 'none', borderRadius: 99, padding: '0.75rem 0', width: '100%',
             fontWeight: 700, fontSize: 14, cursor: 'pointer',
             fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
             transition: 'opacity 200ms ease-out',

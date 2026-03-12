@@ -4,11 +4,18 @@ import { createClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 
-webpush.setVapidDetails(
-  process.env.VAPID_EMAIL!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-)
+const vapidConfigured =
+  !!process.env.VAPID_EMAIL &&
+  !!process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY &&
+  !!process.env.VAPID_PRIVATE_KEY
+
+if (vapidConfigured) {
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!,
+  )
+}
 
 const BATCH_SIZE = 500
 
@@ -25,6 +32,10 @@ type SubscriberRow = {
 }
 
 export async function POST(request: Request) {
+  if (!vapidConfigured) {
+    return NextResponse.json({ error: 'Push not configured' }, { status: 503 })
+  }
+
   // Verify cron secret to prevent public abuse
   const authHeader = request.headers.get('Authorization')
   const cronSecret = process.env.CRON_SECRET

@@ -70,7 +70,7 @@ export function BottomNav() {
                 <Icon className="h-6 w-6" strokeWidth={1.5} />
               </span>
               <span
-                className={`text-[9px] leading-none
+                className={`text-[0.5625rem] leading-none
                   ${active ? 'font-bold' : 'font-medium'}`}
               >
                 {label}

@@ -59,7 +59,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
         </div>
         <div className="senda-dashed-input">
           <input
-            className="w-full border-0 bg-transparent text-base outline-none"
+            className="w-full border-0 bg-transparent text-base outline-none focus-visible:ring-2 focus-visible:ring-[var(--d5-terracotta)]"
             value={fallbackValue}
             onChange={(e) => setFallbackValue(e.target.value)}
             placeholder="Construye tu frase…"
@@ -107,7 +107,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
             key={i}
             type="button"
             onClick={() => !disabled && addWord(word, i)}
-            className="px-3 py-1 bg-[var(--d5-pill-bg)] text-[var(--d5-pill-text)] border border-[var(--d5-pill-border)] rounded-full text-sm hover:bg-[var(--d5-pill-bg)] disabled:opacity-50 active:scale-95 transition-transform"
+            className="px-3 py-1 bg-[var(--d5-pill-bg)] text-[var(--d5-pill-text)] border border-[var(--d5-pill-border)] rounded-full text-sm hover:bg-[var(--d5-pill-bg)] disabled:opacity-50 active:scale-95 transition-transform senda-focus-ring"
             disabled={disabled}
           >
             {word}

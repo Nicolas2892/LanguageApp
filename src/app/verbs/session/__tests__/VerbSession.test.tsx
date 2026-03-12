@@ -67,7 +67,7 @@ describe('VerbSession', () => {
       />
     )
 
-    await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablo')
+    await user.type(screen.getByPlaceholderText(/Escribe la forma conjugada/), 'hablo')
     await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
     expect(screen.getByText('¡Correcto!')).toBeInTheDocument()
@@ -84,7 +84,7 @@ describe('VerbSession', () => {
       />
     )
 
-    await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablo')
+    await user.type(screen.getByPlaceholderText(/Escribe la forma conjugada/), 'hablo')
     await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
     expect(screen.getByText(/Casi — revisa los acentos/)).toBeInTheDocument()
@@ -101,7 +101,7 @@ describe('VerbSession', () => {
       />
     )
 
-    await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablas')
+    await user.type(screen.getByPlaceholderText(/Escribe la forma conjugada/), 'hablas')
     await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
     expect(screen.getByText('Incorrecto')).toBeInTheDocument()
@@ -119,11 +119,11 @@ describe('VerbSession', () => {
       />
     )
 
-    await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablas')
+    await user.type(screen.getByPlaceholderText(/Escribe la forma conjugada/), 'hablas')
     await user.click(screen.getByRole('button', { name: /Comprobar/ }))
     await user.click(screen.getByTestId('try-again-btn'))
 
-    expect(screen.getByPlaceholderText(/Type the conjugated form/)).toHaveValue('')
+    expect(screen.getByPlaceholderText(/Escribe la forma conjugada/)).toHaveValue('')
     expect(screen.getByRole('button', { name: /Comprobar/ })).toBeInTheDocument()
   })
 
@@ -139,7 +139,7 @@ describe('VerbSession', () => {
     )
 
     // Give a wrong answer so we get manual Next (not auto-advance)
-    await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablas')
+    await user.type(screen.getByPlaceholderText(/Escribe la forma conjugada/), 'hablas')
     await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
     // Click "Finalizar sesión" on the last item
@@ -171,7 +171,7 @@ describe('VerbSession', () => {
       />
     )
 
-    await user.type(screen.getByPlaceholderText(/Type the conjugated form/), 'hablo')
+    await user.type(screen.getByPlaceholderText(/Escribe la forma conjugada/), 'hablo')
     await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
     expect(global.fetch).toHaveBeenCalledWith(
