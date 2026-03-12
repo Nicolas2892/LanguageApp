@@ -13,14 +13,15 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { GoogleButton } from '@/components/auth/GoogleButton'
 import { LogoMark } from '@/components/LogoMark'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 
 const schema = z.object({
-  display_name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  display_name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  email: z.string().email('Introduce un correo válido'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
   confirm_password: z.string(),
 }).refine((d) => d.password === d.confirm_password, {
-  message: 'Passwords do not match',
+  message: 'Las contraseñas no coinciden',
   path: ['confirm_password'],
 })
 
@@ -59,14 +60,14 @@ export default function SignupPage() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-sm shadow-lg">
           <CardHeader>
-            <CardTitle>One more step</CardTitle>
+            <CardTitle className="senda-heading text-2xl">Un paso más</CardTitle>
             <CardDescription>
-              We&apos;ve sent you a link. Click it and you&apos;re in — takes less than a minute.
+              Te hemos enviado un enlace. Haz clic y estás dentro — tarda menos de un minuto.
             </CardDescription>
           </CardHeader>
           <CardFooter>
-            <Button asChild className="w-full" variant="outline">
-              <Link href="/auth/login">Back to sign in</Link>
+            <Button asChild className="w-full rounded-full" variant="outline">
+              <Link href="/auth/login">Volver a iniciar sesión</Link>
             </Button>
           </CardFooter>
         </Card>
@@ -77,20 +78,13 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel — desktop only */}
-      <div className="hidden md:flex md:w-1/2 bg-foreground text-background flex-col items-center justify-center p-12 relative overflow-hidden">
-        {/* Faint Ñ letterform background */}
-        <span
-          aria-hidden="true"
-          className="absolute inset-0 flex items-center justify-center text-[32rem] font-extrabold leading-none select-none pointer-events-none"
-          style={{ color: 'rgba(255,255,255,0.04)' }}
-        >
-          Ñ
-        </span>
+      <div className="hidden md:flex md:w-1/2 bg-[var(--d5-ink)] text-[var(--d5-paper)] flex-col items-center justify-center p-12 relative overflow-hidden">
+        <BackgroundMagicS opacity={0.06} style={{ right: -40, top: -30, width: 280, height: 364 }} />
         <div className="relative z-10 space-y-4 text-center">
           <LogoMark size={56} />
-          <h1 className="text-3xl font-bold">Español Avanzado</h1>
+          <h1 className="senda-heading text-3xl text-[var(--d5-paper)]">Español Avanzado</h1>
           <p className="text-base opacity-70 max-w-xs leading-relaxed">
-            Advanced Spanish. Beautifully structured.
+            Español avanzado. Hermosamente estructurado.
           </p>
         </div>
       </div>
@@ -102,8 +96,8 @@ export default function SignupPage() {
             <div className="md:hidden">
               <LogoMark size={48} />
             </div>
-            <CardTitle className="text-2xl font-bold">Create account</CardTitle>
-            <CardDescription>B2 doesn&apos;t happen by accident.</CardDescription>
+            <CardTitle className="senda-heading text-2xl">Crear Cuenta</CardTitle>
+            <CardDescription>El B2 no sucede por accidente.</CardDescription>
           </CardHeader>
 
           {/* Google OAuth */}
@@ -114,7 +108,7 @@ export default function SignupPage() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">or</span>
+                <span className="bg-card px-2 text-muted-foreground">o</span>
               </div>
             </div>
           </CardContent>
@@ -125,10 +119,11 @@ export default function SignupPage() {
                 <p className="text-sm text-destructive">{serverError}</p>
               )}
               <div className="space-y-2">
-                <Label htmlFor="display_name">Name</Label>
+                <Label htmlFor="display_name">Nombre</Label>
                 <Input
                   id="display_name"
                   placeholder="Maria"
+                  className="senda-input"
                   {...register('display_name')}
                 />
                 {errors.display_name && (
@@ -136,11 +131,12 @@ export default function SignupPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
+                  className="senda-input"
                   {...register('email')}
                 />
                 {errors.email && (
@@ -148,10 +144,11 @@ export default function SignupPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Contraseña</Label>
                 <Input
                   id="password"
                   type="password"
+                  className="senda-input"
                   {...register('password')}
                 />
                 {errors.password && (
@@ -159,10 +156,11 @@ export default function SignupPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirm_password">Confirm password</Label>
+                <Label htmlFor="confirm_password">Confirmar contraseña</Label>
                 <Input
                   id="confirm_password"
                   type="password"
+                  className="senda-input"
                   {...register('confirm_password')}
                 />
                 {errors.confirm_password && (
@@ -172,12 +170,12 @@ export default function SignupPage() {
             </CardContent>
             <CardFooter className="flex flex-col gap-3">
               <Button type="submit" className="w-full rounded-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Creating account…' : 'Create account'}
+                {isSubmitting ? 'Creando cuenta…' : 'Crear cuenta'}
               </Button>
               <p className="text-sm text-muted-foreground text-center">
-                Already have an account?{' '}
-                <Link href="/auth/login" className="underline text-green-800 hover:text-green-900">
-                  Sign in
+                ¿Ya tienes cuenta?{' '}
+                <Link href="/auth/login" className="underline text-primary hover:text-primary/80">
+                  Inicia sesión
                 </Link>
               </p>
             </CardFooter>

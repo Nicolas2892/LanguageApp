@@ -74,13 +74,13 @@ export function PushPermissionPrompt() {
   return (
     <div className="border rounded-xl p-4 bg-card text-left space-y-3">
       <div className="flex items-start gap-3">
-        <div className="rounded-lg bg-green-100 dark:bg-green-950/40 p-2 shrink-0">
-          <Bell className="h-4 w-4 text-green-700 dark:text-green-400" strokeWidth={1.5} />
+        <div className="rounded-lg bg-primary/10 p-2 shrink-0">
+          <Bell className="h-4 w-4 text-primary" strokeWidth={1.5} />
         </div>
         <div>
-          <p className="text-sm font-semibold">Never miss a review</p>
+          <p className="text-sm font-semibold">No pierdas tu racha</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Get a daily reminder when your streak is at risk.
+            Recibe un recordatorio diario cuando tu racha esté en riesgo.
           </p>
         </div>
       </div>
@@ -91,14 +91,14 @@ export function PushPermissionPrompt() {
           className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-3 py-2 text-xs font-semibold hover:bg-primary/90 active:scale-95 transition-transform disabled:opacity-60"
         >
           <Bell className="h-3.5 w-3.5" strokeWidth={1.5} />
-          {subscribing ? 'Enabling…' : 'Enable notifications'}
+          {subscribing ? 'Activando…' : 'Activar notificaciones'}
         </button>
         <button
           onClick={handleDismiss}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted active:scale-95 transition-transform"
         >
           <BellOff className="h-3.5 w-3.5" strokeWidth={1.5} />
-          Not now
+          Ahora no
         </button>
       </div>
     </div>

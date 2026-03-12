@@ -14,7 +14,7 @@ const baseResult = {
 
 describe('FeedbackPanel', () => {
   it('shows score label for each score', () => {
-    const labels = ['Incorrect', 'Needs work', 'Good', 'Perfect'] as const
+    const labels = ['Incorrecto', 'A mejorar', 'Bien', 'Perfecto'] as const
     labels.forEach((label, score) => {
       const { unmount } = render(
         <FeedbackPanel
@@ -24,23 +24,23 @@ describe('FeedbackPanel', () => {
           isLast={false}
         />
       )
-      expect(screen.getByText(label)).toBeTruthy()
+      expect(screen.getByText(new RegExp(label))).toBeTruthy()
       unmount()
     })
   })
 
-  it('shows "Next →" when not last', () => {
+  it('shows "Siguiente →" when not last', () => {
     render(
       <FeedbackPanel result={baseResult} userAnswer="test" onNext={vi.fn()} isLast={false} />
     )
-    expect(screen.getByText('Next →')).toBeTruthy()
+    expect(screen.getByText('Siguiente →')).toBeTruthy()
   })
 
-  it('shows "Finish session" when last', () => {
+  it('shows "Finalizar sesión" when last', () => {
     render(
       <FeedbackPanel result={baseResult} userAnswer="test" onNext={vi.fn()} isLast={true} />
     )
-    expect(screen.getByText('Finish session')).toBeTruthy()
+    expect(screen.getByText('Finalizar sesión')).toBeTruthy()
   })
 
   it('calls onNext when Next button is clicked', async () => {
@@ -48,11 +48,11 @@ describe('FeedbackPanel', () => {
     render(
       <FeedbackPanel result={baseResult} userAnswer="test" onNext={onNext} isLast={false} />
     )
-    await userEvent.click(screen.getByText('Next →'))
+    await userEvent.click(screen.getByText('Siguiente →'))
     expect(onNext).toHaveBeenCalledOnce()
   })
 
-  it('shows Try again button when onTryAgain provided', () => {
+  it('shows Intentar de nuevo button when onTryAgain provided', () => {
     render(
       <FeedbackPanel
         result={baseResult}
@@ -62,10 +62,10 @@ describe('FeedbackPanel', () => {
         isLast={false}
       />
     )
-    expect(screen.getByText('Try again')).toBeTruthy()
+    expect(screen.getByText('Intentar de nuevo')).toBeTruthy()
   })
 
-  it('does not show correct answer when answer is correct', () => {
+  it('does not show correct answer label when answer is correct', () => {
     render(
       <FeedbackPanel
         result={{ ...baseResult, is_correct: true }}
@@ -89,10 +89,10 @@ describe('FeedbackPanel', () => {
     expect(screen.getByText('sin embargo')).toBeTruthy()
   })
 
-  it('shows next review countdown', () => {
+  it('shows next review countdown in Spanish', () => {
     render(
       <FeedbackPanel result={{ ...baseResult, next_review_in_days: 1 }} userAnswer="test" onNext={vi.fn()} isLast={false} />
     )
-    expect(screen.getByText(/Back in 1 day/)).toBeTruthy()
+    expect(screen.getByText(/Próxima revisión en 1 día/)).toBeTruthy()
   })
 })

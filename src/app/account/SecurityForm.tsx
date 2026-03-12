@@ -35,7 +35,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
 
     const emailRegex = /\S+@\S+\.\S+/
     if (!emailRegex.test(newEmail)) {
-      setEmailError('Please enter a valid email address.')
+      setEmailError('Introduce un correo válido.')
       return
     }
 
@@ -43,10 +43,10 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
     try {
       const { error } = await supabase.auth.updateUser({ email: newEmail })
       if (error) throw error
-      setEmailMessage('Confirmation email sent — check your inbox.')
+      setEmailMessage('Correo de confirmación enviado — revisa tu bandeja.')
       setNewEmail('')
     } catch (err) {
-      setEmailError(err instanceof Error ? err.message : 'Something went wrong.')
+      setEmailError(err instanceof Error ? err.message : 'Algo salió mal.')
     } finally {
       setEmailSaving(false)
     }
@@ -57,11 +57,11 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
     setPwdError(null)
 
     if (newPwd.length < 6) {
-      setPwdError('New password must be at least 6 characters.')
+      setPwdError('La nueva contraseña debe tener al menos 6 caracteres.')
       return
     }
     if (newPwd !== confirmPwd) {
-      setPwdError('Passwords do not match.')
+      setPwdError('Las contraseñas no coinciden.')
       return
     }
 
@@ -71,17 +71,17 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
         email: userEmail,
         password: currentPwd,
       })
-      if (signInError) throw new Error('Current password is incorrect.')
+      if (signInError) throw new Error('La contraseña actual es incorrecta.')
 
       const { error: updateError } = await supabase.auth.updateUser({ password: newPwd })
       if (updateError) throw updateError
 
-      setPwdMessage('Password updated.')
+      setPwdMessage('Contraseña actualizada.')
       setCurrentPwd('')
       setNewPwd('')
       setConfirmPwd('')
     } catch (err) {
-      setPwdError(err instanceof Error ? err.message : 'Something went wrong.')
+      setPwdError(err instanceof Error ? err.message : 'Algo salió mal.')
     } finally {
       setPwdSaving(false)
     }

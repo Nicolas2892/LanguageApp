@@ -39,7 +39,7 @@ export function WriteSession({ conceptIds, conceptInfos }: Props) {
       const data = await res.json() as { topic: string }
       setState({ phase: 'writing', prompt: data.topic })
     } catch {
-      setError('Could not generate a prompt. Please try again.')
+      setError('No se pudo generar un tema. Inténtalo de nuevo.')
       setState({ phase: 'writing', prompt: '' })
     }
   }, [conceptIds])
@@ -67,7 +67,7 @@ export function WriteSession({ conceptIds, conceptInfos }: Props) {
       const result = await res.json() as GradeResult & { next_review_in_days: number }
       setState({ phase: 'feedback', prompt, answer, result })
     } catch {
-      setError('Could not submit your answer. Please try again.')
+      setError('No se pudo enviar tu respuesta. Inténtalo de nuevo.')
       setState({ phase: 'writing', prompt })
     }
   }
@@ -91,8 +91,8 @@ export function WriteSession({ conceptIds, conceptInfos }: Props) {
             isLast={false}
           />
           <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="outline" onClick={fetchPrompt} className="flex-1">
-              Write another →
+            <Button variant="outline" onClick={fetchPrompt} className="flex-1 rounded-full">
+              Escribir otro →
             </Button>
           </div>
         </div>

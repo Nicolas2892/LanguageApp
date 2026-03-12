@@ -19,11 +19,11 @@ describe('VerbFeedbackPanel', () => {
         isLast={false}
       />
     )
-    expect(screen.getByText('Correct!')).toBeInTheDocument()
+    expect(screen.getByText('¡Correcto!')).toBeInTheDocument()
     expect(screen.getByText('habló')).toBeInTheDocument()
   })
 
-  it('renders accent_error state with Next button', async () => {
+  it('renders accent_error state with Siguiente button', async () => {
     const onNext = vi.fn()
     const user = userEvent.setup()
 
@@ -35,12 +35,12 @@ describe('VerbFeedbackPanel', () => {
         isLast={false}
       />
     )
-    expect(screen.getByText(/Almost — check your accents/)).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: /Next/ }))
+    expect(screen.getByText(/Casi — revisa los acentos/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Siguiente/ }))
     expect(onNext).toHaveBeenCalledOnce()
   })
 
-  it('renders accent_error Finish button on last item', () => {
+  it('renders accent_error Finalizar button on last item', () => {
     render(
       <VerbFeedbackPanel
         result={{ ...baseResult, outcome: 'accent_error' }}
@@ -49,7 +49,7 @@ describe('VerbFeedbackPanel', () => {
         isLast={true}
       />
     )
-    expect(screen.getByRole('button', { name: /Finish/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Finalizar sesión/ })).toBeInTheDocument()
   })
 
   it('renders incorrect state with tense rule and both buttons', async () => {
@@ -66,17 +66,17 @@ describe('VerbFeedbackPanel', () => {
       />
     )
 
-    expect(screen.getByText(/Not quite/)).toBeInTheDocument()
+    expect(screen.getByText('Incorrecto')).toBeInTheDocument()
     expect(screen.getByText(baseResult.tenseRule)).toBeInTheDocument()
 
     await user.click(screen.getByTestId('try-again-btn'))
     expect(onTryAgain).toHaveBeenCalledOnce()
 
-    await user.click(screen.getByRole('button', { name: /Next/ }))
+    await user.click(screen.getByRole('button', { name: /Siguiente/ }))
     expect(onNext).toHaveBeenCalledOnce()
   })
 
-  it('shows Finish instead of Next on last incorrect item', () => {
+  it('shows Finalizar instead of Siguiente on last incorrect item', () => {
     render(
       <VerbFeedbackPanel
         result={{ ...baseResult, outcome: 'incorrect' }}
@@ -85,6 +85,6 @@ describe('VerbFeedbackPanel', () => {
         isLast={true}
       />
     )
-    expect(screen.getByRole('button', { name: /Finish/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Finalizar sesión/ })).toBeInTheDocument()
   })
 })

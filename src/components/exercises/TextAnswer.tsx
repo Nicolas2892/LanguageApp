@@ -37,23 +37,25 @@ export function TextAnswer({ exercise, onSubmit, disabled }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-start gap-2">
-        <p className="text-xl leading-relaxed font-medium flex-1">
+        <p className="senda-heading text-base leading-relaxed flex-1">
           <AnnotatedText text={exercise.prompt} annotations={exercise.annotations} />
         </p>
         <SpeakButton text={exercise.prompt} />
       </div>
-      <Textarea
-        ref={textareaRef}
-        value={answer}
-        onChange={(e) => setAnswer(e.target.value)}
-        placeholder="Write your answer in Spanish…"
-        disabled={disabled}
-        autoFocus
-        className="text-base min-h-[6rem] overflow-hidden"
-        style={{ resize: 'none' }}
-      />
-      <Button type="submit" disabled={disabled || !answer.trim()} className="w-full">
-        Submit
+      <div className="senda-dashed-input">
+        <Textarea
+          ref={textareaRef}
+          value={answer}
+          onChange={(e) => setAnswer(e.target.value)}
+          placeholder="Escribe tu respuesta en español…"
+          disabled={disabled}
+          autoFocus
+          className="text-base min-h-[6rem] overflow-hidden border-0 shadow-none bg-transparent focus-visible:ring-0 px-0"
+          style={{ resize: 'none' }}
+        />
+      </div>
+      <Button type="submit" disabled={disabled || !answer.trim()} className="w-full rounded-full">
+        Confirmar →
       </Button>
     </form>
   )

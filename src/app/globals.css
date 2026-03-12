@@ -158,7 +158,7 @@
 
   /* BackgroundMagicS adaptive tokens */
   --d5-magic-stroke: var(--d5-muted);
-  --d5-magic-opacity: 0.03;
+  --d5-magic-opacity: 0.07;
 
   /* WindingPathSeparator adaptive opacity tokens */
   --d5-separator-opacity: 0.50;

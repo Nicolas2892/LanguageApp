@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
-import { Progress } from '@/components/ui/progress'
+import { SvgTilde } from '@/components/SvgTilde'
 import { SCORE_CONFIG } from '@/lib/scoring'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
@@ -40,7 +40,6 @@ export function DiagnosticSession({ items }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null)
 
   const current = items[index]
-  const progress = (index / items.length) * 100
 
   async function handleSubmit(answer: string) {
     setSubmitting(true)
@@ -67,7 +66,7 @@ export function DiagnosticSession({ items }: Props) {
       ])
       setState({ phase: 'feedback', result, userAnswer: answer })
     } catch {
-      setSubmitError('Something went wrong. Please try again.')
+      setSubmitError('Algo salió mal. Inténtalo de nuevo.')
     } finally {
       setSubmitting(false)
     }
@@ -99,9 +98,9 @@ export function DiagnosticSession({ items }: Props) {
   if (items.length === 0) {
     return (
       <div className="space-y-4 text-center py-8">
-        <p className="text-muted-foreground text-sm">
-          No diagnostic exercises found. Please contact support or{' '}
-          <a href="/dashboard" className="underline">skip to dashboard</a>.
+        <p className="text-sm text-[var(--d5-muted)]">
+          No se encontraron ejercicios de diagnóstico. Contacta soporte o{' '}
+          <a href="/dashboard" className="underline text-primary">ve al inicio</a>.
         </p>
       </div>
     )
@@ -110,10 +109,10 @@ export function DiagnosticSession({ items }: Props) {
   if (state.phase === 'done') {
     return (
       <div className="space-y-4 text-center py-8">
-        <div className="text-4xl">🎉</div>
-        <p className="font-semibold text-lg">All done — your study queue is being built.</p>
-        <p className="text-sm text-muted-foreground">
-          {completing ? 'Personalising your study queue…' : 'Redirecting to dashboard…'}
+        <div className="flex justify-center"><SvgTilde size={56} /></div>
+        <h2 className="senda-heading text-lg">¡Listo! Tu repaso se está construyendo.</h2>
+        <p className="text-sm text-[var(--d5-muted)]">
+          {completing ? 'Personalizando tu repaso…' : 'Redirigiendo al inicio…'}
         </p>
       </div>
     )
@@ -121,22 +120,19 @@ export function DiagnosticSession({ items }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Progress header */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-1.5">
-          {items.map((_, i) => (
-            <span
-              key={i}
-              className={`h-2 w-2 rounded-full inline-block ${i <= index ? 'bg-primary' : 'bg-muted'}`}
-            />
-          ))}
-        </div>
-        <Progress value={progress} className="h-2 transition-all duration-700" />
+      {/* Progress dots — segmented bar */}
+      <div className="flex gap-1">
+        {items.map((_, i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full ${i <= index ? 'bg-primary' : 'bg-[var(--d5-muted)]/30'}`}
+          />
+        ))}
       </div>
 
       {/* Concept context */}
-      <div className="bg-muted/50 rounded-lg p-4 text-sm space-y-1">
-        <p className="font-medium text-xs uppercase tracking-wide text-muted-foreground">Concept</p>
+      <div className="senda-card text-sm space-y-1">
+        <p className="senda-eyebrow">Concepto</p>
         <p>{current.concept.explanation}</p>
       </div>
 
@@ -146,7 +142,7 @@ export function DiagnosticSession({ items }: Props) {
           <>
             <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
             {submitting && (
-              <p className="text-sm text-muted-foreground animate-pulse">Thinking…</p>
+              <p className="text-sm text-[var(--d5-muted)] animate-pulse">Evaluando…</p>
             )}
             {submitError && (
               <p className="text-sm text-destructive">{submitError}</p>
@@ -157,12 +153,13 @@ export function DiagnosticSession({ items }: Props) {
         {state.phase === 'feedback' && (() => {
           const config = SCORE_CONFIG[state.result.score]
           return (
-            <div className="space-y-4">
-              {/* Score badge */}
+            <div className="senda-feedback-card space-y-4">
+              {/* Score badge + tilde */}
               <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold border ${config.className}`}>
+                <span className={`senda-score-pill ${config.className}`}>
                   {config.label}
                 </span>
+                <SvgTilde size={32} />
               </div>
 
               {/* Feedback */}
@@ -171,14 +168,14 @@ export function DiagnosticSession({ items }: Props) {
               {/* Answer comparison */}
               <div className="space-y-2 text-sm">
                 <div className="flex gap-2">
-                  <span className="text-muted-foreground w-28 shrink-0">Your answer:</span>
+                  <span className="text-[var(--d5-muted)] w-28 shrink-0">Tu respuesta:</span>
                   <span className={state.result.is_correct ? 'text-green-700' : 'text-red-700'}>
                     {state.userAnswer}
                   </span>
                 </div>
                 {!state.result.is_correct && (
                   <div className="flex gap-2">
-                    <span className="text-muted-foreground w-28 shrink-0">Correct:</span>
+                    <span className="text-[var(--d5-muted)] w-28 shrink-0">Correcto:</span>
                     <span className="text-green-700 font-medium">{state.result.corrected_version}</span>
                   </div>
                 )}
@@ -186,16 +183,16 @@ export function DiagnosticSession({ items }: Props) {
 
               {/* Explanation */}
               {state.result.explanation && (
-                <p className="text-sm text-muted-foreground border-l-2 pl-3 italic">
+                <p className="text-sm text-[var(--d5-muted)] border-l-2 border-l-primary pl-3 italic">
                   {state.result.explanation}
                 </p>
               )}
 
               <button
                 onClick={handleNext}
-                className="w-full inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-6 py-2 text-sm font-medium hover:bg-primary/90"
+                className="w-full inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-6 py-2 text-sm font-medium hover:bg-primary/90"
               >
-                {index + 1 >= items.length ? 'Finish diagnostic' : 'Next →'}
+                {index + 1 >= items.length ? 'Finalizar diagnóstico' : 'Siguiente →'}
               </button>
             </div>
           )

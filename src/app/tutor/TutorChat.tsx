@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { SvgSendaPath } from '@/components/SvgSendaPath'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 
 export interface Message {
   role: 'user' | 'assistant'
@@ -69,7 +71,7 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
         const updated = [...m]
         updated[updated.length - 1] = {
           role: 'assistant',
-          content: 'Something went wrong. Please try again.',
+          content: 'Algo salió mal. Inténtalo de nuevo.',
         }
         return updated
       })
@@ -89,18 +91,33 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
     <div className="flex flex-col h-full">
       {/* Concept badge */}
       {conceptTitle && (
-        <div className="px-4 py-2 bg-muted/50 border-b text-xs text-muted-foreground">
-          Context: <span className="font-medium text-foreground">{conceptTitle}</span>
+        <div
+          className="px-4 py-2 text-xs"
+          style={{
+            background: 'rgba(140,106,63,0.07)',
+            borderBottom: '1px solid var(--d5-line)',
+            color: 'var(--d5-warm)',
+          }}
+        >
+          Contexto: <span className="font-medium text-foreground">{conceptTitle}</span>
         </div>
       )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
         {messages.length === 0 && (
-          <div className="text-center text-muted-foreground text-sm pt-12 space-y-2">
-            <p className="text-2xl">💬</p>
-            <p>Ask me anything about Spanish grammar, your mistakes, or request more examples.</p>
-            <p className="text-xs">Shift+Enter for new line, Enter to send.</p>
+          <div className="relative overflow-hidden text-center pt-12 space-y-3">
+            <BackgroundMagicS />
+            <div className="flex justify-center">
+              <SvgSendaPath size={40} />
+            </div>
+            <p className="senda-heading text-xl">Pregunta lo que Quieras</p>
+            <p className="text-sm" style={{ color: 'var(--d5-warm)' }}>
+              Gramática, errores frecuentes, ejemplos… estoy aquí para ayudarte.
+            </p>
+            <p className="text-xs" style={{ color: 'var(--d5-muted)' }}>
+              Shift+Enter para nueva línea · Enter para enviar
+            </p>
           </div>
         )}
         {messages.map((msg, i) => (
@@ -112,7 +129,7 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
                 msg.role === 'user'
                   ? 'bg-primary text-primary-foreground rounded-br-sm'
-                  : 'bg-muted rounded-bl-sm'
+                  : 'senda-bubble rounded-bl-sm'
               }`}
             >
               {msg.content}
@@ -126,18 +143,21 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
       </div>
 
       {/* Input */}
-      <div className="border-t p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex gap-2 items-end">
+      <div
+        className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] flex gap-2 items-end"
+        style={{ borderTop: '1px solid var(--d5-line)' }}
+      >
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask your tutor…"
+          placeholder="Pregunta a tu tutor…"
           rows={2}
-          className="resize-none flex-1 text-sm"
+          className="senda-input resize-none flex-1 text-sm"
           disabled={streaming}
         />
         <Button onClick={handleSend} disabled={!input.trim() || streaming} className="shrink-0">
-          Send
+          Enviar
         </Button>
       </div>
     </div>

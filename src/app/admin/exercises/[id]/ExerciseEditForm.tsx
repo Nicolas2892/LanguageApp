@@ -119,7 +119,7 @@ export function ExerciseEditForm({ exercise }: Props) {
           {status === 'saving' ? 'Saving…' : 'Save changes'}
         </Button>
         {status === 'saved' && (
-          <p className="text-sm text-green-700 dark:text-green-400 font-medium">Saved ✓</p>
+          <p className="text-sm text-primary font-medium">Saved ✓</p>
         )}
       </div>
     </form>

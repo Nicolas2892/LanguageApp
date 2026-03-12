@@ -28,7 +28,7 @@ export function DangerZone() {
       if (!res.ok) throw new Error(data.error ?? 'Failed to delete account')
       router.push('/auth/login')
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Something went wrong.')
+      setDeleteError(err instanceof Error ? err.message : 'Algo salió mal.')
       setDeleting(false)
     }
   }

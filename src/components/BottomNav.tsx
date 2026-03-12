@@ -23,11 +23,11 @@ function TutorIcon({ className, strokeWidth = 1.5 }: { className?: string; strok
 }
 
 const TABS = [
-  { href: '/dashboard',       label: 'Home',       Icon: Home            },
-  { href: '/study/configure', label: 'Study',      Icon: StudyIcon       },
-  { href: '/curriculum',      label: 'Curriculum', Icon: ClipboardCheck  },
-  { href: '/verbs',           label: 'Verbs',      Icon: BookMarked      },
-  { href: '/progress',        label: 'Progress',   Icon: BarChart2       },
+  { href: '/dashboard',       label: 'Inicio',     Icon: Home            },
+  { href: '/study/configure', label: 'Estudio',    Icon: StudyIcon       },
+  { href: '/curriculum',      label: 'Currículo',  Icon: ClipboardCheck  },
+  { href: '/verbs',           label: 'Verbos',     Icon: BookMarked      },
+  { href: '/progress',        label: 'Progreso',   Icon: BarChart2       },
   { href: '/tutor',           label: 'Tutor',      Icon: TutorIcon       },
 ]
 const HIDDEN_ROUTES = ['/auth', '/onboarding', '/write', '/brand-preview', '/verbs/session', '/admin']
@@ -60,7 +60,7 @@ export function BottomNav() {
               href={href}
               className={`flex-1 flex flex-col items-center justify-center gap-1
                           transition-colors touch-manipulation
-                          ${active ? 'text-primary' : 'text-[#9ca3af]'}`}
+                          ${active ? 'text-primary' : 'text-[var(--d5-nav-inactive)]'}`}
             >
               {/* Pill: wider than tall, matching iOS active indicator proportions */}
               <span

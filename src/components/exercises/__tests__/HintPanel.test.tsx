@@ -21,9 +21,7 @@ describe('HintPanel', () => {
 
   it('renders dots row when wrongAttempts=0 and hint1 exists', () => {
     render(<HintPanel {...defaultProps} hint1="Think about connectors." />)
-    // Dots row is rendered — look for the "Hints:" label
-    expect(screen.getByText('Hints:')).toBeTruthy()
-    // Hint text itself is NOT shown yet
+    expect(screen.getByText('Pistas:')).toBeTruthy()
     expect(screen.queryByText('Think about connectors.')).toBeNull()
   })
 
@@ -31,35 +29,32 @@ describe('HintPanel', () => {
     const { container } = render(
       <HintPanel {...defaultProps} hint1="Hint one." hint2="Hint two." />
     )
-    // Both dots are rendered (grey border class when not revealed)
     const dots = container.querySelectorAll('.rounded-full.h-2.w-2')
     expect(dots.length).toBe(2)
   })
 
-  it('dot1 turns amber when wrongAttempts >= 1', () => {
+  it('dot1 turns warm when wrongAttempts >= 1', () => {
     const { container } = render(
       <HintPanel {...defaultProps} hint1="Hint one." wrongAttempts={1} />
     )
     const dots = container.querySelectorAll('.rounded-full.h-2.w-2')
-    expect(dots[0].className).toContain('bg-amber-400')
+    expect(dots[0].className).toContain('bg-[var(--d5-warm)]')
   })
 
-  it('dot2 turns amber when wrongAttempts >= 2', () => {
+  it('dot2 turns warm when wrongAttempts >= 2', () => {
     const { container } = render(
       <HintPanel {...defaultProps} hint1="Hint one." hint2="Hint two." wrongAttempts={2} />
     )
     const dots = container.querySelectorAll('.rounded-full.h-2.w-2')
-    expect(dots[1].className).toContain('bg-amber-400')
+    expect(dots[1].className).toContain('bg-[var(--d5-warm)]')
   })
 
   it('hint text is only shown after wrong attempts', () => {
-    // Before: hint text hidden
     const { rerender } = render(
       <HintPanel {...defaultProps} hint1="Think about this." wrongAttempts={0} />
     )
     expect(screen.queryByText('Think about this.')).toBeNull()
 
-    // After first wrong attempt: hint text shown
     rerender(
       <HintPanel {...defaultProps} hint1="Think about this." wrongAttempts={1} />
     )

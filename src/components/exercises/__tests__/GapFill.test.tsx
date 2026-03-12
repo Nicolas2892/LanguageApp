@@ -116,7 +116,7 @@ describe('GapFill — single-blank inline mode', () => {
     const exercise = makeExercise({ prompt: 'La película es larga; ___, me gustó.' })
     render(<GapFill exercise={exercise} onSubmit={vi.fn()} />)
     expect(screen.getByLabelText('Your answer')).toBeTruthy()
-    expect(screen.queryByPlaceholderText('Type your answer…')).toBeNull()
+    expect(screen.queryByPlaceholderText('Escribe tu respuesta…')).toBeNull()
   })
 
   it('calls onSubmit with trimmed plain string', async () => {
@@ -128,7 +128,7 @@ describe('GapFill — single-blank inline mode', () => {
       />
     )
     await userEvent.type(screen.getByLabelText('Your answer'), '  soy  ')
-    await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledWith('soy')
   })
 
@@ -139,7 +139,7 @@ describe('GapFill — single-blank inline mode', () => {
         onSubmit={vi.fn()}
       />
     )
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()
   })
 
   it('disables input and button when disabled=true', () => {
@@ -151,7 +151,7 @@ describe('GapFill — single-blank inline mode', () => {
       />
     )
     expect(screen.getByLabelText('Your answer')).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()
   })
 
   it('Enter key in single blank moves focus to Submit button', async () => {
@@ -164,7 +164,7 @@ describe('GapFill — single-blank inline mode', () => {
     const blank = screen.getByLabelText('Your answer')
     await userEvent.type(blank, 'hacía')
     await userEvent.keyboard('{Enter}')
-    expect(screen.getByRole('button', { name: 'Submit' })).toHaveFocus()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).toHaveFocus()
   })
 })
 
@@ -174,7 +174,7 @@ describe('GapFill — zero-blank fallback', () => {
   it('renders prompt as <p> and a separate input below when no blanks present', () => {
     const exercise = makeExercise({ prompt: 'La película es muy larga. Me ha gustado mucho.' })
     render(<GapFill exercise={exercise} onSubmit={vi.fn()} />)
-    expect(screen.getByPlaceholderText('Type your answer…')).toBeTruthy()
+    expect(screen.getByPlaceholderText('Escribe tu respuesta…')).toBeTruthy()
   })
 })
 
@@ -192,7 +192,7 @@ describe('GapFill — multi-blank mode', () => {
     )
     expect(screen.getByLabelText('Blank 1')).toBeTruthy()
     expect(screen.getByLabelText('Blank 2')).toBeTruthy()
-    expect(screen.queryByPlaceholderText('Type your answer…')).toBeNull()
+    expect(screen.queryByPlaceholderText('Escribe tu respuesta…')).toBeNull()
   })
 
   it('each input has correct aria-label', () => {
@@ -215,7 +215,7 @@ describe('GapFill — multi-blank mode', () => {
         onSubmit={vi.fn()}
       />
     )
-    const submitBtn = screen.getByRole('button', { name: 'Submit' })
+    const submitBtn = screen.getByRole('button', { name: 'Confirmar →' })
     expect(submitBtn).toBeDisabled()
 
     // Fill only first blank — still disabled
@@ -237,7 +237,7 @@ describe('GapFill — multi-blank mode', () => {
     )
     await userEvent.type(screen.getByLabelText('Blank 1'), '  sin embargo  ')
     await userEvent.type(screen.getByLabelText('Blank 2'), '  aunque  ')
-    await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledWith('sin embargo | aunque')
   })
 
@@ -251,7 +251,7 @@ describe('GapFill — multi-blank mode', () => {
     )
     expect(screen.getByLabelText('Blank 1')).toBeDisabled()
     expect(screen.getByLabelText('Blank 2')).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()
   })
 
   it('Enter in first blank moves focus to second blank', async () => {
@@ -278,6 +278,6 @@ describe('GapFill — multi-blank mode', () => {
     await userEvent.type(screen.getByLabelText('Blank 1'), 'Aunque')
     await userEvent.type(screen.getByLabelText('Blank 2'), 'Sin embargo')
     await userEvent.keyboard('{Enter}')
-    expect(screen.getByRole('button', { name: 'Submit' })).toHaveFocus()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).toHaveFocus()
   })
 })

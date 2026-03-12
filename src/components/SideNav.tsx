@@ -5,11 +5,11 @@ import { UserAvatar } from '@/components/UserAvatar'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 
 const NAV_ITEMS = [
-  { href: '/dashboard',       label: 'Home'       },
-  { href: '/study/configure', label: 'Study'      },
-  { href: '/curriculum',      label: 'Curriculum' },
-  { href: '/verbs',           label: 'Verbs'       },
-  { href: '/progress',        label: 'Progress'   },
+  { href: '/dashboard',       label: 'Inicio'     },
+  { href: '/study/configure', label: 'Estudio'    },
+  { href: '/curriculum',      label: 'Currículo'  },
+  { href: '/verbs',           label: 'Verbos'     },
+  { href: '/progress',        label: 'Progreso'   },
   { href: '/tutor',           label: 'Tutor'      },
 ]
 
@@ -105,7 +105,7 @@ export function SideNav({ userInitials }: Props) {
             }}
           />
           <UserAvatar initials={userInitials} size="sm" />
-          Account
+          Cuenta
         </Link>
       </div>
     </aside>

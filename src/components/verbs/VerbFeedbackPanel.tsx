@@ -1,4 +1,7 @@
-import { CheckCircle, AlertCircle, XCircle } from 'lucide-react'
+'use client'
+
+import { Button } from '@/components/ui/button'
+import { SvgTilde } from '@/components/SvgTilde'
 import type { VerbGradeResult } from '@/lib/verbs/grader'
 
 interface Props {
@@ -11,67 +14,72 @@ interface Props {
 export function VerbFeedbackPanel({ result, onNext, onTryAgain, isLast }: Props) {
   const { outcome, userAnswer, correctForm, tenseRule } = result
 
-  if (outcome === 'correct') {
-    return (
-      <div className="rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 p-4 space-y-1">
-        <div className="flex items-center gap-2 text-green-700 dark:text-green-400 font-semibold text-sm">
-          <CheckCircle className="h-4 w-4 shrink-0" />
-          Correct!
-        </div>
-        <p className="text-sm text-green-800 dark:text-green-300 font-medium">{correctForm}</p>
-      </div>
-    )
+  const pillConfig = {
+    correct: { label: '¡Correcto!', bg: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' },
+    accent_error: { label: 'Casi — revisa los acentos', bg: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' },
+    incorrect: { label: 'Incorrecto', bg: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' },
   }
+  const pill = pillConfig[outcome]
 
-  if (outcome === 'accent_error') {
-    return (
-      <div className="rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4 space-y-2">
-        <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-semibold text-sm">
-          <AlertCircle className="h-4 w-4 shrink-0" />
-          Almost — check your accents
-        </div>
-        <p className="text-sm text-muted-foreground">
-          You wrote: <span className="font-medium text-foreground">{userAnswer}</span>
-          {' '}· Correct: <span className="font-medium text-foreground">{correctForm}</span>
-        </p>
-        <button
-          onClick={onNext}
-          className="mt-1 w-full rounded-xl bg-amber-500 text-white py-2.5 text-sm font-semibold hover:bg-amber-600 transition-colors"
-        >
-          {isLast ? 'Finish →' : 'Next →'}
-        </button>
-      </div>
-    )
-  }
-
-  // incorrect
   return (
-    <div className="rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 p-4 space-y-2">
-      <div className="flex items-center gap-2 text-red-700 dark:text-red-400 font-semibold text-sm">
-        <XCircle className="h-4 w-4 shrink-0" />
-        Not quite
+    <div className="senda-feedback-card space-y-4">
+      {/* Tilde ornament */}
+      <div className="flex justify-center">
+        <SvgTilde size={52} />
       </div>
-      <p className="text-sm text-muted-foreground">
-        Correct form: <span className="font-medium text-foreground">{correctForm}</span>
-      </p>
-      {tenseRule && (
-        <p className="text-xs text-muted-foreground border-t pt-2 mt-1">{tenseRule}</p>
+
+      {/* Outcome pill */}
+      <div>
+        <span className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${pill.bg}`}>
+          {pill.label}
+        </span>
+      </div>
+
+      {/* Answer display */}
+      <div className="space-y-2 text-sm">
+        {outcome === 'correct' ? (
+          <div className="senda-heading text-lg text-primary">{correctForm}</div>
+        ) : (
+          <>
+            {outcome === 'accent_error' && (
+              <p className="text-xs text-[var(--d5-muted)]">
+                Tu respuesta: <span className="line-through decoration-1">{userAnswer}</span>
+              </p>
+            )}
+            <div className="senda-heading text-lg text-primary">{correctForm}</div>
+          </>
+        )}
+      </div>
+
+      {/* Tense rule explanation */}
+      {outcome === 'incorrect' && tenseRule && (
+        <>
+          <div className="h-px bg-[var(--d5-muted)] opacity-25" />
+          <p className="text-sm text-[var(--d5-muted)] italic">{tenseRule}</p>
+        </>
       )}
-      <div className="flex gap-2 pt-1">
-        <button
-          onClick={onTryAgain}
-          data-testid="try-again-btn"
-          className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium hover:bg-muted transition-colors"
-        >
-          Try Again
-        </button>
-        <button
-          onClick={onNext}
-          className="flex-1 rounded-xl bg-primary text-primary-foreground py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors"
-        >
-          {isLast ? 'Finish →' : 'Next →'}
-        </button>
-      </div>
+
+      {/* Buttons — only for non-correct outcomes (correct auto-advances) */}
+      {outcome !== 'correct' && (
+        <div className="flex flex-col gap-2 pt-1">
+          <Button
+            onClick={onNext}
+            className="w-full rounded-full active:scale-95 transition-transform"
+          >
+            {isLast ? 'Finalizar sesión' : 'Siguiente →'}
+          </Button>
+          {outcome === 'incorrect' && (
+            <Button
+              variant="outline"
+              onClick={onTryAgain}
+              data-testid="try-again-btn"
+              className="w-full rounded-full border-primary text-primary hover:bg-primary/5"
+            >
+              Intentar de nuevo
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -54,18 +54,20 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
     return (
       <form onSubmit={(e) => { e.preventDefault(); onSubmit(fallbackValue.trim()) }} className="space-y-4">
         <div className="flex items-start gap-2">
-          <p className="text-xl leading-relaxed font-medium flex-1">{exercise.prompt}</p>
+          <p className="senda-heading text-base leading-relaxed flex-1">{exercise.prompt}</p>
           <SpeakButton text={exercise.prompt} />
         </div>
-        <input
-          className="w-full border rounded-md px-3 py-2 text-base"
-          value={fallbackValue}
-          onChange={(e) => setFallbackValue(e.target.value)}
-          placeholder="Build your sentence…"
-          disabled={disabled}
-          autoFocus
-        />
-        <Button type="submit" disabled={disabled || !fallbackValue.trim()} className="w-full">Submit</Button>
+        <div className="senda-dashed-input">
+          <input
+            className="w-full border-0 bg-transparent text-base outline-none"
+            value={fallbackValue}
+            onChange={(e) => setFallbackValue(e.target.value)}
+            placeholder="Construye tu frase…"
+            disabled={disabled}
+            autoFocus
+          />
+        </div>
+        <Button type="submit" disabled={disabled || !fallbackValue.trim()} className="w-full rounded-full">Confirmar →</Button>
       </form>
     )
   }
@@ -74,23 +76,23 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
     <form onSubmit={handleSubmit} className="space-y-4">
       {/* Instruction (strip the bracket part) */}
       <div className="flex items-start gap-2">
-        <p className="text-xl leading-relaxed font-medium flex-1">
+        <p className="senda-heading text-base leading-relaxed flex-1">
           {exercise.prompt.replace(/\s*\[[^\]]+\]/, '')}
         </p>
         <SpeakButton text={exercise.prompt.replace(/\s*\[[^\]]+\]/, '')} />
       </div>
 
       {/* Construction area */}
-      <div className="min-h-12 border-2 border-dashed rounded-lg p-3 flex flex-wrap gap-2 bg-muted/30">
+      <div className="senda-dashed-input min-h-12 flex flex-wrap gap-2">
         {selected.length === 0 && (
-          <span className="text-sm text-muted-foreground self-center">Click words below to build your sentence…</span>
+          <span className="text-sm text-[var(--d5-muted)] self-center">Toca las palabras para construir tu frase…</span>
         )}
         {selected.map((word, i) => (
           <button
             key={i}
             type="button"
             onClick={() => !disabled && removeWord(i)}
-            className="px-3 py-1 bg-green-800 dark:bg-green-700 text-white rounded-full text-sm font-medium hover:bg-green-900 dark:hover:bg-green-600 disabled:opacity-50 active:scale-95 transition-transform"
+            className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 disabled:opacity-50 active:scale-95 transition-transform"
             disabled={disabled}
           >
             {word}
@@ -105,7 +107,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
             key={i}
             type="button"
             onClick={() => !disabled && addWord(word, i)}
-            className="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-sm hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 active:scale-95 transition-transform"
+            className="px-3 py-1 bg-[var(--d5-pill-bg)] text-[var(--d5-pill-text)] border border-[var(--d5-pill-border)] rounded-full text-sm hover:bg-[var(--d5-pill-bg)] disabled:opacity-50 active:scale-95 transition-transform"
             disabled={disabled}
           >
             {word}
@@ -119,11 +121,12 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
           variant="outline"
           onClick={() => { setSelected([]); setRemaining(words) }}
           disabled={disabled || selected.length === 0}
+          className="rounded-full"
         >
-          Reset
+          Reiniciar
         </Button>
-        <Button type="submit" disabled={disabled || selected.length === 0} className="flex-1">
-          Submit
+        <Button type="submit" disabled={disabled || selected.length === 0} className="flex-1 rounded-full">
+          Confirmar →
         </Button>
       </div>
     </form>

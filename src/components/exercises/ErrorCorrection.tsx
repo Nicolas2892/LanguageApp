@@ -65,14 +65,14 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-start gap-2">
-        <p className="text-xl leading-relaxed flex-1">{exercise.prompt}</p>
+        <p className="senda-heading text-base leading-relaxed flex-1">{exercise.prompt}</p>
         <SpeakButton text={exercise.prompt} />
       </div>
 
       {erroneous && (
-        <div className="bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-md p-3 text-sm text-red-900 dark:text-red-300">
-          <span className="font-semibold">Erroneous sentence: </span>
-          <span className="italic">
+        <div className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200/60 dark:border-red-800/40 p-3 text-sm">
+          <span className="font-semibold text-[var(--d5-warm)]">Frase errónea: </span>
+          <span className="italic text-foreground">
             <AnnotatedText
               text={erroneous}
               annotations={sliceAnnotationsForSentence(exercise.annotations, exercise.prompt, erroneous)}
@@ -82,21 +82,23 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
       )}
 
       <div className="space-y-1">
-        <p className="text-xs text-muted-foreground">Type the corrected sentence below:</p>
-        <Textarea
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Type the corrected sentence…"
-          disabled={disabled}
-          autoFocus
-          rows={3}
-          className="text-base resize-none"
-        />
+        <p className="text-xs text-[var(--d5-muted)]">Escribe la frase corregida:</p>
+        <div className="senda-dashed-input">
+          <Textarea
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="Escribe la frase corregida…"
+            disabled={disabled}
+            autoFocus
+            rows={3}
+            className="text-base resize-none border-0 shadow-none bg-transparent focus-visible:ring-0 px-0"
+          />
+        </div>
       </div>
 
       <div className="flex gap-2">
-        <Button type="submit" disabled={disabled || !value.trim()} className="flex-1">
-          Submit
+        <Button type="submit" disabled={disabled || !value.trim()} className="flex-1 rounded-full">
+          Confirmar →
         </Button>
       </div>
     </form>

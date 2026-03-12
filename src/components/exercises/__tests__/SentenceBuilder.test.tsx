@@ -60,7 +60,7 @@ describe('SentenceBuilder', () => {
 
   it('submit is disabled before any word is selected', () => {
     render(<SentenceBuilder exercise={makeExercise()} onSubmit={vi.fn()} />)
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()
   })
 
   it('adds word to selected area when chip is clicked', async () => {
@@ -71,7 +71,7 @@ describe('SentenceBuilder', () => {
     )
     await userEvent.click(chipButtons[0])
     // After clicking one word, Submit should become enabled
-    expect(screen.getByRole('button', { name: 'Submit' })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).not.toBeDisabled()
   })
 
   it('calls onSubmit with joined selected words', async () => {
@@ -80,13 +80,13 @@ describe('SentenceBuilder', () => {
     // Click each word from the bank individually — re-query each time since
     // clicking moves the button from word bank → selected area
     for (const word of ['llueve', 'hace', 'frío', 'mucho']) {
-      // Only click buttons in the word bank (bg-gray-100), not in the selected area (bg-orange)
+      // Only click buttons in the word bank (pill-bg), not in the selected area (bg-primary)
       const bankButtons = screen.getAllByRole('button').filter(
-        (b) => b.textContent === word && b.className.includes('bg-gray')
+        (b) => b.textContent === word && !b.className.includes('bg-primary')
       )
       if (bankButtons.length > 0) await userEvent.click(bankButtons[0])
     }
-    await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledOnce()
     const submitted = (onSubmit.mock.calls[0][0] as string).split(' ')
     expect(submitted).toHaveLength(4)
@@ -94,6 +94,6 @@ describe('SentenceBuilder', () => {
 
   it('disables chips and submit when disabled=true', () => {
     render(<SentenceBuilder exercise={makeExercise()} onSubmit={vi.fn()} disabled={true} />)
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()
   })
 })

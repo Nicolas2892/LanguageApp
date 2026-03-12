@@ -39,7 +39,7 @@ export function AccountForm({ profile }: Props) {
 
     const goalNum = parseInt(goalMinutes, 10)
     if (isNaN(goalNum) || goalNum < 5 || goalNum > 120) {
-      setError('Daily goal must be between 5 and 120 minutes.')
+      setError('La meta diaria debe estar entre 5 y 120 minutos.')
       setSaving(false)
       return
     }
@@ -56,11 +56,11 @@ export function AccountForm({ profile }: Props) {
       })
       if (!res.ok) {
         const data = await res.json() as { error?: string }
-        throw new Error(data.error ?? 'Failed to save')
+        throw new Error(data.error ?? 'Error al guardar')
       }
       setSaved(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      setError(err instanceof Error ? err.message : 'Algo salió mal.')
     } finally {
       setSaving(false)
     }

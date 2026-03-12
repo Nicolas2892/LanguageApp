@@ -62,7 +62,7 @@ export function VerbTenseChart({ summaries }: Props) {
             dataKey="pct"
             position="right"
             formatter={(v: unknown) => `${v}%`}
-            style={{ fontSize: 11, fill: '#6b7280' }}
+            style={{ fontSize: 11, fill: 'var(--d5-warm)' }}
           />
         </Bar>
       </BarChart>

@@ -37,34 +37,34 @@ describe('ErrorCorrection', () => {
 
   it('extracts and displays the erroneous sentence', () => {
     render(<ErrorCorrection exercise={makeExercise()} onSubmit={vi.fn()} />)
-    expect(screen.getByText(/Erroneous sentence/)).toBeTruthy()
+    expect(screen.getByText(/Frase errónea/)).toBeTruthy()
   })
 
   it('submit button is disabled when textarea is empty', () => {
     render(<ErrorCorrection exercise={makeExercise()} onSubmit={vi.fn()} />)
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()
   })
 
   it('enables submit button once text is entered', async () => {
     render(<ErrorCorrection exercise={makeExercise()} onSubmit={vi.fn()} />)
-    const textarea = screen.getByPlaceholderText('Type the corrected sentence…')
+    const textarea = screen.getByPlaceholderText('Escribe la frase corregida…')
     await userEvent.type(textarea, 'El niño come muchos dulces.')
-    expect(screen.getByRole('button', { name: 'Submit' })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).not.toBeDisabled()
   })
 
   it('calls onSubmit with trimmed value', async () => {
     const onSubmit = vi.fn()
     render(<ErrorCorrection exercise={makeExercise()} onSubmit={onSubmit} />)
-    const textarea = screen.getByPlaceholderText('Type the corrected sentence…')
+    const textarea = screen.getByPlaceholderText('Escribe la frase corregida…')
     await userEvent.type(textarea, 'El niño come dulces.')
-    await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledWith('El niño come dulces.')
   })
 
   it('disables textarea and submit when disabled=true', () => {
     render(<ErrorCorrection exercise={makeExercise()} onSubmit={vi.fn()} disabled={true} />)
-    expect(screen.getByPlaceholderText('Type the corrected sentence…')).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+    expect(screen.getByPlaceholderText('Escribe la frase corregida…')).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()
   })
 
   it('renders SpeakButton with Play audio label', () => {

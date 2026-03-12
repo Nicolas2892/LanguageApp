@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { TutorChat } from './TutorChat'
 
 export default async function TutorPage({
@@ -26,9 +27,15 @@ export default async function TutorPage({
   return (
     <div className="flex flex-col h-[100dvh] pb-[calc(3.125rem+env(safe-area-inset-bottom))] lg:pb-0">
       {/* Header */}
-      <header className="px-4 py-3 border-b shrink-0">
-        <h1 className="font-semibold">AI Tutor</h1>
-        <p className="text-xs text-muted-foreground">Powered by Claude</p>
+      <header
+        className="px-4 py-3 shrink-0 flex items-center gap-3"
+        style={{ borderBottom: '1px solid var(--d5-line)' }}
+      >
+        <SvgSendaPath size={24} />
+        <div>
+          <p className="senda-eyebrow">Tu Tutor de Español</p>
+          <h1 className="senda-heading text-xl">Tutor IA</h1>
+        </div>
       </header>
 
       {/* Chat fills remaining height */}

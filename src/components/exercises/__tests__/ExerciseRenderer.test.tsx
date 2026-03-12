@@ -51,7 +51,7 @@ describe('ExerciseRenderer', () => {
       />
     )
     await userEvent.type(screen.getByLabelText('Your answer'), 'soy')
-    await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledWith('soy')
   })
 
@@ -78,7 +78,7 @@ describe('ExerciseRenderer', () => {
     )
     await userEvent.type(screen.getByLabelText('Blank 1'), 'Aunque')
     await userEvent.type(screen.getByLabelText('Blank 2'), 'Sin embargo')
-    await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledWith('Aunque | Sin embargo')
   })
 
@@ -92,7 +92,7 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    expect(screen.getByPlaceholderText('Write your answer in Spanish…').tagName).toBe('TEXTAREA')
+    expect(screen.getByPlaceholderText('Escribe tu respuesta en español…').tagName).toBe('TEXTAREA')
   })
 
   // --- translation → TextAnswer ---
@@ -105,7 +105,7 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    expect(screen.getByPlaceholderText('Write your answer in Spanish…').tagName).toBe('TEXTAREA')
+    expect(screen.getByPlaceholderText('Escribe tu respuesta en español…').tagName).toBe('TEXTAREA')
   })
 
   // --- free_write → TextAnswer ---
@@ -118,7 +118,7 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    expect(screen.getByPlaceholderText('Write your answer in Spanish…').tagName).toBe('TEXTAREA')
+    expect(screen.getByPlaceholderText('Escribe tu respuesta en español…').tagName).toBe('TEXTAREA')
   })
 
   // --- error_correction → ErrorCorrection ---
@@ -136,7 +136,7 @@ describe('ExerciseRenderer', () => {
     const textarea = screen.getByRole('textbox') as HTMLTextAreaElement
     expect(textarea.value).toBe('')
     // Erroneous sentence shown in read-only callout only
-    expect(screen.getByText('Erroneous sentence:')).toBeTruthy()
+    expect(screen.getByText(/Frase errónea/)).toBeTruthy()
   })
 
   // --- sentence_builder → SentenceBuilder ---
@@ -170,7 +170,7 @@ describe('ExerciseRenderer', () => {
     const yoBtn = screen.getByRole('button', { name: 'yo' })
     await userEvent.click(yoBtn)
     // Submit button should now be enabled (something selected)
-    expect(screen.getByRole('button', { name: 'Submit' })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar →' })).not.toBeDisabled()
   })
 
   // --- disabled prop propagation ---
@@ -183,7 +183,7 @@ describe('ExerciseRenderer', () => {
         disabled={true}
       />
     )
-    expect(screen.getByPlaceholderText('Type your answer…')).toBeDisabled()
+    expect(screen.getByPlaceholderText('Escribe tu respuesta…')).toBeDisabled()
   })
 
   it('disables TextAnswer submit when disabled=true', () => {
@@ -194,7 +194,7 @@ describe('ExerciseRenderer', () => {
         disabled={true}
       />
     )
-    expect(screen.getByPlaceholderText('Write your answer in Spanish…')).toBeDisabled()
+    expect(screen.getByPlaceholderText('Escribe tu respuesta en español…')).toBeDisabled()
   })
 
   it('disables ErrorCorrection controls when disabled=true', () => {
@@ -218,6 +218,6 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    expect(screen.getByPlaceholderText('Write your answer in Spanish…')).toBeTruthy()
+    expect(screen.getByPlaceholderText('Escribe tu respuesta en español…')).toBeTruthy()
   })
 })

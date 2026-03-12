@@ -40,7 +40,7 @@ describe('SecurityForm', () => {
     await userEvent.type(screen.getByLabelText('Nuevo correo'), 'new@example.com')
     await userEvent.click(screen.getByRole('button', { name: 'Actualizar correo' }))
     await waitFor(() => {
-      expect(screen.getByText(/Confirmation email sent/)).toBeTruthy()
+      expect(screen.getByText(/Correo de confirmación enviado/)).toBeTruthy()
     })
   })
 
@@ -73,7 +73,7 @@ describe('SecurityForm', () => {
     await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'abc')
     await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'abc')
     await userEvent.click(screen.getByRole('button', { name: 'Actualizar contraseña' }))
-    expect(screen.getByText('New password must be at least 6 characters.')).toBeTruthy()
+    expect(screen.getByText('La nueva contraseña debe tener al menos 6 caracteres.')).toBeTruthy()
     expect(mockSignInWithPassword).not.toHaveBeenCalled()
   })
 
@@ -83,7 +83,7 @@ describe('SecurityForm', () => {
     await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'newpassword123')
     await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'differentpassword')
     await userEvent.click(screen.getByRole('button', { name: 'Actualizar contraseña' }))
-    expect(screen.getByText('Passwords do not match.')).toBeTruthy()
+    expect(screen.getByText('Las contraseñas no coinciden.')).toBeTruthy()
     expect(mockSignInWithPassword).not.toHaveBeenCalled()
   })
 
@@ -112,7 +112,7 @@ describe('SecurityForm', () => {
     await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'newpassword123')
     await userEvent.click(screen.getByRole('button', { name: 'Actualizar contraseña' }))
     await waitFor(() => {
-      expect(screen.getByText('Current password is incorrect.')).toBeTruthy()
+      expect(screen.getByText('La contraseña actual es incorrecta.')).toBeTruthy()
     })
     expect(mockUpdateUser).not.toHaveBeenCalled()
   })
@@ -123,7 +123,7 @@ describe('SecurityForm', () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
     await userEvent.type(screen.getByLabelText('Nuevo correo'), 'notanemail')
     await userEvent.click(screen.getByRole('button', { name: 'Actualizar correo' }))
-    expect(screen.getByText('Please enter a valid email address.')).toBeTruthy()
+    expect(screen.getByText('Introduce un correo válido.')).toBeTruthy()
     expect(mockUpdateUser).not.toHaveBeenCalled()
   })
 

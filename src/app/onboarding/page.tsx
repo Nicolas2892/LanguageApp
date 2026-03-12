@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DiagnosticSession } from './DiagnosticSession'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
+import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { DIAGNOSTIC_CONCEPT_TITLES } from './diagnosticConcepts'
 import type { Concept, Exercise, Profile } from '@/lib/supabase/types'
 
@@ -56,14 +58,16 @@ export default async function OnboardingPage() {
 
   return (
     <main className="min-h-screen flex items-start justify-center bg-background">
-      <div className="w-full max-w-xl mx-auto p-6 md:p-10">
-        <div className="mb-8 space-y-1.5">
-          <h1 className="text-2xl font-bold">Welcome! Let&apos;s see where you are.</h1>
-          <p className="text-muted-foreground text-sm">
-            Answer these {items.length} questions — no hints, no pressure. Your results will
-            personalise your study queue from the start.
+      <div className="relative overflow-hidden w-full max-w-xl mx-auto p-6 md:p-10">
+        <BackgroundMagicS />
+        <div className="relative mb-8 space-y-2">
+          <SvgSendaPath size={28} />
+          <h1 className="senda-heading text-2xl">¡Bienvenido! Veamos tu nivel.</h1>
+          <p className="text-sm text-[var(--d5-muted)]">
+            Responde estas {items.length} preguntas — sin pistas, sin presión. Tus resultados
+            personalizarán tu repaso desde el inicio.
           </p>
-          <p className="text-xs text-muted-foreground">Takes about 3 minutes.</p>
+          <p className="text-xs text-[var(--d5-muted)]">Tarda unos 3 minutos.</p>
         </div>
         <ErrorBoundary>
           <DiagnosticSession items={items} />

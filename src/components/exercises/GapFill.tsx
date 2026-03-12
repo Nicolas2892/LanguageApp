@@ -118,7 +118,7 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-start gap-2">
         {hasInlineBlanks ? (
-          <div className="text-xl leading-relaxed font-medium flex-1 flex flex-wrap items-baseline gap-x-1 gap-y-2">
+          <div className="senda-heading text-base leading-relaxed flex-1 flex flex-wrap items-baseline gap-x-1 gap-y-2" style={{ fontWeight: 600 }}>
             {segments.map((segment, i) => (
               <Fragment key={i}>
                 <span>
@@ -144,18 +144,18 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
                       setAnswers(next)
                     }}
                     onKeyDown={handleKeyDown(i)}
-                    aria-label={blankCount > 1 ? `Blank ${i + 1}` : 'Your answer'}
+                    aria-label={blankCount > 1 ? `Hueco ${i + 1}` : 'Tu respuesta'}
                     disabled={disabled}
                     autoFocus={i === 0}
-                    className="inline-block border-0 border-b-2 border-muted-foreground/60 focus:border-violet-600 focus:outline-none bg-transparent text-xl font-medium text-center transition-colors duration-150 py-0.5 align-text-bottom"
-                    style={{ width: `${getHintWidth(i)}ch` }}
+                    className="inline-block border-0 border-b-2 border-[var(--d5-muted)] focus:border-primary focus:outline-none bg-transparent text-base font-medium text-center transition-colors duration-150 py-0.5 align-text-bottom"
+                    style={{ fontFamily: 'var(--font-dm-sans), system-ui, sans-serif', fontStyle: 'normal', width: `${getHintWidth(i)}ch` }}
                   />
                 )}
               </Fragment>
             ))}
           </div>
         ) : (
-          <p className="text-xl leading-relaxed font-medium flex-1">
+          <p className="senda-heading text-base leading-relaxed flex-1">
             <AnnotatedText text={exercise.prompt} annotations={exercise.annotations} />
           </p>
         )}
@@ -163,20 +163,20 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
       </div>
 
       {!hasInlineBlanks && (
-        <div className="flex gap-2">
+        <div className="senda-dashed-input">
           <Input
             value={singleAnswer}
             onChange={(e) => setSingleAnswer(e.target.value)}
-            placeholder="Type your answer…"
+            placeholder="Escribe tu respuesta…"
             disabled={disabled}
             autoFocus
-            className="text-base"
+            className="text-base border-0 shadow-none bg-transparent focus-visible:ring-0 px-0"
           />
         </div>
       )}
 
-      <Button ref={submitRef} type="submit" disabled={disabled || !allFilled} className="w-full">
-        Submit
+      <Button ref={submitRef} type="submit" disabled={disabled || !allFilled} className="w-full rounded-full">
+        Confirmar →
       </Button>
     </form>
   )

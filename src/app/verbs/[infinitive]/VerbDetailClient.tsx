@@ -137,7 +137,8 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
         <div className="flex-1">
           <div className="flex items-center gap-2 flex-wrap">
             <h1
-              style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 28, lineHeight: 1.15, color: 'var(--d5-terracotta)' }}
+              className="senda-heading"
+              style={{ fontSize: 28, color: 'var(--d5-terracotta)' }}
             >
               {infinitive}
             </h1>

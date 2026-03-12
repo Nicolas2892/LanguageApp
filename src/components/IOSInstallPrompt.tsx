@@ -45,7 +45,7 @@ export function IOSInstallPrompt() {
       style={{ bottom: 'calc(3.125rem + env(safe-area-inset-bottom))' }}
     >
       <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">Install Español Avanzado</p>
+        <p className="text-sm font-semibold">Instalar Senda</p>
         <button
           onClick={handleDismiss}
           aria-label="Dismiss"
@@ -56,21 +56,21 @@ export function IOSInstallPrompt() {
       </div>
 
       <p className="text-sm text-muted-foreground">
-        Add this app to your Home Screen for the best experience — opens instantly, works offline.
+        Añade esta app a tu pantalla de inicio para la mejor experiencia — se abre al instante.
       </p>
 
       <ol className="space-y-2">
         <li className="flex items-center gap-3 text-sm">
-          <span className="w-7 h-7 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center shrink-0">
-            <Share2 className="h-3.5 w-3.5 text-green-700 dark:text-green-400" strokeWidth={1.5} />
+          <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Share2 className="h-3.5 w-3.5 text-primary" strokeWidth={1.5} />
           </span>
-          Tap <strong>Share</strong> in Safari&apos;s toolbar
+          Toca <strong>Compartir</strong> en la barra de Safari
         </li>
         <li className="flex items-center gap-3 text-sm">
-          <span className="w-7 h-7 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center shrink-0">
-            <PlusSquare className="h-3.5 w-3.5 text-green-700 dark:text-green-400" strokeWidth={1.5} />
+          <span className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <PlusSquare className="h-3.5 w-3.5 text-primary" strokeWidth={1.5} />
           </span>
-          Tap <strong>Add to Home Screen</strong>
+          Toca <strong>Añadir a Inicio</strong>
         </li>
       </ol>
     </div>
