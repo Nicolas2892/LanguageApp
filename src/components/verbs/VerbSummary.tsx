@@ -1,3 +1,6 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { PartyPopper, CheckCircle2, XCircle } from 'lucide-react'
 import { TENSE_LABELS } from '@/lib/verbs/constants'
@@ -18,6 +21,18 @@ interface Props {
 
 export function VerbSummary({ correct, total, tenseStats, onPracticeAgain }: Props) {
   const pct = total > 0 ? Math.round((correct / total) * 100) : 0
+  const confettiFired = useRef(false)
+
+  useEffect(() => {
+    if (pct >= 70 && !confettiFired.current) {
+      confettiFired.current = true
+      import('canvas-confetti')
+        .then(({ default: confetti }) => {
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } })
+        })
+        .catch(() => {})
+    }
+  }, [pct])
   const missed = total - correct
 
   // Sort tense stats worst first

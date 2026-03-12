@@ -6,6 +6,8 @@ import { OnboardingTour } from '@/components/OnboardingTour'
 import { DashboardDeferredSection, DashboardDeferredSkeleton } from '@/components/DashboardDeferredSection'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
+import { StreakMilestone } from '@/components/StreakMilestone'
+import { LevelUpOverlay } from '@/components/LevelUpOverlay'
 import type { Profile } from '@/lib/supabase/types'
 import { LEVEL_CHIP } from '@/lib/constants'
 
@@ -26,7 +28,7 @@ export default async function DashboardPage() {
   lastWeekStart.setDate(thisWeekStart.getDate() - 7)
 
   const [profileRes, dueRes, totalConceptsRes, studiedRes] = await Promise.all([
-    supabase.from('profiles').select('computed_level, display_name').eq('id', user.id).single(),
+    supabase.from('profiles').select('computed_level, display_name, streak').eq('id', user.id).single(),
     supabase
       .from('user_progress')
       .select('id', { count: 'exact', head: true })
@@ -49,7 +51,7 @@ export default async function DashboardPage() {
   const isNewUser = studiedCount === 0
 
   return (
-    <main className="max-w-xl mx-auto px-5 pt-5 pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:px-8 lg:pt-8 lg:pb-8">
+    <main className="max-w-2xl mx-auto px-5 pt-5 pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:px-8 lg:pt-8 lg:pb-8 animate-page-in">
 
       {/* ── Greeting ────────────────────────────────────────────────────────── */}
       <div className="mb-3">
@@ -69,7 +71,7 @@ export default async function DashboardPage() {
       <WindingPathSeparator />
 
       {/* ── Tu Senda Diaria — SRS review card ──────────────────────────────── */}
-      <div className="senda-card space-y-3 mt-4">
+      <div className="senda-card animate-card-in space-y-3 mt-4" style={{ animationDelay: '0ms' }}>
         <p className="senda-eyebrow">Tu Senda Diaria</p>
 
         {studiedCount === 0 ? (
@@ -115,14 +117,14 @@ export default async function DashboardPage() {
 
       {/* ── Card stack wrapper — BackgroundMagicS threads behind all three cards ── */}
       <div className="relative overflow-hidden mt-4">
-        <BackgroundMagicS style={{ left: -20, top: 20, right: 'auto', width: 280, height: 360 }} />
+        <BackgroundMagicS style={{ left: '-1.25rem', top: '1.25rem', right: 'auto', width: '17.5rem', height: '22.5rem' }} />
 
         <WindingPathSeparator />
 
         {/* ── Exploración Abierta — open practice ─────────────────────────────── */}
         {newConceptsCount > 0 && (
           <>
-            <div className="senda-card space-y-3">
+            <div className="senda-card animate-card-in space-y-3" style={{ animationDelay: '60ms' }}>
               <p className="senda-eyebrow">Exploración Abierta</p>
               <p className="senda-heading text-base">
                 Tu Práctica: {newConceptsCount} Concepto{newConceptsCount !== 1 ? 's' : ''} Esperándote
@@ -150,6 +152,8 @@ export default async function DashboardPage() {
       </div>
 
       <OnboardingTour />
+      <StreakMilestone streak={profile?.streak ?? 0} />
+      <LevelUpOverlay currentLevel={profile?.computed_level ?? null} />
     </main>
   )
 }

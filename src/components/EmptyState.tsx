@@ -1,10 +1,13 @@
 import Link from 'next/link'
+import type { ReactNode } from 'react'
 
 interface EmptyStateProps {
   heading: string
   subtext: string
-  ctaLabel: string
-  ctaHref: string
+  ctaLabel?: string
+  ctaHref?: string
+  ctaOnClick?: () => void
+  icon?: ReactNode
 }
 
 // Winding-path separator — matches the Senda brand SVG language
@@ -22,7 +25,7 @@ function WindingRule() {
   )
 }
 
-export function EmptyState({ heading, subtext, ctaLabel, ctaHref }: EmptyStateProps) {
+export function EmptyState({ heading, subtext, ctaLabel, ctaHref, ctaOnClick, icon }: EmptyStateProps) {
   return (
     <div className="relative overflow-hidden flex flex-col items-center justify-center text-center py-20 px-6">
 
@@ -40,6 +43,8 @@ export function EmptyState({ heading, subtext, ctaLabel, ctaHref }: EmptyStatePr
       </div>
 
       <div className="relative z-10 flex flex-col items-center gap-5 max-w-xs">
+        {icon && <div>{icon}</div>}
+
         <WindingRule />
 
         {/* Heading — DM Serif italic */}
@@ -54,14 +59,23 @@ export function EmptyState({ heading, subtext, ctaLabel, ctaHref }: EmptyStatePr
 
         <WindingRule />
 
-        {/* Terracotta CTA — fixed brand colour, dark-mode stable */}
-        <Link
-          href={ctaHref}
-          className="rounded-full px-7 py-2.5 text-sm font-semibold transition-opacity hover:opacity-90 active:scale-95"
-          style={{ background: '#C4522E', color: '#FDFCF9' }}
-        >
-          {ctaLabel}
-        </Link>
+        {/* Terracotta CTA */}
+        {ctaLabel && ctaHref && (
+          <Link
+            href={ctaHref}
+            className="senda-cta"
+          >
+            {ctaLabel}
+          </Link>
+        )}
+        {ctaLabel && !ctaHref && ctaOnClick && (
+          <button
+            onClick={ctaOnClick}
+            className="senda-cta"
+          >
+            {ctaLabel}
+          </button>
+        )}
       </div>
     </div>
   )

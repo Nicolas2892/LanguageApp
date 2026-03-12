@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { VerbConfig } from './VerbConfig'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 
 interface Props {
   searchParams: Promise<{ verb?: string }>
@@ -24,7 +25,8 @@ export default async function VerbConfigurePage({ searchParams }: Props) {
   const favoriteCount = count ?? 0
 
   return (
-    <main className="max-w-md mx-auto pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-8">
+    <main className="relative overflow-hidden max-w-md mx-auto pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-8 animate-page-in">
+      <BackgroundMagicS opacity={0.05} />
       {/* Compact header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <Link

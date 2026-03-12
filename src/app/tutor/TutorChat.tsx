@@ -27,14 +27,21 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  async function handleSend() {
-    const text = input.trim()
+  const STARTERS = [
+    '¿Cómo uso el subjuntivo?',
+    'Explícame ser vs estar',
+    '¿Qué son los conectores?',
+    'Practica conmigo un diálogo',
+  ]
+
+  async function handleSend(directText?: string) {
+    const text = (directText ?? input).trim()
     if (!text || streaming) return
 
     const userMessage: Message = { role: 'user', content: text }
     const next = [...messages, userMessage]
     setMessages(next)
-    setInput('')
+    if (!directText) setInput('')
     setStreaming(true)
 
     // Add empty assistant message to stream into
@@ -118,15 +125,27 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
             <p className="text-xs" style={{ color: 'var(--d5-subtle)' }}>
               Shift+Enter para nueva línea · Enter para enviar
             </p>
+            <div className="flex flex-wrap justify-center gap-2 mt-4">
+              {STARTERS.map((text) => (
+                <button
+                  key={text}
+                  onClick={() => handleSend(text)}
+                  className="senda-cta-outline text-xs"
+                  style={{ padding: '0.375rem 0.75rem' }}
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
           </div>
         )}
         {messages.map((msg, i) => (
           <div
             key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} ${i === messages.length - 1 ? 'animate-message-in' : ''}`}
           >
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
+              className={`max-w-[85%] max-w-prose rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap ${
                 msg.role === 'user'
                   ? 'bg-primary text-primary-foreground rounded-br-sm'
                   : 'senda-bubble rounded-bl-sm'
@@ -156,7 +175,7 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
           className="senda-input resize-none flex-1 text-sm"
           disabled={streaming}
         />
-        <Button onClick={handleSend} disabled={!input.trim() || streaming} className="shrink-0">
+        <Button onClick={() => handleSend()} disabled={!input.trim() || streaming} className="shrink-0">
           Enviar
         </Button>
       </div>

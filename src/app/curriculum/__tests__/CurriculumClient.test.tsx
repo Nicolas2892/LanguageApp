@@ -21,6 +21,16 @@ vi.mock('@/components/WindingPathSeparator', () => ({
 vi.mock('@/components/BackgroundMagicS', () => ({
   BackgroundMagicS: () => null,
 }))
+vi.mock('@/components/ui/dialog', () => ({
+  Dialog: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}))
+vi.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => <button {...props}>{children}</button>,
+}))
 
 const MODULES = [
   { id: 'mod-1', title: 'Conectores', order_index: 1 },
@@ -88,15 +98,16 @@ describe('CurriculumClient', () => {
     const user = userEvent.setup()
     render(<CurriculumClient {...defaultProps} />)
 
-    // Concepts should not be visible initially
-    expect(screen.queryByText('Sin embargo')).not.toBeInTheDocument()
+    // Accordion content is in DOM but hidden (aria-hidden=true)
+    const conceptText = screen.getByText('Sin embargo')
+    expect(conceptText.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true')
 
     // Click the first module content area
     const moduleTitle = screen.getByText('Conectores')
     await user.click(moduleTitle)
 
-    // Concept should now be visible
-    expect(screen.getByText('Sin embargo')).toBeInTheDocument()
+    // Accordion should now be expanded (aria-hidden=false)
+    expect(conceptText.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'false')
   })
 
   it('collapses concepts when the same module is clicked again', async () => {
@@ -105,10 +116,11 @@ describe('CurriculumClient', () => {
 
     const moduleTitle = screen.getByText('Conectores')
     await user.click(moduleTitle)
-    expect(screen.getByText('Sin embargo')).toBeInTheDocument()
+    const conceptText = screen.getByText('Sin embargo')
+    expect(conceptText.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'false')
 
     await user.click(moduleTitle)
-    expect(screen.queryByText('Sin embargo')).not.toBeInTheDocument()
+    expect(conceptText.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('renders "Practicar →" module links', () => {

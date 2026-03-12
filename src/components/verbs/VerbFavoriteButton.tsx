@@ -13,12 +13,18 @@ interface Props {
 export function VerbFavoriteButton({ verbId, initialFavorited, size = 'sm' }: Props) {
   const [favorited, setFavorited] = useState(initialFavorited)
   const [loading, setLoading] = useState(false)
+  const [bouncing, setBouncing] = useState(false)
 
   async function toggle() {
     if (loading) return
     setLoading(true)
     // Optimistic update
+    const wasFavorited = favorited
     setFavorited((prev) => !prev)
+    if (!wasFavorited) {
+      setBouncing(true)
+      setTimeout(() => setBouncing(false), 300)
+    }
 
     try {
       const res = await fetch('/api/verbs/favorite', {
@@ -54,7 +60,7 @@ export function VerbFavoriteButton({ verbId, initialFavorited, size = 'sm' }: Pr
       )}
     >
       <Heart
-        className={cn(size === 'sm' ? 'h-4 w-4' : 'h-5 w-5')}
+        className={cn(size === 'sm' ? 'h-4 w-4' : 'h-5 w-5', bouncing && 'animate-heart-bounce')}
         fill={favorited ? 'currentColor' : 'none'}
         strokeWidth={2}
       />

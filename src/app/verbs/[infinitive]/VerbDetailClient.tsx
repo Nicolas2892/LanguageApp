@@ -6,6 +6,7 @@ import { ArrowLeft, Palette } from 'lucide-react'
 import { VerbFavoriteButton } from '@/components/verbs/VerbFavoriteButton'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { TENSE_LABELS, TENSE_DESCRIPTIONS, type VerbTense } from '@/lib/verbs/constants'
 
 const COLOUR_ENDINGS_KEY = 'verb-colour-endings'
@@ -124,7 +125,8 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
   const attempts = activeData?.attempts ?? 0
 
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 flex flex-col gap-5">
+    <main className="relative overflow-hidden max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 flex flex-col gap-5">
+      <BackgroundMagicS opacity={0.04} />
       {/* Header */}
       <div className="flex items-center gap-3">
         <Link
@@ -138,7 +140,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
           <div className="flex items-center gap-2 flex-wrap">
             <h1
               className="senda-heading"
-              style={{ fontSize: 28, color: 'var(--d5-terracotta)' }}
+              style={{ fontSize: '1.75rem', color: 'var(--d5-terracotta)' }}
             >
               {infinitive}
             </h1>
@@ -161,7 +163,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
           <div key={group.label}>
             <p
               className="senda-eyebrow"
-              style={{ marginBottom: 8, color: 'var(--d5-subtle)', fontSize: '0.5625rem' }}
+              style={{ marginBottom: '0.5rem', color: 'var(--d5-subtle)', fontSize: '0.5625rem' }}
             >
               {group.label}
             </p>
@@ -179,7 +181,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
                       borderRadius: 99, cursor: 'pointer',
                       fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
                       whiteSpace: 'nowrap',
-                      minHeight: 44, display: 'flex', alignItems: 'center',
+                      minHeight: '2.75rem', display: 'flex', alignItems: 'center',
                       padding: '0 16px', fontSize: 12,
                       fontWeight: active ? 700 : 400,
                       transition: 'background 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out',
@@ -200,7 +202,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
       {/* Tense header — label + description + colour toggle */}
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="senda-eyebrow" style={{ marginBottom: 4 }}>{TENSE_LABELS[selectedTense]}</p>
+          <p className="senda-eyebrow" style={{ marginBottom: '0.25rem' }}>{TENSE_LABELS[selectedTense]}</p>
           <p className="text-[11px]" style={{ color: 'var(--d5-subtle)' }}>{TENSE_DESCRIPTIONS[selectedTense]}</p>
         </div>
         <button
@@ -211,7 +213,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
           className="senda-focus-ring"
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
-            padding: 8, marginTop: -4, marginRight: -8, borderRadius: 8,
+            padding: '0.5rem', marginTop: '-0.25rem', marginRight: '-0.5rem', borderRadius: '0.5rem',
             color: colourEndings ? 'var(--d5-terracotta)' : 'var(--d5-muted)',
             transition: 'color 200ms ease-out',
           }}
@@ -237,8 +239,8 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
                   >
                     <td
                       style={{
-                        padding: '8px 2px', width: 82, flexShrink: 0,
-                        fontSize: 11, color: 'var(--d5-subtle)',
+                        padding: '0.5rem 0.125rem', width: '5.125rem', flexShrink: 0,
+                        fontSize: '0.6875rem', color: 'var(--d5-subtle)',
                         fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
                       }}
                     >
@@ -246,16 +248,16 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
                     </td>
                     <td
                       style={{
-                        padding: '8px 2px',
+                        padding: '0.5rem 0.125rem',
                         fontFamily: 'var(--font-lora), serif', fontStyle: 'italic',
-                        fontSize: 14,
+                        fontSize: '0.875rem',
                       }}
                     >
                       {row && row.form !== ''
                         ? colourEndings
                           ? <ColouredForm form={row.form} stem={row.stem} />
                           : <span style={{ color: 'var(--d5-heading)' }}>{row.form}</span>
-                        : <span style={{ color: 'var(--d5-subtle)', fontSize: 12, fontStyle: 'italic' }}>—</span>
+                        : <span style={{ color: 'var(--d5-subtle)', fontSize: '0.75rem', fontStyle: 'italic' }}>—</span>
                       }
                     </td>
                   </tr>
@@ -265,19 +267,19 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
           </table>
         </div>
       ) : (
-        <p style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 14, color: 'var(--d5-body)', lineHeight: 1.5, padding: '8px 0' }}>
+        <p style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: '0.875rem', color: 'var(--d5-body)', lineHeight: 1.5, padding: '0.5rem 0' }}>
           Sin datos aún — practica para ver tu progreso.
         </p>
       )}
 
       {/* Mastery stats — below table */}
       {masteryPct !== null && (
-        <div style={{ padding: '0 2px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <p style={{ fontSize: 10, color: 'var(--d5-body)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+        <div style={{ padding: '0 0.125rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+            <p style={{ fontSize: '0.625rem', color: 'var(--d5-body)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
               {attempts} intentos
             </p>
-            <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--d5-heading)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+            <p style={{ fontSize: '0.625rem', fontWeight: 700, color: 'var(--d5-heading)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
               {masteryPct}%
             </p>
           </div>

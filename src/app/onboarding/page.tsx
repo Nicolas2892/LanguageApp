@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DiagnosticSession } from './DiagnosticSession'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { WelcomeScreen } from '@/components/WelcomeScreen'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { DIAGNOSTIC_CONCEPT_TITLES } from './diagnosticConcepts'
@@ -57,22 +58,24 @@ export default async function OnboardingPage() {
     .filter((item): item is { concept: Concept; exercise: Exercise } => item !== null)
 
   return (
-    <main className="min-h-screen flex items-start justify-center bg-background">
-      <div className="relative overflow-hidden w-full max-w-xl mx-auto p-6 md:p-10">
-        <BackgroundMagicS />
-        <div className="relative mb-8 space-y-2">
-          <SvgSendaPath size={28} />
-          <h1 className="senda-heading text-2xl">¡Bienvenido! Veamos tu nivel.</h1>
-          <p className="text-sm text-[var(--d5-muted)]">
-            Responde estas {items.length} preguntas — sin pistas, sin presión. Tus resultados
-            personalizarán tu repaso desde el inicio.
-          </p>
-          <p className="text-xs text-[var(--d5-muted)]">Tarda unos 3 minutos.</p>
+    <WelcomeScreen>
+      <main className="min-h-screen flex items-start justify-center bg-background">
+        <div className="relative overflow-hidden w-full max-w-2xl mx-auto p-6 md:p-10">
+          <BackgroundMagicS />
+          <div className="relative mb-8 space-y-2">
+            <SvgSendaPath size={28} />
+            <h1 className="senda-heading text-2xl">¡Bienvenido! Veamos tu nivel.</h1>
+            <p className="text-sm text-[var(--d5-muted)]">
+              Responde estas {items.length} preguntas — sin pistas, sin presión. Tus resultados
+              personalizarán tu repaso desde el inicio.
+            </p>
+            <p className="text-xs text-[var(--d5-muted)]">Tarda unos 3 minutos.</p>
+          </div>
+          <ErrorBoundary>
+            <DiagnosticSession items={items} />
+          </ErrorBoundary>
         </div>
-        <ErrorBoundary>
-          <DiagnosticSession items={items} />
-        </ErrorBoundary>
-      </div>
-    </main>
+      </main>
+    </WelcomeScreen>
   )
 }

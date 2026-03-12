@@ -2,14 +2,14 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Español Avanzado',
-    short_name: 'EA',
-    description: 'Adaptive Spanish learning for B1 to B2 progression',
+    name: 'Senda',
+    short_name: 'Senda',
+    description: 'Tu camino al español avanzado',
     start_url: '/dashboard',
     display: 'standalone',
     orientation: 'portrait',
-    background_color: '#ffffff',
-    theme_color: '#18181b',
+    background_color: '#FDFCF9',
+    theme_color: '#C4522E',
     icons: [
       {
         src: '/icon',
@@ -26,23 +26,23 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     shortcuts: [
       {
-        name: 'Study Now',
-        short_name: 'Study',
-        description: 'Start your SRS review session',
+        name: 'Estudiar Ahora',
+        short_name: 'Estudiar',
+        description: 'Empieza tu repaso diario',
         url: '/study',
         icons: [{ src: '/icon', sizes: '192x192' }],
       },
       {
-        name: 'Quick Sprint',
-        short_name: 'Sprint',
-        description: '10-minute sprint session',
-        url: '/study?mode=sprint',
+        name: 'Conjugar Verbos',
+        short_name: 'Verbos',
+        description: 'Practica la conjugación',
+        url: '/verbs/configure',
         icons: [{ src: '/icon', sizes: '192x192' }],
       },
       {
-        name: 'View Progress',
-        short_name: 'Progress',
-        description: 'See your learning progress',
+        name: 'Ver Progreso',
+        short_name: 'Progreso',
+        description: 'Consulta tu avance',
         url: '/progress',
         icons: [{ src: '/icon', sizes: '192x192' }],
       },

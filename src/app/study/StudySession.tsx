@@ -19,6 +19,7 @@ import {
   Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles, Timer, X, Loader2,
 } from 'lucide-react'
 import { PushPermissionPrompt } from '@/components/PushPermissionPrompt'
+import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
@@ -91,6 +92,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [streamingDetails, setStreamingDetails] = useState(false)
   const [flashClass, setFlashClass] = useState<string | null>(null)
+  const [exiting, setExiting] = useState(false)
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Holds details chunk that arrived before the 300ms flash timer fires
   const pendingDetailsRef = useRef<{ feedback: string; corrected_version: string; explanation: string } | null>(null)
@@ -396,15 +398,20 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         }),
       }).catch(() => {})
     } else {
-      // UX-AB: collapse concept note on each new exercise
-      setIsConceptExpanded(false)
-      startTransition(() => {
-        autoGenerateTriggeredRef.current = false
-        setIndex((i) => i + 1)
-        setState({ phase: 'answering' })
-        setWrongAttempts(0)
-        setClaudeHint(null)
-      })
+      // Exit animation before advancing
+      setExiting(true)
+      setTimeout(() => {
+        setExiting(false)
+        // UX-AB: collapse concept note on each new exercise
+        setIsConceptExpanded(false)
+        startTransition(() => {
+          autoGenerateTriggeredRef.current = false
+          setIndex((i) => i + 1)
+          setState({ phase: 'answering' })
+          setWrongAttempts(0)
+          setClaudeHint(null)
+        })
+      }, 150)
     }
   }
 
@@ -555,7 +562,9 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const isLast = index + 1 >= effectiveLength
 
   return (
-    <>
+    <div className="relative overflow-hidden">
+      <BackgroundMagicS opacity={0.05} />
+
       {/* UX-AA: Mastery milestone overlay */}
       <Dialog open={masteryOverlayOpen} onOpenChange={setMasteryOverlayOpen}>
         <DialogContent className="text-center max-w-sm">
@@ -635,7 +644,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         <div className="flex items-center gap-1.5 text-xs flex-wrap">
           <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>{typeMeta.label}</span>
           <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-          <span className="text-[var(--d5-muted)]">{current.concept.title}</span>
+          <span className="text-[var(--d5-warm)]">{current.concept.title}</span>
           {current.concept.grammar_focus && (
             <>
               <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
@@ -666,13 +675,13 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
           style={{ maxHeight: isConceptExpanded ? '16rem' : '0' }}
         >
-          <div className="bg-muted/50 rounded-lg text-sm px-4 py-3">
+          <div className="bg-muted/50 rounded-lg text-sm px-4 py-3 max-w-prose">
             <p>{current.concept.explanation}</p>
           </div>
         </div>
 
         {/* Exercise */}
-        <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 animate-exercise-in ${flashClass ?? ''}`}>
+        <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 ${exiting ? 'animate-exercise-out' : 'animate-exercise-in'} ${flashClass ?? ''}`}>
           {(state.phase === 'answering' || flashClass) && (
             <div className="animate-in slide-in-from-right-2 duration-200">
               <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
@@ -714,6 +723,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           )}
         </div>
       </div>
-    </>
+    </div>
   )
 }

@@ -173,9 +173,9 @@ export default async function ProgressPage() {
   const hasAnyData = totalAttempts > 0
 
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 relative overflow-hidden">
+    <main className="max-w-2xl mx-auto p-6 md:p-10 space-y-8 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10 relative overflow-hidden animate-page-in">
       {/* BackgroundMagicS watermark */}
-      <div style={{ position: 'absolute', top: '15%', right: -20, opacity: 0.025, pointerEvents: 'none', zIndex: 0 }} aria-hidden="true">
+      <div style={{ position: 'absolute', top: '15%', right: -20, opacity: 0.05, pointerEvents: 'none', zIndex: 0 }} aria-hidden="true">
         <BackgroundMagicS opacity={1} />
       </div>
 
