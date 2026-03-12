@@ -130,7 +130,12 @@ self.addEventListener('fetch', (e) => {
 
 // Push notification received
 self.addEventListener('push', (event) => {
-  const data = event.data?.json() ?? {}
+  let data = {}
+  try {
+    data = event.data?.json() ?? {}
+  } catch {
+    // Malformed payload — show a generic notification rather than silently failing
+  }
   const title = data.title ?? 'Senda'
   const options = {
     body: data.body ?? 'You have reviews due today.',

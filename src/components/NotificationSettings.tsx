@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, BellOff, BellRing } from 'lucide-react'
+import { Bell, BellOff, BellRing, Send } from 'lucide-react'
 
 type NotifState = 'loading' | 'unsupported' | 'denied' | 'granted' | 'default'
 
@@ -35,11 +35,30 @@ async function subscribeToPush(): Promise<boolean> {
   return res.ok
 }
 
-export function NotificationSettings() {
+/** Detect iOS Safari running as a browser tab (not installed as PWA) */
+function isIOSSafariTab(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  const isStandalone = 'standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true
+  return isIOS && !isStandalone
+}
+
+interface NotificationSettingsProps {
+  isAdmin?: boolean
+}
+
+export function NotificationSettings({ isAdmin = false }: NotificationSettingsProps) {
   const [notifState, setNotifState] = useState<NotifState>('loading')
   const [loading, setLoading] = useState(false)
+  const [testLoading, setTestLoading] = useState(false)
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null)
+  const [iosSafariTab, setIosSafariTab] = useState(false)
 
   useEffect(() => {
+    // Detect iOS Safari tab for install hint
+    setIosSafariTab(isIOSSafariTab())
+
     // Cast through unknown to handle environments where Notification may be undefined at runtime
     const notif = (window as unknown as Record<string, unknown>)['Notification'] as { permission?: string } | undefined
     if (!notif || !('PushManager' in window)) {
@@ -78,6 +97,24 @@ export function NotificationSettings() {
     }
   }
 
+  async function handleTestPush() {
+    setTestLoading(true)
+    setTestResult(null)
+    try {
+      const res = await fetch('/api/push/test', { method: 'POST' })
+      if (res.ok) {
+        setTestResult({ ok: true, message: 'Notificacion enviada' })
+      } else {
+        const body = await res.json().catch(() => ({ error: 'Error desconocido' }))
+        setTestResult({ ok: false, message: body.error ?? `Error ${res.status}` })
+      }
+    } catch {
+      setTestResult({ ok: false, message: 'Error de red' })
+    } finally {
+      setTestLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2">
@@ -90,14 +127,21 @@ export function NotificationSettings() {
       )}
 
       {notifState === 'unsupported' && (
-        <p className="text-sm text-muted-foreground">
-          Las notificaciones push no están disponibles en este navegador.
-        </p>
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Las notificaciones push no estan disponibles en este navegador.
+          </p>
+          {iosSafariTab && (
+            <p className="text-xs" style={{ color: 'var(--d5-terracotta)' }}>
+              En iOS, instala la app primero: toca <strong>Compartir</strong> → <strong>Anadir a pantalla de inicio</strong> y abre desde ahi para activar notificaciones.
+            </p>
+          )}
+        </div>
       )}
 
       {notifState === 'denied' && (
         <p className="text-sm text-muted-foreground">
-          Las notificaciones están bloqueadas. Actívalas en los ajustes de tu navegador para recibir recordatorios de racha.
+          Las notificaciones estan bloqueadas. Activalas en los ajustes de tu navegador para recibir recordatorios de racha.
         </p>
       )}
 
@@ -105,23 +149,40 @@ export function NotificationSettings() {
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--d5-terracotta)' }}>
             <Bell size={14} strokeWidth={1.5} className="shrink-0" />
-            <span>Notificaciones activas — recibirás un aviso cuando tu racha esté en riesgo.</span>
+            <span>Notificaciones activas — recibiras un aviso cuando tu racha este en riesgo.</span>
           </div>
-          <button
-            onClick={handleDisable}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted active:scale-95 transition-transform disabled:opacity-60"
-          >
-            <BellOff className="h-3.5 w-3.5" />
-            {loading ? 'Desactivando…' : 'Desactivar'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDisable}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted active:scale-95 transition-transform disabled:opacity-60"
+            >
+              <BellOff className="h-3.5 w-3.5" />
+              {loading ? 'Desactivando…' : 'Desactivar'}
+            </button>
+            {isAdmin && (
+              <button
+                onClick={handleTestPush}
+                disabled={testLoading}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10 active:scale-95 transition-transform disabled:opacity-60"
+              >
+                <Send className="h-3.5 w-3.5" />
+                {testLoading ? 'Enviando…' : 'Enviar prueba'}
+              </button>
+            )}
+          </div>
+          {testResult && (
+            <p className={`text-xs ${testResult.ok ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+              {testResult.message}
+            </p>
+          )}
         </div>
       )}
 
       {notifState === 'default' && (
         <div className="space-y-2">
           <p className="text-xs" style={{ color: 'var(--d5-muted)' }}>
-            Recibe un recordatorio diario cuando tu racha esté en riesgo.
+            Recibe un recordatorio diario cuando tu racha este en riesgo.
           </p>
           <button
             onClick={handleEnable}

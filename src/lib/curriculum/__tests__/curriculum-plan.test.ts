@@ -13,8 +13,8 @@ const VALID_EXERCISE_TYPES: ExerciseType[] = [
 ]
 
 describe('CURRICULUM_PLAN', () => {
-  it('contains exactly 85 concepts', () => {
-    expect(CURRICULUM_PLAN).toHaveLength(85)
+  it('contains exactly 100 concepts', () => {
+    expect(CURRICULUM_PLAN).toHaveLength(100)
   })
 
   describe('each concept has required fields', () => {
@@ -94,12 +94,12 @@ describe('CURRICULUM_PLAN', () => {
       expect(unique.size).toBe(titles.length)
     })
 
-    it('groups into exactly 7 distinct modules', () => {
+    it('groups into exactly 8 distinct modules', () => {
       const modules = new Set(CURRICULUM_PLAN.map((c) => c.module))
-      expect(modules.size).toBe(7)
+      expect(modules.size).toBe(8)
     })
 
-    it('contains the expected 7 module names', () => {
+    it('contains the expected 8 module names', () => {
       const modules = new Set(CURRICULUM_PLAN.map((c) => c.module))
       expect(modules).toContain('Connectors & Discourse Markers')
       expect(modules).toContain('The Subjunctive: Core')
@@ -108,6 +108,7 @@ describe('CURRICULUM_PLAN', () => {
       expect(modules).toContain('Core Spanish Contrasts')
       expect(modules).toContain('Verbal Periphrases')
       expect(modules).toContain('Complex Sentences')
+      expect(modules).toContain('Conversational & Pragmatic Markers')
     })
 
     it('has Module 1 with 23 concepts', () => {
@@ -143,6 +144,11 @@ describe('CURRICULUM_PLAN', () => {
     it('has Module 6 with 13 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'Complex Sentences').length
       expect(count).toBe(13)
+    })
+
+    it('has Module 8 with 15 concepts', () => {
+      const count = CURRICULUM_PLAN.filter((c) => c.module === 'Conversational & Pragmatic Markers').length
+      expect(count).toBe(15)
     })
 
     it('has Module 1 Unit 1.2 with 7 concepts (including por eso and así que)', () => {

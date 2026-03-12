@@ -35,6 +35,7 @@ pnpm seed:ai:apply        # Apply approved entries from review JSON to Supabase
 pnpm seed:verbs           # Generate verb sentences via Claude Haiku → docs/verb-sentences-YYYY-MM-DD.json
 pnpm seed:verbs:apply     # Insert verb_sentences rows from review JSON
 pnpm validate:grading     # ARCH-02 offline validation: grade 50 attempts with Haiku vs Sonnet baseline
+pnpm push:keygen          # Generate VAPID key pair for push notifications
 ```
 
 Post-deploy API smoke check (requires env vars):
@@ -116,6 +117,10 @@ SENTRY_PROJECT                  # Sentry project slug
 SENTRY_AUTH_TOKEN               # Sentry auth token (source map upload)
 NEXT_PUBLIC_POSTHOG_KEY         # PostHog product analytics (Infra-A)
 NEXT_PUBLIC_POSTHOG_HOST        # PostHog ingest host (default: https://us.i.posthog.com)
+NEXT_PUBLIC_VAPID_PUBLIC_KEY    # VAPID public key for push subscriptions (Fix-L)
+VAPID_PRIVATE_KEY               # VAPID private key for web-push (Fix-L)
+VAPID_EMAIL                     # VAPID contact email (mailto:you@example.com) (Fix-L)
+CRON_SECRET                     # Bearer token for cron-triggered push send route
 ```
 
 ### Route Map
@@ -148,6 +153,9 @@ NEXT_PUBLIC_POSTHOG_HOST        # PostHog ingest host (default: https://us.i.pos
 | `POST /api/concepts/[id]/hard`  | Route handler   | Toggle `is_hard` flag on `user_progress`; update-then-insert pattern                      |
 | `POST /api/verbs/grade`         | Route handler   | Record verb conjugation attempt → `increment_verb_progress` RPC; Zod + rate-limit         |
 | `POST /api/verbs/favorite`      | Route handler   | Toggle `user_verb_favorites` row; returns `{ favorited: boolean }`                        |
+| `POST /api/push/test`           | Route handler   | Admin-only: send self-test push notification via webpush (Fix-L)                          |
+| `POST /api/push/subscribe`      | Route handler   | Save/delete push subscription to `profiles.push_subscription`                             |
+| `POST /api/push/send`           | Route handler   | Cron-triggered: batch push notifications to subscribers with due exercises                 |
 
 
 ### Middleware Rules (`src/lib/supabase/middleware.ts`)
@@ -286,7 +294,7 @@ Migrations (run once in Supabase SQL editor):
 
 ### Curriculum Seed Content
 
-**Currently in DB** (85 concepts, 787 exercises):
+**Currently in DB** (100 concepts, 924 exercises):
 
 - Module 1: Connectors & Discourse Markers — 4 units, 23 concepts
 - Module 2a: The Subjunctive: Core — 1 unit, 5 concepts
@@ -295,8 +303,9 @@ Migrations (run once in Supabase SQL editor):
 - Module 4: Core Spanish Contrasts — 3 units, 12 concepts
 - Module 5: Verbal Periphrases — 3 units, 13 concepts
 - Module 6: Complex Sentences — 3 units, 13 concepts
+- Module 8: Conversational & Pragmatic Markers — 4 units, 15 concepts
 - ~9 exercises per concept (3 per exercise type); 56/61 null-annotation exercises annotated
-- Full plan: `src/lib/curriculum/curriculum-plan.ts`; design reference: `docs/curriculum-design.md`
+- Full plan: `src/lib/curriculum/curriculum-plan.ts` (100 concepts); design reference: `docs/curriculum-design.md`
 - `pnpm seed:ai:apply` is now idempotent — skips concepts/exercises that already exist. Safe to re-run.
 
 ### Verb Seed Content
@@ -391,7 +400,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ## Current Status
 
-**Test suite: 1450 tests across 69 files — all passing.**
+**Test suite: 1595 tests across 70 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -438,14 +447,11 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Pedagogical / Learning Quality
 
-**Ped-J: New curriculum module — Conversational / Pragmatic Markers** *(content + seed work required)*
+**Ped-J: Module 8 — Conversational & Pragmatic Markers** *(DONE)*
 
-- Add a new module covering colloquial spoken discourse markers (*marcadores conversacionales* / *muletillas*) — distinct from Module 1 which covers formal written connectors (*sin embargo*, *por tanto*, etc.).
-- Target concepts (indicative, ~10–15): *o sea*, *entonces*, *bueno*, *pues*, *es que*, *a ver*, *o sea que*, *vamos*, *hombre/mujer*, *venga*, *eso sí*, *de hecho* (spoken register), *en plan*, *tipo* (colloquial hedges).
-- Key distinction to encode in exercises: register awareness — knowing *when* these are appropriate (spoken vs. written, formal vs. casual) is as important as knowing the meaning.
-- Suggested exercise types: gap_fill (insert the right marker in a dialogue), transformation (rewrite formal sentence using colloquial marker), error_correction (inappropriate register), translation (capture pragmatic nuance in English).
-- Implementation: add concepts to `src/lib/curriculum/curriculum-plan.ts`, then run `pnpm seed:ai` + `pnpm seed:ai:apply` to generate exercises.
-- **Content design required first** — map the ~10–15 concepts and their register rules before seeding. Do not seed without a reviewed concept list.
+- 15 concepts across 4 units: Fillers & Hesitation Markers (B1, 4), Attention-Getters & Reaction Markers (B2, 5), Hedges, Justifiers & Emphatic Markers (B2, 3), Advanced Colloquial Markers & Register Switching (C1, 3).
+- 135 exercises generated and seeded (+ 2 topup exercises for existing concept). All in DB.
+- Distinct from Module 1 (formal written connectors) — Module 8 covers colloquial spoken discourse markers with register awareness as key pedagogy.
 
 **Ped-F: Shared AI-generated exercise pool + adaptive grading strategy** *(PM research required before implementation)*
 
@@ -540,11 +546,16 @@ Items are ordered by priority within each group. Full details of completed work 
 - **Acceptance criteria**: STT works on iOS Safari + Chrome + Edge; graceful fallback (hidden mic button) on unsupported environments.
 - **Do not implement without a PM decision on vendor and cost model.**
 
-**Fix-L: Verify push notifications on iOS PWA** *(CHECKLIST CREATED — pending device verification)*
+**Fix-L: Verify push notifications on iOS PWA** *(TOOLING COMPLETE — pending device verification)*
 
-- Structured verification checklist created: `docs/ios-push-verification.md`.
-- Covers: PWA install, permission flow, notification delivery, deep-link on tap, SW lifecycle, edge cases, known iOS limitations.
-- **Next step: run checklist on a physical iPhone (iOS 16.4+) in Safari standalone mode.**
+- `pnpm push:keygen` — generates VAPID key pair (`scripts/generate-vapid-keys.ts`)
+- `POST /api/push/test` — admin-only self-test endpoint; sends test notification to the caller's subscription via webpush
+- `NotificationSettings` — `isAdmin` prop; when true + granted, shows "Enviar prueba" button; iOS Safari non-standalone shows PWA install hint
+- `public/sw.js` — push event hardened with try/catch around `event.data.json()` for malformed payloads
+- Verification checklist with developer setup instructions: `docs/ios-push-verification.md`
+- Tests: `src/app/api/push/__tests__/test-push.test.ts` (5 tests), updated `NotificationSettings.test.tsx` (+4 tests)
+- **Known limitation**: single `push_subscription` per profile row — only last-subscribed device gets pushes
+- **Next step: deploy with VAPID env vars, run checklist on a physical iPhone (iOS 16.4+) in Safari standalone mode.**
 
 ### Technical Debt
 
@@ -574,7 +585,7 @@ Items are ordered by priority within each group. Full details of completed work 
 | **P0** | **Infra-A** — Product analytics (PostHog) | ✅ Done |
 | **P0** | **Infra-B** — Error monitoring (Sentry) | ✅ Done |
 | **P1** | **Fix-J** — STT replacement for iOS Safari | PM decision on vendor + cost model |
-| **P1** | **Fix-L** — Verify push notifications on iOS PWA | Checklist created; pending device test |
+| **P1** | **Fix-L** — Verify push notifications on iOS PWA | Tooling complete; deploy + device test pending |
 | **P2** | **Feat-G** — Streak freeze / recovery | PM decision on mechanic |
 | **P2** | **Feat-H** — Listening comprehension exercises | PM decision on audio source |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |

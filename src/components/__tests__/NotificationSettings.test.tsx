@@ -41,7 +41,7 @@ describe('NotificationSettings', () => {
   it('shows unsupported message when Notification API is absent', async () => {
     stubNotification(null)
     await act(async () => { render(<NotificationSettings />) })
-    expect(screen.getByText(/no están disponibles/i)).toBeTruthy()
+    expect(screen.getByText(/no estan disponibles/i)).toBeTruthy()
   })
 
   it('shows blocked message when permission is denied', async () => {
@@ -72,5 +72,43 @@ describe('NotificationSettings', () => {
       screen.getByRole('button', { name: /desactivar/i }).click()
     })
     expect(fetchMock).toHaveBeenCalledWith('/api/push/subscribe', { method: 'DELETE' })
+  })
+
+  it('does not show test push button when isAdmin is false', async () => {
+    stubNotification('granted')
+    await act(async () => { render(<NotificationSettings isAdmin={false} />) })
+    expect(screen.queryByRole('button', { name: /enviar prueba/i })).toBeNull()
+  })
+
+  it('shows test push button when isAdmin is true and notifications are granted', async () => {
+    stubNotification('granted')
+    await act(async () => { render(<NotificationSettings isAdmin={true} />) })
+    expect(screen.getByRole('button', { name: /enviar prueba/i })).toBeTruthy()
+  })
+
+  it('test push button calls POST /api/push/test', async () => {
+    stubNotification('granted')
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve({ ok: true }) })
+    vi.stubGlobal('fetch', fetchMock)
+    await act(async () => { render(<NotificationSettings isAdmin={true} />) })
+    await act(async () => {
+      screen.getByRole('button', { name: /enviar prueba/i }).click()
+    })
+    expect(fetchMock).toHaveBeenCalledWith('/api/push/test', { method: 'POST' })
+  })
+
+  it('shows iOS install hint when unsupported on iOS Safari tab', async () => {
+    stubNotification(null)
+    // Simulate iOS Safari (non-standalone)
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+      configurable: true,
+    })
+    Object.defineProperty(navigator, 'standalone', {
+      value: false,
+      configurable: true,
+    })
+    await act(async () => { render(<NotificationSettings />) })
+    expect(screen.getByText(/pantalla de inicio/i)).toBeTruthy()
   })
 })

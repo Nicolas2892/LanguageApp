@@ -79,7 +79,7 @@ export default async function AccountPage() {
 
       {/* Notificaciones + Sesión + Danger Zone — grouped */}
       <div className="mt-6">
-        <NotificationSettings />
+        <NotificationSettings isAdmin={profile.is_admin} />
       </div>
       <div className="mt-8">
         <DangerZone />

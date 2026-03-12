@@ -1,5 +1,40 @@
 # iOS Push Notification Verification Checklist (Fix-L)
 
+## Developer Setup
+
+### 1. Generate VAPID Keys
+```bash
+pnpm push:keygen
+```
+Copy the output into `.env.local` (local dev) and Vercel environment variables (production). Update `VAPID_EMAIL` with your real email.
+
+### 2. Deploy with VAPID Env Vars
+Ensure these are set in Vercel:
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
+- `VAPID_PRIVATE_KEY`
+- `VAPID_EMAIL` (format: `mailto:you@example.com`)
+
+### 3. Grant Admin Access
+In Supabase SQL editor:
+```sql
+UPDATE profiles SET is_admin = true WHERE id = '<your-user-uuid>';
+```
+
+### 4. Test on iPhone
+1. Open the production URL in **Safari** on iPhone (iOS 16.4+)
+2. Tap **Share** → **Add to Home Screen**
+3. Open the app from the Home Screen (must be standalone mode)
+4. Go to **Mi Cuenta** → **Notificaciones push**
+5. Tap **Activar notificaciones** → grant permission
+6. The **Enviar prueba** button appears (admin-only)
+7. Tap it → a test notification should arrive within seconds
+8. Tap the notification → app should open to `/account`
+
+### Known Limitation
+Only one `push_subscription` per profile row — the last device to subscribe gets pushes. Multi-device support would require a separate subscriptions table.
+
+---
+
 ## Prerequisites
 - [ ] iPhone running iOS 16.4+ (push for PWA requires 16.4+)
 - [ ] Safari (not Chrome/Firefox — only Safari supports PWA push on iOS)
@@ -14,13 +49,14 @@
 
 ## 2. Push Permission Flow
 - [ ] `ServiceWorkerRegistration` component loads successfully in standalone mode
-- [ ] Permission prompt appears when triggered (first study session or dashboard visit)
+- [ ] Permission prompt appears when triggered (account page or dashboard visit)
 - [ ] User can grant permission — no console errors
 - [ ] User can deny permission — app continues working normally
 - [ ] `push_subscription` column in `profiles` table is populated after granting
+- [ ] iOS Safari tab (non-PWA) shows install hint instead of enable button
 
 ## 3. Notification Delivery
-- [ ] Send test push via Supabase Edge Function or `web-push` script
+- [ ] Tap "Enviar prueba" button on account page (admin-only)
 - [ ] Notification appears in iOS Notification Center
 - [ ] Notification title, body, and icon render correctly
 - [ ] Notification appears when app is in background (Home Screen)
@@ -29,7 +65,7 @@
 
 ## 4. Deep Link on Tap
 - [ ] Tapping notification opens the PWA (not Safari)
-- [ ] Navigates to correct route (e.g. `/study` or `/dashboard`)
+- [ ] Navigates to correct route (e.g. `/account` for test, `/study` for cron)
 - [ ] If app was closed, it re-opens and navigates correctly
 
 ## 5. Service Worker Lifecycle
@@ -42,7 +78,8 @@
 - [ ] User revokes notification permission in iOS Settings → app degrades gracefully
 - [ ] Network offline → push subscription does not break on reconnect
 - [ ] Multiple devices with same account → each gets its own subscription
-- [ ] Uninstall PWA from Home Screen → subscription is stale (acceptable; server-side cleanup needed?)
+- [ ] Uninstall PWA from Home Screen → subscription is stale (acceptable; server-side cleanup on 410)
+- [ ] Malformed push payload → SW shows generic notification (try/catch hardening)
 
 ## Known iOS Limitations
 - Push for web apps requires iOS 16.4+ and standalone mode (Add to Home Screen)
@@ -58,11 +95,14 @@
 | PWA install | | |
 | Permission grant | | |
 | Permission deny | | |
+| iOS Safari tab install hint | | |
+| Notification display (test button) | | |
 | Notification display (background) | | |
 | Notification display (closed) | | |
 | Deep link on tap | | |
 | SW update | | |
 | Permission revoke | | |
+| Malformed payload fallback | | |
 
 Date tested: ___________
 iOS version: ___________
