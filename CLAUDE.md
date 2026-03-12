@@ -73,7 +73,7 @@ Seed:verbs command requires env vars:
 NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm seed:verbs
 ```
 
-Inserts 50 verbs into `verbs` table, then generates 3 sentences per verb × tense (350 combos) via Claude Haiku. Resume-safe — skips combos already written. Then run `pnpm seed:verbs:apply [--dry-run] <file>`. ⚠️ No idempotency guard on apply — running twice duplicates rows.
+Inserts 50 verbs into `verbs` table, then generates 3 sentences per verb × tense (350 combos) via Claude Haiku. Resume-safe — skips combos already written. Then run `pnpm seed:verbs:apply [--dry-run] <file>`. Idempotent — skips combos already in DB.
 
 ## Git / GitHub Workflow
 
@@ -297,7 +297,7 @@ Migrations (run once in Supabase SQL editor):
 - Module 6: Complex Sentences — 3 units, 13 concepts
 - ~9 exercises per concept (3 per exercise type); 56/61 null-annotation exercises annotated
 - Full plan: `src/lib/curriculum/curriculum-plan.ts`; design reference: `docs/curriculum-design.md`
-- ⚠️ Do NOT re-run `pnpm seed:ai:apply` on an existing review file — no idempotency guard, will create duplicate concept rows. See `docs/completed-features.md` Feat-E for cleanup procedure.
+- `pnpm seed:ai:apply` is now idempotent — skips concepts/exercises that already exist. Safe to re-run.
 
 ### Verb Seed Content
 
@@ -391,7 +391,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ## Current Status
 
-**Test suite: 1443 tests across 68 files — all passing.**
+**Test suite: 1450 tests across 69 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -548,12 +548,14 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Technical Debt
 
-**Debt-A: Seed script idempotency guards** *(P3 — prevent duplicate data on re-runs)*
+**Debt-A: Seed script idempotency guards** *(DONE)*
 
-- `pnpm seed:ai:apply` and `pnpm seed:verbs:apply` have no idempotency guards — running twice creates duplicate rows.
-- Add `ON CONFLICT` clauses or pre-check queries to make apply scripts safe to re-run.
-- Document the cleanup procedure for existing duplicates (currently in `docs/completed-features.md` Feat-E).
-- **Low risk — only affects developers running seed scripts, not production users.**
+- All three apply scripts are now idempotent:
+  - `seed:ai:apply` (mode `new`): skips concept if `(title, unit_id)` already exists in DB.
+  - `seed:ai:apply` (mode `topup`): skips exercises whose `(concept_id, type, prompt)` already exist.
+  - `seed:verbs:apply`: skips combos whose `(verb_id, tense)` already have sentences in DB.
+  - `seed:conjugations:apply`: already idempotent (ON CONFLICT DO UPDATE on PK).
+- Tests: `src/lib/curriculum/__tests__/seed-idempotency.test.ts`
 
 ### Strategic / Long-term
 
@@ -580,7 +582,7 @@ Items are ordered by priority within each group. Full details of completed work 
 | **P3** | **Feat-J** — Verb SRS integration | PM decision on SRS model |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
-| **P3** | **Debt-A** — Seed script idempotency | Low risk, dev-only |
+| **P3** | **Debt-A** — Seed script idempotency | ✅ Done |
 | **P4** | **Infra-D** — A/B testing / feature flags | Needed before Ped-F |
 | **P4** | **Feat-F** — Offline exercise packs | PM decision on sync |
 | **P4** | **Feat-L** — Reading comprehension | Content strategy needed |

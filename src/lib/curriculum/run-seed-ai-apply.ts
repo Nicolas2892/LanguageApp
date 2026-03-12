@@ -121,12 +121,38 @@ async function applyEntry(
       conceptCache.set(entry.title, conceptId)
     }
 
-    if (dryRun) {
-      console.log(`    [DRY RUN] Would insert ${entry.exercises.length} exercise(s) for concept "${entry.title}" (topup)`)
-      return { inserted: entry.exercises.length, failed: false }
+    // Dedup: fetch existing exercises for this concept to skip duplicates
+    const { data: existingExercises } = await supabase
+      .from('exercises')
+      .select('type, prompt')
+      .eq('concept_id', conceptId)
+
+    const existingSet = new Set(
+      ((existingExercises as Array<{ type: string; prompt: string }>) ?? []).map(
+        (e) => `${e.type}::${e.prompt}`,
+      ),
+    )
+
+    const newExercises = entry.exercises.filter(
+      (ex) => !existingSet.has(`${ex.type}::${ex.prompt}`),
+    )
+    const skippedCount = entry.exercises.length - newExercises.length
+
+    if (skippedCount > 0) {
+      console.log(`    ⚠️  Skipped ${skippedCount} duplicate exercise(s)`)
     }
 
-    const exercisesToInsert = entry.exercises.map((ex) => ({
+    if (newExercises.length === 0) {
+      console.log(`    ⚠️  All exercises already exist — nothing to insert`)
+      return { inserted: 0, failed: false }
+    }
+
+    if (dryRun) {
+      console.log(`    [DRY RUN] Would insert ${newExercises.length} exercise(s) for concept "${entry.title}" (topup)`)
+      return { inserted: newExercises.length, failed: false }
+    }
+
+    const exercisesToInsert = newExercises.map((ex) => ({
       concept_id: conceptId!,
       type: ex.type,
       prompt: ex.prompt,
@@ -142,7 +168,7 @@ async function applyEntry(
       return { inserted: 0, failed: true }
     }
 
-    return { inserted: entry.exercises.length, failed: false }
+    return { inserted: newExercises.length, failed: false }
   }
 
   // _mode === 'new'
@@ -223,7 +249,21 @@ async function applyEntry(
     unitCache.set(unitKey, unitId!)
   }
 
-  // 3. Insert concept
+  // 3. Dedup: check if concept already exists in this unit
+  if (!dryRun) {
+    const { data: existingConcept } = await supabase
+      .from('concepts')
+      .select('id')
+      .eq('title', entry.title)
+      .eq('unit_id', unitId!)
+      .single()
+
+    if (existingConcept) {
+      console.log(`    ⚠️  Skipped (concept already exists in unit)`)
+      return { inserted: 0, failed: false }
+    }
+  }
+
   if (dryRun) {
     console.log(`    [DRY RUN] Would insert concept "${entry.title}" (${entry.level}) with ${entry.exercises.length} exercises into "${entry.module} > ${entry.unit}"`)
     return { inserted: entry.exercises.length, failed: false }
