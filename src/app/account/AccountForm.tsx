@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Volume2, VolumeX, CheckCircle2 } from 'lucide-react'
+import { Volume2, VolumeX, CheckCircle2, EyeOff, Eye } from 'lucide-react'
 import { useSpeech } from '@/lib/hooks/useSpeech'
 import { useTheme } from '@/components/ThemeProvider'
 import { LEVEL_CHIP } from '@/lib/constants'
@@ -26,6 +26,7 @@ export function AccountForm({ profile }: Props) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [skipGapFill, setSkipGapFill] = useState(profile.skip_gap_fill)
   const { enabled: audioEnabled, toggle: toggleAudio } = useSpeech()
   const { theme, setTheme } = useTheme()
 
@@ -63,6 +64,21 @@ export function AccountForm({ profile }: Props) {
       setError(err instanceof Error ? err.message : 'Algo salió mal.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleSkipGapFillToggle() {
+    const next = !skipGapFill
+    setSkipGapFill(next)
+    try {
+      const res = await fetch('/api/account/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skip_gap_fill: next }),
+      })
+      if (!res.ok) setSkipGapFill(!next) // revert on failure
+    } catch {
+      setSkipGapFill(!next) // revert on failure
     }
   }
 
@@ -173,7 +189,42 @@ export function AccountForm({ profile }: Props) {
 
       <div style={{ height: '1.5rem' }} />
 
-      {/* ── Section 3: Nivel actual ── */}
+      {/* ── Section 3: Ejercicios ── */}
+      <div style={{ padding: '0.25rem 0 1rem' }}>
+        <span className="senda-eyebrow block mb-3">Ejercicios</span>
+
+        <button
+          type="button"
+          onClick={handleSkipGapFillToggle}
+          className={`senda-focus-ring w-full rounded-xl flex items-center gap-3 text-left border-none cursor-pointer transition-[background] duration-200 ease-out ${
+            skipGapFill
+              ? 'bg-[rgba(196,82,46,0.05)] dark:bg-[rgba(196,82,46,0.10)]'
+              : 'bg-[rgba(140,106,63,0.04)] dark:bg-[rgba(184,170,153,0.06)]'
+          }`}
+          style={{
+            padding: '0.75rem',
+            boxShadow: '0 10px 30px -10px rgba(26,17,8,0.06)',
+          }}
+        >
+          {skipGapFill ? (
+            <EyeOff size={16} strokeWidth={1.5} className="shrink-0" style={{ color: 'var(--d5-terracotta)' }} />
+          ) : (
+            <Eye size={16} strokeWidth={1.5} className="shrink-0 opacity-40" style={{ color: 'var(--d5-ink)' }} />
+          )}
+          <div>
+            <p className={`text-sm font-medium ${skipGapFill ? 'text-[var(--d5-ink)] dark:text-[var(--d5-paper)]' : 'text-[var(--d5-muted)]'}`}>
+              Omitir ejercicios de completar
+            </p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--d5-muted)' }}>
+              Los ejercicios de rellenar huecos (gap fill) son demasiado fáciles
+            </p>
+          </div>
+        </button>
+      </div>
+
+      <div style={{ height: '1.5rem' }} />
+
+      {/* ── Section 4: Nivel actual ── */}
       <div className="flex items-center justify-between" style={{ padding: '0.25rem 0 1rem' }}>
         <span className="senda-field-label">Nivel actual</span>
         {levelChip ? (

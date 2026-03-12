@@ -18,6 +18,7 @@ const baseProfile: Profile = {
   push_subscription: null,
   theme_preference: 'system',
   is_admin: false,
+  skip_gap_fill: false,
 }
 
 function renderWithTheme(ui: React.ReactElement) {
@@ -253,5 +254,29 @@ describe('AccountForm', () => {
     await waitFor(() => expect(screen.getByText('Cambios guardados.')).toBeTruthy())
     await userEvent.type(screen.getByLabelText('Nombre'), 'x')
     expect(screen.queryByText('Cambios guardados.')).toBeNull()
+  })
+
+  // --- Skip gap_fill toggle ---
+
+  it('renders skip gap_fill toggle with correct label', () => {
+    renderWithTheme(<AccountForm profile={baseProfile} />)
+    expect(screen.getByText('Omitir ejercicios de completar')).toBeTruthy()
+  })
+
+  it('clicking skip gap_fill toggle calls API with skip_gap_fill: true', async () => {
+    vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({ ok: true }) } as Response)
+    renderWithTheme(<AccountForm profile={baseProfile} />)
+    await userEvent.click(screen.getByText('Omitir ejercicios de completar'))
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/account/update',
+      expect.objectContaining({
+        body: JSON.stringify({ skip_gap_fill: true }),
+      })
+    )
+  })
+
+  it('shows toggle as active when profile has skip_gap_fill=true', () => {
+    renderWithTheme(<AccountForm profile={{ ...baseProfile, skip_gap_fill: true }} />)
+    expect(screen.getByText('Omitir ejercicios de completar')).toBeTruthy()
   })
 })

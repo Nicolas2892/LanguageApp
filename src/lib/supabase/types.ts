@@ -28,6 +28,7 @@ export interface Database {
           push_subscription: Json | null
           theme_preference: 'light' | 'dark' | 'system'
           is_admin: boolean
+          skip_gap_fill: boolean
         }
         Insert: {
           id: string
@@ -42,6 +43,7 @@ export interface Database {
           push_subscription?: Json | null
           theme_preference?: 'light' | 'dark' | 'system'
           is_admin?: boolean
+          skip_gap_fill?: boolean
         }
         Update: {
           id?: string
@@ -56,6 +58,7 @@ export interface Database {
           push_subscription?: Json | null
           theme_preference?: 'light' | 'dark' | 'system'
           is_admin?: boolean
+          skip_gap_fill?: boolean
         }
         Relationships: []
       }

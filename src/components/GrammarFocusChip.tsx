@@ -14,7 +14,7 @@ export function GrammarFocusChip({ focus }: Props) {
   if (!focus || !(focus in GRAMMAR_FOCUS_CONFIG)) return null
   const { label, className } = GRAMMAR_FOCUS_CONFIG[focus as GrammarFocus]
   return (
-    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${className}`}>
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold border ${className}`}>
       {label}
     </span>
   )

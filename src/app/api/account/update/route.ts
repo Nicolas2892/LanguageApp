@@ -7,6 +7,7 @@ const AccountUpdateSchema = z.object({
   display_name: z.string().min(1).max(50).optional(),
   daily_goal_minutes: z.number().int().min(5).max(120).optional(),
   theme_preference: z.enum(['light', 'dark', 'system']).optional(),
+  skip_gap_fill: z.boolean().optional(),
 })
 
 export async function POST(request: Request) {

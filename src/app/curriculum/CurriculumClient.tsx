@@ -365,64 +365,59 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                 <div
                                   style={{
                                     display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'space-between',
+                                    flexDirection: 'column',
+                                    gap: '0.25rem',
                                     marginTop: '0.625rem',
                                     paddingLeft: '1.25rem',
                                     borderLeft: '2px solid rgba(196,82,46,0.15)',
                                     opacity: locked ? 0.4 : 1,
-                                    gap: '0.5rem',
                                   }}
                                 >
-                                  {/* Left: icon + title + dot + chips */}
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
-                                    {locked && (
-                                      <Lock
-                                        size={12}
-                                        strokeWidth={1.5}
-                                        style={{ flexShrink: 0, color: 'var(--d5-subtle)' }}
-                                      />
-                                    )}
-                                    <span
-                                      className="text-foreground"
-                                      style={{
-                                        fontSize: 14,
-                                        fontWeight: 400,
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap',
-                                      }}
-                                    >
-                                      {concept.title}
-                                    </span>
-                                    <span
-                                      style={{
-                                        width: 4,
-                                        height: 4,
-                                        borderRadius: '50%',
-                                        background: 'var(--d5-terracotta)',
-                                        display: 'inline-block',
-                                        flexShrink: 0,
-                                      }}
-                                    />
-                                    <LevelChip level={concept.level} />
-                                    <GrammarFocusChip focus={concept.grammar_focus} />
-                                  </div>
-                                  {/* Right: badge + flag + chevron */}
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                                    <span style={badge.style}>{badge.label}</span>
-                                    <div
-                                      onClick={e => e.stopPropagation()}
-                                      style={{ position: 'relative', zIndex: 20 }}
-                                    >
-                                      <HardFlagButton conceptId={concept.id} initialIsHard={isHard} />
+                                  {/* Row 1: icon + title + right section */}
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
+                                      {locked && (
+                                        <Lock
+                                          size={12}
+                                          strokeWidth={1.5}
+                                          style={{ flexShrink: 0, color: 'var(--d5-subtle)' }}
+                                        />
+                                      )}
+                                      <span
+                                        className="text-foreground"
+                                        style={{
+                                          fontSize: 14,
+                                          fontWeight: 400,
+                                          overflow: 'hidden',
+                                          textOverflow: 'ellipsis',
+                                          whiteSpace: 'nowrap',
+                                        }}
+                                      >
+                                        {concept.title}
+                                      </span>
                                     </div>
-                                    <ChevronRight
-                                      size={14}
-                                      strokeWidth={1.5}
-                                      style={{ color: 'var(--d5-pill-text-soft)', flexShrink: 0 }}
-                                    />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                                      <span style={badge.style}>{badge.label}</span>
+                                      <div
+                                        onClick={e => e.stopPropagation()}
+                                        style={{ position: 'relative', zIndex: 20 }}
+                                      >
+                                        <HardFlagButton conceptId={concept.id} initialIsHard={isHard} />
+                                      </div>
+                                      <ChevronRight
+                                        size={14}
+                                        strokeWidth={1.5}
+                                        style={{ color: 'var(--d5-pill-text-soft)', flexShrink: 0 }}
+                                      />
+                                    </div>
                                   </div>
+                                  {/* Row 2: chips below title */}
+                                  {(concept.level || concept.grammar_focus) && (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingLeft: locked ? 18 : 0 }}>
+                                      <LevelChip level={concept.level} />
+                                      <GrammarFocusChip focus={concept.grammar_focus} />
+                                    </div>
+                                  )}
                                 </div>
                               </Link>
                             )

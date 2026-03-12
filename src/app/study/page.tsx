@@ -5,6 +5,7 @@ import { StudySession } from './StudySession'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { SESSION_SIZE, BOOTSTRAP_SIZE, MIN_PRACTICE_SIZE } from '@/lib/constants'
 import { cycleToMinimum } from '@/lib/practiceUtils'
+import { biasedExercisePick, dropGapFillForPractice } from '@/lib/studyUtils'
 import { computeUnlockedLevels } from '@/lib/curriculum/prerequisites'
 import type { CefrLevel } from '@/lib/curriculum/prerequisites'
 import type { StudyItem } from './StudySession'
@@ -47,6 +48,14 @@ export default async function StudyPage({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+
+  // Fetch skip_gap_fill preference
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('skip_gap_fill')
+    .eq('id', user.id)
+    .single()
+  const skipGapFill = (profileData as { skip_gap_fill: boolean } | null)?.skip_gap_fill ?? false
 
   const params = await searchParams
   const sessionSize = params.size ? Math.min(Math.max(parseInt(params.size, 10) || SESSION_SIZE, 1), 50) : SESSION_SIZE
@@ -254,6 +263,13 @@ export default async function StudyPage({
   if (filterTypes.length > 0) {
     exerciseQuery = exerciseQuery.in('type', filterTypes)
   }
+  // Skip gap_fill at DB level when user opted out (except review/drill modes)
+  const isReviewMode = params.mode === 'review'
+  if (skipGapFill && filterTypes.length === 0 && !isReviewMode && !isDrillMode) {
+    exerciseQuery = exerciseQuery.neq('type', 'gap_fill')
+  }
+  // Underweight gap_fill when types are mixed and user hasn't already skipped them
+  const isMixedTypes = filterTypes.length === 0 && !skipGapFill
 
   // Fetch concepts + exercises in parallel
   const [{ data: concepts }, { data: exercises }] = await Promise.all([
@@ -315,15 +331,17 @@ export default async function StudyPage({
       const exercise = (targetExId ? exArr.find((e) => e.id === targetExId) : undefined) ?? randomExercise
       items.push({ concept, exercise })
     } else {
-      // SRS mode: one random exercise per concept
-      // eslint-disable-next-line react-hooks/purity
-      const exercise = exArr[Math.floor(Math.random() * exArr.length)]
+      // SRS mode: one exercise per concept, biased away from gap_fill when mixed
+      const exercise = biasedExercisePick(exArr, isMixedTypes)
       items.push({ concept, exercise })
     }
   }
 
+  // Underweight gap_fill in Open Practice before cycling
+  const filteredItems = (isMixedTypes && isOpenPractice) ? dropGapFillForPractice(items) : items
+
   // Apply minimum cycling for Open Practice sessions (Fix-H)
-  const paddedItems = isOpenPractice ? cycleToMinimum(items, MIN_PRACTICE_SIZE) : items
+  const paddedItems = isOpenPractice ? cycleToMinimum(filteredItems, MIN_PRACTICE_SIZE) : filteredItems
 
   // Interleave by unit in SRS/sprint modes so each session mixes grammar areas (Ped-H)
   const shouldInterleave = !isOpenPractice && !isSprint && !params.concept && !params.unit && !params.module && params.mode !== 'review'
