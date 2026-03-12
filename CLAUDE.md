@@ -110,6 +110,12 @@ NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY
 ANTHROPIC_API_KEY
+NEXT_PUBLIC_SENTRY_DSN          # Sentry error monitoring (Infra-B)
+SENTRY_ORG                      # Sentry org slug (source map upload)
+SENTRY_PROJECT                  # Sentry project slug
+SENTRY_AUTH_TOKEN               # Sentry auth token (source map upload)
+NEXT_PUBLIC_POSTHOG_KEY         # PostHog product analytics (Infra-A)
+NEXT_PUBLIC_POSTHOG_HOST        # PostHog ingest host (default: https://us.i.posthog.com)
 ```
 
 ### Route Map
@@ -385,7 +391,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ## Current Status
 
-**Test suite: 1410 tests across 63 files — all passing.**
+**Test suite: 1443 tests across 68 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -401,6 +407,34 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 Items are ordered by priority within each group. Full details of completed work in `docs/completed-features.md`.
 
+### Observability / Infrastructure
+
+**Infra-A: Product analytics (PostHog)** *(DONE)*
+
+- PostHog integrated via `posthog-js` + `PostHogProvider` (wraps layout). Typed event helpers in `src/lib/analytics.ts`.
+- Core events instrumented: `signup`, `login`, `exercise_submitted`, `session_completed`, `verb_drill_started`, `verb_drill_completed`. Deferred: `onboarding_complete`, `tutor_message_sent`, `free_write_submitted`, `streak_milestone`.
+- Auto page-view capture enabled. User identification wired via `PostHogProvider userId` prop.
+- Env vars: `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`.
+
+**Infra-B: Error monitoring (Sentry)** *(DONE)*
+
+- `@sentry/nextjs` integrated without `withSentryConfig()` (Turbopack-safe). Manual `Sentry.init()` in `sentry.{client,server,edge}.config.ts`.
+- `src/instrumentation.ts` — Next.js 16 instrumentation hook with `onRequestError` for server/edge.
+- `src/app/global-error.tsx` — App Router global error page with `Sentry.captureException`.
+- `ErrorBoundary.tsx` — `componentDidCatch` now reports to Sentry with React `componentStack`.
+- Env vars: `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`.
+
+**Infra-C: Database migration tooling** *(P3 — reduce manual SQL risk)*
+
+- All migrations are currently run manually in the Supabase SQL editor. No version tracking, no rollback, no CI integration.
+- Evaluate lightweight options: `supabase db push` (requires Supabase CLI), `dbmate`, or a custom `migrations` table with a simple runner script.
+- **Do not implement without a PM decision on tooling and whether Supabase CLI adoption is acceptable.**
+
+**Infra-D: A/B testing / feature flag infrastructure** *(P4 — needed before Ped-F adaptive strategy)*
+
+- No feature flag system exists. Required before safely rolling out adaptive grading (Ped-F) or exercise pool changes.
+- Options: PostHog feature flags (if Infra-A adopts PostHog), LaunchDarkly, or simple DB-backed flags.
+- **Low priority — only needed when we have features that require gradual rollout.**
 
 ### Pedagogical / Learning Quality
 
@@ -435,6 +469,64 @@ Items are ordered by priority within each group. Full details of completed work 
 - SRS updates queued in IndexedDB, flushed when `navigator.onLine` is true; conflict resolution strategy needed.
 - **Do not implement without a written PM decision on conflict resolution and sync UI.**
 
+**Feat-G: Streak freeze / recovery mechanism** *(P2 — retention lever)*
+
+- Users who miss a day lose their streak entirely, which is demotivating. Offer a "streak freeze" (earned or purchased) that preserves the streak for 1 missed day.
+- Alternatively, offer a "streak recovery" window (e.g. complete 2× exercises within 24h of a break to restore the streak).
+- Requires changes to streak logic in `POST /api/submit` and `profiles` table (e.g. `streak_freezes_remaining`).
+- **Do not implement without a PM decision on the mechanic (freeze vs. recovery vs. both) and earning/purchase model.**
+
+**Feat-H: Listening comprehension exercise type** *(P2 — new modality)*
+
+- Add a listening exercise type where the user hears a Spanish audio clip and answers a comprehension question (e.g. gap_fill from audio, transcription, or multiple-choice).
+- Could use TTS (`SpeakButton` already wired) to generate audio from existing exercise prompts, or curate dedicated audio content.
+- Requires new `listening` exercise type in `ExerciseRenderer`, new component, and curriculum content.
+- **Do not implement without a PM decision on audio source (TTS vs. curated) and exercise format.**
+
+**Feat-I: i18n architecture (next-intl or JSON dictionaries)** *(P2 — future market expansion)*
+
+- All UI strings are currently hardcoded in Spanish/English. To support additional interface languages (e.g. German, French learners of Spanish), we need an i18n framework.
+- Evaluate `next-intl` (App Router native) vs. simple JSON dictionaries with a custom hook.
+- **Do not implement until there is a concrete plan to support non-English interface languages.**
+
+**Feat-J: Verb SRS integration** *(P3 — connect verbs to spaced repetition)*
+
+- Verb conjugation drills currently track accuracy (`verb_progress`) but do not feed into the SRS system. Verbs the user struggles with should surface more frequently.
+- Requires connecting `verb_progress` to `user_progress` or creating a parallel SRS loop for verbs.
+- **Do not implement without a PM decision on whether verbs should share the concept SRS or have their own.**
+
+**Feat-K: Email re-engagement (Resend / Postmark)** *(P3 — retention)*
+
+- Users who drop off have no re-engagement mechanism. Send emails after 3, 7, and 14 days of inactivity with streak status and a "come back" CTA.
+- Evaluate Resend (developer-friendly, generous free tier) or Postmark (deliverability focus).
+- Requires a cron job or Supabase Edge Function to check `profiles.last_studied_date` and send emails.
+- **Do not implement without a PM decision on vendor, email content, and frequency caps.**
+
+**Feat-L: Reading comprehension / passage-based exercises** *(P4 — new modality)*
+
+- Add longer-form reading passages with comprehension questions. Targets B2+ learners who need practice with extended text.
+- Could be AI-generated or curated. Exercises would be tied to passages rather than individual concepts.
+- **Future consideration — requires content strategy and new DB schema for passages.**
+
+**Feat-M: Vocabulary feature (word-in-context)** *(P4 — new modality)*
+
+- Dedicated vocabulary building beyond grammar concepts. Show words in context sentences, track mastery, and integrate with SRS.
+- Could leverage existing `verb_sentences` pattern for vocabulary sentences.
+- **Future consideration — requires PM decision on scope and differentiation from grammar exercises.**
+
+**Feat-N: Social / accountability features** *(P4 — retention)*
+
+- Leaderboards, study groups, or accountability partners to increase motivation and retention.
+- Requires careful design to avoid toxic competition (e.g. focus on consistency rather than speed).
+- **Future consideration — requires PM research on what social features actually drive retention in language apps.**
+
+**Feat-O: Onboarding re-engagement email sequence** *(P3 — activation)*
+
+- Users who complete signup but abandon onboarding (diagnostic quiz) never return. Send a sequence of 2–3 emails encouraging completion.
+- Separate from Feat-K (which targets users who completed onboarding but stopped studying).
+- Requires tracking `onboarding_completed = false` users and a transactional email provider.
+- **Do not implement without Feat-K vendor decision (shared email infrastructure).**
+
 ### Bugs / Layout Fixes
 
 **Fix-J: STT (speech-to-text) broken on free-write page — investigate and replace Web Speech API** *(high priority — iOS is primary target)*
@@ -448,6 +540,21 @@ Items are ordered by priority within each group. Full details of completed work 
 - **Acceptance criteria**: STT works on iOS Safari + Chrome + Edge; graceful fallback (hidden mic button) on unsupported environments.
 - **Do not implement without a PM decision on vendor and cost model.**
 
+**Fix-L: Verify push notifications on iOS PWA** *(CHECKLIST CREATED — pending device verification)*
+
+- Structured verification checklist created: `docs/ios-push-verification.md`.
+- Covers: PWA install, permission flow, notification delivery, deep-link on tap, SW lifecycle, edge cases, known iOS limitations.
+- **Next step: run checklist on a physical iPhone (iOS 16.4+) in Safari standalone mode.**
+
+### Technical Debt
+
+**Debt-A: Seed script idempotency guards** *(P3 — prevent duplicate data on re-runs)*
+
+- `pnpm seed:ai:apply` and `pnpm seed:verbs:apply` have no idempotency guards — running twice creates duplicate rows.
+- Add `ON CONFLICT` clauses or pre-check queries to make apply scripts safe to re-run.
+- Document the cleanup procedure for existing duplicates (currently in `docs/completed-features.md` Feat-E).
+- **Low risk — only affects developers running seed scripts, not production users.**
+
 ### Strategic / Long-term
 
 **Strat-C: Evaluate Claude API audio for pronunciation exercises** *(future research only)*
@@ -460,6 +567,23 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ## Recommended Next Steps (priority order)
 
-1. **Fix-J** — STT replacement for iOS Safari (PM decision on vendor first)
-2. **Feat-F** — Offline exercise packs (PM decision on conflict resolution first)
+| Priority | Item | Gate |
+| -------- | ---- | ---- |
+| **P0** | **Infra-A** — Product analytics (PostHog) | ✅ Done |
+| **P0** | **Infra-B** — Error monitoring (Sentry) | ✅ Done |
+| **P1** | **Fix-J** — STT replacement for iOS Safari | PM decision on vendor + cost model |
+| **P1** | **Fix-L** — Verify push notifications on iOS PWA | Checklist created; pending device test |
+| **P2** | **Feat-G** — Streak freeze / recovery | PM decision on mechanic |
+| **P2** | **Feat-H** — Listening comprehension exercises | PM decision on audio source |
+| **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
+| **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |
+| **P3** | **Feat-J** — Verb SRS integration | PM decision on SRS model |
+| **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
+| **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
+| **P3** | **Debt-A** — Seed script idempotency | Low risk, dev-only |
+| **P4** | **Infra-D** — A/B testing / feature flags | Needed before Ped-F |
+| **P4** | **Feat-F** — Offline exercise packs | PM decision on sync |
+| **P4** | **Feat-L** — Reading comprehension | Content strategy needed |
+| **P4** | **Feat-M** — Vocabulary feature | PM scope decision |
+| **P4** | **Feat-N** — Social / accountability | PM research needed |
 

@@ -23,6 +23,7 @@ import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
+import { trackExerciseSubmitted, trackSessionCompleted } from '@/lib/analytics'
 
 export interface StudyItem {
   concept: Concept
@@ -206,6 +207,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     if (state.phase === 'done') return
     const correct = scores.filter((s) => s >= 2).length
     setState({ phase: 'done', correct, total: scores.length, elapsedSeconds: totalSeconds })
+    trackSessionCompleted({ correct, total: scores.length, practiceMode: !!practiceMode, elapsedSeconds: totalSeconds })
     fetch('/api/sessions/complete', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -280,6 +282,14 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             scoreChunk = parsed as unknown as typeof scoreChunk
 
             setScores((s) => [...s, parsed.score as number])
+
+            trackExerciseSubmitted({
+              exerciseType: current.exercise.type,
+              conceptId: current.concept.id,
+              score: parsed.score as number,
+              isCorrect: parsed.is_correct as boolean,
+              practiceMode: !!practiceMode,
+            })
 
             // Track missed concepts (score < 2)
             if ((parsed.score as number) < 2) {
@@ -388,6 +398,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       const correct = scores.filter((s) => s >= 2).length
       const elapsed = sprintConfig?.limitType === 'time' ? totalSeconds - secondsLeft : undefined
       setState({ phase: 'done', correct, total: index + 1, elapsedSeconds: elapsed })
+      trackSessionCompleted({ correct, total: index + 1, practiceMode: !!practiceMode, elapsedSeconds: elapsed })
       fetch('/api/sessions/complete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

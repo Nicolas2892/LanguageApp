@@ -18,6 +18,7 @@ import type { VerbTense } from '@/lib/verbs/constants'
 import { VerbFeedbackPanel } from '@/components/verbs/VerbFeedbackPanel'
 import { VerbSummary } from '@/components/verbs/VerbSummary'
 import { useHaptics } from '@/lib/hooks/useHaptics'
+import { trackVerbDrillStarted, trackVerbDrillCompleted } from '@/lib/analytics'
 
 const PRONOUN_LABELS: Record<string, string> = {
   yo:       'yo',
@@ -85,6 +86,13 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
     })
     return Array.from(map.entries()).map(([tense, s]) => ({ tense, ...s }))
   }
+
+  // Track drill start on mount
+  useEffect(() => {
+    const tenses = [...new Set(items.map((i) => i.tense))]
+    trackVerbDrillStarted({ tenses, verbSet: 'session', length: items.length })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Focus input when entering answering phase
   useEffect(() => {
@@ -169,6 +177,13 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
   }
 
   // ── Done screen ────────────────────────────────────────────────────────────
+  const doneTrackedRef = useRef(false)
+  if (phase.kind === 'done' && !doneTrackedRef.current) {
+    doneTrackedRef.current = true
+    const correctCount = Array.from(scores.values()).filter(Boolean).length
+    trackVerbDrillCompleted({ correct: correctCount, total: scores.size })
+  }
+
   if (phase.kind === 'done') {
     const correctCount = Array.from(scores.values()).filter(Boolean).length
     return (

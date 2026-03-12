@@ -8,6 +8,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { SideNav } from "@/components/SideNav";
 import { PageWrapper } from "@/components/PageWrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { PostHogProvider } from "@/components/PostHogProvider";
 import { createClient } from "@/lib/supabase/server";
 import { getInitials } from "@/lib/utils";
 
@@ -90,11 +91,13 @@ export default async function RootLayout({
   // Fetch initials + theme for the nav avatar — lightweight PK lookup, gracefully skipped
   // when unauthenticated (auth pages). Middleware already handles redirects.
   let userInitials = ''
+  let userId: string | undefined
   let themePreference: 'light' | 'dark' | 'system' = 'system'
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
+      userId = user.id
       const { data: profile } = await supabase
         .from('profiles')
         .select('display_name, theme_preference')
@@ -125,14 +128,16 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${dmSans.variable} ${lora.variable} antialiased`}
       >
         <ThemeProvider initialTheme={themePreference}>
-          <SideNav userInitials={userInitials} />
-          <div className="lg:ml-[220px]">
-            <AppHeader userInitials={userInitials} />
-            <PageWrapper>{children}</PageWrapper>
-          </div>
-          <BottomNav />
-          <ServiceWorkerRegistration />
-          <IOSInstallPrompt />
+          <PostHogProvider userId={userId}>
+            <SideNav userInitials={userInitials} />
+            <div className="lg:ml-[220px]">
+              <AppHeader userInitials={userInitials} />
+              <PageWrapper>{children}</PageWrapper>
+            </div>
+            <BottomNav />
+            <ServiceWorkerRegistration />
+            <IOSInstallPrompt />
+          </PostHogProvider>
         </ThemeProvider>
       </body>
     </html>

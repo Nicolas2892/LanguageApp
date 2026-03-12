@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { GoogleButton } from '@/components/auth/GoogleButton'
 import { LogoMark } from '@/components/LogoMark'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
+import { trackSignup } from '@/lib/analytics'
 
 const schema = z.object({
   display_name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
@@ -52,6 +53,7 @@ export default function SignupPage() {
       setServerError(error.message)
       return
     }
+    trackSignup()
     setSuccess(true)
   }
 

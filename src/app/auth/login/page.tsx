@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { GoogleButton } from '@/components/auth/GoogleButton'
 import { LogoMark } from '@/components/LogoMark'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
+import { trackLogin } from '@/lib/analytics'
 
 const schema = z.object({
   email: z.string().email('Introduce un correo válido'),
@@ -49,6 +50,7 @@ export default function LoginPage() {
       setServerError(error.message)
       return
     }
+    trackLogin()
     router.push('/dashboard')
     router.refresh()
   }
