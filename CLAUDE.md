@@ -260,7 +260,7 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 
 | Table                                    | Purpose                                                                                                                  |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `profiles`                               | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level`                                |
+| `profiles`                               | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level`, `skip_gap_fill`               |
 | `modules / units / concepts / exercises` | Curriculum hierarchy (publicly readable); `concepts.level` = B1/B2/C1                                                    |
 | `user_progress`                          | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`, `production_mastered`, `is_hard`) |
 | `exercise_attempts`                      | Full attempt history with AI score + feedback                                                                            |
@@ -282,6 +282,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/014_verb_conjugation.sql` — `verbs`, `verb_sentences`, `user_verb_favorites`, `verb_progress` tables + `increment_verb_progress(p_user_id, p_verb_id, p_tense, p_correct)` RPC
 - `supabase/migrations/015_verb_conjugations.sql` — `verb_conjugations` table (full 6-pronoun paradigm + stem per verb × tense)
 - `supabase/migrations/016_is_admin.sql` — `profiles.is_admin boolean NOT NULL DEFAULT false`; run `UPDATE profiles SET is_admin = true WHERE id = '<uuid>'` after applying
+- `supabase/migrations/017_skip_gap_fill.sql` — `profiles.skip_gap_fill boolean NOT NULL DEFAULT false`
 
 ### Dashboard Stats
 
@@ -350,6 +351,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 - `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
 - `src/lib/practiceUtils.ts` — `cycleToMinimum(items, min)` pads Open Practice sessions to at least MIN_PRACTICE_SIZE; avoids consecutive duplicates when pool ≥ 2
+- `src/lib/studyUtils.ts` — `biasedExercisePick(exercises, underweight)` (80% gap_fill exclusion in SRS) + `dropGapFillForPractice(items)` (~60% gap_fill drop in Open Practice)
 - `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map)
 - `src/lib/verbs/constants.ts` — `TENSES`, `TENSE_LABELS` (Spanish names), `TENSE_DESCRIPTIONS`, `VerbTense` type
 - `src/lib/verbs/grader.ts` — `normalizeSpanish(s)` + `gradeConjugation(userAnswer, correctForm, tenseRule)` → `VerbGradeResult`; pure functions, no network calls
@@ -400,7 +402,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ## Current Status
 
-**Test suite: 1595 tests across 70 files — all passing.**
+**Test suite: 1618 tests across 72 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
