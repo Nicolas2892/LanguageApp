@@ -69,7 +69,7 @@ export default async function VerbsPage() {
             {verbs.length} verbos de alta frecuencia
           </p>
           {practicados > 0 && (
-            <p className="text-xs mt-1" style={{ color: 'var(--d5-warm)' }}>
+            <p className="text-xs mt-1" style={{ color: 'var(--d5-body)' }}>
               {practicados} practicados · {dominados} dominados
             </p>
           )}

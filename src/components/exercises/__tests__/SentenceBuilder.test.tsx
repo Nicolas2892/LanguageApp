@@ -45,7 +45,7 @@ describe('SentenceBuilder', () => {
 
   it('renders SpeakButton with Play audio label (main path)', () => {
     render(<SentenceBuilder exercise={makeExercise()} onSubmit={vi.fn()} />)
-    expect(screen.getByLabelText('Play audio')).toBeTruthy()
+    expect(screen.getByLabelText('Reproducir audio')).toBeTruthy()
   })
 
   it('renders SpeakButton on fallback path (no bracket notation)', () => {
@@ -55,7 +55,7 @@ describe('SentenceBuilder', () => {
         onSubmit={vi.fn()}
       />
     )
-    expect(screen.getByLabelText('Play audio')).toBeTruthy()
+    expect(screen.getByLabelText('Reproducir audio')).toBeTruthy()
   })
 
   it('submit is disabled before any word is selected', () => {

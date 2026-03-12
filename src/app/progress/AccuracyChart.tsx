@@ -87,7 +87,7 @@ export function AccuracyChart({ data }: Props) {
           <LabelList
             dataKey="label"
             position="right"
-            style={{ fontSize: 11, fill: 'var(--d5-warm)' }}
+            style={{ fontSize: 11, fill: 'var(--d5-body)' }}
           />
         </Bar>
       </BarChart>

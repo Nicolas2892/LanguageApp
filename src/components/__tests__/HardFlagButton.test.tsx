@@ -12,13 +12,13 @@ describe('HardFlagButton', () => {
   describe('initial render', () => {
     it('shows "Mark as hard" aria-label when not hard', () => {
       render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={false} />)
-      const btn = screen.getByRole('button', { name: 'Mark as hard' })
+      const btn = screen.getByRole('button', { name: 'Marcar como difícil' })
       expect(btn).toBeDefined()
     })
 
     it('shows "Remove hard flag" aria-label when hard', () => {
       render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={true} />)
-      const btn = screen.getByRole('button', { name: 'Remove hard flag' })
+      const btn = screen.getByRole('button', { name: 'Quitar marca de difícil' })
       expect(btn).toBeDefined()
     })
 
@@ -42,12 +42,12 @@ describe('HardFlagButton', () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ is_hard: true }) }))
 
       render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={false} />)
-      const btn = screen.getByRole('button', { name: 'Mark as hard' })
+      const btn = screen.getByRole('button', { name: 'Marcar como difícil' })
 
       fireEvent.click(btn)
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Remove hard flag' })).toBeDefined()
+        expect(screen.getByRole('button', { name: 'Quitar marca de difícil' })).toBeDefined()
       })
     })
 
@@ -55,12 +55,12 @@ describe('HardFlagButton', () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ is_hard: false }) }))
 
       render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={true} />)
-      const btn = screen.getByRole('button', { name: 'Remove hard flag' })
+      const btn = screen.getByRole('button', { name: 'Quitar marca de difícil' })
 
       fireEvent.click(btn)
 
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Mark as hard' })).toBeDefined()
+        expect(screen.getByRole('button', { name: 'Marcar como difícil' })).toBeDefined()
       })
     })
 
@@ -88,11 +88,11 @@ describe('HardFlagButton', () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }))
 
       render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={false} />)
-      fireEvent.click(screen.getByRole('button', { name: 'Mark as hard' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Marcar como difícil' }))
 
       // After fetch failure, should revert back to "Mark as hard"
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Mark as hard' })).toBeDefined()
+        expect(screen.getByRole('button', { name: 'Marcar como difícil' })).toBeDefined()
       })
     })
 
@@ -100,11 +100,11 @@ describe('HardFlagButton', () => {
       vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')))
 
       render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={true} />)
-      fireEvent.click(screen.getByRole('button', { name: 'Remove hard flag' }))
+      fireEvent.click(screen.getByRole('button', { name: 'Quitar marca de difícil' }))
 
       // After fetch failure, should revert back to "Remove hard flag"
       await waitFor(() => {
-        expect(screen.getByRole('button', { name: 'Remove hard flag' })).toBeDefined()
+        expect(screen.getByRole('button', { name: 'Quitar marca de difícil' })).toBeDefined()
       })
     })
   })

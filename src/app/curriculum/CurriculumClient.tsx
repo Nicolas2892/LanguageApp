@@ -64,7 +64,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
         <h1 className="senda-heading" style={{ fontSize: 26 }}>
           Tu Currículo
         </h1>
-        <p style={{ fontSize: 11, color: 'var(--d5-warm)', marginTop: 4 }}>B1 → B2 · Tu camino personal</p>
+        <p style={{ fontSize: 11, color: 'var(--d5-body)', marginTop: 4 }}>B1 → B2 · Tu camino personal</p>
       </div>
 
       {/* Timeline */}
@@ -85,7 +85,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
           const nodeSize = state === 'active' ? 16 : 11
           const nodeStyle: React.CSSProperties =
             state === 'mastered'
-              ? { width: nodeSize, height: nodeSize, borderRadius: '50%', background: 'var(--d5-muted)', flexShrink: 0 }
+              ? { width: nodeSize, height: nodeSize, borderRadius: '50%', background: 'var(--d5-subtle)', flexShrink: 0 }
               : state === 'active'
               ? {
                   width: nodeSize,
@@ -93,7 +93,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                   borderRadius: '50%',
                   border: '2px solid var(--d5-terracotta)',
                   boxShadow: '0 0 0 5px rgba(196,82,46,0.09)',
-                  background: 'var(--d5-paper)',
+                  background: 'var(--background)',
                   flexShrink: 0,
                 }
               : { width: nodeSize, height: nodeSize, borderRadius: '50%', border: '1.5px solid var(--d5-border-subtle)', background: 'transparent', flexShrink: 0 }
@@ -104,12 +104,12 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
           // Status chip per state
           const statusChip =
             state === 'mastered'
-              ? { label: 'Completado', style: { background: 'rgba(184,170,153,0.3)', color: 'var(--d5-muted)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 500 } as React.CSSProperties }
+              ? { label: 'Completado', style: { background: 'var(--d5-surface-tint)', color: 'var(--d5-subtle)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 500 } as React.CSSProperties }
               : state === 'active'
               ? { label: 'En Progreso', style: { background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', padding: '2px 7px', borderRadius: 9999, fontSize: 10, fontWeight: 500 } as React.CSSProperties }
               : { label: 'Próximamente', style: { color: 'var(--d5-pill-text-soft)', fontSize: 10, fontWeight: 400, padding: '2px 7px' } as React.CSSProperties }
 
-          const lineColor = idx === 1 ? 'var(--d5-muted)' : 'var(--d5-line)'
+          const lineColor = idx === 1 ? 'var(--d5-subtle)' : 'var(--d5-line)'
 
           return (
             <div key={mod.id} style={{ display: 'flex' }}>
@@ -170,7 +170,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                           borderRadius: 9999,
                           border: '1px solid var(--d5-border-subtle)',
                           fontSize: 10,
-                          color: 'var(--d5-warm)',
+                          color: 'var(--d5-body)',
                           fontWeight: 400,
                         }}
                       >
@@ -224,7 +224,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                         height: '100%',
                         width: `${masteredPct}%`,
                         borderRadius: 999,
-                        background: state === 'active' ? 'var(--d5-terracotta)' : 'var(--d5-muted)',
+                        background: state === 'active' ? 'var(--d5-terracotta)' : 'var(--d5-subtle)',
                         transition: 'width 0.5s ease',
                       }}
                     />
@@ -287,7 +287,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                       <Lock
                                         size={12}
                                         strokeWidth={1.5}
-                                        style={{ flexShrink: 0, color: 'var(--d5-muted)' }}
+                                        style={{ flexShrink: 0, color: 'var(--d5-subtle)' }}
                                       />
                                     )}
                                     <span
@@ -351,7 +351,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
         style={{
           textAlign: 'center',
           fontSize: 11,
-          color: 'var(--d5-warm)',
+          color: 'var(--d5-body)',
           marginTop: 8,
           fontStyle: 'italic',
         }}

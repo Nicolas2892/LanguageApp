@@ -43,7 +43,7 @@ export function SideNav({ userInitials }: Props) {
             fontStyle: 'italic',
             fontSize: 20,
             lineHeight: 1,
-            color: 'var(--d5-ink)',
+            color: 'var(--d5-heading)',
           }}
         >
           Senda

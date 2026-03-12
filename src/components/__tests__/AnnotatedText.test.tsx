@@ -26,7 +26,7 @@ describe('AnnotatedText', () => {
       { text: ' mañana.', form: null },
     ]
     render(<AnnotatedText text="Espero que vengas mañana." annotations={annotations} />)
-    const subjSpan = screen.getByTitle('Subjunctive')
+    const subjSpan = screen.getByTitle('Subjuntivo')
     expect(subjSpan.textContent).toBe('vengas')
     expect(subjSpan.className).toContain('border-violet-400')
     expect(subjSpan.className).toContain('text-violet-700')
@@ -56,7 +56,7 @@ describe('AnnotatedText', () => {
       { text: 'llegues', form: 'subjunctive' },
     ]
     render(<AnnotatedText text="llegues" annotations={annotations} />)
-    expect(screen.getByTitle('Subjunctive')).toBeTruthy()
+    expect(screen.getByTitle('Subjuntivo')).toBeTruthy()
   })
 
   it('highlights multiple subjunctive spans', () => {
@@ -68,7 +68,7 @@ describe('AnnotatedText', () => {
       { text: '.', form: null },
     ]
     render(<AnnotatedText text="Aunque llueva, quiero que vengas." annotations={annotations} />)
-    const subjSpans = screen.getAllByTitle('Subjunctive')
+    const subjSpans = screen.getAllByTitle('Subjuntivo')
     expect(subjSpans.length).toBe(2)
     expect(subjSpans[0].textContent).toBe('llueva')
     expect(subjSpans[1].textContent).toBe('vengas')

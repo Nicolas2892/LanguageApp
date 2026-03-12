@@ -115,7 +115,7 @@ describe('GapFill — single-blank inline mode', () => {
   it('renders a single inline input with aria-label "Your answer"', () => {
     const exercise = makeExercise({ prompt: 'La película es larga; ___, me gustó.' })
     render(<GapFill exercise={exercise} onSubmit={vi.fn()} />)
-    expect(screen.getByLabelText('Your answer')).toBeTruthy()
+    expect(screen.getByLabelText('Tu respuesta')).toBeTruthy()
     expect(screen.queryByPlaceholderText('Escribe tu respuesta…')).toBeNull()
   })
 
@@ -127,7 +127,7 @@ describe('GapFill — single-blank inline mode', () => {
         onSubmit={onSubmit}
       />
     )
-    await userEvent.type(screen.getByLabelText('Your answer'), '  soy  ')
+    await userEvent.type(screen.getByLabelText('Tu respuesta'), '  soy  ')
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledWith('soy')
   })
@@ -150,7 +150,7 @@ describe('GapFill — single-blank inline mode', () => {
         disabled={true}
       />
     )
-    expect(screen.getByLabelText('Your answer')).toBeDisabled()
+    expect(screen.getByLabelText('Tu respuesta')).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()
   })
 
@@ -161,7 +161,7 @@ describe('GapFill — single-blank inline mode', () => {
         onSubmit={vi.fn()}
       />
     )
-    const blank = screen.getByLabelText('Your answer')
+    const blank = screen.getByLabelText('Tu respuesta')
     await userEvent.type(blank, 'hacía')
     await userEvent.keyboard('{Enter}')
     expect(screen.getByRole('button', { name: 'Confirmar →' })).toHaveFocus()
@@ -190,8 +190,8 @@ describe('GapFill — multi-blank mode', () => {
         onSubmit={vi.fn()}
       />
     )
-    expect(screen.getByLabelText('Blank 1')).toBeTruthy()
-    expect(screen.getByLabelText('Blank 2')).toBeTruthy()
+    expect(screen.getByLabelText('Hueco 1')).toBeTruthy()
+    expect(screen.getByLabelText('Hueco 2')).toBeTruthy()
     expect(screen.queryByPlaceholderText('Escribe tu respuesta…')).toBeNull()
   })
 
@@ -203,9 +203,9 @@ describe('GapFill — multi-blank mode', () => {
         onSubmit={vi.fn()}
       />
     )
-    expect(screen.getByLabelText('Blank 1')).toBeTruthy()
-    expect(screen.getByLabelText('Blank 2')).toBeTruthy()
-    expect(screen.getByLabelText('Blank 3')).toBeTruthy()
+    expect(screen.getByLabelText('Hueco 1')).toBeTruthy()
+    expect(screen.getByLabelText('Hueco 2')).toBeTruthy()
+    expect(screen.getByLabelText('Hueco 3')).toBeTruthy()
   })
 
   it('Submit is disabled until ALL blanks are filled', async () => {
@@ -219,11 +219,11 @@ describe('GapFill — multi-blank mode', () => {
     expect(submitBtn).toBeDisabled()
 
     // Fill only first blank — still disabled
-    await userEvent.type(screen.getByLabelText('Blank 1'), 'Aunque')
+    await userEvent.type(screen.getByLabelText('Hueco 1'), 'Aunque')
     expect(submitBtn).toBeDisabled()
 
     // Fill second blank — now enabled
-    await userEvent.type(screen.getByLabelText('Blank 2'), 'Sin embargo')
+    await userEvent.type(screen.getByLabelText('Hueco 2'), 'Sin embargo')
     expect(submitBtn).not.toBeDisabled()
   })
 
@@ -235,8 +235,8 @@ describe('GapFill — multi-blank mode', () => {
         onSubmit={onSubmit}
       />
     )
-    await userEvent.type(screen.getByLabelText('Blank 1'), '  sin embargo  ')
-    await userEvent.type(screen.getByLabelText('Blank 2'), '  aunque  ')
+    await userEvent.type(screen.getByLabelText('Hueco 1'), '  sin embargo  ')
+    await userEvent.type(screen.getByLabelText('Hueco 2'), '  aunque  ')
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledWith('sin embargo | aunque')
   })
@@ -249,8 +249,8 @@ describe('GapFill — multi-blank mode', () => {
         disabled={true}
       />
     )
-    expect(screen.getByLabelText('Blank 1')).toBeDisabled()
-    expect(screen.getByLabelText('Blank 2')).toBeDisabled()
+    expect(screen.getByLabelText('Hueco 1')).toBeDisabled()
+    expect(screen.getByLabelText('Hueco 2')).toBeDisabled()
     expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()
   })
 
@@ -261,10 +261,10 @@ describe('GapFill — multi-blank mode', () => {
         onSubmit={vi.fn()}
       />
     )
-    const blank1 = screen.getByLabelText('Blank 1')
+    const blank1 = screen.getByLabelText('Hueco 1')
     await userEvent.type(blank1, 'Aunque')
     await userEvent.keyboard('{Enter}')
-    expect(screen.getByLabelText('Blank 2')).toHaveFocus()
+    expect(screen.getByLabelText('Hueco 2')).toHaveFocus()
   })
 
   it('Enter in last blank moves focus to Submit button', async () => {
@@ -275,8 +275,8 @@ describe('GapFill — multi-blank mode', () => {
       />
     )
     // Fill both blanks so Submit is enabled and can receive focus
-    await userEvent.type(screen.getByLabelText('Blank 1'), 'Aunque')
-    await userEvent.type(screen.getByLabelText('Blank 2'), 'Sin embargo')
+    await userEvent.type(screen.getByLabelText('Hueco 1'), 'Aunque')
+    await userEvent.type(screen.getByLabelText('Hueco 2'), 'Sin embargo')
     await userEvent.keyboard('{Enter}')
     expect(screen.getByRole('button', { name: 'Confirmar →' })).toHaveFocus()
   })

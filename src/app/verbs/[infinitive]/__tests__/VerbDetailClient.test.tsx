@@ -140,7 +140,7 @@ describe('VerbDetailClient', () => {
     const user = userEvent.setup()
     render(<VerbDetailClient {...defaultProps} />)
 
-    const toggleBtn = screen.getByRole('button', { name: 'Toggle colour endings' })
+    const toggleBtn = screen.getByRole('button', { name: 'Alternar terminaciones coloreadas' })
     expect(toggleBtn).toHaveAttribute('aria-pressed', 'true')
 
     await user.click(toggleBtn)

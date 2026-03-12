@@ -69,6 +69,6 @@ describe('ErrorCorrection', () => {
 
   it('renders SpeakButton with Play audio label', () => {
     render(<ErrorCorrection exercise={makeExercise()} onSubmit={vi.fn()} />)
-    expect(screen.getByLabelText('Play audio')).toBeTruthy()
+    expect(screen.getByLabelText('Reproducir audio')).toBeTruthy()
   })
 })

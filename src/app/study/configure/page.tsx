@@ -94,7 +94,7 @@ export default async function ConfigurePage() {
         <Link
           href="/dashboard"
           className="text-[11px] font-semibold"
-          style={{ color: 'var(--d5-warm)' }}
+          style={{ color: 'var(--d5-body)' }}
         >
           ← Inicio
         </Link>

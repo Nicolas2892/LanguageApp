@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
+import { SvgSendaPath } from '@/components/SvgSendaPath'
 
 const STORAGE_KEY = 'tour_dismissed'
 
@@ -45,26 +46,26 @@ export function OnboardingTour() {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-3">
-          <div className="text-2xl">👋</div>
+          <SvgSendaPath size={28} />
           <button
             onClick={dismiss}
-            aria-label="Dismiss tour"
+            aria-label="Cerrar guía"
             className="text-[var(--d5-muted)] hover:text-[var(--d5-ink)] dark:hover:text-[var(--d5-paper)] transition-colors ml-auto"
           >
             <X className="h-4 w-4" strokeWidth={1.5} />
           </button>
         </div>
         <div>
-          <p className="font-bold text-base text-[var(--d5-ink)] dark:text-[var(--d5-paper)]" style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic' }}>You&apos;re set up.</p>
+          <p className="font-bold text-base text-[var(--d5-ink)] dark:text-[var(--d5-paper)]" style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic' }}>Todo listo.</p>
           <p className="text-sm text-[var(--d5-muted)] mt-1">
-            Your first exercises are ready — hit <span className="font-semibold text-[var(--d5-ink)] dark:text-[var(--d5-paper)]">Start review</span> and the app takes care of the rest. No planning, just practice.
+            Tus primeros ejercicios están preparados — pulsa <span className="font-semibold text-[var(--d5-ink)] dark:text-[var(--d5-paper)]">Empezar Repaso</span> y la app se encarga del resto. Sin planificar, solo practicar.
           </p>
         </div>
         <button
           onClick={dismiss}
           className="w-full rounded-xl bg-primary text-primary-foreground py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors"
         >
-          Got it →
+          Entendido →
         </button>
       </div>
     </div>

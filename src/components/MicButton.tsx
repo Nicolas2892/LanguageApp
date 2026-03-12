@@ -16,8 +16,8 @@ export function MicButton({ stt, disabled }: Props) {
       <button
         type="button"
         disabled
-        title="Speech recognition is not supported in your browser"
-        aria-label="Speech recognition not supported"
+        title="El reconocimiento de voz no está disponible en tu navegador"
+        aria-label="Reconocimiento de voz no disponible"
         className="inline-flex items-center justify-center w-8 h-8 rounded-full text-muted-foreground/40 cursor-not-allowed"
       >
         <MicOff className="h-4 w-4" />
@@ -30,8 +30,8 @@ export function MicButton({ stt, disabled }: Props) {
       <button
         type="button"
         disabled
-        title="Microphone access was denied — check your browser settings"
-        aria-label="Microphone access denied"
+        title="Acceso al micrófono denegado — revisa la configuración de tu navegador"
+        aria-label="Acceso al micrófono denegado"
         className="inline-flex items-center justify-center w-8 h-8 rounded-full text-muted-foreground/40 cursor-not-allowed"
       >
         <MicOff className="h-4 w-4" />
@@ -48,8 +48,8 @@ export function MicButton({ stt, disabled }: Props) {
         type="button"
         onClick={listening ? stop : start}
         disabled={disabled}
-        title={listening ? 'Listening… click to stop' : 'Dictate your answer'}
-        aria-label={listening ? 'Stop dictation' : 'Start dictation'}
+        title={listening ? 'Escuchando… pulsa para detener' : 'Dictar tu respuesta'}
+        aria-label={listening ? 'Detener dictado' : 'Iniciar dictado'}
         className={`inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors
           ${listening
             ? 'text-orange-500 bg-orange-100 dark:bg-orange-950/40 animate-pulse'
@@ -60,10 +60,10 @@ export function MicButton({ stt, disabled }: Props) {
         <Mic className="h-4 w-4" />
       </button>
       {isNoSpeech && (
-        <p className="text-xs text-muted-foreground">No speech detected — try again</p>
+        <p className="text-xs text-muted-foreground">No se detectó voz — inténtalo de nuevo</p>
       )}
       {isAudioCapture && (
-        <p className="text-xs text-destructive">Could not access microphone</p>
+        <p className="text-xs text-destructive">No se pudo acceder al micrófono</p>
       )}
     </div>
   )

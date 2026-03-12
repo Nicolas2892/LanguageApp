@@ -19,7 +19,7 @@ export function SpeakButton({ text, lang = 'es-ES' }: Props) {
     <button
       type="button"
       onClick={() => speak(text, lang)}
-      aria-label="Play audio"
+      aria-label="Reproducir audio"
       className={`inline-flex items-center justify-center min-w-[44px] min-h-[44px] sm:w-7 sm:h-7 sm:min-w-0 sm:min-h-0 rounded-full transition-colors shrink-0
         ${speaking
           ? 'text-primary bg-primary/10'

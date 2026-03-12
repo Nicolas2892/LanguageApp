@@ -16,7 +16,7 @@ export function AnnotatedText({ text, annotations }: Props) {
           <span
             key={i}
             className="border-b-2 border-violet-400 text-violet-700 dark:text-violet-300"
-            title="Subjunctive"
+            title="Subjuntivo"
           >
             {span.text}
           </span>

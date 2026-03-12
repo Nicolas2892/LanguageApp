@@ -89,7 +89,7 @@ function ColouredForm({ form, stem }: { form: string; stem: string }) {
   const ending = form.substring(stem.length)
   return (
     <>
-      <span style={{ color: 'color-mix(in oklch, var(--d5-ink) 75%, transparent)', fontWeight: 400 }}>{stemPart}</span>
+      <span style={{ color: 'color-mix(in oklch, var(--d5-heading) 75%, transparent)', fontWeight: 400 }}>{stemPart}</span>
       <span style={{ color: 'var(--d5-terracotta)', fontWeight: 600 }}>{ending}</span>
     </>
   )
@@ -130,7 +130,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
         <Link
           href="/verbs"
           className="p-2 -ml-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          aria-label="Back to verbs"
+          aria-label="Volver a verbos"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
@@ -142,11 +142,11 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
             >
               {infinitive}
             </h1>
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'rgba(184,170,153,0.25)', color: 'var(--d5-warm)' }}>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded" style={{ background: 'var(--d5-surface-tint)', color: 'var(--d5-body)' }}>
               -{verbGroup}
             </span>
           </div>
-          <p className="text-sm" style={{ color: 'var(--d5-warm)' }}>{english}</p>
+          <p className="text-sm" style={{ color: 'var(--d5-body)' }}>{english}</p>
         </div>
         <VerbFavoriteButton verbId={verbId} initialFavorited={favorited} size="md" />
       </div>
@@ -161,7 +161,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
           <div key={group.label}>
             <p
               className="senda-eyebrow"
-              style={{ marginBottom: 8, color: 'var(--d5-muted)', fontSize: '0.5625rem' }}
+              style={{ marginBottom: 8, color: 'var(--d5-subtle)', fontSize: '0.5625rem' }}
             >
               {group.label}
             </p>
@@ -184,7 +184,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
                       fontWeight: active ? 700 : 400,
                       transition: 'background 200ms ease-out, color 200ms ease-out, border-color 200ms ease-out',
                       background: active ? 'var(--d5-terracotta)' : 'transparent',
-                      color: active ? 'var(--d5-paper)' : 'var(--d5-warm)',
+                      color: active ? 'var(--d5-paper)' : 'var(--d5-body)',
                       border: active ? '1.5px solid transparent' : '1.5px solid var(--d5-pill-border)',
                     }}
                   >
@@ -201,13 +201,13 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="senda-eyebrow" style={{ marginBottom: 4 }}>{TENSE_LABELS[selectedTense]}</p>
-          <p className="text-[11px]" style={{ color: 'var(--d5-muted)' }}>{TENSE_DESCRIPTIONS[selectedTense]}</p>
+          <p className="text-[11px]" style={{ color: 'var(--d5-subtle)' }}>{TENSE_DESCRIPTIONS[selectedTense]}</p>
         </div>
         <button
           onClick={toggleColourEndings}
           aria-pressed={colourEndings}
-          aria-label="Toggle colour endings"
-          title={colourEndings ? 'Hide coloured endings' : 'Show coloured endings'}
+          aria-label="Alternar terminaciones coloreadas"
+          title={colourEndings ? 'Ocultar terminaciones coloreadas' : 'Mostrar terminaciones coloreadas'}
           className="senda-focus-ring"
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
@@ -231,14 +231,14 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
                   <tr
                     key={pronoun}
                     style={{
-                      borderBottom: idx < PRONOUN_ORDER.length - 1 ? '1px solid rgba(184,170,153,0.15)' : undefined,
-                      background: idx % 2 === 1 ? 'rgba(140,106,63,0.03)' : undefined,
+                      borderBottom: idx < PRONOUN_ORDER.length - 1 ? '1px solid var(--d5-divider)' : undefined,
+                      background: idx % 2 === 1 ? 'var(--d5-surface-tint)' : undefined,
                     }}
                   >
                     <td
                       style={{
                         padding: '8px 2px', width: 82, flexShrink: 0,
-                        fontSize: 11, color: 'var(--d5-muted)',
+                        fontSize: 11, color: 'var(--d5-subtle)',
                         fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
                       }}
                     >
@@ -254,8 +254,8 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
                       {row && row.form !== ''
                         ? colourEndings
                           ? <ColouredForm form={row.form} stem={row.stem} />
-                          : <span style={{ color: 'var(--d5-ink)' }}>{row.form}</span>
-                        : <span style={{ color: 'var(--d5-muted)', fontSize: 12, fontStyle: 'italic' }}>—</span>
+                          : <span style={{ color: 'var(--d5-heading)' }}>{row.form}</span>
+                        : <span style={{ color: 'var(--d5-subtle)', fontSize: 12, fontStyle: 'italic' }}>—</span>
                       }
                     </td>
                   </tr>
@@ -265,7 +265,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
           </table>
         </div>
       ) : (
-        <p style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 14, color: 'var(--d5-warm)', lineHeight: 1.5, padding: '8px 0' }}>
+        <p style={{ fontFamily: 'var(--font-lora), serif', fontStyle: 'italic', fontSize: 14, color: 'var(--d5-body)', lineHeight: 1.5, padding: '8px 0' }}>
           Sin datos aún — practica para ver tu progreso.
         </p>
       )}
@@ -274,19 +274,19 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
       {masteryPct !== null && (
         <div style={{ padding: '0 2px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <p style={{ fontSize: 10, color: 'var(--d5-warm)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+            <p style={{ fontSize: 10, color: 'var(--d5-body)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
               {attempts} intentos
             </p>
-            <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--d5-ink)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--d5-heading)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
               {masteryPct}%
             </p>
           </div>
-          <div className="relative overflow-hidden" style={{ height: 5, borderRadius: 99, background: 'color-mix(in oklch, var(--d5-muted) 25%, transparent)' }} data-testid="mastery-bar">
+          <div className="relative overflow-hidden" style={{ height: 5, borderRadius: 99, background: 'color-mix(in oklch, var(--d5-subtle) 50%, transparent)' }} data-testid="mastery-bar">
             <AnimatedBar
               pct={masteryPct}
               className={masteryPct >= 70 ? '' : ''}
               style={{
-                background: masteryPct >= 70 ? 'var(--d5-muted)' : 'var(--d5-terracotta)',
+                background: masteryPct >= 70 ? 'var(--d5-subtle)' : 'var(--d5-terracotta)',
                 borderRadius: 99,
               }}
             />

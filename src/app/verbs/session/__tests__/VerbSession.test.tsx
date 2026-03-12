@@ -202,7 +202,7 @@ describe('VerbSession', () => {
       />
     )
 
-    await user.click(screen.getByRole('button', { name: /Exit session/ }))
+    await user.click(screen.getByRole('button', { name: /Salir de la sesión/ }))
 
     expect(screen.getByText('¿Salir de la Sesión?')).toBeInTheDocument()
     expect(screen.getByText('Tu progreso de esta sesión no se guardará.')).toBeInTheDocument()

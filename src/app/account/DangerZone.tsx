@@ -25,7 +25,7 @@ export function DangerZone() {
     try {
       const res = await fetch('/api/account/delete', { method: 'POST' })
       const data = await res.json() as { ok?: boolean; error?: string }
-      if (!res.ok) throw new Error(data.error ?? 'Failed to delete account')
+      if (!res.ok) throw new Error(data.error ?? 'Error al eliminar la cuenta')
       router.push('/auth/login')
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'Algo salió mal.')

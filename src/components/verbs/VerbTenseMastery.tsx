@@ -17,13 +17,13 @@ export function VerbTenseMastery({ summaries }: Props) {
   if (summaries.length === 0) {
     return (
       <section className="space-y-3 px-1">
-        <p className="senda-eyebrow" style={{ color: 'var(--d5-muted)' }}>Verbos por Tiempo</p>
+        <p className="senda-eyebrow" style={{ color: 'var(--d5-subtle)' }}>Verbos por Tiempo</p>
         <p
           style={{
             fontFamily: 'var(--font-lora), serif',
             fontStyle: 'italic',
             fontSize: 14,
-            color: 'var(--d5-muted)',
+            color: 'var(--d5-subtle)',
           }}
         >
           Completa ejercicios de verbos para ver tu progreso.
@@ -34,11 +34,11 @@ export function VerbTenseMastery({ summaries }: Props) {
 
   return (
     <section className="space-y-4 px-1">
-      <p className="senda-eyebrow" style={{ color: 'var(--d5-muted)' }}>Verbos por Tiempo</p>
+      <p className="senda-eyebrow" style={{ color: 'var(--d5-subtle)' }}>Verbos por Tiempo</p>
       <div className="space-y-4">
         {summaries.map(({ tense, attempts, pct }) => {
           const label = TENSE_LABELS[tense as VerbTense] ?? tense
-          const barColor = pct >= 70 ? 'var(--d5-muted)' : 'var(--d5-terracotta)'
+          const barColor = pct >= 70 ? 'var(--d5-subtle)' : 'var(--d5-terracotta)'
 
           return (
             <div key={tense} className="space-y-1">
@@ -48,11 +48,11 @@ export function VerbTenseMastery({ summaries }: Props) {
               </div>
               <div
                 className="relative h-[3px] w-full rounded-full overflow-hidden"
-                style={{ background: 'color-mix(in oklch, var(--d5-muted) 20%, transparent)' }}
+                style={{ background: 'color-mix(in oklch, var(--d5-subtle) 50%, transparent)' }}
               >
                 <AnimatedBar pct={pct} style={{ background: barColor }} />
               </div>
-              <p style={{ fontSize: 9, color: 'var(--d5-muted)' }}>
+              <p style={{ fontSize: 9, color: 'var(--d5-subtle)' }}>
                 {attempts} intentos
               </p>
             </div>

@@ -31,15 +31,15 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback
       return (
         <div className="space-y-4 text-center py-8">
-          <p className="text-lg font-semibold">Something went wrong</p>
+          <p className="text-lg font-semibold">Algo salió mal</p>
           <p className="text-sm text-muted-foreground">
-            {this.state.error?.message ?? 'An unexpected error occurred.'}
+            {this.state.error?.message ?? 'Ha ocurrido un error inesperado.'}
           </p>
           <button
             onClick={() => this.setState({ hasError: false, error: null })}
             className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90"
           >
-            Try again
+            Reintentar
           </button>
         </div>
       )

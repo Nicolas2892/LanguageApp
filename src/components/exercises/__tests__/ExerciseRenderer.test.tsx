@@ -36,9 +36,9 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    expect(screen.getByLabelText('Your answer')).toBeTruthy()
+    expect(screen.getByLabelText('Tu respuesta')).toBeTruthy()
     // Inline input, not textarea
-    expect(screen.getByLabelText('Your answer').tagName).toBe('INPUT')
+    expect(screen.getByLabelText('Tu respuesta').tagName).toBe('INPUT')
   })
 
   it('submits gap_fill answer on form submit', async () => {
@@ -50,7 +50,7 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    await userEvent.type(screen.getByLabelText('Your answer'), 'soy')
+    await userEvent.type(screen.getByLabelText('Tu respuesta'), 'soy')
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledWith('soy')
   })
@@ -63,8 +63,8 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    expect(screen.getByLabelText('Blank 1')).toBeTruthy()
-    expect(screen.getByLabelText('Blank 2')).toBeTruthy()
+    expect(screen.getByLabelText('Hueco 1')).toBeTruthy()
+    expect(screen.getByLabelText('Hueco 2')).toBeTruthy()
   })
 
   it('submits multi-blank gap_fill answers as pipe-delimited string', async () => {
@@ -76,8 +76,8 @@ describe('ExerciseRenderer', () => {
         disabled={false}
       />
     )
-    await userEvent.type(screen.getByLabelText('Blank 1'), 'Aunque')
-    await userEvent.type(screen.getByLabelText('Blank 2'), 'Sin embargo')
+    await userEvent.type(screen.getByLabelText('Hueco 1'), 'Aunque')
+    await userEvent.type(screen.getByLabelText('Hueco 2'), 'Sin embargo')
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar →' }))
     expect(onSubmit).toHaveBeenCalledWith('Aunque | Sin embargo')
   })

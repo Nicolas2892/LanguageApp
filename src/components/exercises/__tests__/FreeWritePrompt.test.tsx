@@ -205,36 +205,36 @@ describe('FreeWritePrompt', () => {
 
   it('renders SpeakButton (Play audio) when prompt is loaded', () => {
     render(<FreeWritePrompt {...baseProps} />)
-    expect(screen.getByLabelText('Play audio')).toBeTruthy()
+    expect(screen.getByLabelText('Reproducir audio')).toBeTruthy()
   })
 
   it('does not render SpeakButton while prompt is loading', () => {
     render(<FreeWritePrompt {...baseProps} loadingPrompt={true} />)
-    expect(screen.queryByLabelText('Play audio')).toBeNull()
+    expect(screen.queryByLabelText('Reproducir audio')).toBeNull()
   })
 
   // --- STT (MicButton) ---
 
   it('renders the mic dictation button when STT is supported', () => {
     render(<FreeWritePrompt {...baseProps} />)
-    expect(screen.getByLabelText('Start dictation')).toBeTruthy()
+    expect(screen.getByLabelText('Iniciar dictado')).toBeTruthy()
   })
 
   it('renders mic-off button when STT is not supported', () => {
     mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, supported: false })
     render(<FreeWritePrompt {...baseProps} />)
-    expect(screen.getByLabelText('Speech recognition not supported')).toBeTruthy()
+    expect(screen.getByLabelText('Reconocimiento de voz no disponible')).toBeTruthy()
   })
 
   it('renders mic-off button when permission is denied', () => {
     mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, permissionState: 'denied' })
     render(<FreeWritePrompt {...baseProps} />)
-    expect(screen.getByLabelText('Microphone access denied')).toBeTruthy()
+    expect(screen.getByLabelText('Acceso al micrófono denegado')).toBeTruthy()
   })
 
   it('mic button is disabled when loadingPrompt=true', () => {
     render(<FreeWritePrompt {...baseProps} loadingPrompt={true} />)
-    const dictateBtn = screen.queryByLabelText('Start dictation')
+    const dictateBtn = screen.queryByLabelText('Iniciar dictado')
     if (dictateBtn) {
       expect((dictateBtn as HTMLButtonElement).disabled).toBe(true)
     }
@@ -243,6 +243,6 @@ describe('FreeWritePrompt', () => {
   it('mic button shows listening state while recording', () => {
     mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, listening: true })
     render(<FreeWritePrompt {...baseProps} />)
-    expect(screen.getByLabelText('Stop dictation')).toBeTruthy()
+    expect(screen.getByLabelText('Detener dictado')).toBeTruthy()
   })
 })

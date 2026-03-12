@@ -56,7 +56,7 @@ describe('IOSInstallPrompt', () => {
     await act(async () => {
       render(<IOSInstallPrompt />)
     })
-    expect(screen.getByRole('dialog', { name: /install app prompt/i })).toBeTruthy()
+    expect(screen.getByRole('dialog', { name: /instalar aplicación/i })).toBeTruthy()
   })
 
   it('hides when pwa_prompt_dismissed is true in localStorage', async () => {
@@ -95,7 +95,7 @@ describe('IOSInstallPrompt', () => {
     await act(async () => {
       render(<IOSInstallPrompt />)
     })
-    const dismissBtn = screen.getByRole('button', { name: /dismiss/i })
+    const dismissBtn = screen.getByRole('button', { name: /cerrar/i })
     await act(async () => {
       fireEvent.click(dismissBtn)
     })
@@ -107,8 +107,8 @@ describe('IOSInstallPrompt', () => {
     await act(async () => {
       render(<IOSInstallPrompt />)
     })
-    expect(screen.getByText('Share')).toBeTruthy()
-    expect(screen.getByText('Add to Home Screen')).toBeTruthy()
+    expect(screen.getByText('Compartir')).toBeTruthy()
+    expect(screen.getByText('Añadir a Inicio')).toBeTruthy()
   })
 
   it('hides when pathname is /auth/login', async () => {

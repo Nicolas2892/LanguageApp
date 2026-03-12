@@ -119,14 +119,14 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
               )}
               <div style={{
                 fontFamily: 'var(--font-lora), serif', fontWeight: 600, fontStyle: 'italic', fontSize: 14,
-                color: sessionMode === mode.id ? 'var(--d5-paper)' : 'var(--d5-ink)',
+                color: sessionMode === mode.id ? 'var(--d5-paper)' : 'var(--d5-heading)',
                 marginBottom: 2,
               }}>
                 {mode.title}
               </div>
               <div style={{
                 fontSize: 10,
-                color: sessionMode === mode.id ? 'var(--d5-paper-75)' : 'var(--d5-muted)',
+                color: sessionMode === mode.id ? 'var(--d5-paper-75)' : 'var(--d5-subtle)',
                 fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
               }}>
                 {mode.subtitle}

@@ -72,7 +72,7 @@ export function ExerciseTypeChart({ data }: Props) {
           <LabelList
             dataKey="count"
             position="right"
-            style={{ fontSize: 11, fill: 'var(--d5-warm)' }}
+            style={{ fontSize: 11, fill: 'var(--d5-body)' }}
           />
         </Bar>
       </BarChart>

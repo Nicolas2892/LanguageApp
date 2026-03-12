@@ -228,7 +228,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
           </div>
           <button
             onClick={() => setShowExitDialog(true)}
-            aria-label="Exit session"
+            aria-label="Salir de la sesión"
             className="text-[var(--d5-muted)] hover:text-foreground transition-colors shrink-0"
           >
             <X className="h-4 w-4" strokeWidth={1.5} />

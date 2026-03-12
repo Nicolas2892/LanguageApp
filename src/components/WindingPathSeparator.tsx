@@ -3,7 +3,7 @@
 // Opacity adapts via --d5-separator-opacity / --d5-separator-echo-opacity tokens.
 export function WindingPathSeparator() {
   return (
-    <div className="-mx-2 my-2" aria-hidden="true">
+    <div className="-mx-5 my-2 lg:-mx-8" aria-hidden="true">
       <svg
         viewBox="0 0 354 30"
         width="100%"

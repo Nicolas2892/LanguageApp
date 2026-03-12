@@ -94,9 +94,9 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
         <div
           className="px-4 py-2 text-xs"
           style={{
-            background: 'rgba(140,106,63,0.07)',
+            background: 'var(--d5-surface-tint)',
             borderBottom: '1px solid var(--d5-line)',
-            color: 'var(--d5-warm)',
+            color: 'var(--d5-body)',
           }}
         >
           Contexto: <span className="font-medium text-foreground">{conceptTitle}</span>
@@ -112,10 +112,10 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
               <SvgSendaPath size={40} />
             </div>
             <p className="senda-heading text-xl">Pregunta lo que Quieras</p>
-            <p className="text-sm" style={{ color: 'var(--d5-warm)' }}>
+            <p className="text-sm" style={{ color: 'var(--d5-body)' }}>
               Gramática, errores frecuentes, ejemplos… estoy aquí para ayudarte.
             </p>
-            <p className="text-xs" style={{ color: 'var(--d5-muted)' }}>
+            <p className="text-xs" style={{ color: 'var(--d5-subtle)' }}>
               Shift+Enter para nueva línea · Enter para enviar
             </p>
           </div>

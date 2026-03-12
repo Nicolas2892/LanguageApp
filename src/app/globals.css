@@ -145,6 +145,13 @@
   --d5-separator: var(--d5-warm);
   --d5-nav-inactive: var(--d5-warm);
 
+  /* Adaptive text tokens — auto-swap for dark mode */
+  --d5-heading: var(--d5-ink);          /* headings: ink in light, paper in dark */
+  --d5-body: var(--d5-warm);            /* body/label text */
+  --d5-subtle: var(--d5-muted);         /* secondary/muted text */
+  --d5-surface-tint: rgba(140, 106, 63, 0.07);  /* card-like tint */
+  --d5-divider: rgba(184, 170, 153, 0.15);      /* table/list dividers */
+
   /* SideNav border & active pill tokens */
   --d5-nav-border: rgba(184, 170, 153, 0.4);
   --d5-nav-active-bg: rgba(184, 170, 153, 0.25);
@@ -172,6 +179,11 @@
   --d5-eyebrow: var(--d5-muted);
   --d5-separator: var(--d5-muted);
   --d5-nav-inactive: var(--d5-muted);
+  --d5-heading: var(--d5-paper);
+  --d5-body: var(--d5-muted);
+  --d5-subtle: rgba(184, 170, 153, 0.7);
+  --d5-surface-tint: rgba(140, 106, 63, 0.12);
+  --d5-divider: rgba(184, 170, 153, 0.2);
   --d5-nav-border: rgba(184, 170, 153, 0.25);
   --d5-nav-active-bg: rgba(184, 170, 153, 0.15);
   --d5-pill-bg: rgba(253, 252, 249, 0.06);
@@ -192,11 +204,8 @@
   font-family: var(--font-lora), serif;
   font-style: italic;
   font-weight: 600;
-  color: var(--d5-ink);
+  color: var(--d5-heading);
   line-height: 1.2;
-}
-.dark .senda-heading {
-  color: var(--d5-paper);
 }
 
 /* Section eyebrow — 0.75rem label used throughout all pages */
@@ -304,7 +313,7 @@
 }
 .dark .senda-input {
   background: rgba(26, 17, 8, 0.40);
-  color: var(--d5-paper);
+  color: var(--d5-heading);
 }
 
 /* Senda field label — small muted label above inputs */

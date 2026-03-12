@@ -57,7 +57,7 @@ export default function OfflinePage() {
         </h1>
 
         <p className="text-sm text-muted-foreground leading-relaxed" style={{ maxWidth: 260 }}>
-          Reconnect to continue your journey.
+          Reconéctate para continuar tu camino.
         </p>
 
         {/* Winding path separator */}
@@ -77,7 +77,7 @@ export default function OfflinePage() {
           onClick={() => window.location.reload()}
           className="rounded-full bg-primary text-primary-foreground px-8 py-3 text-sm font-semibold hover:bg-primary/90 transition-colors"
         >
-          Try again
+          Reintentar
         </button>
 
       </div>

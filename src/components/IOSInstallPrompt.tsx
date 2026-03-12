@@ -40,7 +40,7 @@ export function IOSInstallPrompt() {
   return (
     <div
       role="dialog"
-      aria-label="Install app prompt"
+      aria-label="Instalar aplicación"
       className="fixed left-4 right-4 z-50 bg-card border border-border/50 rounded-2xl shadow-lg p-5 space-y-3 lg:hidden"
       style={{ bottom: 'calc(3.125rem + env(safe-area-inset-bottom))' }}
     >
@@ -48,7 +48,7 @@ export function IOSInstallPrompt() {
         <p className="text-sm font-semibold">Instalar Senda</p>
         <button
           onClick={handleDismiss}
-          aria-label="Dismiss"
+          aria-label="Cerrar"
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="h-4 w-4" strokeWidth={1.5} />

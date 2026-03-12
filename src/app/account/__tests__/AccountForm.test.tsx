@@ -96,7 +96,7 @@ describe('AccountForm', () => {
     await userEvent.clear(screen.getByLabelText('Meta diaria'))
     await userEvent.type(screen.getByLabelText('Meta diaria'), '4')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
-    expect(screen.getByText('Daily goal must be between 5 and 120 minutes.')).toBeTruthy()
+    expect(screen.getByText('La meta diaria debe estar entre 5 y 120 minutos.')).toBeTruthy()
     expect(global.fetch).not.toHaveBeenCalled()
   })
 
@@ -105,7 +105,7 @@ describe('AccountForm', () => {
     await userEvent.clear(screen.getByLabelText('Meta diaria'))
     await userEvent.type(screen.getByLabelText('Meta diaria'), '121')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
-    expect(screen.getByText('Daily goal must be between 5 and 120 minutes.')).toBeTruthy()
+    expect(screen.getByText('La meta diaria debe estar entre 5 y 120 minutos.')).toBeTruthy()
     expect(global.fetch).not.toHaveBeenCalled()
   })
 
@@ -114,7 +114,7 @@ describe('AccountForm', () => {
     await userEvent.clear(screen.getByLabelText('Meta diaria'))
     await userEvent.type(screen.getByLabelText('Meta diaria'), 'abc')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
-    expect(screen.getByText('Daily goal must be between 5 and 120 minutes.')).toBeTruthy()
+    expect(screen.getByText('La meta diaria debe estar entre 5 y 120 minutos.')).toBeTruthy()
     expect(global.fetch).not.toHaveBeenCalled()
   })
 

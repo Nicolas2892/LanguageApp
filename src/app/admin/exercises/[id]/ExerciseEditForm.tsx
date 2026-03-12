@@ -58,7 +58,7 @@ export function ExerciseEditForm({ exercise }: Props) {
     <form onSubmit={handleSave} className="space-y-5">
       <div className="space-y-1.5">
         <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Prompt
+          Enunciado
         </label>
         <textarea
           value={prompt}
@@ -72,7 +72,7 @@ export function ExerciseEditForm({ exercise }: Props) {
 
       <div className="space-y-1.5">
         <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          Expected answer
+          Respuesta esperada
         </label>
         <textarea
           value={expectedAnswer}
@@ -86,7 +86,7 @@ export function ExerciseEditForm({ exercise }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Hint 1
+            Pista 1
           </label>
           <textarea
             value={hint1}
@@ -98,7 +98,7 @@ export function ExerciseEditForm({ exercise }: Props) {
         </div>
         <div className="space-y-1.5">
           <label className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Hint 2
+            Pista 2
           </label>
           <textarea
             value={hint2}
@@ -116,10 +116,10 @@ export function ExerciseEditForm({ exercise }: Props) {
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={status === 'saving'}>
-          {status === 'saving' ? 'Saving…' : 'Save changes'}
+          {status === 'saving' ? 'Guardando…' : 'Guardar cambios'}
         </Button>
         {status === 'saved' && (
-          <p className="text-sm text-primary font-medium">Saved ✓</p>
+          <p className="text-sm text-primary font-medium">Guardado ✓</p>
         )}
       </div>
     </form>
