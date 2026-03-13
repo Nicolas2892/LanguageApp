@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { validateOrigin } from '@/lib/api-utils'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { DEFAULT_PROGRESS } from '@/lib/srs'
+import * as Sentry from '@sentry/nextjs'
 
 const HardFlagSchema = z.object({
   is_hard: z.boolean(),
@@ -58,6 +59,7 @@ export async function POST(
 
     return NextResponse.json({ is_hard })
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[concepts/hard] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

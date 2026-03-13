@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Palette } from 'lucide-react'
+import { ArrowLeft, Palette, Bot } from 'lucide-react'
 import { VerbFavoriteButton } from '@/components/verbs/VerbFavoriteButton'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
@@ -149,6 +149,13 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
             </span>
           </div>
           <p className="text-sm" style={{ color: 'var(--d5-body)' }}>{english}</p>
+          <Link
+            href="/tutor"
+            className="inline-flex items-center gap-1 text-xs text-[var(--d5-warm)] hover:text-primary transition-colors mt-0.5"
+          >
+            <Bot className="h-3.5 w-3.5" strokeWidth={1.5} />
+            Consultar tutor →
+          </Link>
         </div>
         <VerbFavoriteButton verbId={verbId} initialFavorited={favorited} size="md" />
       </div>

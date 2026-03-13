@@ -90,7 +90,7 @@ function makeStreamGen(scoreChunk = mockScoreChunk, detailsChunk = mockDetailsCh
   })()
 }
 
-function setupMocks(prevIntervalDays: number, newIntervalDays: number) {
+function setupMocks(prevIntervalDays: number, newIntervalDays: number, opts?: { is_hard?: boolean }) {
   let callCount = 0
   const mockFrom = vi.fn().mockImplementation((table: string) => {
     if (table === 'exercises') {
@@ -122,7 +122,7 @@ function setupMocks(prevIntervalDays: number, newIntervalDays: number) {
             eq: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
                 single: vi.fn().mockResolvedValue({
-                  data: { ease_factor: 2.5, interval_days: prevIntervalDays, repetitions: 3, due_date: '2026-01-01', production_mastered: false, is_hard: false },
+                  data: { ease_factor: 2.5, interval_days: prevIntervalDays, repetitions: 3, due_date: '2026-01-01', production_mastered: false, is_hard: opts?.is_hard ?? false },
                   error: null,
                 }),
               }),
@@ -193,6 +193,17 @@ describe('POST /api/submit — UX-AA just_mastered flag', () => {
 
   it('returns just_mastered: true with concept title when crossing the threshold', async () => {
     setupMocks(15, MASTERY_THRESHOLD)
+    const res = await POST(makeRequest())
+    expect(res.status).toBe(200)
+    const body = await readNDJSONMerged(res)
+    expect(body.just_mastered).toBe(true)
+    expect(body.mastered_concept_title).toBe('El Subjuntivo')
+  })
+
+  it('returns just_mastered: true even when is_hard multiplier would reduce interval below threshold', async () => {
+    // SM-2 returns 21 (exactly at threshold), but hard-flag multiplier would reduce to 13.
+    // Mastery check must happen BEFORE the multiplier is applied.
+    setupMocks(15, MASTERY_THRESHOLD, { is_hard: true })
     const res = await POST(makeRequest())
     expect(res.status).toBe(200)
     const body = await readNDJSONMerged(res)

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { validateOrigin } from '@/lib/api-utils'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { TENSES } from '@/lib/verbs/constants'
+import * as Sentry from '@sentry/nextjs'
 
 const GradeSchema = z.object({
   verb_id:    z.string().uuid(),
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true })
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[verbs/grade] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

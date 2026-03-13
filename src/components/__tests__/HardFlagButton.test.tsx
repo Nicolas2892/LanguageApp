@@ -107,5 +107,28 @@ describe('HardFlagButton', () => {
         expect(screen.getByRole('button', { name: 'Quitar marca de difícil' })).toBeDefined()
       })
     })
+
+    it('shows inline error text when fetch returns non-ok', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }))
+
+      render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={false} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Marcar como difícil' }))
+
+      await waitFor(() => {
+        expect(screen.getByRole('alert')).toBeDefined()
+        expect(screen.getByText('Error al guardar')).toBeDefined()
+      })
+    })
+
+    it('shows inline error text when fetch throws', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')))
+
+      render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={false} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Marcar como difícil' }))
+
+      await waitFor(() => {
+        expect(screen.getByText('Error al guardar')).toBeDefined()
+      })
+    })
   })
 })

@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
 import type { Concept, Exercise, AnnotationSpan } from '@/lib/supabase/types'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { validateOrigin } from '@/lib/api-utils'
 import { EXERCISE_CAP_PER_TYPE } from '@/lib/constants'
+import * as Sentry from '@sentry/nextjs'
 
 function createServiceRoleClient() {
   return createAdminClient(
@@ -33,6 +35,10 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
     // Rate limit: 10 requests per 10 minutes per user
     if (!(await checkRateLimit(user.id, 'exercises/generate', { maxRequests: 10, windowMs: 10 * 60 * 1000 })).allowed) {
       return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
@@ -52,6 +58,7 @@ export async function POST(request: Request) {
       .select('id, concept_id, type, prompt, expected_answer, answer_variants, hint_1, hint_2, annotations, source, created_at')
       .eq('concept_id', concept_id)
       .eq('type', type)
+      .limit(EXERCISE_CAP_PER_TYPE + 1)
 
     const existing = (existingData ?? []) as Exercise[]
 
@@ -173,6 +180,7 @@ Rules for ${typeLabel}: ${rule}${dedupContext}`
 
     return NextResponse.json(newExercise as Exercise)
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[generate] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

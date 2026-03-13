@@ -7,6 +7,7 @@ import type { SRSScore } from '@/lib/srs'
 import type { Concept, UserProgress } from '@/lib/supabase/types'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib/api-utils'
+import * as Sentry from '@sentry/nextjs'
 
 const GradeSchema = z.object({
   concept_ids: z.array(z.string().uuid()).min(1).max(5),
@@ -133,6 +134,7 @@ export async function POST(request: Request) {
       next_review_in_days: nextReviewDays,
     })
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[grade] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

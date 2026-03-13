@@ -279,4 +279,14 @@ describe('AccountForm', () => {
     renderWithTheme(<AccountForm profile={{ ...baseProfile, skip_gap_fill: true }} />)
     expect(screen.getByText('Omitir ejercicios de completar')).toBeTruthy()
   })
+
+  it('shows error text when skip gap_fill toggle API fails', async () => {
+    vi.mocked(global.fetch).mockResolvedValueOnce({ ok: false, json: async () => ({}) } as Response)
+    renderWithTheme(<AccountForm profile={baseProfile} />)
+    await userEvent.click(screen.getByText('Omitir ejercicios de completar'))
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeTruthy()
+      expect(screen.getByText('No se pudo guardar. Inténtalo de nuevo.')).toBeTruthy()
+    })
+  })
 })

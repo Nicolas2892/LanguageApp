@@ -147,6 +147,18 @@ describe('SecurityForm', () => {
     expect(input.type).toBe('text')
   })
 
+  // --- Touch target accessibility ---
+
+  it('password toggle buttons have WCAG 44px minimum touch targets', () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    const toggleBtns = screen.getAllByRole('button', { name: 'Mostrar contraseña' })
+    expect(toggleBtns).toHaveLength(3)
+    for (const btn of toggleBtns) {
+      expect(btn.className).toContain('min-w-[44px]')
+      expect(btn.className).toContain('min-h-[44px]')
+    }
+  })
+
   // --- Password strength indicator ---
 
   it('password strength hidden when new password field is empty', () => {
@@ -172,5 +184,37 @@ describe('SecurityForm', () => {
     render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
     await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'abcdefghijkl')
     expect(screen.getByText('Segura')).toBeTruthy()
+  })
+
+  // --- Real-time confirm mismatch (Audit-D6) ---
+
+  it('shows mismatch warning on confirm blur when passwords differ', async () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'newpassword123')
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'different')
+    // Tab away to trigger blur
+    await userEvent.tab()
+    expect(screen.getByRole('alert')).toBeTruthy()
+    expect(screen.getByText('Las contraseñas no coinciden.')).toBeTruthy()
+  })
+
+  it('does not show mismatch warning when passwords match on blur', async () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'newpassword123')
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'newpassword123')
+    await userEvent.tab()
+    expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('clears mismatch warning when user resumes typing', async () => {
+    render(<SecurityForm userEmail="user@example.com" isOAuthUser={false} />)
+    await userEvent.type(screen.getByLabelText('Nueva contraseña'), 'newpassword123')
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'diff')
+    await userEvent.tab()
+    expect(screen.getByRole('alert')).toBeTruthy()
+    // Resume typing in confirm field
+    await userEvent.click(screen.getByLabelText('Confirmar contraseña'))
+    await userEvent.type(screen.getByLabelText('Confirmar contraseña'), 'x')
+    expect(screen.queryByRole('alert')).toBeNull()
   })
 })

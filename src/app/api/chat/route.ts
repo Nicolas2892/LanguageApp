@@ -5,6 +5,7 @@ import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
 import { buildTutorSystemPrompt } from '@/lib/claude/tutor'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { validateOrigin } from '@/lib/api-utils'
+import * as Sentry from '@sentry/nextjs'
 
 export const runtime = 'nodejs'
 
@@ -17,6 +18,7 @@ const ChatSchema = z.object({
 })
 
 export async function POST(request: Request) {
+  try {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -104,4 +106,9 @@ export async function POST(request: Request) {
       'X-Content-Type-Options': 'nosniff',
     },
   })
+  } catch (err) {
+    Sentry.captureException(err)
+    console.error('[chat] error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

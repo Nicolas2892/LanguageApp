@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { validateOrigin } from '@/lib/api-utils'
 import { checkRateLimit } from '@/lib/rate-limit'
+import * as Sentry from '@sentry/nextjs'
 
 const FavoriteSchema = z.object({
   verb_id: z.string().uuid(),
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ favorited: true })
     }
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[verbs/favorite] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

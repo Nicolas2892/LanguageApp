@@ -93,6 +93,20 @@ describe('SentenceBuilder', () => {
     expect(submitted).toHaveLength(4)
   })
 
+  it('word bank chips have "Agregar palabra" aria-labels', () => {
+    render(<SentenceBuilder exercise={makeExercise()} onSubmit={vi.fn()} />)
+    for (const word of ['llueve', 'hace', 'frío', 'mucho']) {
+      expect(screen.getByLabelText(`Agregar palabra ${word}`)).toBeTruthy()
+    }
+  })
+
+  it('selected chips have "Remover palabra" aria-labels', async () => {
+    render(<SentenceBuilder exercise={makeExercise()} onSubmit={vi.fn()} />)
+    // Click a word to move it to selected area
+    await userEvent.click(screen.getByLabelText('Agregar palabra hace'))
+    expect(screen.getByLabelText('Remover palabra hace')).toBeTruthy()
+  })
+
   it('disables chips and submit when disabled=true', () => {
     render(<SentenceBuilder exercise={makeExercise()} onSubmit={vi.fn()} disabled={true} />)
     expect(screen.getByRole('button', { name: 'Confirmar →' })).toBeDisabled()

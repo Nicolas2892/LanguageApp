@@ -95,4 +95,46 @@ describe('FeedbackPanel', () => {
     )
     expect(screen.getByText(/Próxima revisión en 1 día/)).toBeTruthy()
   })
+
+  it('shows "Preguntale al tutor" link when incorrect and conceptId provided', () => {
+    render(
+      <FeedbackPanel
+        result={{ ...baseResult, score: 1, is_correct: false, corrected_version: 'correcto' }}
+        userAnswer="wrong"
+        onNext={vi.fn()}
+        onTryAgain={vi.fn()}
+        isLast={false}
+        conceptId="concept-123"
+      />
+    )
+    const link = screen.getByText('Preguntale al tutor →')
+    expect(link).toBeTruthy()
+    expect(link.closest('a')?.getAttribute('href')).toBe('/tutor?concept=concept-123')
+  })
+
+  it('does not show tutor link when answer is correct', () => {
+    render(
+      <FeedbackPanel
+        result={baseResult}
+        userAnswer="correct"
+        onNext={vi.fn()}
+        isLast={false}
+        conceptId="concept-123"
+      />
+    )
+    expect(screen.queryByText('Preguntale al tutor →')).toBeNull()
+  })
+
+  it('does not show tutor link when no conceptId', () => {
+    render(
+      <FeedbackPanel
+        result={{ ...baseResult, score: 0, is_correct: false, corrected_version: 'correcto' }}
+        userAnswer="wrong"
+        onNext={vi.fn()}
+        onTryAgain={vi.fn()}
+        isLast={false}
+      />
+    )
+    expect(screen.queryByText('Preguntale al tutor →')).toBeNull()
+  })
 })

@@ -1,19 +1,19 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { ActivityHeatmap } from './ActivityHeatmap'
+import { WeeklyActivityChart } from './WeeklyActivityChart'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { VerbTenseMastery } from '@/components/verbs/VerbTenseMastery'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { EmptyState } from '@/components/EmptyState'
-import type { DayActivity } from './ActivityHeatmap'
+import type { WeekData } from './WeeklyActivityChart'
 import type { TenseSummary } from '@/components/verbs/VerbTenseMastery'
 
 const CEFR_COLORS: Record<string, { barStyle: React.CSSProperties }> = {
   B1: { barStyle: { background: 'var(--d5-muted)' } },
   B2: { barStyle: { background: 'var(--d5-terracotta)' } },
-  C1: { barStyle: { background: 'rgba(26,17,8,0.4)' } },
+  C1: { barStyle: { background: 'var(--d5-warm)' } },
 }
 
 export default async function ProgressPage() {
@@ -32,12 +32,18 @@ export default async function ProgressPage() {
   const currentStreak = profile?.streak ?? 0
   const computedLevel = profile?.computed_level ?? 'B1'
 
-  // ── 2. CEFR Journey ───────────────────────────────────────────────────────
-  const [{ data: conceptRows }, { data: progressRows }] = await Promise.all([
+  // ── 2. CEFR Journey + Accuracy (parallel) ─────────────────────────────────
+  const [{ data: conceptRows }, { data: progressRows }, { data: attemptRows }, { data: exerciseRows }] = await Promise.all([
     supabase.from('concepts').select('id, level'),
     supabase.from('user_progress')
       .select('concept_id, interval_days, production_mastered')
       .eq('user_id', user.id),
+    supabase
+      .from('exercise_attempts')
+      .select('ai_score, exercise_id')
+      .eq('user_id', user.id)
+      .limit(5000),
+    supabase.from('exercises').select('id, type'),
   ])
 
   type ConceptRow = { id: string; level: string }
@@ -73,17 +79,17 @@ export default async function ProgressPage() {
     total: totalByLevel.get(level) ?? 0,
   }))
 
-  // ── 3. Accuracy (overall) ────────────────────────────────────────────────
-  const { data: attemptRows } = await supabase
-    .from('exercise_attempts')
-    .select('ai_score, exercises(type)')
-    .eq('user_id', user.id)
+  // ── 3. Accuracy (overall) — joined in TypeScript (no Supabase join syntax)
+  type AttemptRow = { ai_score: number | null; exercise_id: string | null }
+  type ExerciseRow = { id: string; type: string }
 
-  type AttemptRow = { ai_score: number | null; exercises: { type: string } | null }
+  const exerciseTypeMap = new Map(
+    ((exerciseRows ?? []) as ExerciseRow[]).map((e) => [e.id, e.type])
+  )
+
   const byType = new Map<string, { total: number; correct: number }>()
-
   for (const row of (attemptRows ?? []) as AttemptRow[]) {
-    const type = row.exercises?.type ?? 'unknown'
+    const type = (row.exercise_id && exerciseTypeMap.get(row.exercise_id)) ?? 'unknown'
     const agg = byType.get(type) ?? { total: 0, correct: 0 }
     agg.total += 1
     if ((row.ai_score ?? 0) >= 2) agg.correct += 1
@@ -105,26 +111,47 @@ export default async function ProgressPage() {
         )
       : 0
 
-  // ── 4. Activity heatmap (last 12 weeks) ───────────────────────────────────
-  const twelveWeeksAgo = new Date()
-  twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 84)
+  // ── 4. Weekly activity chart (last 14 weeks) ──────────────────────────────
+  const fourteenWeeksAgo = new Date()
+  fourteenWeeksAgo.setDate(fourteenWeeksAgo.getDate() - 98)
 
   const { data: activityRows } = await supabase
     .from('exercise_attempts')
     .select('created_at')
     .eq('user_id', user.id)
-    .gte('created_at', twelveWeeksAgo.toISOString())
+    .gte('created_at', fourteenWeeksAgo.toISOString())
 
+  // Count by date for uniqueDaysStudied, then aggregate by week
   const activityByDate = new Map<string, number>()
   for (const row of (activityRows ?? []) as Array<{ created_at: string }>) {
     const date = row.created_at.split('T')[0]
     activityByDate.set(date, (activityByDate.get(date) ?? 0) + 1)
   }
-
-  const activityData: DayActivity[] = Array.from(activityByDate.entries()).map(
-    ([date, count]) => ({ date, count })
-  )
   const uniqueDaysStudied = activityByDate.size
+
+  // Build 14 weeks of data (Monday-aligned)
+  const today = new Date()
+  const dayOfWeek = today.getDay() // 0=Sun
+  const daysSinceMonday = (dayOfWeek + 6) % 7
+  const thisMonday = new Date(today)
+  thisMonday.setDate(today.getDate() - daysSinceMonday)
+
+  const weeklyData: WeekData[] = []
+  for (let w = 13; w >= 0; w--) {
+    const weekStart = new Date(thisMonday)
+    weekStart.setDate(thisMonday.getDate() - w * 7)
+    const weekStartIso = weekStart.toISOString().split('T')[0]
+
+    let weekCount = 0
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(weekStart)
+      date.setDate(weekStart.getDate() + d)
+      const iso = date.toISOString().split('T')[0]
+      weekCount += activityByDate.get(iso) ?? 0
+    }
+
+    weeklyData.push({ weekStart: weekStartIso, count: weekCount })
+  }
 
   // ── 5. Study sessions this month ──────────────────────────────────────────
   const monthStart = new Date()
@@ -266,36 +293,12 @@ export default async function ProgressPage() {
             <WindingPathSeparator />
 
             {/* Study consistency */}
-            <section className="space-y-3">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="senda-eyebrow" style={{ color: 'var(--d5-muted)' }}>Consistencia De Estudio</p>
-                  {sessionCount > 0 && (
-                    <p className="text-xs mt-1" style={{ color: 'var(--d5-muted)' }}>
-                      <span className="font-medium" style={{ color: 'var(--d5-warm)' }}>
-                        {sessionCount} Sesion{sessionCount !== 1 ? 'es' : ''}
-                      </span>{' '}
-                      Este Mes
-                      {totalMinutes > 0 && (
-                        <>
-                          {' '}·{' '}
-                          <span className="font-medium" style={{ color: 'var(--d5-warm)' }}>
-                            {(totalMinutes / 60).toFixed(1)} hrs
-                          </span>{' '}
-                          total
-                        </>
-                      )}
-                    </p>
-                  )}
-                </div>
-                <p className="text-xs text-right shrink-0" style={{ color: 'var(--d5-muted)' }}>
-                  {uniqueDaysStudied} Día{uniqueDaysStudied !== 1 ? 's' : ''} Estudiados
-                  <br />
-                  <span className="text-[10px]">En Los Últimos 3 Meses</span>
-                </p>
-              </div>
-              <ActivityHeatmap data={activityData} weeks={14} />
-            </section>
+            <WeeklyActivityChart
+              data={weeklyData}
+              sessionCount={sessionCount}
+              totalMinutes={totalMinutes}
+              uniqueDaysStudied={uniqueDaysStudied}
+            />
 
             {/* Footer */}
             <p

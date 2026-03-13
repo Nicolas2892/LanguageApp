@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, DM_Sans, Lora } from "next/font/google";
+import { DM_Sans, Lora } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistration";
 import { IOSInstallPrompt } from "@/components/IOSInstallPrompt";
@@ -13,11 +13,6 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { createClient } from "@/lib/supabase/server";
 import { getInitials } from "@/lib/utils";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
@@ -27,8 +22,8 @@ const dmSans = DM_Sans({
 const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: ["600"],
+  style: ["italic"],
 });
 
 export const metadata: Metadata = {
@@ -93,6 +88,7 @@ export default async function RootLayout({
   // when unauthenticated (auth pages). Middleware already handles redirects.
   let userInitials = ''
   let userId: string | undefined
+  let streak = 0
   let themePreference: 'light' | 'dark' | 'system' = 'system'
   try {
     const supabase = await createClient()
@@ -101,11 +97,12 @@ export default async function RootLayout({
       userId = user.id
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name, theme_preference')
+        .select('display_name, theme_preference, streak')
         .eq('id', user.id)
         .single()
-      const p = profile as { display_name: string | null; theme_preference: string | null } | null
+      const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null } | null
       userInitials = getInitials(p?.display_name ?? null, user.email!)
+      streak = p?.streak ?? 0
       if (p?.theme_preference === 'light' || p?.theme_preference === 'dark' || p?.theme_preference === 'system') {
         themePreference = p.theme_preference
       }
@@ -126,13 +123,13 @@ export default async function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${dmSans.variable} ${lora.variable} antialiased`}
+        className={`${dmSans.variable} ${lora.variable} antialiased`}
       >
         <ThemeProvider initialTheme={themePreference}>
           <PostHogProvider userId={userId}>
-            <SideNav userInitials={userInitials} />
+            <SideNav userInitials={userInitials} streak={streak} />
             <div className="lg:ml-[220px]">
-              <AppHeader userInitials={userInitials} />
+              <AppHeader userInitials={userInitials} streak={streak} />
               <PageWrapper>{children}</PageWrapper>
             </div>
             <BottomNav />

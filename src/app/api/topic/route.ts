@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
 import type { Concept } from '@/lib/supabase/types'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { validateOrigin } from '@/lib/api-utils'
+import * as Sentry from '@sentry/nextjs'
 
 const TopicSchema = z.object({
   concept_ids: z.array(z.string().uuid()).min(1).max(5),
@@ -14,6 +16,10 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     // Rate limit: 10 requests per 10 minutes per user
     if (!(await checkRateLimit(user.id, 'topic', { maxRequests: 10, windowMs: 10 * 60 * 1000 })).allowed) {
@@ -54,6 +60,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ topic })
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[topic] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

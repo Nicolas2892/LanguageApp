@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useTransition } from 'react'
+import { useState, useRef, useEffect, useTransition, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
@@ -94,6 +94,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const [streamingDetails, setStreamingDetails] = useState(false)
   const [flashClass, setFlashClass] = useState<string | null>(null)
   const [exiting, setExiting] = useState(false)
+  const submittingRef = useRef(false)
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Holds details chunk that arrived before the 300ms flash timer fires
   const pendingDetailsRef = useRef<{ feedback: string; corrected_version: string; explanation: string } | null>(null)
@@ -135,7 +136,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       confettiFired.current = true
       import('canvas-confetti').then(({ default: confetti }) => {
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } })
-      }).catch(() => {})
+      }).catch((err) => console.warn('confetti load failed', err))
     }
   }, [state])
 
@@ -188,6 +189,51 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     })
   }, [state.phase, index, practiceMode, generateConfig, dynamicItems.length, generatingMore])
 
+  // Effective length for count mode (must be above handleNext)
+  const effectiveLength = sprintConfig?.limitType === 'count'
+    ? Math.min(dynamicItems.length, sprintConfig.limit)
+    : dynamicItems.length
+
+  const current = dynamicItems[index]
+
+  function handleTryAgain() {
+    setState({ phase: 'answering' })
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const handleNext = useCallback(function handleNext() {
+    if (index + 1 >= effectiveLength) {
+      const correct = scores.filter((s) => s >= 2).length
+      const elapsed = sprintConfig?.limitType === 'time' ? totalSeconds - secondsLeft : undefined
+      setState({ phase: 'done', correct, total: index + 1, elapsedSeconds: elapsed })
+      trackSessionCompleted({ correct, total: index + 1, practiceMode: !!practiceMode, elapsedSeconds: elapsed })
+      fetch('/api/sessions/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          started_at: startedAt.current,
+          concepts_reviewed: index + 1,
+          accuracy: Math.round((correct / (index + 1)) * 100),
+        }),
+      }).catch(() => {})
+    } else {
+      // Exit animation before advancing
+      setExiting(true)
+      setTimeout(() => {
+        setExiting(false)
+        // UX-AB: collapse concept note on each new exercise
+        setIsConceptExpanded(false)
+        startTransition(() => {
+          autoGenerateTriggeredRef.current = false
+          setIndex((i) => i + 1)
+          setState({ phase: 'answering' })
+          setWrongAttempts(0)
+          setClaudeHint(null)
+        })
+      }, 150)
+    }
+  }, [index, effectiveLength, scores, sprintConfig, totalSeconds, secondsLeft, practiceMode])
+
   // Enter/Space to advance after feedback (UX-X)
   useEffect(() => {
     if (state.phase !== 'feedback') return
@@ -220,13 +266,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     }).catch(() => {})
   }, [secondsLeft, sprintConfig, state.phase, scores, totalSeconds])
 
-  // Effective length for count mode
-  const effectiveLength = sprintConfig?.limitType === 'count'
-    ? Math.min(dynamicItems.length, sprintConfig.limit)
-    : dynamicItems.length
-
-  const current = dynamicItems[index]
-
   // Progress bar values
   const progressPct = sprintConfig?.limitType === 'time'
     ? totalSeconds > 0 ? (secondsLeft / totalSeconds) * 100 : 0
@@ -235,6 +274,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const isTimeLow = sprintConfig?.limitType === 'time' && secondsLeft / totalSeconds < 0.1 && secondsLeft > 0
 
   async function handleSubmit(answer: string) {
+    if (submittingRef.current) return
+    submittingRef.current = true
     setSubmitting(true)
     setSubmitError(null)
     try {
@@ -242,12 +283,17 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          exercise_id: current.exercise.id,
-          concept_id: current.concept.id,
+          exercise_id: current!.exercise.id,
+          concept_id: current!.concept.id,
           user_answer: answer,
           ...(practiceMode && { skip_srs: true }),
         }),
       })
+
+      if (res.status === 401) {
+        router.push('/auth/login?returnUrl=/study')
+        return
+      }
 
       if (!res.ok || !res.body) {
         setSubmitError('Algo salió mal. Inténtalo de nuevo.')
@@ -276,7 +322,13 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
 
         for (const line of lines) {
           if (!line.trim()) continue
-          const parsed = JSON.parse(line) as Record<string, unknown>
+          let parsed: Record<string, unknown>
+          try {
+            parsed = JSON.parse(line) as Record<string, unknown>
+          } catch {
+            console.warn('Malformed NDJSON line, skipping:', line)
+            continue
+          }
 
           if ('score' in parsed && !scoreChunk) {
             // Chunk 1: score + SRS data
@@ -285,8 +337,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             setScores((s) => [...s, parsed.score as number])
 
             trackExerciseSubmitted({
-              exerciseType: current.exercise.type,
-              conceptId: current.concept.id,
+              exerciseType: current!.exercise.type,
+              conceptId: current!.concept.id,
               score: parsed.score as number,
               isCorrect: parsed.is_correct as boolean,
               practiceMode: !!practiceMode,
@@ -295,8 +347,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             // Track missed concepts (score < 2)
             if ((parsed.score as number) < 2) {
               setMissedConcepts((prev) => {
-                if (prev.some((c) => c.id === current.concept.id)) return prev
-                return [...prev, { id: current.concept.id, title: current.concept.title }]
+                if (prev.some((c) => c.id === current!.concept.id)) return prev
+                return [...prev, { id: current!.concept.id, title: current!.concept.title }]
               })
             }
 
@@ -304,14 +356,14 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             if (
               parsed.just_mastered &&
               parsed.mastered_concept_title &&
-              !masteredConceptIdsThisSession.current.has(current.concept.id)
+              !masteredConceptIdsThisSession.current.has(current!.concept.id)
             ) {
-              masteredConceptIdsThisSession.current.add(current.concept.id)
+              masteredConceptIdsThisSession.current.add(current!.concept.id)
               setMasteredConceptTitle(parsed.mastered_concept_title as string)
               setMasteryOverlayOpen(true)
               import('canvas-confetti').then(({ default: confetti }) => {
                 confetti({ particleCount: 60, spread: 50, origin: { y: 0.5 }, scalar: 0.8 })
-              }).catch(() => {})
+              }).catch((err) => console.warn('confetti load failed', err))
             }
 
             if (!parsed.is_correct) setWrongAttempts((n) => n + 1)
@@ -367,6 +419,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     } catch {
       setSubmitError('Algo salió mal. Inténtalo de nuevo.')
       setSubmitting(false)
+    } finally {
+      submittingRef.current = false
     }
   }
 
@@ -377,8 +431,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          exercise_id: current.exercise.id,
-          concept_id: current.concept.id,
+          exercise_id: current!.exercise.id,
+          concept_id: current!.concept.id,
         }),
       })
       const { hint } = await res.json() as { hint: string }
@@ -387,43 +441,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       // silently fail
     } finally {
       setLoadingHint(false)
-    }
-  }
-
-  function handleTryAgain() {
-    setState({ phase: 'answering' })
-  }
-
-  function handleNext() {
-    if (index + 1 >= effectiveLength) {
-      const correct = scores.filter((s) => s >= 2).length
-      const elapsed = sprintConfig?.limitType === 'time' ? totalSeconds - secondsLeft : undefined
-      setState({ phase: 'done', correct, total: index + 1, elapsedSeconds: elapsed })
-      trackSessionCompleted({ correct, total: index + 1, practiceMode: !!practiceMode, elapsedSeconds: elapsed })
-      fetch('/api/sessions/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          started_at: startedAt.current,
-          concepts_reviewed: index + 1,
-          accuracy: Math.round((correct / (index + 1)) * 100),
-        }),
-      }).catch(() => {})
-    } else {
-      // Exit animation before advancing
-      setExiting(true)
-      setTimeout(() => {
-        setExiting(false)
-        // UX-AB: collapse concept note on each new exercise
-        setIsConceptExpanded(false)
-        startTransition(() => {
-          autoGenerateTriggeredRef.current = false
-          setIndex((i) => i + 1)
-          setState({ phase: 'answering' })
-          setWrongAttempts(0)
-          setClaudeHint(null)
-        })
-      }, 150)
     }
   }
 
@@ -465,6 +482,18 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     } finally {
       setGeneratingMore(false)
     }
+  }
+
+  // E3: Null guard — empty items or out-of-bounds index
+  if (!current && state.phase !== 'done') {
+    return (
+      <div className="text-center py-12 space-y-4">
+        <p className="text-muted-foreground">No hay ejercicios disponibles.</p>
+        <Button onClick={() => router.push(returnHref ?? '/dashboard')} variant="outline">
+          ← Volver
+        </Button>
+      </div>
+    )
   }
 
   // Done screen
@@ -570,7 +599,9 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     )
   }
 
-  const typeMeta = EXERCISE_TYPE_META[current.exercise.type] ?? { label: current.exercise.type, Icon: Type }
+  // current is guaranteed non-null here — early returns above handle undefined + done
+  const item = current!
+  const typeMeta = EXERCISE_TYPE_META[item.exercise.type] ?? { label: item.exercise.type, Icon: Type }
   const TypeIcon = typeMeta.Icon
   const isLast = index + 1 >= effectiveLength
 
@@ -657,11 +688,11 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         <div className="flex items-center gap-1.5 text-xs flex-wrap">
           <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>{typeMeta.label}</span>
           <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-          <span className="text-[var(--d5-warm)]">{current.concept.title}</span>
-          {current.concept.grammar_focus && (
+          <span className="text-[var(--d5-warm)]">{item.concept.title}</span>
+          {item.concept.grammar_focus && (
             <>
               <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-              <GrammarFocusChip focus={current.concept.grammar_focus} />
+              <GrammarFocusChip focus={item.concept.grammar_focus} />
             </>
           )}
           <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
@@ -689,7 +720,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           style={{ maxHeight: isConceptExpanded ? '16rem' : '0' }}
         >
           <div className="bg-muted/50 rounded-lg text-sm px-4 py-3 max-w-prose">
-            <p>{current.concept.explanation}</p>
+            <p>{item.concept.explanation}</p>
           </div>
         </div>
 
@@ -697,7 +728,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 ${exiting ? 'animate-exercise-out' : 'animate-exercise-in'} ${flashClass ?? ''}`}>
           {(state.phase === 'answering' || flashClass) && (
             <div className="animate-in slide-in-from-right-2 duration-200">
-              <ExerciseRenderer exercise={current.exercise} onSubmit={handleSubmit} disabled={submitting} />
+              <ExerciseRenderer exercise={item.exercise} onSubmit={handleSubmit} disabled={submitting} />
               {submitting && (
                 <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -710,8 +741,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
               {wrongAttempts > 0 && (
                 <div className="animate-in fade-in duration-300">
                   <HintPanel
-                    hint1={current.exercise.hint_1}
-                    hint2={current.exercise.hint_2}
+                    hint1={item.exercise.hint_1}
+                    hint2={item.exercise.hint_2}
                     claudeHint={claudeHint}
                     wrongAttempts={wrongAttempts}
                     loadingHint={loadingHint}
@@ -731,6 +762,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                 onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
                 isLast={isLast}
                 isGenerating={generatingMore || streamingDetails}
+                conceptId={item.concept.id}
               />
             </div>
           )}

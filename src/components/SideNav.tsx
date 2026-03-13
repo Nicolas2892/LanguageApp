@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserAvatar } from '@/components/UserAvatar'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
+import { StreakBadge } from '@/components/StreakBadge'
 
 const NAV_ITEMS = [
   { href: '/dashboard',       label: 'Inicio'     },
@@ -19,9 +20,10 @@ const HIDDEN_ROUTES = ['/auth', '/onboarding', '/brand-preview', '/admin']
 
 interface Props {
   userInitials: string
+  streak: number
 }
 
-export function SideNav({ userInitials }: Props) {
+export function SideNav({ userInitials, streak }: Props) {
   const pathname = usePathname()
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
@@ -84,8 +86,11 @@ export function SideNav({ userInitials }: Props) {
         })}
       </nav>
 
-      {/* Account at bottom */}
-      <div className="p-3 border-t shrink-0" style={{ borderColor: 'var(--d5-nav-border)' }}>
+      {/* Streak + Account at bottom */}
+      <div className="p-3 border-t shrink-0 space-y-2" style={{ borderColor: 'var(--d5-nav-border)' }}>
+        <div className="px-3">
+          <StreakBadge streak={streak} size="md" />
+        </div>
         <Link
           href="/account"
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"

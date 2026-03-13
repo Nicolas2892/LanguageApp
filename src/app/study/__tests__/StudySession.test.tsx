@@ -21,12 +21,13 @@ vi.mock('@/components/exercises/ExerciseRenderer', () => ({
 }))
 
 vi.mock('@/components/exercises/FeedbackPanel', () => ({
-  FeedbackPanel: ({ onNext, onTryAgain, isLast, isGenerating }: { onNext: () => void; onTryAgain?: () => void; isLast: boolean; isGenerating?: boolean }) => (
+  FeedbackPanel: ({ onNext, onTryAgain, isLast, isGenerating, conceptId }: { onNext: () => void; onTryAgain?: () => void; isLast: boolean; isGenerating?: boolean; conceptId?: string }) => (
     <div>
       <button data-testid="next-btn" onClick={onNext} disabled={isGenerating}>
         {isGenerating ? 'Generando…' : isLast ? 'Finalizar sesión' : 'Siguiente →'}
       </button>
       {onTryAgain && <button data-testid="try-again-btn" onClick={onTryAgain}>Try again</button>}
+      {conceptId && <span data-testid="concept-id">{conceptId}</span>}
     </div>
   ),
 }))
@@ -422,6 +423,69 @@ describe('StudySession — Fix-I drill generation disables Next button', () => {
   })
 })
 
+// ── Audit-E3: Empty items null guard ──────────────────────────────────────────
+describe('StudySession — Audit-E3 null guard', () => {
+  it('renders empty state when items is empty', () => {
+    render(<StudySession items={[]} />)
+    expect(screen.getByText('No hay ejercicios disponibles.')).toBeTruthy()
+    expect(screen.getByRole('button', { name: /volver/i })).toBeTruthy()
+  })
+
+  it('empty state back button navigates to dashboard', async () => {
+    render(<StudySession items={[]} />)
+    await userEvent.click(screen.getByRole('button', { name: /volver/i }))
+    expect(mockRouter.push).toHaveBeenCalledWith('/dashboard')
+  })
+
+  it('empty state back button uses returnHref when provided', async () => {
+    render(<StudySession items={[]} returnHref="/curriculum" />)
+    await userEvent.click(screen.getByRole('button', { name: /volver/i }))
+    expect(mockRouter.push).toHaveBeenCalledWith('/curriculum')
+  })
+})
+
+// ── Audit-E4: Double-click submit debounce ───────────────────────────────────
+describe('StudySession — Audit-E4 submit debounce', () => {
+  it('prevents double-click from sending two submit requests', async () => {
+    // Use a fetch that never resolves to keep submittingRef locked
+    let resolveSubmit: (v: Response) => void
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/submit') {
+        return new Promise<Response>((resolve) => { resolveSubmit = resolve })
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+    render(<StudySession items={[makeItem()]} />)
+    const btn = screen.getByTestId('submit-exercise')
+    // Click twice rapidly
+    await userEvent.click(btn)
+    await userEvent.click(btn)
+    const submitCalls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
+      (call) => call[0] === '/api/submit',
+    )
+    expect(submitCalls).toHaveLength(1)
+    // Clean up: resolve the pending promise
+    resolveSubmit!(makeStreamingSubmitResponse())
+  })
+})
+
+// ── Audit-E5: 401 redirect ──────────────────────────────────────────────────
+describe('StudySession — Audit-E5 expired auth redirect', () => {
+  it('redirects to login on 401 response', async () => {
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/submit') {
+        return Promise.resolve(new Response('Unauthorized', { status: 401 }))
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+    render(<StudySession items={[makeItem()]} />)
+    await userEvent.click(screen.getByTestId('submit-exercise'))
+    await waitFor(() =>
+      expect(mockRouter.push).toHaveBeenCalledWith('/auth/login?returnUrl=/study'),
+    )
+  })
+})
+
 // ── UX-W: HintPanel progressive disclosure ────────────────────────────────────
 describe('StudySession — UX-W hint panel gating', () => {
   function makeItemWithHint(exerciseId = 'exercise-hint'): StudyItem {
@@ -457,5 +521,34 @@ describe('StudySession — UX-W hint panel gating', () => {
     await userEvent.click(screen.getByTestId('next-btn'))
     // Exercise 2: wrongAttempts reset to 0 — hint-panel hidden
     await waitFor(() => expect(screen.queryByTestId('hint-panel')).toBeNull())
+  })
+})
+
+// ── Audit-E6: Malformed NDJSON resilience ────────────────────────────────────
+describe('StudySession — Audit-E6 malformed NDJSON', () => {
+  it('skips malformed NDJSON lines without crashing', async () => {
+    const encoder = new TextEncoder()
+    const body = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode('NOT VALID JSON\n'))
+        controller.enqueue(encoder.encode(JSON.stringify(mockScoreChunk) + '\n'))
+        controller.enqueue(encoder.encode(JSON.stringify(mockDetailsChunk) + '\n'))
+        controller.close()
+      },
+    })
+    global.fetch = vi.fn().mockImplementation((url: string) => {
+      if (url === '/api/submit') {
+        return Promise.resolve(new Response(body, { status: 200, headers: { 'Content-Type': 'application/x-ndjson' } }))
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
+    })
+
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    render(<StudySession items={[makeItem()]} />)
+    await submitAndWaitForFeedback()
+    // Session should proceed to feedback despite the malformed line
+    expect(screen.getByTestId('next-btn')).toBeTruthy()
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Malformed NDJSON'), expect.any(String))
+    warnSpy.mockRestore()
   })
 })

@@ -154,8 +154,8 @@ describe('TutorChat', () => {
       })
     })
 
-    it('shows Spanish error on fetch failure', async () => {
-      vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network'))
+    it('shows generic error on non-network fetch failure', async () => {
+      vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Server error'))
 
       const user = userEvent.setup()
       render(<TutorChat />)
@@ -164,6 +164,19 @@ describe('TutorChat', () => {
 
       await waitFor(() => {
         expect(screen.getByText('Algo salió mal. Inténtalo de nuevo.')).toBeInTheDocument()
+      })
+    })
+
+    it('shows network-specific error on TypeError (network error)', async () => {
+      vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'))
+
+      const user = userEvent.setup()
+      render(<TutorChat />)
+
+      await user.type(screen.getByPlaceholderText('Pregunta a tu tutor…'), 'Test{Enter}')
+
+      await waitFor(() => {
+        expect(screen.getByText('Sin conexión a internet. Revisa tu red.')).toBeInTheDocument()
       })
     })
   })

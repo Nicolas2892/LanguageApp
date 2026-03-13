@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { validateOrigin } from '@/lib/api-utils'
 import type { Profile } from '@/lib/supabase/types'
+import * as Sentry from '@sentry/nextjs'
 
 const ExerciseUpdateSchema = z.object({
   prompt: z.string().min(1).max(2000),
@@ -15,6 +16,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  try {
   if (!validateOrigin(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -60,12 +62,18 @@ export async function PATCH(
   }
 
   return NextResponse.json({ ok: true })
+  } catch (err) {
+    Sentry.captureException(err)
+    console.error('[PATCH /api/admin/exercises/[id]] error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
 
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  try {
   if (!validateOrigin(request)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -99,4 +107,9 @@ export async function DELETE(
   }
 
   return NextResponse.json({ ok: true })
+  } catch (err) {
+    Sentry.captureException(err)
+    console.error('[DELETE /api/admin/exercises/[id]] error:', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }

@@ -1198,3 +1198,33 @@ Shortcuts now:
 ### Deferred
 
 - **Weekly recap card** — complex query changes to DashboardDeferredSection; will revisit separately.
+
+---
+
+## PWA Icons — D5 Senda Brand Update (2026-03-13)
+
+**Files changed:** `src/app/icon.tsx`, `src/app/apple-icon.tsx`
+
+### Context
+
+The app icons (favicon/manifest at 192×192 and iOS home screen at 180×180) still showed the old design: orange gradient background with a white "Ñ" speech bubble. The D5 brand direction was already applied to the animated splash screen (`SplashScreen.tsx`) and all production pages, but the icons were missed.
+
+### Changes
+
+**Both `icon.tsx` (192×192) and `apple-icon.tsx` (180×180):**
+
+| Aspect | Before | After |
+|--------|--------|-------|
+| Background | `linear-gradient(145deg, #f97316, #c2410c)` (orange) | `#FDFCF9` (D5 paper) |
+| Foreground | White speech bubble with bold "Ñ" letter | Terracotta S-path monogram (`#C4522E`) |
+| Design language | Old brand (orange/white) | D5 Senda (paper/terracotta) |
+
+**S-path details:**
+- Same cubic Bézier path as `SvgSendaPath.tsx` and `SplashScreen.tsx`: `M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2`
+- Stroke width 3, round line caps and line joins
+- Rendered via inline SVG data URI (required because `next/og` `ImageResponse` does not support `<svg>` elements directly)
+- Scaled to 100×92px in the 192px icon, 94×86px in the 180px icon
+
+### Technical Note
+
+`next/og` (`ImageResponse`) uses Satori under the hood, which only supports a subset of HTML/CSS — no `<svg>` elements. The S-path is embedded as a `data:image/svg+xml` URI in an `<img>` tag to work around this limitation.

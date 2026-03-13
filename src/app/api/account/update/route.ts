@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { validateOrigin } from '@/lib/api-utils'
+import * as Sentry from '@sentry/nextjs'
 
 const AccountUpdateSchema = z.object({
   display_name: z.string().min(1).max(50).optional(),
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true })
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[account/update] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

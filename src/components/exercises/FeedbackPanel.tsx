@@ -1,8 +1,9 @@
 'use client'
 
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { SCORE_CONFIG } from '@/lib/scoring'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Bot } from 'lucide-react'
 import { SpeakButton } from '@/components/SpeakButton'
 import { SvgTilde } from '@/components/SvgTilde'
 import type { GradeResult } from '@/lib/claude/grader'
@@ -14,9 +15,10 @@ interface Props {
   onTryAgain?: () => void
   isLast: boolean
   isGenerating?: boolean
+  conceptId?: string
 }
 
-export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, isGenerating = false }: Props) {
+export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, isGenerating = false, conceptId }: Props) {
   const config = SCORE_CONFIG[result.score]
   const isCorrect = result.is_correct
 
@@ -100,6 +102,15 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, 
           <Button variant="outline" onClick={onTryAgain} className="w-full rounded-full border-primary text-primary hover:bg-primary/5">
             Intentar de nuevo
           </Button>
+        )}
+        {onTryAgain && conceptId && (
+          <Link
+            href={`/tutor?concept=${conceptId}`}
+            className="inline-flex items-center justify-center gap-1.5 text-sm text-[var(--d5-warm)] hover:text-primary transition-colors pt-1"
+          >
+            <Bot className="h-4 w-4" strokeWidth={1.5} />
+            Preguntale al tutor →
+          </Link>
         )}
       </div>
     </div>

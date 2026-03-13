@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { validateOrigin } from '@/lib/api-utils'
+import * as Sentry from '@sentry/nextjs'
 
 const DiagnosticResultSchema = z.object({
   concept_id: z.string().uuid(),
@@ -26,6 +28,10 @@ export async function POST(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     const parsed = OnboardingCompleteSchema.safeParse(await request.json())
     if (!parsed.success) {
@@ -74,6 +80,7 @@ export async function POST(request: Request) {
     })
     return response
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[onboarding/complete] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

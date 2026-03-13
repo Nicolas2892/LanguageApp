@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { validateOrigin } from '@/lib/api-utils'
+import * as Sentry from '@sentry/nextjs'
 
 function createServiceRoleClient() {
   return createAdminClient(
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
     response.cookies.delete('onboarding_done')
     return response
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[account/delete] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

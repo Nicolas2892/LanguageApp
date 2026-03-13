@@ -73,12 +73,15 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
           return updated
         })
       }
-    } catch {
+    } catch (err) {
+      const isNetworkError = err instanceof TypeError
       setMessages((m) => {
         const updated = [...m]
         updated[updated.length - 1] = {
           role: 'assistant',
-          content: 'Algo salió mal. Inténtalo de nuevo.',
+          content: isNetworkError
+            ? 'Sin conexión a internet. Revisa tu red.'
+            : 'Algo salió mal. Inténtalo de nuevo.',
         }
         return updated
       })

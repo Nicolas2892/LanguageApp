@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { POST } from '../route'
 import { createClient } from '@/lib/supabase/server'
 import { clearRateLimitStore } from '@/lib/rate-limit'
+import { validateOrigin } from '@/lib/api-utils'
 
 vi.mock('@/lib/supabase/server')
 vi.mock('@/lib/claude/client', () => ({
@@ -19,6 +20,10 @@ vi.mock('@/lib/claude/client', () => ({
     },
   },
   TUTOR_MODEL: 'claude-test',
+}))
+
+vi.mock('@/lib/api-utils', () => ({
+  validateOrigin: vi.fn(() => true),
 }))
 
 // Mock service role client
@@ -95,9 +100,12 @@ function setupMocks({ exerciseCount = 3, conceptExists = true }: { exerciseCount
   })
   mockServiceInsertSelect.mockReturnValue({ single: mockServiceInsertSingle })
   mockServiceInsert.mockReturnValue({ select: mockServiceInsertSelect })
+  const mockLimit = vi.fn().mockResolvedValue({ data: existingExercises })
   mockServiceSelect.mockReturnValue({
     eq: vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ data: existingExercises }),
+      eq: vi.fn().mockReturnValue({
+        limit: mockLimit,
+      }),
     }),
   })
 
@@ -116,6 +124,16 @@ describe('POST /api/exercises/generate', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     clearRateLimitStore()
+  })
+
+  it('returns 403 when origin validation fails', async () => {
+    setupMocks()
+    vi.mocked(validateOrigin).mockReturnValue(false)
+    const res = await POST(makeRequest({ concept_id: CONCEPT_ID, type: 'gap_fill' }))
+    expect(res.status).toBe(403)
+    const body = await res.json()
+    expect(body.error).toBe('Forbidden')
+    vi.mocked(validateOrigin).mockReturnValue(true)
   })
 
   it('returns 401 when unauthenticated', async () => {
@@ -174,6 +192,16 @@ describe('POST /api/exercises/generate', () => {
     expect(mockServiceInsert).toHaveBeenCalledWith(
       expect.objectContaining({ source: 'ai_generated' }),
     )
+  })
+
+  it('applies .limit(CAP + 1) on cap check query', async () => {
+    setupMocks({ exerciseCount: 3 })
+    await POST(makeRequest({ concept_id: CONCEPT_ID, type: 'gap_fill' }))
+    // The mock chain: mockServiceSelect → .eq() → .eq() → .limit()
+    // Verify limit was called with EXERCISE_CAP_PER_TYPE + 1 = 16
+    const limitCalls = mockServiceSelect.mock.results[0]?.value.eq.mock.results[0]?.value.eq.mock.results[0]?.value.limit.mock.calls
+    expect(limitCalls).toHaveLength(1)
+    expect(limitCalls[0][0]).toBe(16) // EXERCISE_CAP_PER_TYPE (15) + 1
   })
 
   it('passes existing prompts as dedup context to Claude', async () => {

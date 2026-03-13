@@ -28,6 +28,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
   const [showCurrentPwd, setShowCurrentPwd] = useState(false)
   const [showNewPwd, setShowNewPwd] = useState(false)
   const [showConfirmPwd, setShowConfirmPwd] = useState(false)
+  const [confirmMismatch, setConfirmMismatch] = useState(false)
 
   async function handleEmailChange() {
     setEmailMessage(null)
@@ -55,6 +56,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
   async function handlePasswordChange() {
     setPwdMessage(null)
     setPwdError(null)
+    setConfirmMismatch(false)
 
     if (newPwd.length < 6) {
       setPwdError('La nueva contraseña debe tener al menos 6 caracteres.')
@@ -149,12 +151,12 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowCurrentPwd(!showCurrentPwd)}
-                  className="senda-focus-ring absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0"
+                  className="senda-focus-ring absolute right-1 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label={showCurrentPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showCurrentPwd
-                    ? <EyeOff size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />
-                    : <Eye size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />}
+                    ? <EyeOff size={18} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />
+                    : <Eye size={18} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />}
                 </button>
               </div>
             </div>
@@ -174,12 +176,12 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowNewPwd(!showNewPwd)}
-                  className="senda-focus-ring absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0"
+                  className="senda-focus-ring absolute right-1 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label={showNewPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showNewPwd
-                    ? <EyeOff size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />
-                    : <Eye size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />}
+                    ? <EyeOff size={18} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />
+                    : <Eye size={18} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />}
                 </button>
               </div>
               {newPwd.length > 0 && (
@@ -202,21 +204,36 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                   id="confirm_password"
                   type={showConfirmPwd ? 'text' : 'password'}
                   value={confirmPwd}
-                  onChange={(e) => setConfirmPwd(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPwd(e.target.value)
+                    if (confirmMismatch) setConfirmMismatch(false)
+                  }}
+                  onBlur={() => {
+                    if (confirmPwd.length > 0 && newPwd.length > 0 && confirmPwd !== newPwd) {
+                      setConfirmMismatch(true)
+                    } else {
+                      setConfirmMismatch(false)
+                    }
+                  }}
                   className="senda-input pr-10"
                 />
                 <button
                   type="button"
                   tabIndex={-1}
                   onClick={() => setShowConfirmPwd(!showConfirmPwd)}
-                  className="senda-focus-ring absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0"
+                  className="senda-focus-ring absolute right-1 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label={showConfirmPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showConfirmPwd
-                    ? <EyeOff size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />
-                    : <Eye size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />}
+                    ? <EyeOff size={18} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />
+                    : <Eye size={18} strokeWidth={1.5} style={{ color: 'var(--d5-muted)' }} />}
                 </button>
               </div>
+              {confirmMismatch && (
+                <p style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--destructive)', marginTop: '0.125rem' }} role="alert">
+                  Las contraseñas no coinciden.
+                </p>
+              )}
             </div>
 
             {pwdError && (

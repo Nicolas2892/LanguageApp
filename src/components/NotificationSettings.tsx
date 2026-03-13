@@ -166,7 +166,7 @@ export function NotificationSettings({ isAdmin = false }: NotificationSettingsPr
             <button
               onClick={handleDisable}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted active:scale-95 transition-transform disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 min-h-[44px] text-xs font-medium text-muted-foreground hover:bg-muted active:scale-95 transition-transform disabled:opacity-60"
             >
               <BellOff className="h-3.5 w-3.5" />
               {loading ? 'Desactivando…' : 'Desactivar'}

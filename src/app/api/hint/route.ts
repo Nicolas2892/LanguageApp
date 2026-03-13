@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { anthropic, GRADE_MODEL } from '@/lib/claude/client'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { validateOrigin } from '@/lib/api-utils'
+import * as Sentry from '@sentry/nextjs'
 
 const HintSchema = z.object({
   exercise_id: z.string().uuid(),
@@ -61,6 +62,7 @@ export async function POST(request: Request) {
     const hint = message.content[0].type === 'text' ? message.content[0].text : ''
     return NextResponse.json({ hint })
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[hint]', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

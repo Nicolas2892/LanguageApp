@@ -152,10 +152,10 @@ describe('ExerciseRenderer', () => {
       />
     )
     // All 4 words should appear as clickable buttons in the word bank
-    expect(screen.getByRole('button', { name: 'quiero' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'ir' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'al' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'mercado' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Agregar palabra quiero' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Agregar palabra ir' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Agregar palabra al' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Agregar palabra mercado' })).toBeTruthy()
   })
 
   it('moves word from bank to construction area on click', async () => {
@@ -168,7 +168,7 @@ describe('ExerciseRenderer', () => {
       />
     )
     // Click one of the word bank buttons
-    const yoBtn = screen.getByRole('button', { name: 'yo' })
+    const yoBtn = screen.getByRole('button', { name: 'Agregar palabra yo' })
     await userEvent.click(yoBtn)
     // Submit button should now be enabled (something selected)
     expect(screen.getByRole('button', { name: 'Confirmar →' })).not.toBeDisabled()

@@ -1,16 +1,20 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Bot } from 'lucide-react'
 import { UserAvatar } from '@/components/UserAvatar'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
+import { StreakBadge } from '@/components/StreakBadge'
 
 const HIDDEN_ROUTES = ['/auth', '/study', '/tutor', '/onboarding', '/brand-preview']
+const TUTOR_ICON_ROUTES = ['/dashboard', '/curriculum', '/verbs']
 
 interface Props {
   userInitials: string
+  streak: number
 }
 
-export function AppHeader({ userInitials }: Props) {
+export function AppHeader({ userInitials, streak }: Props) {
   const pathname = usePathname()
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
@@ -22,15 +26,28 @@ export function AppHeader({ userInitials }: Props) {
           <SvgSendaPath size={26} strokeWidth={3.5} />
         </Link>
 
-        {/* Profile avatar → /account */}
-        <Link
-          href="/account"
-          aria-label="Account"
-          className="rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
-                     min-h-[44px] flex items-center justify-center"
-        >
-          <UserAvatar initials={userInitials} size="md" />
-        </Link>
+        {/* Right side: tutor + streak + avatar */}
+        <div className="flex items-center gap-3">
+          {TUTOR_ICON_ROUTES.some((r) => pathname === r || (r !== '/dashboard' && pathname.startsWith(r))) && (
+            <Link
+              href="/tutor"
+              aria-label="Tutor"
+              className="rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
+                         min-h-[44px] flex items-center justify-center text-[var(--d5-nav-inactive)]"
+            >
+              <Bot className="h-5 w-5" strokeWidth={1.5} />
+            </Link>
+          )}
+          <StreakBadge streak={streak} size="sm" />
+          <Link
+            href="/account"
+            aria-label="Account"
+            className="rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
+                       min-h-[44px] flex items-center justify-center"
+          >
+            <UserAvatar initials={userInitials} size="md" />
+          </Link>
+        </div>
       </div>
     </header>
   )

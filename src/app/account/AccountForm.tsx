@@ -67,18 +67,27 @@ export function AccountForm({ profile }: Props) {
     }
   }
 
+  const [skipError, setSkipError] = useState(false)
+
   async function handleSkipGapFillToggle() {
     const next = !skipGapFill
     setSkipGapFill(next)
+    setSkipError(false)
     try {
       const res = await fetch('/api/account/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ skip_gap_fill: next }),
       })
-      if (!res.ok) setSkipGapFill(!next) // revert on failure
+      if (!res.ok) {
+        setSkipGapFill(!next)
+        setSkipError(true)
+        setTimeout(() => setSkipError(false), 3000)
+      }
     } catch {
-      setSkipGapFill(!next) // revert on failure
+      setSkipGapFill(!next)
+      setSkipError(true)
+      setTimeout(() => setSkipError(false), 3000)
     }
   }
 
@@ -220,6 +229,11 @@ export function AccountForm({ profile }: Props) {
             </p>
           </div>
         </button>
+        {skipError && (
+          <p className="text-xs mt-1.5" style={{ color: 'var(--d5-error)' }} role="alert">
+            No se pudo guardar. Inténtalo de nuevo.
+          </p>
+        )}
       </div>
 
       <div style={{ height: '1.5rem' }} />

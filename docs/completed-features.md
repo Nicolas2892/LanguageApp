@@ -4,6 +4,89 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Move Tutor Out of Bottom Nav + Audit-D2 Fix ✓ (2026-03-13)
+
+1692 tests across 85 files, all passing.
+
+### Tutor Navigation Refactor
+
+**Problem:** BottomNav had 6 tabs (best practice is 3-5). Tutor is a reactive/support feature, not a core navigation destination.
+
+**Changes:**
+1. **BottomNav** — Removed Tutor tab (now 5 items: Dashboard → Study → Curriculum → Verbs → Progress). Deleted `TutorIcon` component.
+2. **AppHeader** — Added Bot icon (lucide `Bot`) in right-side cluster, shown only on `/dashboard`, `/curriculum`, `/verbs` (+ sub-routes). 44px touch target. Links to `/tutor`.
+3. **FeedbackPanel** — New `conceptId?: string` prop. When answer is incorrect (`onTryAgain` present) and `conceptId` provided, shows "Preguntale al tutor →" link below try-again button. Links to `/tutor?concept=<id>`.
+4. **StudySession** — Passes `conceptId={item.concept.id}` to `FeedbackPanel`.
+5. **VerbDetailClient** — Added "Consultar tutor →" link (Bot icon + warm text) below English translation in header.
+6. **SideNav** — No changes (Tutor stays on desktop where space is not an issue).
+
+**Files modified:** `src/components/BottomNav.tsx`, `src/components/AppHeader.tsx`, `src/components/exercises/FeedbackPanel.tsx`, `src/app/study/StudySession.tsx`, `src/app/verbs/[infinitive]/VerbDetailClient.tsx`
+
+**Tests:**
+- New: `src/components/__tests__/BottomNav.test.tsx` (5 tests — tab count, no Tutor, labels, font size, hidden routes)
+- New: `src/components/__tests__/AppHeader.test.tsx` (9 tests — tutor icon visibility per route, link target, touch target)
+- Updated: `src/components/exercises/__tests__/FeedbackPanel.test.tsx` (+3 tests — tutor link when incorrect+conceptId, hidden when correct, hidden when no conceptId)
+- Updated: `src/app/study/__tests__/StudySession.test.tsx` — FeedbackPanel mock updated with `conceptId` prop
+
+### Audit-D2 (P2): BottomNav label font 9px → 10px
+
+**Problem:** `text-[0.5625rem]` = 9px, below WCAG minimum for UI text.
+**Fix:** Changed to `text-[0.625rem]` (10px) in `src/components/BottomNav.tsx`.
+
+---
+
+## Audit Fixes Batch: P0 + P1 (5 items) ✓ (2026-03-13)
+
+1690 tests across 85 files, all passing. Fixed 1 P0 and 4 P1 issues from the 2026-03-13 codebase audit.
+
+### Audit-A1 (P0): Progress page unbounded query + join-syntax violation
+
+**Problem:** `.select('ai_score, exercises(type)')` used Supabase join syntax which fails with empty `Relationships: []`. Also unbounded (no `.limit()`).
+
+**Fix:** Replaced with two separate queries — `exercise_attempts` (with `.limit(5000)`) and `exercises` (all rows, ~924 total) — joined in TypeScript via Map. Both merged into the existing `Promise.all` for better parallelism (3 sequential query groups → 2).
+
+**File:** `src/app/progress/page.tsx`
+
+### Audit-B1 (P1): Missing CSRF on 4 API routes
+
+**Problem:** 4 POST routes lacked `validateOrigin(request)` CSRF check.
+
+**Fix:** Added `validateOrigin` import + guard after auth check in:
+- `src/app/api/topic/route.ts`
+- `src/app/api/exercises/generate/route.ts`
+- `src/app/api/onboarding/complete/route.ts`
+- `src/app/api/sessions/complete/route.ts`
+
+**Tests created:**
+- `src/app/api/topic/__tests__/route.test.ts` (2 tests)
+- `src/app/api/onboarding/complete/__tests__/route.test.ts` (2 tests)
+- `src/app/api/sessions/complete/__tests__/route.test.ts` (2 tests)
+- Updated `src/app/api/exercises/generate/__tests__/route.test.ts` (+1 CSRF test)
+
+### Audit-E2 (P1): Hard-flag multiplier prevents mastery
+
+**Problem:** Hard-flag interval multiplier (×0.6) was applied BEFORE the mastery check. SM-2 yields interval 21 (crossing MASTERY_THRESHOLD), but multiplier reduces to 13 — `is_hard` concepts could never be mastered.
+
+**Fix:** Moved `justMastered` check before the hard-flag multiplier block. `nextReviewInDays` stays as post-multiplier (shown to user), but mastery detection uses pre-multiplier interval.
+
+**File:** `src/app/api/submit/route.ts`
+**Test:** New case in `src/app/api/submit/__tests__/route.mastery.test.ts` — verifies `just_mastered: true` with `is_hard: true` when SM-2 returns exactly MASTERY_THRESHOLD.
+
+### Audit-E1 (P1): UTC-only streak calculation — documented
+
+**Action:** Added known-limitation note to CLAUDE.md Streak Logic section. No code change — long-term timezone-aware fix requires PM decision + new migration.
+
+### Audit-D1 (P1): Password toggle touch targets
+
+**Problem:** Toggle buttons had `p-0` + 14px icons = ~16px touch target, well below WCAG 44px minimum.
+
+**Fix:** All 3 buttons now have `min-w-[44px] min-h-[44px] flex items-center justify-center`. Icons increased from 14px to 18px. `right-3` → `right-1` to compensate for larger button.
+
+**File:** `src/app/account/SecurityForm.tsx`
+**Test:** New assertion in `src/app/account/__tests__/SecurityForm.test.tsx` — verifies all 3 toggle buttons have WCAG touch target classes.
+
+---
+
 ## D5 Splash Screen — animated brand overlay on app launch ✓ (2026-03-13)
 
 1651 tests across 76 files, all passing. Premium splash screen that bridges app launch to the dashboard using D5 design tokens.
@@ -1575,3 +1658,233 @@ Full D5 brand alignment of `/verbs/configure` — the last production page with 
 - `src/app/verbs/configure/VerbConfig.tsx` — full D5 rework (inline styles, terracotta pills/cards, Spanish)
 - `src/app/account/SecurityForm.tsx` — 8 English strings → Spanish
 - `src/app/account/__tests__/SecurityForm.test.tsx` — 5 assertion strings → Spanish
+
+---
+
+## Progress Page — Study Consistency Redesign + Persistent Streak Badge ✓ (2026-03-13)
+
+1681 tests across 82 files, all passing. Two-part feature: persistent streak badge in navigation (retention mechanic) and full-width weekly activity chart replacing the GitHub-style heatmap.
+
+### Part 1: Persistent Streak Badge
+
+`StreakBadge` component (`src/components/StreakBadge.tsx`) — flame SVG icon + streak number. Terracotta when active (streak > 0), muted when 0. Two sizes: `sm` (AppHeader, number only) and `md` (SideNav, with "día/días" label).
+
+- `layout.tsx` — profile query extended to `.select('display_name, theme_preference, streak')`; streak passed to both `<AppHeader>` and `<SideNav>`
+- `AppHeader.tsx` — streak badge between logo and avatar on mobile (`[logo] ... [🔥 5] [avatar]`)
+- `SideNav.tsx` — streak badge in bottom section above account link on desktop
+
+### Part 2: Weekly Activity Chart
+
+Replaced `ActivityHeatmap` (GitHub-style dot grid) with `WeeklyActivityChart` (`src/app/progress/WeeklyActivityChart.tsx`). Rationale: dot grid wasted 50% page width, was hard to read at 12px, and the color scale was too subtle. Weekly bars communicate trends at a glance.
+
+**Chart details:**
+- 14 vertical bars (one per week, last 14 weeks), full-width via `flex-1`
+- Bar color by intensity: `--d5-muted` (1–2), `--d5-warm` (3–5), `--d5-terracotta` (6+)
+- Zero-activity weeks: 2px stub (visible baseline)
+- Staggered mount animation (500ms transition, 30ms delay per bar)
+- Hover tooltip: "Semana del 3 Feb: 12 ejercicios"
+- Month labels below bars, Spanish legend ("Menos" / "Más")
+- Stats row absorbed into section header (sessions, hours, days studied)
+
+**Data change:** `page.tsx` now aggregates exercise_attempts into weekly buckets (Monday-aligned) instead of passing raw day-level data. Query window extended from 84 to 98 days (14 weeks).
+
+### Tests
+- `src/components/__tests__/StreakBadge.test.tsx` — 6 tests (colors, sizes, singular/plural labels)
+- `src/app/progress/__tests__/WeeklyActivityChart.test.tsx` — 6 tests (bar count, colors, legend, stats, month labels, zero-activity stubs)
+
+### Files Changed
+- `src/components/StreakBadge.tsx` — NEW
+- `src/components/__tests__/StreakBadge.test.tsx` — NEW
+- `src/components/AppHeader.tsx` — added `streak` prop, StreakBadge
+- `src/components/SideNav.tsx` — added `streak` prop, StreakBadge
+- `src/app/layout.tsx` — extended profile query, pass streak to nav
+- `src/app/progress/WeeklyActivityChart.tsx` — NEW (replaces ActivityHeatmap)
+- `src/app/progress/__tests__/WeeklyActivityChart.test.tsx` — NEW
+- `src/app/progress/page.tsx` — weekly data aggregation, uses WeeklyActivityChart
+
+---
+
+## Audit Fixes Batch (2026-03-13) — Full Detail
+
+Full codebase audit performed. 22 findings grouped by severity. All resolved except Audit-E1 (documented, needs PM decision) and Audit-E7 (P3, not done).
+
+### P0 — Critical
+
+**Audit-A1: Progress page unbounded query + join-syntax violation** *(DONE)*
+
+- Replaced `.select('ai_score, exercises(type)')` join syntax with two separate queries (`exercise_attempts` with `.limit(5000)` + `exercises` for types), joined in TypeScript via Map. Both merged into the existing `Promise.all` for better parallelism.
+
+### P1 — High
+
+**Audit-B1: Missing CSRF (`validateOrigin`) on 4 API routes** *(DONE)*
+
+- Added `validateOrigin(request)` check after auth in all 4 routes: `/api/topic`, `/api/exercises/generate`, `/api/onboarding/complete`, `/api/sessions/complete`.
+- Tests: CSRF rejection tests for all 4 routes (6 new tests).
+
+**Audit-E2: Hard-flag multiplier prevents mastery** *(DONE)*
+
+- Moved mastery check (`justMastered`) before hard-flag multiplier application. `is_hard` concepts now correctly cross MASTERY_THRESHOLD before interval compression.
+- Test: new case in `route.mastery.test.ts` verifies `just_mastered: true` even when multiplier would reduce interval below threshold.
+
+**Audit-E1: UTC-only streak calculation causes false resets** *(DOCUMENTED)*
+
+- Documented as known limitation in Streak Logic section. Long-term fix (timezone-aware RPC) requires PM decision + migration.
+
+**Audit-D1: Password toggle touch targets 14px** *(DONE)*
+
+- All 3 toggle buttons now have `min-w-[44px] min-h-[44px] flex items-center justify-center`. Icons increased from 14px to 18px.
+- Test: new assertion in `SecurityForm.test.tsx` verifies WCAG touch target classes.
+
+### P2 — Medium
+
+**Audit-E3: StudySession null guard missing** *(DONE)*
+
+- Added null guard before main render: if `current` is undefined (empty items or out-of-bounds index), renders "No hay ejercicios disponibles" + back button.
+- Tests: 3 new tests (empty state render, back button → dashboard, back button → returnHref).
+
+**Audit-E4: Double-click submit race condition** *(DONE)*
+
+- Added `submittingRef = useRef(false)` with early return at top of `handleSubmit` + `finally` reset. Prevents duplicate `/api/submit` requests from rapid double-clicks.
+- Test: double-click sends only 1 fetch call.
+
+**Audit-E5: No 401 handler for expired auth mid-study** *(DONE)*
+
+- Added `res.status === 401` check before generic error handler. Redirects to `/auth/login?returnUrl=/study` on expired auth.
+- Test: mock 401 → assert `router.push` to login.
+
+**Audit-A2: exercises/generate cap query unbounded** *(DONE)*
+
+- Added `.limit(EXERCISE_CAP_PER_TYPE + 1)` to cap check query in `/api/exercises/generate`.
+- Test: verifies `.limit(16)` is called in mock chain.
+
+**Audit-A3: Dead code — SprintCard** *(DONE)*
+
+- Deleted `src/components/SprintCard.tsx` + `src/components/__tests__/SprintCard.test.tsx`.
+
+**Audit-A4: Dead code — WeeklySnapshot** *(DONE)*
+
+- Deleted `src/components/WeeklySnapshot.tsx` + `src/components/__tests__/WeeklySnapshot.test.tsx`.
+
+**Audit-D2: BottomNav label font 9px** *(DONE)*
+
+- Changed `text-[0.5625rem]` (9px) to `text-[0.625rem]` (10px) in `src/components/BottomNav.tsx`.
+
+**Audit-D3: SentenceBuilder word chips missing aria-labels** *(DONE)*
+
+- Added `aria-label={`Agregar palabra ${word}`}` to word bank buttons and `aria-label={`Remover palabra ${word}`}` to selected area buttons.
+- Tests: 2 new tests verifying aria-labels via `getByLabelText`.
+
+**Audit-B5: No Sentry in API route catch blocks** *(DONE)*
+
+- Added `import * as Sentry from '@sentry/nextjs'` + `Sentry.captureException(err)` to outer catch blocks in all 14 API routes.
+
+**Audit-C1: Large JS chunks (recharts)** *(RESOLVED — recharts removed from codebase; all charts are now custom React+CSS)*
+
+**Audit-D4: HardFlagButton silent failure** *(DONE)*
+
+- Added inline error text "Error al guardar" with `role="alert"` that auto-clears after 3s on API failure or network error.
+- Tests: 2 new tests (non-ok response + fetch throw both show error text).
+
+**Audit-D5: skip_gap_fill toggle silent failure** *(DONE)*
+
+- Added inline error text "No se pudo guardar. Inténtalo de nuevo." with `role="alert"` that auto-clears after 3s on toggle failure.
+- Test: 1 new test verifying error text appears on API failure.
+
+**Audit-D6: Password confirmation only validated on submit** *(DONE)*
+
+- Added `onBlur` handler on confirm password field. Shows "Las contraseñas no coinciden." inline warning when passwords differ. Clears when user resumes typing or on submit.
+- Tests: 3 new tests (blur mismatch shown, matching passwords no alert, typing clears alert).
+
+**Audit-D7: NotificationSettings button touch target** *(DONE)*
+
+- Added `min-h-[44px]` to "Desactivar" button className.
+
+**Audit-A6: C1 bar invisible in dark mode** *(DONE)*
+
+- Replaced `rgba(26,17,8,0.4)` with `var(--d5-warm)` which is visible in both light and dark modes.
+
+**Audit-A7: Font weight audit** *(DONE)*
+
+- Removed Geist font entirely (unused — body font is DM Sans). Reduced Lora from 4 weights × 2 styles to `weight: ["600"], style: ["italic"]` only (`.senda-heading` is the sole consumer).
+
+**Audit-C4: Missing loading.tsx for /verbs** *(DONE)*
+
+- Created `src/app/verbs/loading.tsx` — Bone skeleton matching progress page pattern: header + search bar + 3×4 verb card grid.
+
+**Audit-E6: Stream JSON.parse crash risk** *(DONE)*
+
+- Wrapped `JSON.parse(line)` in try-catch with `console.warn` + `continue` to skip malformed NDJSON lines.
+- Test: 1 new test verifying malformed line is skipped and session proceeds normally.
+
+**Audit-B6: Swallowed confetti errors** *(DONE)*
+
+- Replaced `.catch(() => {})` with `.catch((err) => console.warn('confetti load failed', err))` in both confetti import locations.
+
+**Audit-B7: Generic error in TutorChat** *(DONE)*
+
+- `TypeError` (network error) → "Sin conexión a internet. Revisa tu red." Other errors → "Algo salió mal. Inténtalo de nuevo."
+- Test: 1 new test verifying `TypeError` shows network-specific message.
+
+---
+
+## Completed Infrastructure
+
+### Infra-A: Product analytics (PostHog) *(DONE)*
+
+- PostHog integrated via `posthog-js` + `PostHogProvider` (wraps layout). Typed event helpers in `src/lib/analytics.ts`.
+- Core events instrumented: `signup`, `login`, `exercise_submitted`, `session_completed`, `verb_drill_started`, `verb_drill_completed`. Deferred: `onboarding_complete`, `tutor_message_sent`, `free_write_submitted`, `streak_milestone`.
+- Auto page-view capture enabled. User identification wired via `PostHogProvider userId` prop.
+- Env vars: `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`.
+
+### Infra-B: Error monitoring (Sentry) *(DONE)*
+
+- `@sentry/nextjs` integrated without `withSentryConfig()` (Turbopack-safe). Manual `Sentry.init()` in `sentry.{client,server,edge}.config.ts`.
+- `src/instrumentation.ts` — Next.js 16 instrumentation hook with `onRequestError` for server/edge.
+- `src/app/global-error.tsx` — App Router global error page with `Sentry.captureException`.
+- `ErrorBoundary.tsx` — `componentDidCatch` now reports to Sentry with React `componentStack`.
+- Env vars: `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`.
+
+---
+
+## Completed Pedagogical Features
+
+### Ped-J: Module 8 — Conversational & Pragmatic Markers *(DONE)*
+
+- 15 concepts across 4 units: Fillers & Hesitation Markers (B1, 4), Attention-Getters & Reaction Markers (B2, 5), Hedges, Justifiers & Emphatic Markers (B2, 3), Advanced Colloquial Markers & Register Switching (C1, 3).
+- 135 exercises generated and seeded (+ 2 topup exercises for existing concept). All in DB.
+- Distinct from Module 1 (formal written connectors) — Module 8 covers colloquial spoken discourse markers with register awareness as key pedagogy.
+
+### Ped-F: Shared AI-generated exercise pool *(DONE)*
+
+- `EXERCISE_CAP_PER_TYPE = 15` per concept per type. When cap reached, random existing exercise returned (zero Claude cost).
+- `exercises.source` column: `'seed'` (default) or `'ai_generated'`. Migration 018.
+- `POST /api/exercises/generate` enhanced: cap check → serve cached, dedup context to Claude, post-generation dedup, `force` flag for admin bypass.
+- Admin pool dashboard (`/admin/pool`): concept × type grid, "+" generate button, colour-coded counts.
+- Admin exercise list: source filter + badge + delete button. Exercise detail: source badge + delete.
+- `DELETE /api/admin/exercises/[id]`: hard-delete with FK ON DELETE SET NULL (preserves attempt history).
+- StudySession dedup: ID-based filtering prevents duplicate exercises in auto-generate and "Generar 3 más".
+
+---
+
+## Completed Technical Debt
+
+### Debt-A: Seed script idempotency guards *(DONE)*
+
+- All three apply scripts are now idempotent:
+  - `seed:ai:apply` (mode `new`): skips concept if `(title, unit_id)` already exists in DB.
+  - `seed:ai:apply` (mode `topup`): skips exercises whose `(concept_id, type, prompt)` already exist.
+  - `seed:verbs:apply`: skips combos whose `(verb_id, tense)` already have sentences in DB.
+  - `seed:conjugations:apply`: already idempotent (ON CONFLICT DO UPDATE on PK).
+- Tests: `src/lib/curriculum/__tests__/seed-idempotency.test.ts`
+
+---
+
+## Fix-L: Push Notifications iOS PWA — Tooling Complete (2026-03-13)
+
+- `pnpm push:keygen` — generates VAPID key pair (`scripts/generate-vapid-keys.ts`)
+- `POST /api/push/test` — admin-only self-test endpoint; sends test notification to the caller's subscription via webpush
+- `NotificationSettings` — `isAdmin` prop; when true + granted, shows "Enviar prueba" button; iOS Safari non-standalone shows PWA install hint
+- `public/sw.js` — push event hardened with try/catch around `event.data.json()` for malformed payloads
+- Verification checklist with developer setup instructions: `docs/ios-push-verification.md`
+- Tests: `src/app/api/push/__tests__/test-push.test.ts` (5 tests), updated `NotificationSettings.test.tsx` (+4 tests)
+- **Known limitation**: single `push_subscription` per profile row — only last-subscribed device gets pushes

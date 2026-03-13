@@ -10,6 +10,7 @@ import { PRODUCTION_TYPES } from '@/lib/mastery/computeLevel'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib/api-utils'
 import { MASTERY_THRESHOLD, HARD_INTERVAL_MULTIPLIER } from '@/lib/constants'
+import * as Sentry from '@sentry/nextjs'
 
 const SubmitSchema = z.object({
   exercise_id: z.string().uuid(),
@@ -105,6 +106,9 @@ export async function POST(request: Request) {
             // Calculate new SRS values
             const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, score as SRSScore)
 
+            // Check mastery BEFORE applying hard-flag multiplier
+            justMastered = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD
+
             // Apply hard-flag multiplier on correct answers to schedule ~40% more frequently
             if (existingProgress?.is_hard && score >= 2) {
               newSRS.interval_days = Math.max(1, Math.round(newSRS.interval_days * HARD_INTERVAL_MULTIPLIER))
@@ -114,7 +118,6 @@ export async function POST(request: Request) {
             }
 
             nextReviewInDays = newSRS.interval_days
-            justMastered = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD
 
             // Upsert user_progress before emitting chunk 1
             await supabase
@@ -185,6 +188,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (err) {
+    Sentry.captureException(err)
     console.error('[submit] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

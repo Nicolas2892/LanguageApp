@@ -94,7 +94,6 @@ Remote: `https://github.com/Nicolas2892/LanguageApp.git`
 - **Supabase** — Postgres + Auth + RLS (no Supabase CLI; migrations run manually in SQL editor)
 - **Claude API** — `claude-sonnet-4-20250514` (TUTOR_MODEL) for tutor + exercise generation; `claude-haiku-4-5-20251001` (GRADE_MODEL) for grading + hints (validated 93.8% score agreement vs Sonnet)
 - **shadcn/ui** + Tailwind v4 (Neutral theme)
-- **recharts** — progress analytics charts
 - **Vitest** + **@testing-library/react** — unit + component tests (`src/**/__tests__/`)
 - **pnpm** — package manager
 
@@ -120,6 +119,7 @@ NEXT_PUBLIC_POSTHOG_HOST        # PostHog ingest host (default: https://us.i.pos
 NEXT_PUBLIC_VAPID_PUBLIC_KEY    # VAPID public key for push subscriptions (Fix-L)
 VAPID_PRIVATE_KEY               # VAPID private key for web-push (Fix-L)
 VAPID_EMAIL                     # VAPID contact email (mailto:you@example.com) (Fix-L)
+OPENAI_API_KEY                  # OpenAI Whisper STT for speech-to-text (Fix-J)
 CRON_SECRET                     # Bearer token for cron-triggered push send route
 ```
 
@@ -136,7 +136,7 @@ CRON_SECRET                     # Bearer token for cron-triggered push send rout
 | `/study`                        | Server + Client | Study session — queue fetched server-side, state machine client-side                      |
 | `/study/configure`              | Server + Client | Session config — pick module + exercise types before starting                             |
 | `/curriculum`                   | Server          | Full concept tree with mastery badges; all concepts/units/modules are clickable           |
-| `/progress`                     | Server          | 4-card stats, CEFR level progress bars, AccuracyChart, ActivityHeatmap, VerbTenseMastery  |
+| `/progress`                     | Server          | 4-card stats, CEFR level progress bars, AccuracyChart, WeeklyActivityChart, VerbTenseMastery |
 | `/tutor`                        | Server + Client | Streaming AI chat; accepts `?concept=<id>` for context                                    |
 | `/verbs`                        | Server + Client | Verb directory — 50 verbs, search, mastery dots, favorite toggle                          |
 | `/verbs/[infinitive]`           | Server + Client | Conjugation tables per tense + mastery bars + favorite toggle                             |
@@ -156,6 +156,7 @@ CRON_SECRET                     # Bearer token for cron-triggered push send rout
 | `POST /api/push/test`           | Route handler   | Admin-only: send self-test push notification via webpush (Fix-L)                          |
 | `POST /api/push/subscribe`      | Route handler   | Save/delete push subscription to `profiles.push_subscription`                             |
 | `POST /api/push/send`           | Route handler   | Cron-triggered: batch push notifications to subscribers with due exercises                 |
+| `POST /api/transcribe`          | Route handler   | OpenAI Whisper STT — accepts FormData with `audio` blob, returns `{ text }` (Fix-J)      |
 | `DELETE /api/admin/exercises/[id]` | Route handler | Admin-only: hard-delete exercise (FK ON DELETE SET NULL preserves attempt history)         |
 | `/admin/pool`                   | Server + Client | Admin exercise pool dashboard — concept × type grid with counts, "+" generate button      |
 
@@ -238,6 +239,7 @@ All routed through shared `ExerciseRenderer` in `src/components/exercises/Exerci
 - If gap > 1 day (or null) → `streak = 1`
 - If `last_studied_date == today` → no-op (already counted)
 - Stored in `profiles.streak` and `profiles.last_studied_date`
+- **Known limitation**: streak RPC uses `NOW() AT TIME ZONE 'UTC'`. Users far from UTC (e.g. UTC-8) may lose a streak if they submit late local time (appears as next day in UTC). Long-term fix: add `profiles.timezone` column, send `Intl.DateTimeFormat().resolvedOptions().timeZone` from client, use in RPC. Requires PM decision + migration.
 
 ### Hint System
 
@@ -349,6 +351,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/components/SvgSendaPath.tsx` — inline terracotta S-path; props: `size?` (default 20); used in SideNav + AppHeader wordmarks
 - `src/components/WindingPathSeparator.tsx` — calligraphic SVG divider; uses `--d5-separator`; place between dashboard sections
 - `src/components/BackgroundMagicS.tsx` — large watermark S-path (absolute positioned); parent must be `relative overflow-hidden`; props: `opacity?` (default 0.07)
+- `src/components/StreakBadge.tsx` — flame SVG + streak number; `size='sm'` (AppHeader) or `size='md'` (SideNav, shows "día/días" label); terracotta when active, muted when 0
 - `src/components/SplashScreen.tsx` — client-side fullscreen splash overlay; animates S-trail draw (800ms) + logo blur-fade (400ms, 400ms delay) → fade-out at 1200ms → unmount at 1700ms; uses `var(--background)` for dark mode; reduced-motion: static 600ms then fade; renders in `layout.tsx` as last child in `<PostHogProvider>`
 
 ### Key Shared Components & Utilities
@@ -361,7 +364,8 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/lib/verbs/grader.ts` — `normalizeSpanish(s)` + `gradeConjugation(userAnswer, correctForm, tenseRule)` → `VerbGradeResult`; pure functions, no network calls
 - `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
 - `src/lib/hooks/useSpeech.ts` — TTS hook; `src/components/SpeakButton.tsx` — speaker button (wired in all 5 exercise types)
-- `src/lib/hooks/useSpeechRecognition.ts` — STT hook (Web Speech API, es-ES, SSR-safe); `src/components/MicButton.tsx` — mic button used in FreeWritePrompt
+- `src/lib/hooks/useSpeechRecognition.ts` — STT hook (MediaRecorder → OpenAI Whisper via `/api/transcribe`, SSR-safe); `src/components/MicButton.tsx` — mic button used in FreeWritePrompt; states: idle, listening, processing, not-supported, denied
+- `src/lib/openai/client.ts` — OpenAI client singleton (Whisper STT)
 - `src/components/exercises/ExerciseRenderer.tsx` — shared exercise switch
 - `src/components/exercises/FreeWritePrompt.tsx` — AI prompt + textarea + SpeakButton + MicButton; used by WriteSession
 - `src/components/ErrorBoundary.tsx` — wraps StudySession, DiagnosticSession, WriteSession
@@ -376,9 +380,18 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ### Navigation
 
-- **SideNav** (`src/components/SideNav.tsx`) — desktop sidebar (`hidden lg:flex`); D5 design: `SvgSendaPath` + DM Serif italic wordmark, left 3px terracotta accent bar per active item (no icons), `--d5-nav-inactive` for inactive items; 6 items: Dashboard → Study → Curriculum → Verbs → Progress → Tutor; hidden on `/auth`, `/onboarding`, `/brand-preview`, `/admin`
-- **BottomNav** (`src/components/BottomNav.tsx`) — mobile 6-tab bar (`lg:hidden`); same order; active pill uses inline `rgba(184,170,153,0.28)` bg; `HIDDEN_ROUTES` includes `/verbs/session`
-- **AppHeader** (`src/components/AppHeader.tsx`) — sticky mobile header (`lg:hidden`); `SvgSendaPath size={22}` + DM Serif italic "Senda" wordmark; hidden on `/auth`, `/study`, `/tutor`, `/onboarding`, `/brand-preview`
+- **SideNav** (`src/components/SideNav.tsx`) — desktop sidebar (`hidden lg:flex`); D5 design: `SvgSendaPath` + DM Serif italic wordmark, left 3px terracotta accent bar per active item (no icons), `--d5-nav-inactive` for inactive items; 6 items: Dashboard → Study → Curriculum → Verbs → Progress → Tutor; hidden on `/auth`, `/onboarding`, `/brand-preview`, `/admin`; `StreakBadge` (md) in bottom section above account link
+- **BottomNav** (`src/components/BottomNav.tsx`) — mobile 5-tab bar (`lg:hidden`); Dashboard → Study → Curriculum → Verbs → Progress (Tutor removed — surfaced via AppHeader icon + FeedbackPanel link instead); active pill uses inline `rgba(184,170,153,0.28)` bg; `HIDDEN_ROUTES` includes `/verbs/session`; label font `text-[0.625rem]` (10px, WCAG compliant)
+- **AppHeader** (`src/components/AppHeader.tsx`) — sticky mobile header (`lg:hidden`); `SvgSendaPath size={26}`; right side: tutor Bot icon (on `/dashboard`, `/curriculum`, `/verbs` + sub-routes only) + `StreakBadge` (sm) + avatar; hidden on `/auth`, `/study`, `/tutor`, `/onboarding`, `/brand-preview`
+
+### Tutor Entry Points
+
+Tutor (`/tutor`) is a reactive support feature, not a primary nav destination. Entry points:
+- **AppHeader** — Bot icon on `/dashboard`, `/curriculum`, `/verbs` (mobile only, 44px touch target)
+- **SideNav** — nav item (desktop only)
+- **FeedbackPanel** — "Preguntale al tutor →" link when answer is incorrect + `conceptId` provided; links to `/tutor?concept=<id>`
+- **Concept detail** (`/curriculum/[id]`) — "Consultar tutor →" link with `?concept=<id>` context
+- **Verb detail** (`/verbs/[infinitive]`) — "Consultar tutor →" link (general, no verb context param)
 
 ### CSS Animations & Skeleton
 
@@ -404,13 +417,13 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `/write?concept=<id>` — dedicated page; not part of SRS study queue
 - `POST /api/topic` — generates prompt; Claude non-streaming, max_tokens 256
 - `POST /api/grade` — grades answer; inserts `exercise_attempts` with `exercise_id: null`
-- STT mic button overlaid on textarea; transcript appended with space separator; permission-denied + unsupported-browser (Firefox) fallbacks
+- STT mic button overlaid on textarea; MediaRecorder captures audio → `POST /api/transcribe` (OpenAI Whisper); transcript appended with space separator; permission-denied + unsupported-browser fallbacks; 60s max recording; 20 req/10min rate limit
 
 ---
 
 ## Current Status
 
-**Test suite: 1651 tests across 76 files — all passing.**
+**Test suite: 1713 tests across 86 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -428,20 +441,9 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Observability / Infrastructure
 
-**Infra-A: Product analytics (PostHog)** *(DONE)*
+**Infra-A: Product analytics (PostHog)** *(DONE — see completed-features.md)*
 
-- PostHog integrated via `posthog-js` + `PostHogProvider` (wraps layout). Typed event helpers in `src/lib/analytics.ts`.
-- Core events instrumented: `signup`, `login`, `exercise_submitted`, `session_completed`, `verb_drill_started`, `verb_drill_completed`. Deferred: `onboarding_complete`, `tutor_message_sent`, `free_write_submitted`, `streak_milestone`.
-- Auto page-view capture enabled. User identification wired via `PostHogProvider userId` prop.
-- Env vars: `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`.
-
-**Infra-B: Error monitoring (Sentry)** *(DONE)*
-
-- `@sentry/nextjs` integrated without `withSentryConfig()` (Turbopack-safe). Manual `Sentry.init()` in `sentry.{client,server,edge}.config.ts`.
-- `src/instrumentation.ts` — Next.js 16 instrumentation hook with `onRequestError` for server/edge.
-- `src/app/global-error.tsx` — App Router global error page with `Sentry.captureException`.
-- `ErrorBoundary.tsx` — `componentDidCatch` now reports to Sentry with React `componentStack`.
-- Env vars: `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`.
+**Infra-B: Error monitoring (Sentry)** *(DONE — see completed-features.md)*
 
 **Infra-C: Database migration tooling** *(P3 — reduce manual SQL risk)*
 
@@ -457,21 +459,9 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Pedagogical / Learning Quality
 
-**Ped-J: Module 8 — Conversational & Pragmatic Markers** *(DONE)*
+**Ped-J: Module 8 — Conversational & Pragmatic Markers** *(DONE — see completed-features.md)*
 
-- 15 concepts across 4 units: Fillers & Hesitation Markers (B1, 4), Attention-Getters & Reaction Markers (B2, 5), Hedges, Justifiers & Emphatic Markers (B2, 3), Advanced Colloquial Markers & Register Switching (C1, 3).
-- 135 exercises generated and seeded (+ 2 topup exercises for existing concept). All in DB.
-- Distinct from Module 1 (formal written connectors) — Module 8 covers colloquial spoken discourse markers with register awareness as key pedagogy.
-
-**Ped-F: Shared AI-generated exercise pool** *(DONE)*
-
-- `EXERCISE_CAP_PER_TYPE = 15` per concept per type. When cap reached, random existing exercise returned (zero Claude cost).
-- `exercises.source` column: `'seed'` (default) or `'ai_generated'`. Migration 018.
-- `POST /api/exercises/generate` enhanced: cap check → serve cached, dedup context to Claude, post-generation dedup, `force` flag for admin bypass.
-- Admin pool dashboard (`/admin/pool`): concept × type grid, "+" generate button, colour-coded counts.
-- Admin exercise list: source filter + badge + delete button. Exercise detail: source badge + delete.
-- `DELETE /api/admin/exercises/[id]`: hard-delete with FK ON DELETE SET NULL (preserves attempt history).
-- StudySession dedup: ID-based filtering prevents duplicate exercises in auto-generate and "Generar 3 más".
+**Ped-F: Shared AI-generated exercise pool** *(DONE — see completed-features.md)*
 
 **Ped-I: Concept explanation content audit** *(very low priority — content only, no code)*
 
@@ -548,38 +538,31 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Bugs / Layout Fixes
 
-**Fix-J: STT (speech-to-text) broken on free-write page — investigate and replace Web Speech API** *(high priority — iOS is primary target)*
-
-- Current implementation uses the Web Speech API (`useSpeechRecognition.ts` / `MicButton.tsx`) which is Chromium-only (Chrome, Edge, Arc). Not supported on Safari or Firefox.
-- iPhone users (Safari) cannot use dictation at all — this is a critical gap given iOS is a primary target platform.
-- **Replacement candidates to evaluate**:
-  1. **OpenAI Whisper API** — high accuracy on learner speech; `MediaRecorder` pattern; $0.006/min
-  2. **Google Cloud Speech-to-Text API** — broad support; ~$0.006/15s; requires `GOOGLE_STT_API_KEY`
-  3. **Claude API audio input** — see Strat-C; higher latency but no extra vendor
-- **Acceptance criteria**: STT works on iOS Safari + Chrome + Edge; graceful fallback (hidden mic button) on unsupported environments.
-- **Do not implement without a PM decision on vendor and cost model.**
+**Fix-J: STT — replace Web Speech API with OpenAI Whisper** *(DONE — see completed-features.md)*
 
 **Fix-L: Verify push notifications on iOS PWA** *(TOOLING COMPLETE — pending device verification)*
 
-- `pnpm push:keygen` — generates VAPID key pair (`scripts/generate-vapid-keys.ts`)
-- `POST /api/push/test` — admin-only self-test endpoint; sends test notification to the caller's subscription via webpush
-- `NotificationSettings` — `isAdmin` prop; when true + granted, shows "Enviar prueba" button; iOS Safari non-standalone shows PWA install hint
-- `public/sw.js` — push event hardened with try/catch around `event.data.json()` for malformed payloads
-- Verification checklist with developer setup instructions: `docs/ios-push-verification.md`
-- Tests: `src/app/api/push/__tests__/test-push.test.ts` (5 tests), updated `NotificationSettings.test.tsx` (+4 tests)
-- **Known limitation**: single `push_subscription` per profile row — only last-subscribed device gets pushes
+- Full implementation details in `docs/completed-features.md`. Checklist: `docs/ios-push-verification.md`.
+- **Known limitation**: single `push_subscription` per profile row — only last-subscribed device gets pushes.
 - **Next step: deploy with VAPID env vars, run checklist on a physical iPhone (iOS 16.4+) in Safari standalone mode.**
 
 ### Technical Debt
 
-**Debt-A: Seed script idempotency guards** *(DONE)*
+**Debt-A: Seed script idempotency guards** *(DONE — see completed-features.md)*
 
-- All three apply scripts are now idempotent:
-  - `seed:ai:apply` (mode `new`): skips concept if `(title, unit_id)` already exists in DB.
-  - `seed:ai:apply` (mode `topup`): skips exercises whose `(concept_id, type, prompt)` already exist.
-  - `seed:verbs:apply`: skips combos whose `(verb_id, tense)` already have sentences in DB.
-  - `seed:conjugations:apply`: already idempotent (ON CONFLICT DO UPDATE on PK).
-- Tests: `src/lib/curriculum/__tests__/seed-idempotency.test.ts`
+**Debt-B: Monthly STT usage tracking** *(P4 — billing clarity)*
+
+- Current burst limit (20 req/10min) prevents abuse but doesn't enforce the ~80 min/month budget precisely.
+- Would require a `profiles.stt_minutes_used` column + monthly reset cron + duration tracking in `/api/transcribe`.
+- **Do not implement unless billing/cost becomes a measurable problem.**
+
+### Audit Findings (2026-03-13)
+
+Full codebase audit: 22 findings, 20 fixed. Full details in `docs/completed-features.md` under "Audit Fixes Batch".
+
+**Open items:**
+- **Audit-E1**: UTC-only streak — documented as known limitation; timezone-aware fix needs PM decision + migration
+- **Audit-E7**: SRS due_date uses server local time (UTC on Vercel) while streak RPC uses UTC — document only, no code change needed
 
 ### Strategic / Long-term
 
@@ -595,18 +578,17 @@ Items are ordered by priority within each group. Full details of completed work 
 
 | Priority | Item | Gate |
 | -------- | ---- | ---- |
-| **P0** | **Infra-A** — Product analytics (PostHog) | ✅ Done |
-| **P0** | **Infra-B** — Error monitoring (Sentry) | ✅ Done |
-| **P1** | **Fix-J** — STT replacement for iOS Safari | PM decision on vendor + cost model |
-| **P1** | **Fix-L** — Verify push notifications on iOS PWA | Tooling complete; deploy + device test pending |
+| **P1** | **Audit-E1** — Timezone-aware streak RPC | PM decision + migration |
+| **P1** | **Fix-J** — STT replacement for iOS Safari | **DONE** |
+| **P1** | **Fix-L** — Verify push notifications on iOS PWA | Deploy + device test pending |
 | **P2** | **Feat-G** — Streak freeze / recovery | PM decision on mechanic |
 | **P2** | **Feat-H** — Listening comprehension exercises | PM decision on audio source |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
+| **P3** | **Audit-E7** — Document SRS due_date UTC assumption | None — implement now |
 | **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |
 | **P3** | **Feat-J** — Verb SRS integration | PM decision on SRS model |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
-| **P3** | **Debt-A** — Seed script idempotency | ✅ Done |
 | **P4** | **Infra-D** — A/B testing / feature flags | Needed before adaptive grading |
 | **P4** | **Feat-F** — Offline exercise packs | PM decision on sync |
 | **P4** | **Feat-L** — Reading comprehension | Content strategy needed |

@@ -3,21 +3,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, ClipboardCheck, BookMarked, BarChart2 } from 'lucide-react'
 
-/* Brand-preview SVG icons for Study and Tutor (match senda-master-specs) */
+/* Brand-preview SVG icon for Study (match senda-master-specs) */
 function StudyIcon({ className, strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 19.5A2.5 2.5 0 016.5 17H20V2H6.5A2.5 2.5 0 004 4.5v15z" />
-    </svg>
-  )
-}
-
-function TutorIcon({ className, strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 8V4H8M3 12v6a2 2 0 002 2h14a2 2 0 002-2v-6M3 12h18" />
     </svg>
   )
 }
@@ -28,7 +19,6 @@ const TABS = [
   { href: '/curriculum',      label: 'Currículo',  Icon: ClipboardCheck  },
   { href: '/verbs',           label: 'Verbos',     Icon: BookMarked      },
   { href: '/progress',        label: 'Progreso',   Icon: BarChart2       },
-  { href: '/tutor',           label: 'Tutor',      Icon: TutorIcon       },
 ]
 const HIDDEN_ROUTES = ['/auth', '/onboarding', '/write', '/brand-preview', '/verbs/session', '/admin']
 
@@ -70,7 +60,7 @@ export function BottomNav() {
                 <Icon className="h-6 w-6" strokeWidth={1.5} />
               </span>
               <span
-                className={`text-[0.5625rem] leading-none
+                className={`text-[0.625rem] leading-none
                   ${active ? 'font-bold' : 'font-medium'}`}
               >
                 {label}

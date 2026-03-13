@@ -8,6 +8,7 @@ import type { UseSpeechRecognitionReturn } from '@/lib/hooks/useSpeechRecognitio
 const defaultStt: UseSpeechRecognitionReturn = {
   supported: true,
   listening: false,
+  processing: false,
   transcript: '',
   error: null,
   permissionState: 'unknown',
@@ -223,7 +224,7 @@ describe('FreeWritePrompt', () => {
   it('renders mic-off button when STT is not supported', () => {
     mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, supported: false })
     render(<FreeWritePrompt {...baseProps} />)
-    expect(screen.getByLabelText('Reconocimiento de voz no disponible')).toBeTruthy()
+    expect(screen.getByLabelText('Dictación no disponible')).toBeTruthy()
   })
 
   it('renders mic-off button when permission is denied', () => {
@@ -244,5 +245,17 @@ describe('FreeWritePrompt', () => {
     mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, listening: true })
     render(<FreeWritePrompt {...baseProps} />)
     expect(screen.getByLabelText('Detener dictado')).toBeTruthy()
+  })
+
+  it('mic button shows processing state while transcribing', () => {
+    mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, processing: true })
+    render(<FreeWritePrompt {...baseProps} />)
+    expect(screen.getByLabelText('Procesando audio')).toBeTruthy()
+  })
+
+  it('shows not-supported fallback with "Dictación no disponible" label', () => {
+    mockUseSpeechRecognition.mockReturnValue({ ...defaultStt, supported: false })
+    render(<FreeWritePrompt {...baseProps} />)
+    expect(screen.getByLabelText('Dictación no disponible')).toBeTruthy()
   })
 })

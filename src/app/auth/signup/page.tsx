@@ -12,8 +12,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { GoogleButton } from '@/components/auth/GoogleButton'
-import { LogoMark } from '@/components/LogoMark'
-import { BackgroundMagicS } from '@/components/BackgroundMagicS'
+import { AuthHeroPanel } from '@/components/auth/AuthHeroPanel'
+import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { trackSignup } from '@/lib/analytics'
 
 const schema = z.object({
@@ -59,8 +59,8 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-sm shadow-lg">
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <Card className="w-full max-w-md border-0 shadow-none" style={{ boxShadow: '0 10px 30px -10px rgba(26, 17, 8, 0.08)' }}>
           <CardHeader>
             <CardTitle className="senda-heading text-2xl">Un paso más</CardTitle>
             <CardDescription>
@@ -68,7 +68,7 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardFooter>
-            <Button asChild className="w-full rounded-full" variant="outline">
+            <Button asChild className="w-full rounded-full h-11 font-bold" variant="outline">
               <Link href="/auth/login">Volver a iniciar sesión</Link>
             </Button>
           </CardFooter>
@@ -80,23 +80,15 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel — desktop only */}
-      <div className="hidden md:flex md:w-1/2 bg-[var(--d5-ink)] text-[var(--d5-paper)] flex-col items-center justify-center p-12 relative overflow-hidden">
-        <BackgroundMagicS opacity={0.06} style={{ right: -40, top: -30, width: 280, height: 364 }} />
-        <div className="relative z-10 space-y-4 text-center">
-          <LogoMark size={56} />
-          <h1 className="senda-heading text-3xl text-[var(--d5-paper)]">Español Avanzado</h1>
-          <p className="text-base opacity-70 max-w-xs leading-relaxed">
-            Español avanzado. Hermosamente estructurado.
-          </p>
-        </div>
-      </div>
+      <AuthHeroPanel />
 
       {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-sm shadow-lg">
+      <div className="flex-1 flex items-center justify-center bg-background p-6">
+        <Card className="w-full max-w-md border-0 shadow-none" style={{ boxShadow: '0 10px 30px -10px rgba(26, 17, 8, 0.08)' }}>
           <CardHeader className="space-y-3 items-center text-center">
-            <div className="md:hidden">
-              <LogoMark size={48} />
+            <div className="lg:hidden flex flex-col items-center gap-2">
+              <SvgSendaPath size={40} strokeWidth={3} />
+              <span className="senda-heading text-xl" style={{ letterSpacing: '0.02em' }}>Senda</span>
             </div>
             <CardTitle className="senda-heading text-2xl">Crear Cuenta</CardTitle>
             <CardDescription>El B2 no sucede por accidente.</CardDescription>
@@ -107,7 +99,7 @@ export default function SignupPage() {
             <GoogleButton />
             <div className="relative my-5">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full h-px bg-[var(--d5-divider)]" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground">o</span>
@@ -121,7 +113,7 @@ export default function SignupPage() {
                 <p className="text-sm text-destructive">{serverError}</p>
               )}
               <div className="space-y-2">
-                <Label htmlFor="display_name">Nombre</Label>
+                <Label htmlFor="display_name" className="senda-field-label">Nombre</Label>
                 <Input
                   id="display_name"
                   placeholder="Maria"
@@ -133,7 +125,7 @@ export default function SignupPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="email" className="senda-field-label">Correo electrónico</Label>
                 <Input
                   id="email"
                   type="email"
@@ -146,7 +138,7 @@ export default function SignupPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password" className="senda-field-label">Contraseña</Label>
                 <Input
                   id="password"
                   type="password"
@@ -158,7 +150,7 @@ export default function SignupPage() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirm_password">Confirmar contraseña</Label>
+                <Label htmlFor="confirm_password" className="senda-field-label">Confirmar contraseña</Label>
                 <Input
                   id="confirm_password"
                   type="password"
@@ -170,8 +162,8 @@ export default function SignupPage() {
                 )}
               </div>
             </CardContent>
-            <CardFooter className="flex flex-col gap-3">
-              <Button type="submit" className="w-full rounded-full" disabled={isSubmitting}>
+            <CardFooter className="flex flex-col gap-y-5 pt-2">
+              <Button type="submit" className="w-full rounded-full h-11 font-bold" disabled={isSubmitting}>
                 {isSubmitting ? 'Creando cuenta…' : 'Crear cuenta'}
               </Button>
               <p className="text-sm text-muted-foreground text-center">

@@ -92,6 +92,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
             key={i}
             type="button"
             onClick={() => !disabled && removeWord(i)}
+            aria-label={`Remover palabra ${word}`}
             className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:bg-primary/90 disabled:opacity-50 active:scale-95 transition-transform"
             disabled={disabled}
           >
@@ -107,6 +108,7 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
             key={i}
             type="button"
             onClick={() => !disabled && addWord(word, i)}
+            aria-label={`Agregar palabra ${word}`}
             className="px-3 py-1 bg-[var(--d5-pill-bg)] text-[var(--d5-pill-text)] border border-[var(--d5-pill-border)] rounded-full text-sm hover:bg-[var(--d5-pill-bg)] disabled:opacity-50 active:scale-95 transition-transform senda-focus-ring"
             disabled={disabled}
           >
