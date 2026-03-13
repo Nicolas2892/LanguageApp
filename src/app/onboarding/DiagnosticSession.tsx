@@ -54,7 +54,27 @@ export function DiagnosticSession({ items }: Props) {
           user_answer: answer,
         }),
       })
-      const result = await res.json() as GradeResult & { next_review_in_days: number }
+      if (!res.ok || !res.body) {
+        throw new Error(`Submit failed: ${res.status}`)
+      }
+      // Read NDJSON stream (two JSON lines: score chunk + details chunk)
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+      const chunks: Record<string, unknown>[] = []
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read()
+        if (value) buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          if (line.trim()) chunks.push(JSON.parse(line))
+        }
+        if (done) break
+      }
+      // Merge score chunk + details chunk into a single GradeResult
+      const result = Object.assign({}, ...chunks) as GradeResult & { next_review_in_days: number }
       setResults((prev) => [
         ...prev,
         {
