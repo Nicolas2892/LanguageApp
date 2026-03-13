@@ -2,9 +2,15 @@ import { ImageResponse } from 'next/og'
 
 /**
  * Shared PWA icon renderer — terracotta S-path on paper background.
- * Used by icon.tsx, apple-icon.tsx, and icon-512 route.
+ * Used by icon.tsx, apple-icon.tsx, and pwa-icon route.
+ *
+ * @param rounded - set false for apple-icon (iOS applies its own mask)
  */
-export function renderIcon(width: number, height: number): ImageResponse {
+export function renderIcon(
+  width: number,
+  height: number,
+  { rounded = true }: { rounded?: boolean } = {},
+): ImageResponse {
   // Scale the S-path SVG proportionally to the icon size
   const svgWidth = Math.round(width * 0.52)
   const svgHeight = Math.round(svgWidth * 0.92)
@@ -27,9 +33,12 @@ export function renderIcon(width: number, height: number): ImageResponse {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: width >= 512 ? 80 : width >= 180 ? 40 : 32,
+          ...(rounded
+            ? { borderRadius: width >= 512 ? 80 : 32 }
+            : {}),
         }}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={svgDataUri} width={svgWidth} height={svgHeight} alt="" />
       </div>
     ),
