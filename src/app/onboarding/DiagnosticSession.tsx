@@ -99,15 +99,18 @@ export function DiagnosticSession({ items }: Props) {
       setState({ phase: 'done' })
       try {
         // Include the current result already stored
-        await fetch('/api/onboarding/complete', {
+        const res = await fetch('/api/onboarding/complete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ results }),
         })
-      } catch {
-        // Best-effort — still redirect
-      } finally {
+        if (!res.ok) throw new Error(`Onboarding complete failed: ${res.status}`)
         router.push('/dashboard')
+      } catch {
+        // If completion fails, user would be stuck in redirect loop — retry
+        setCompleting(false)
+        setState({ phase: 'answering' })
+        setSubmitError('No se pudo completar el diagnóstico. Inténtalo de nuevo.')
       }
     } else {
       setIndex((i) => i + 1)

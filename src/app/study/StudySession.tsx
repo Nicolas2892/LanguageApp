@@ -435,10 +435,11 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           concept_id: current!.concept.id,
         }),
       })
+      if (!res.ok) throw new Error(`Hint request failed: ${res.status}`)
       const { hint } = await res.json() as { hint: string }
       setClaudeHint(hint)
     } catch {
-      // silently fail
+      setSubmitError('No se pudo cargar la pista. Inténtalo de nuevo.')
     } finally {
       setLoadingHint(false)
     }
