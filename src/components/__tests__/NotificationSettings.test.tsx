@@ -97,6 +97,36 @@ describe('NotificationSettings', () => {
     expect(fetchMock).toHaveBeenCalledWith('/api/push/test', { method: 'POST' })
   })
 
+  it('shows error message when subscribeToPush fails', async () => {
+    stubNotification('default')
+    stubPushManager(true)
+    // Mock Notification.requestPermission to return 'granted'
+    vi.stubGlobal('Notification', {
+      permission: 'default',
+      requestPermission: vi.fn().mockResolvedValue('granted'),
+    })
+    // Mock navigator.serviceWorker.ready to simulate subscribeToPush failure
+    const mockSubscribe = vi.fn().mockResolvedValue({
+      endpoint: 'https://example.com',
+      toJSON: () => ({ endpoint: 'https://example.com', keys: {} }),
+    })
+    Object.defineProperty(navigator, 'serviceWorker', {
+      value: {
+        ready: Promise.resolve({ pushManager: { subscribe: mockSubscribe } }),
+      },
+      configurable: true,
+    })
+    // fetch returns not-ok to simulate server-side failure
+    const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 500 })
+    vi.stubGlobal('fetch', fetchMock)
+
+    await act(async () => { render(<NotificationSettings />) })
+    await act(async () => {
+      screen.getByRole('button', { name: /activar notificaciones/i }).click()
+    })
+    expect(screen.getByText(/no se pudo registrar/i)).toBeTruthy()
+  })
+
   it('shows iOS install hint when unsupported on iOS Safari tab', async () => {
     stubNotification(null)
     // Simulate iOS Safari (non-standalone)

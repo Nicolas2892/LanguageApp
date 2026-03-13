@@ -53,6 +53,7 @@ export function NotificationSettings({ isAdmin = false }: NotificationSettingsPr
   const [loading, setLoading] = useState(false)
   const [testLoading, setTestLoading] = useState(false)
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string } | null>(null)
+  const [subscribeError, setSubscribeError] = useState(false)
   const [iosSafariTab, setIosSafariTab] = useState(false)
 
   useEffect(() => {
@@ -70,12 +71,17 @@ export function NotificationSettings({ isAdmin = false }: NotificationSettingsPr
 
   async function handleEnable() {
     setLoading(true)
+    setSubscribeError(false)
     try {
       const permission = await Notification.requestPermission()
       if (permission === 'granted') {
-        await subscribeToPush()
-        // Clear dismissed flag so post-session prompt won't show redundantly
-        localStorage.removeItem(DISMISSED_KEY)
+        const ok = await subscribeToPush()
+        if (!ok) {
+          setSubscribeError(true)
+        } else {
+          // Clear dismissed flag so post-session prompt won't show redundantly
+          localStorage.removeItem(DISMISSED_KEY)
+        }
       }
       setNotifState(permission as NotifState)
     } catch {
@@ -147,6 +153,11 @@ export function NotificationSettings({ isAdmin = false }: NotificationSettingsPr
 
       {notifState === 'granted' && (
         <div className="space-y-2">
+          {subscribeError && (
+            <p className="text-xs text-red-600 dark:text-red-400">
+              No se pudo registrar la suscripción. Inténtalo de nuevo.
+            </p>
+          )}
           <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--d5-terracotta)' }}>
             <Bell size={14} strokeWidth={1.5} className="shrink-0" />
             <span>Notificaciones activas — recibiras un aviso cuando tu racha este en riesgo.</span>

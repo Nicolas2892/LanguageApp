@@ -67,8 +67,8 @@ export async function POST(request: Request) {
       batch.map(async (row) => {
         const dueCount = Number(row.due_count)
         const payload = JSON.stringify({
-          title: "Don't break your streak!",
-          body: `${dueCount > 0 ? `${dueCount} review${dueCount !== 1 ? 's' : ''} due` : 'Time to study'} — ${row.streak}-day streak at risk.`,
+          title: '¡No pierdas tu racha!',
+          body: `${dueCount > 0 ? `${dueCount} repaso${dueCount !== 1 ? 's' : ''} pendiente${dueCount !== 1 ? 's' : ''}` : 'Hora de estudiar'} — Tu racha de ${row.streak} días está en riesgo.`,
           url: '/study',
         })
 

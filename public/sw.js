@@ -138,7 +138,7 @@ self.addEventListener('push', (event) => {
   }
   const title = data.title ?? 'Senda'
   const options = {
-    body: data.body ?? 'You have reviews due today.',
+    body: data.body ?? 'Tienes repasos pendientes hoy.',
     icon: '/icon',
     badge: '/icon',
     data: { url: data.url ?? '/dashboard' },
