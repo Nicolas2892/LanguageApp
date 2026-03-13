@@ -573,14 +573,6 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 **Open items:**
 - None remaining from audit
 
-### Strategic / Long-term
-
-**Strat-C: Evaluate Claude API audio for pronunciation exercises** *(future research only)*
-
-- Current STT (Web Speech API) is optimised for fluent native speech. For a future pronunciation exercise type, evaluate `claude-sonnet-4-6` native audio input (MP3/WAV/WebM) for combined transcription + accuracy scoring.
-- Trade-offs: higher accuracy on learner speech; +1–3s latency; per-call cost; needs `/api/transcribe` + `MediaRecorder`.
-- **Do not implement without a defined pronunciation exercise type and PM decision on accuracy requirements.**
-
 ---
 
 ## Recommended Next Steps (priority order)

@@ -7,7 +7,7 @@ describe('AuthHeroPanel', () => {
     const { container } = render(<AuthHeroPanel />)
     const svg = container.querySelector('svg[viewBox="0 0 24 24"]')
     expect(svg).toBeInTheDocument()
-    expect(svg).toHaveAttribute('width', '80')
+    expect(svg).toHaveAttribute('width', '96')
   })
 
   it('renders "Senda" wordmark with senda-heading class', () => {
