@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import webpush from 'web-push'
 import { createClient } from '@/lib/supabase/server'
+import { userLocalToday } from '@/lib/timezone'
 
 export const runtime = 'nodejs'
 
@@ -44,7 +45,10 @@ export async function POST(request: Request) {
   }
 
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0]
+  // Push uses UTC today — the RPC takes a single p_today for all subscribers.
+  // Per-user timezone would require changing the RPC or querying per-timezone group.
+  // UTC is acceptable for push nudges (off-by-one hour is not critical).
+  const today = userLocalToday(null)
 
   let sent = 0
   let failed = 0

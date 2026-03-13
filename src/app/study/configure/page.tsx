@@ -5,13 +5,20 @@ import { SessionConfig } from './SessionConfig'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { userLocalToday } from '@/lib/timezone'
 
 export default async function ConfigurePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const today = new Date().toISOString().split('T')[0]
+  // Fetch timezone for today calculation
+  const { data: profileTz } = await supabase
+    .from('profiles')
+    .select('timezone')
+    .eq('id', user.id)
+    .single()
+  const today = userLocalToday((profileTz as { timezone: string | null } | null)?.timezone)
 
   const [{ data: modules }, { data: concepts }, { data: progress }, { data: mistakeAttempts }, { count: rawDueCount }] = await Promise.all([
     supabase.from('modules').select('id, title').order('order_index'),

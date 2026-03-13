@@ -19,6 +19,7 @@ const baseProfile: Profile = {
   theme_preference: 'system',
   is_admin: false,
   skip_gap_fill: false,
+  timezone: null,
 }
 
 function renderWithTheme(ui: React.ReactElement) {

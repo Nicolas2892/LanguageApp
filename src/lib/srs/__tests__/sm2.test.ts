@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { sm2, DEFAULT_PROGRESS } from '../index'
 
 describe('sm2', () => {
@@ -81,6 +81,30 @@ describe('sm2', () => {
       const result = sm2(DEFAULT_PROGRESS, 2)
       const today = new Date().toISOString().split('T')[0]
       expect(result.due_date >= today).toBe(true)
+    })
+
+    it('accepts null timezone (falls back to UTC)', () => {
+      const result = sm2(DEFAULT_PROGRESS, 2, null)
+      expect(result.due_date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    })
+
+    it('accepts a valid IANA timezone', () => {
+      const result = sm2(DEFAULT_PROGRESS, 2, 'America/New_York')
+      expect(result.due_date).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    })
+
+    it('uses timezone-local today when computing due_date', () => {
+      // 2026-03-14 02:00 UTC = still March 13 in LA (UTC-7 PDT)
+      vi.setSystemTime(new Date('2026-03-14T02:00:00Z'))
+
+      const utcResult = sm2(DEFAULT_PROGRESS, 2, 'UTC')
+      const laResult = sm2(DEFAULT_PROGRESS, 2, 'America/Los_Angeles')
+
+      // interval_days = 1 for first correct answer
+      expect(utcResult.due_date).toBe('2026-03-15') // March 14 + 1
+      expect(laResult.due_date).toBe('2026-03-14')  // March 13 + 1
+
+      vi.useRealTimers()
     })
   })
 })

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { validateOrigin } from '@/lib/api-utils'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { DEFAULT_PROGRESS } from '@/lib/srs'
+import { userLocalToday } from '@/lib/timezone'
 import * as Sentry from '@sentry/nextjs'
 
 const HardFlagSchema = z.object({
@@ -46,8 +47,9 @@ export async function POST(
       .single()
 
     if (!updated) {
-      // No existing row — insert with SRS defaults
-      const today = new Date().toISOString().split('T')[0]
+      // No existing row — insert with SRS defaults (timezone-aware)
+      const { data: profileTz } = await supabase.from('profiles').select('timezone').eq('id', user.id).single()
+      const today = userLocalToday((profileTz as { timezone: string | null } | null)?.timezone)
       await supabase.from('user_progress').insert({
         user_id: user.id,
         concept_id,

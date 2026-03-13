@@ -60,12 +60,21 @@ export async function POST(request: Request) {
       userAnswer: user_answer,
     })
 
-    // 3. Batch-fetch all user_progress rows for this user + these concepts
-    const { data: progressRows } = await supabase
-      .from('user_progress')
-      .select('concept_id, ease_factor, interval_days, repetitions, due_date, production_mastered')
-      .eq('user_id', user.id)
-      .in('concept_id', concept_ids)
+    // 3. Batch-fetch user_progress + timezone in parallel
+    const [{ data: progressRows }, { data: profileTz }] = await Promise.all([
+      supabase
+        .from('user_progress')
+        .select('concept_id, ease_factor, interval_days, repetitions, due_date, production_mastered')
+        .eq('user_id', user.id)
+        .in('concept_id', concept_ids),
+      supabase
+        .from('profiles')
+        .select('timezone')
+        .eq('id', user.id)
+        .single(),
+    ])
+
+    const timezone = (profileTz as { timezone: string | null } | null)?.timezone ?? null
 
     const progressMap = new Map(
       (progressRows as Pick<UserProgress, 'concept_id' | 'ease_factor' | 'interval_days' | 'repetitions' | 'due_date' | 'production_mastered'>[] ?? [])
@@ -81,7 +90,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         concept_id,
       }
-      const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore)
+      const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, gradeResult.score as SRSScore, timezone)
       return {
         user_id: user.id,
         concept_id,

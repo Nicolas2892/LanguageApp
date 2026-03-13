@@ -10,16 +10,23 @@ import { StreakMilestone } from '@/components/StreakMilestone'
 import { LevelUpOverlay } from '@/components/LevelUpOverlay'
 import type { Profile } from '@/lib/supabase/types'
 import { LEVEL_CHIP } from '@/lib/constants'
+import { userLocalToday } from '@/lib/timezone'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const today = new Date().toISOString().split('T')[0]
+  // Fetch profile first to get timezone for today's date calculation
+  const { data: profileRaw } = await supabase
+    .from('profiles')
+    .select('computed_level, display_name, streak, timezone')
+    .eq('id', user.id)
+    .single()
+  const profile = profileRaw as Profile | null
+  const today = userLocalToday(profile?.timezone)
 
-  const [profileRes, dueRes, totalConceptsRes, studiedRes] = await Promise.all([
-    supabase.from('profiles').select('computed_level, display_name, streak').eq('id', user.id).single(),
+  const [dueRes, totalConceptsRes, studiedRes] = await Promise.all([
     supabase
       .from('user_progress')
       .select('id', { count: 'exact', head: true })
@@ -34,7 +41,6 @@ export default async function DashboardPage() {
       .eq('user_id', user.id),
   ])
 
-  const profile = profileRes.data as Profile | null
   const dueCount = dueRes.count ?? 0
   const totalConcepts = totalConceptsRes.count ?? 0
   const studiedCount = studiedRes.count ?? 0

@@ -10,6 +10,7 @@ import { HardFlagButton } from '@/components/HardFlagButton'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import type { Concept } from '@/lib/supabase/types'
+import { userLocalToday } from '@/lib/timezone'
 import type { VerbTense } from '@/lib/verbs/constants'
 import { TENSE_LABELS } from '@/lib/verbs/constants'
 import { ConjugationInsightTable, type ConjugationRow } from './ConjugationInsightTable'
@@ -66,8 +67,8 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
 
   const tenseKey = CONCEPT_TENSE_MAP[concept.title] ?? null
 
-  // Fetch unit, exercises, progress (+ hablar verb id if tense-mapped) in parallel
-  const [unitRes, exercisesRes, progressRes, hablarRes] = await Promise.all([
+  // Fetch unit, exercises, progress, timezone (+ hablar verb id if tense-mapped) in parallel
+  const [unitRes, exercisesRes, progressRes, hablarRes, profileTzRes] = await Promise.all([
     supabase.from('units').select('id, title, module_id').eq('id', concept.unit_id).single(),
     supabase.from('exercises').select('id, type').eq('concept_id', id),
     supabase
@@ -79,6 +80,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
     tenseKey
       ? supabase.from('verbs').select('id').eq('infinitive', 'hablar').single()
       : Promise.resolve({ data: null }),
+    supabase.from('profiles').select('timezone').eq('id', user.id).single(),
   ])
 
   type UnitRow     = { id: string; title: string; module_id: string }
@@ -146,9 +148,10 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
     : []
 
   // SRS status
+  const userTz = (profileTzRes.data as { timezone: string | null } | null)?.timezone ?? null
   const srsStatus = (() => {
     if (!progress) return 'No comenzado'
-    const today     = new Date().toISOString().split('T')[0]
+    const today     = userLocalToday(userTz)
     const daysUntil = Math.ceil(
       (new Date(progress.due_date).getTime() - new Date(today).getTime()) / (1000 * 60 * 60 * 24)
     )

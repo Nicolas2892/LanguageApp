@@ -1,4 +1,5 @@
 import type { UserProgress } from '@/lib/supabase/types'
+import { userLocalToday } from '@/lib/timezone'
 
 export type SRSScore = 0 | 1 | 2 | 3
 
@@ -18,8 +19,15 @@ export interface SRSResult {
  *   1 = partially correct / unnatural
  *   2 = correct with minor errors
  *   3 = correct, natural, confident
+ *
+ * @param timezone  IANA timezone string (e.g. 'America/Los_Angeles').
+ *                  Falls back to UTC when null/undefined.
  */
-export function sm2(progress: Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, score: SRSScore): SRSResult {
+export function sm2(
+  progress: Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>,
+  score: SRSScore,
+  timezone?: string | null,
+): SRSResult {
   let { ease_factor, interval_days, repetitions } = progress
 
   if (score >= 2) {
@@ -41,9 +49,12 @@ export function sm2(progress: Pick<UserProgress, 'ease_factor' | 'interval_days'
     interval_days = score === 1 ? 3 : 1
   }
 
-  const due = new Date()
-  due.setDate(due.getDate() + interval_days)
-  const due_date = due.toISOString().split('T')[0]
+  // Compute due_date relative to today in the user's local timezone.
+  // Falls back to UTC when timezone is null (legacy users).
+  const todayStr = userLocalToday(timezone)
+  const today = new Date(todayStr + 'T00:00:00Z')
+  today.setUTCDate(today.getUTCDate() + interval_days)
+  const due_date = today.toISOString().split('T')[0]
 
   return { ease_factor, interval_days, due_date, repetitions }
 }

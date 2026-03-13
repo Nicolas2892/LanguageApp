@@ -34,9 +34,20 @@ function setupSupabaseMock({
   // .insert() chain
   mockInsert.mockResolvedValue({ error: null })
 
-  mockFrom.mockReturnValue({
-    update: mockUpdate,
-    insert: mockInsert,
+  mockFrom.mockImplementation((table: string) => {
+    if (table === 'profiles') {
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: { timezone: null }, error: null }),
+          }),
+        }),
+      }
+    }
+    return {
+      update: mockUpdate,
+      insert: mockInsert,
+    }
   })
 
   vi.mocked(createClient).mockResolvedValue({

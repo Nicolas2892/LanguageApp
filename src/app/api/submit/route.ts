@@ -10,6 +10,7 @@ import { PRODUCTION_TYPES } from '@/lib/mastery/computeLevel'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib/api-utils'
 import { MASTERY_THRESHOLD, HARD_INTERVAL_MULTIPLIER } from '@/lib/constants'
+import { userLocalToday } from '@/lib/timezone'
 import * as Sentry from '@sentry/nextjs'
 
 const SubmitSchema = z.object({
@@ -87,14 +88,22 @@ export async function POST(request: Request) {
           let justMastered = false
 
           if (!skip_srs) {
-            // Fetch current user_progress (or use defaults if first time)
-            const { data: existingProgress } = await supabase
-              .from('user_progress')
-              .select('ease_factor, interval_days, repetitions, due_date, production_mastered, is_hard')
-              .eq('user_id', user.id)
-              .eq('concept_id', concept_id)
-              .single()
+            // Fetch current user_progress + user timezone in parallel
+            const [{ data: existingProgress }, { data: profileTz }] = await Promise.all([
+              supabase
+                .from('user_progress')
+                .select('ease_factor, interval_days, repetitions, due_date, production_mastered, is_hard')
+                .eq('user_id', user.id)
+                .eq('concept_id', concept_id)
+                .single(),
+              supabase
+                .from('profiles')
+                .select('timezone')
+                .eq('id', user.id)
+                .single(),
+            ])
 
+            const timezone = (profileTz as { timezone: string | null } | null)?.timezone ?? null
             const prevIntervalDays = existingProgress?.interval_days ?? 0
 
             const currentProgress = existingProgress ?? {
@@ -104,7 +113,7 @@ export async function POST(request: Request) {
             }
 
             // Calculate new SRS values
-            const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, score as SRSScore)
+            const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, score as SRSScore, timezone)
 
             // Check mastery BEFORE applying hard-flag multiplier
             justMastered = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD
@@ -112,8 +121,9 @@ export async function POST(request: Request) {
             // Apply hard-flag multiplier on correct answers to schedule ~40% more frequently
             if (existingProgress?.is_hard && score >= 2) {
               newSRS.interval_days = Math.max(1, Math.round(newSRS.interval_days * HARD_INTERVAL_MULTIPLIER))
-              const due = new Date()
-              due.setDate(due.getDate() + newSRS.interval_days)
+              const todayStr = userLocalToday(timezone)
+              const due = new Date(todayStr + 'T00:00:00Z')
+              due.setUTCDate(due.getUTCDate() + newSRS.interval_days)
               newSRS.due_date = due.toISOString().split('T')[0]
             }
 

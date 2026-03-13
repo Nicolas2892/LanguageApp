@@ -10,6 +10,7 @@ import { computeUnlockedLevels } from '@/lib/curriculum/prerequisites'
 import type { CefrLevel } from '@/lib/curriculum/prerequisites'
 import type { StudyItem } from './StudySession'
 import type { Concept, Exercise } from '@/lib/supabase/types'
+import { userLocalToday } from '@/lib/timezone'
 
 function interleaveByUnit(items: StudyItem[]): StudyItem[] {
   const groups = new Map<string, StudyItem[]>()
@@ -49,13 +50,14 @@ export default async function StudyPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  // Fetch skip_gap_fill preference
+  // Fetch skip_gap_fill preference + timezone
   const { data: profileData } = await supabase
     .from('profiles')
-    .select('skip_gap_fill')
+    .select('skip_gap_fill, timezone')
     .eq('id', user.id)
     .single()
-  const skipGapFill = (profileData as { skip_gap_fill: boolean } | null)?.skip_gap_fill ?? false
+  const profileRow = profileData as { skip_gap_fill: boolean; timezone: string | null } | null
+  const skipGapFill = profileRow?.skip_gap_fill ?? false
 
   const params = await searchParams
   const sessionSize = params.size ? Math.min(Math.max(parseInt(params.size, 10) || SESSION_SIZE, 1), 50) : SESSION_SIZE
@@ -70,7 +72,7 @@ export default async function StudyPage({
   const isSprint = params.mode === 'sprint'
   const sprintLimitType = params.limitType === 'count' ? 'count' : 'time'
   const sprintLimit = Math.min(Math.max(parseInt(params.limit ?? '10', 10) || 10, 1), 60)
-  const today = new Date().toISOString().split('T')[0]
+  const today = userLocalToday(profileRow?.timezone)
 
   let conceptIds: string[] = []
   // Review mode: maps conceptId → specific exerciseId to replay

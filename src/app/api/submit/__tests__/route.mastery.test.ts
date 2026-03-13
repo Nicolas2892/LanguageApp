@@ -140,6 +140,15 @@ function setupMocks(prevIntervalDays: number, newIntervalDays: number, opts?: { 
         }),
       }
     }
+    if (table === 'profiles') {
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: { timezone: null }, error: null }),
+          }),
+        }),
+      }
+    }
     if (table === 'exercise_attempts') {
       return { insert: vi.fn().mockResolvedValue({ error: null }) }
     }

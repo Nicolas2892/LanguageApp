@@ -239,7 +239,7 @@ All routed through shared `ExerciseRenderer` in `src/components/exercises/Exerci
 - If gap > 1 day (or null) → `streak = 1`
 - If `last_studied_date == today` → no-op (already counted)
 - Stored in `profiles.streak` and `profiles.last_studied_date`
-- **Known limitation**: streak RPC uses `NOW() AT TIME ZONE 'UTC'`. Users far from UTC (e.g. UTC-8) may lose a streak if they submit late local time (appears as next day in UTC). Long-term fix: add `profiles.timezone` column, send `Intl.DateTimeFormat().resolvedOptions().timeZone` from client, use in RPC. Requires PM decision + migration.
+- **Timezone-aware** (Audit-E1): streak RPC reads `profiles.timezone` (IANA string, e.g. `America/Los_Angeles`) and uses `NOW() AT TIME ZONE user_tz`. Falls back to UTC when timezone is NULL. Client auto-syncs timezone via `TimezoneSync` component in layout. SRS `sm2()` and all server-side "today" queries also use `userLocalToday(tz)` from `src/lib/timezone.ts`.
 
 ### Hint System
 
@@ -264,7 +264,7 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 
 | Table                                    | Purpose                                                                                                                  |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `profiles`                               | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level`, `skip_gap_fill`               |
+| `profiles`                               | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level`, `skip_gap_fill`, `timezone`   |
 | `modules / units / concepts / exercises` | Curriculum hierarchy (publicly readable); `concepts.level` = B1/B2/C1; `exercises.source` = 'seed' or 'ai_generated'     |
 | `user_progress`                          | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`, `production_mastered`, `is_hard`) |
 | `exercise_attempts`                      | Full attempt history with AI score + feedback                                                                            |
@@ -288,6 +288,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/016_is_admin.sql` — `profiles.is_admin boolean NOT NULL DEFAULT false`; run `UPDATE profiles SET is_admin = true WHERE id = '<uuid>'` after applying
 - `supabase/migrations/017_skip_gap_fill.sql` — `profiles.skip_gap_fill boolean NOT NULL DEFAULT false`
 - `supabase/migrations/018_exercise_pool.sql` — `exercises.source text NOT NULL DEFAULT 'seed'` CHECK IN ('seed','ai_generated'); FK `exercise_attempts.exercise_id` changed to ON DELETE SET NULL
+- `supabase/migrations/019_user_timezone.sql` — `profiles.timezone text DEFAULT NULL`; replaces `increment_streak_if_new_day` RPC to use user's IANA timezone (Audit-E1)
 
 ### Dashboard Stats
 
@@ -356,6 +357,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ### Key Shared Components & Utilities
 
+- `src/lib/timezone.ts` — `userLocalToday(tz?)` returns YYYY-MM-DD in user's IANA timezone; falls back to UTC
 - `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, EXERCISE_CAP_PER_TYPE=15, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
 - `src/lib/practiceUtils.ts` — `cycleToMinimum(items, min)` pads Open Practice sessions to at least MIN_PRACTICE_SIZE; avoids consecutive duplicates when pool ≥ 2
 - `src/lib/studyUtils.ts` — `biasedExercisePick(exercises, underweight)` (80% gap_fill exclusion in SRS) + `dropGapFillForPractice(items)` (~60% gap_fill drop in Open Practice)
@@ -423,7 +425,7 @@ Tutor (`/tutor`) is a reactive support feature, not a primary nav destination. E
 
 ## Current Status
 
-**Test suite: 1713 tests across 86 files — all passing.**
+**Test suite: 1731 tests across 88 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -558,11 +560,14 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### Audit Findings (2026-03-13)
 
-Full codebase audit: 22 findings, 20 fixed. Full details in `docs/completed-features.md` under "Audit Fixes Batch".
+Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-features.md` under "Audit Fixes Batch".
+
+**Audit-E7: SRS due_date UTC assumption** *(DONE — documented in `src/lib/srs/index.ts` and `supabase/migrations/011_streak_rpc.sql`)*
+
+**Audit-E1: Timezone-aware streak & SRS** *(DONE — migration 019)*
 
 **Open items:**
-- **Audit-E1**: UTC-only streak — documented as known limitation; timezone-aware fix needs PM decision + migration
-- **Audit-E7**: SRS due_date uses server local time (UTC on Vercel) while streak RPC uses UTC — document only, no code change needed
+- None remaining from audit
 
 ### Strategic / Long-term
 
@@ -578,13 +583,12 @@ Full codebase audit: 22 findings, 20 fixed. Full details in `docs/completed-feat
 
 | Priority | Item | Gate |
 | -------- | ---- | ---- |
-| **P1** | **Audit-E1** — Timezone-aware streak RPC | PM decision + migration |
+| **P1** | **Audit-E1** — Timezone-aware streak RPC | **DONE** |
 | **P1** | **Fix-J** — STT replacement for iOS Safari | **DONE** |
 | **P1** | **Fix-L** — Verify push notifications on iOS PWA | Deploy + device test pending |
 | **P2** | **Feat-G** — Streak freeze / recovery | PM decision on mechanic |
 | **P2** | **Feat-H** — Listening comprehension exercises | PM decision on audio source |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
-| **P3** | **Audit-E7** — Document SRS due_date UTC assumption | None — implement now |
 | **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |
 | **P3** | **Feat-J** — Verb SRS integration | PM decision on SRS model |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |

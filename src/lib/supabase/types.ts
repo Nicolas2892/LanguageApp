@@ -29,6 +29,7 @@ export interface Database {
           theme_preference: 'light' | 'dark' | 'system'
           is_admin: boolean
           skip_gap_fill: boolean
+          timezone: string | null
         }
         Insert: {
           id: string
@@ -44,6 +45,7 @@ export interface Database {
           theme_preference?: 'light' | 'dark' | 'system'
           is_admin?: boolean
           skip_gap_fill?: boolean
+          timezone?: string | null
         }
         Update: {
           id?: string
@@ -59,6 +61,7 @@ export interface Database {
           theme_preference?: 'light' | 'dark' | 'system'
           is_admin?: boolean
           skip_gap_fill?: boolean
+          timezone?: string | null
         }
         Relationships: []
       }

@@ -117,6 +117,15 @@ function setupMocks(opts: { prevIntervalDays?: number } = {}) {
       }
       return { upsert: upsertMock, update: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }) }) }
     }
+    if (table === 'profiles') {
+      return {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: { timezone: null }, error: null }),
+          }),
+        }),
+      }
+    }
     if (table === 'exercise_attempts') {
       return { insert: vi.fn().mockResolvedValue({ error: null }) }
     }

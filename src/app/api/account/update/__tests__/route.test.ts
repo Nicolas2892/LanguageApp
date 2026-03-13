@@ -208,6 +208,27 @@ describe('POST /api/account/update', () => {
     expect(res.status).toBe(400)
   })
 
+  // --- Validation: timezone ---
+
+  it('accepts a valid timezone string', async () => {
+    setupSupabaseMock()
+    const res = await POST(makeRequest({ timezone: 'America/New_York' }))
+    expect(res.status).toBe(200)
+    expect(mockUpdate).toHaveBeenCalledWith({ timezone: 'America/New_York' })
+  })
+
+  it('rejects empty timezone string', async () => {
+    setupSupabaseMock()
+    const res = await POST(makeRequest({ timezone: '' }))
+    expect(res.status).toBe(400)
+  })
+
+  it('rejects timezone longer than 100 characters', async () => {
+    setupSupabaseMock()
+    const res = await POST(makeRequest({ timezone: 'a'.repeat(101) }))
+    expect(res.status).toBe(400)
+  })
+
   // --- Bad JSON ---
 
   it('returns 500 for completely malformed request body', async () => {

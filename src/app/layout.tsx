@@ -10,6 +10,7 @@ import { PageWrapper } from "@/components/PageWrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { SplashScreen } from "@/components/SplashScreen";
+import { TimezoneSync } from "@/components/TimezoneSync";
 import { createClient } from "@/lib/supabase/server";
 import { getInitials } from "@/lib/utils";
 
@@ -90,6 +91,7 @@ export default async function RootLayout({
   let userId: string | undefined
   let streak = 0
   let themePreference: 'light' | 'dark' | 'system' = 'system'
+  let userTimezone: string | null = null
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -97,12 +99,13 @@ export default async function RootLayout({
       userId = user.id
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name, theme_preference, streak')
+        .select('display_name, theme_preference, streak, timezone')
         .eq('id', user.id)
         .single()
-      const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null } | null
+      const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null; timezone: string | null } | null
       userInitials = getInitials(p?.display_name ?? null, user.email!)
       streak = p?.streak ?? 0
+      userTimezone = p?.timezone ?? null
       if (p?.theme_preference === 'light' || p?.theme_preference === 'dark' || p?.theme_preference === 'system') {
         themePreference = p.theme_preference
       }
@@ -136,6 +139,7 @@ export default async function RootLayout({
             <ServiceWorkerRegistration />
             <IOSInstallPrompt />
             <SplashScreen />
+            {userId && <TimezoneSync serverTimezone={userTimezone} />}
           </PostHogProvider>
         </ThemeProvider>
       </body>
