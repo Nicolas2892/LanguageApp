@@ -2,17 +2,16 @@
 
 import { useState, useEffect } from 'react'
 
-// BackgroundMagicS path data, rendered larger for the splash trail animation
+// S-trail path — scaled to fill a large viewBox
 const S_TRAIL_PATH = 'M 80 230 C 20 220, 0 185, 28 158 C 56 131, 130 138, 158 110 C 186 82, 192 42, 158 20'
 
-// SvgSendaPath monogram path (from SvgSendaPath.tsx)
+// S monogram path (from SvgSendaPath.tsx)
 const S_LOGO_PATH = 'M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2'
 
 export function SplashScreen() {
   const [phase, setPhase] = useState<'animate' | 'fading' | 'done'>('animate')
 
   useEffect(() => {
-    // Check for reduced motion
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const fadeDelay = prefersReduced ? 600 : 1200
     const unmountDelay = prefersReduced ? 1100 : 1700
@@ -47,13 +46,19 @@ export function SplashScreen() {
       {/* Vellum noise texture */}
       <div className="splash-vellum" />
 
-      {/* Animated S-trail — draws bottom→up */}
+      {/* Animated S-trail — fills the viewport */}
       <svg
         viewBox="0 0 200 260"
-        width={160}
-        height={208}
         aria-hidden="true"
-        style={{ position: 'absolute', opacity: 0.15, pointerEvents: 'none' }}
+        preserveAspectRatio="xMidYMid meet"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          opacity: 0.12,
+          pointerEvents: 'none',
+        }}
       >
         <path
           d={S_TRAIL_PATH}
@@ -66,11 +71,20 @@ export function SplashScreen() {
       </svg>
 
       {/* Logo group — S monogram + wordmark */}
-      <div className="splash-logo-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+      <div
+        className="splash-logo-in"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 16,
+          zIndex: 1,
+        }}
+      >
         <svg
           viewBox="0 0 24 24"
-          width={56}
-          height={56}
+          width={80}
+          height={80}
           fill="none"
           aria-hidden="true"
         >
@@ -78,7 +92,7 @@ export function SplashScreen() {
         </svg>
         <span
           className="senda-heading"
-          style={{ fontSize: '2rem', letterSpacing: '0.02em' }}
+          style={{ fontSize: '2.5rem', letterSpacing: '0.02em' }}
         >
           Senda
         </span>
