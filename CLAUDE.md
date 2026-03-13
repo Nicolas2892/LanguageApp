@@ -236,9 +236,11 @@ All routed through shared `ExerciseRenderer` in `src/components/exercises/Exerci
 
 - Updated in `POST /api/submit` on the **first submission of each calendar day**
 - If `last_studied_date == yesterday` → `streak + 1`
-- If gap > 1 day (or null) → `streak = 1`
+- If gap = exactly 1 missed day AND `streak_freeze_remaining > 0` AND `streak > 0` → consume freeze, preserve streak, record `streak_freeze_used_date` (Feat-G)
+- If gap > 1 day (or null, or no freeze) → `streak = 1`
 - If `last_studied_date == today` → no-op (already counted)
-- Stored in `profiles.streak` and `profiles.last_studied_date`
+- **Streak freeze** (Feat-G): 1 free freeze per week. Auto-replenishes when `streak_freeze_remaining = 0` and 7+ days since `streak_freeze_last_replenished`. RPC returns `jsonb { freeze_used, freeze_replenished }` (callers currently ignore return).
+- Stored in `profiles.streak`, `profiles.last_studied_date`, `profiles.streak_freeze_remaining`, `profiles.streak_freeze_used_date`
 - **Timezone-aware** (Audit-E1): streak RPC reads `profiles.timezone` (IANA string, e.g. `America/Los_Angeles`) and uses `NOW() AT TIME ZONE user_tz`. Falls back to UTC when timezone is NULL. Client auto-syncs timezone via `TimezoneSync` component in layout. SRS `sm2()` and all server-side "today" queries also use `userLocalToday(tz)` from `src/lib/timezone.ts`.
 
 ### Hint System
@@ -264,7 +266,7 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 
 | Table                                    | Purpose                                                                                                                  |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `profiles`                               | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level`, `skip_gap_fill`, `timezone`   |
+| `profiles`                               | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level`, `skip_gap_fill`, `timezone`, `streak_freeze_remaining`, `streak_freeze_used_date` |
 | `modules / units / concepts / exercises` | Curriculum hierarchy (publicly readable); `concepts.level` = B1/B2/C1; `exercises.source` = 'seed' or 'ai_generated'     |
 | `user_progress`                          | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`, `production_mastered`, `is_hard`) |
 | `exercise_attempts`                      | Full attempt history with AI score + feedback                                                                            |
@@ -289,6 +291,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/017_skip_gap_fill.sql` — `profiles.skip_gap_fill boolean NOT NULL DEFAULT false`
 - `supabase/migrations/018_exercise_pool.sql` — `exercises.source text NOT NULL DEFAULT 'seed'` CHECK IN ('seed','ai_generated'); FK `exercise_attempts.exercise_id` changed to ON DELETE SET NULL
 - `supabase/migrations/019_user_timezone.sql` — `profiles.timezone text DEFAULT NULL`; replaces `increment_streak_if_new_day` RPC to use user's IANA timezone (Audit-E1)
+- `supabase/migrations/020_streak_freeze.sql` — `profiles.streak_freeze_remaining integer DEFAULT 1`, `streak_freeze_last_replenished text`, `streak_freeze_used_date text`; replaces `increment_streak_if_new_day` RPC (now `RETURNS jsonb`) with freeze logic + auto-replenish. **Note:** must `DROP FUNCTION increment_streak_if_new_day(uuid)` before running (return type change)
 
 ### Dashboard Stats
 
@@ -352,7 +355,9 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/components/SvgSendaPath.tsx` — inline terracotta S-path; props: `size?` (default 20); used in SideNav + AppHeader wordmarks
 - `src/components/WindingPathSeparator.tsx` — calligraphic SVG divider; uses `--d5-separator`; place between dashboard sections
 - `src/components/BackgroundMagicS.tsx` — large watermark S-path (absolute positioned); parent must be `relative overflow-hidden`; props: `opacity?` (default 0.07)
-- `src/components/StreakBadge.tsx` — flame SVG + streak number; `size='sm'` (AppHeader) or `size='md'` (SideNav, shows "día/días" label); terracotta when active, muted when 0
+- `src/components/StreakBadge.tsx` — flame SVG + streak number; `size='sm'` (AppHeader) or `size='md'` (SideNav, shows "día/días" label + "Protegida" when freeze available); terracotta when active, muted when 0; optional `freezeAvailable` prop shows shield icon
+- `src/components/StreakFreezeStatus.tsx` — compact inline chip for dashboard greeting; "Protección activa" / "Protección usada"; only renders when streak > 0
+- `src/components/StreakFreezeNotification.tsx` — client-side toast notification when streak freeze was used yesterday; localStorage-gated, 6s auto-dismiss; pattern follows `StreakMilestone.tsx`
 - `src/components/SplashScreen.tsx` — client-side fullscreen splash overlay; animates S-trail draw (800ms) + logo blur-fade (400ms, 400ms delay) → fade-out at 1200ms → unmount at 1700ms; uses `var(--background)` for dark mode; reduced-motion: static 600ms then fade; renders in `layout.tsx` as last child in `<PostHogProvider>`
 
 ### Key Shared Components & Utilities
@@ -425,7 +430,7 @@ Tutor (`/tutor`) is a reactive support feature, not a primary nav destination. E
 
 ## Current Status
 
-**Test suite: 1731 tests across 88 files — all passing.**
+**Test suite: 1745 tests across 90 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -480,12 +485,11 @@ Items are ordered by priority within each group. Full details of completed work 
 - SRS updates queued in IndexedDB, flushed when `navigator.onLine` is true; conflict resolution strategy needed.
 - **Do not implement without a written PM decision on conflict resolution and sync UI.**
 
-**Feat-G: Streak freeze / recovery mechanism** *(P2 — retention lever)*
+**Feat-G: Streak freeze** *(DONE — migration 020 applied)*
 
-- Users who miss a day lose their streak entirely, which is demotivating. Offer a "streak freeze" (earned or purchased) that preserves the streak for 1 missed day.
-- Alternatively, offer a "streak recovery" window (e.g. complete 2× exercises within 24h of a break to restore the streak).
-- Requires changes to streak logic in `POST /api/submit` and `profiles` table (e.g. `streak_freezes_remaining`).
-- **Do not implement without a PM decision on the mechanic (freeze vs. recovery vs. both) and earning/purchase model.**
+- 1 free streak freeze per week. If user misses exactly 1 day and has a freeze, streak is preserved + freeze consumed. Auto-replenishes after 7 days.
+- UI: `StreakBadge` shield icon, `StreakFreezeStatus` dashboard chip, `StreakFreezeNotification` toast.
+- Migration 020: 3 new `profiles` columns + updated `increment_streak_if_new_day` RPC (now `RETURNS jsonb`).
 
 **Feat-H: Listening comprehension exercise type** *(P2 — new modality)*
 
@@ -586,7 +590,7 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 | **P1** | **Audit-E1** — Timezone-aware streak RPC | **DONE** |
 | **P1** | **Fix-J** — STT replacement for iOS Safari | **DONE** |
 | **P1** | **Fix-L** — Verify push notifications on iOS PWA | Deploy + device test pending |
-| **P2** | **Feat-G** — Streak freeze / recovery | PM decision on mechanic |
+| **P2** | **Feat-G** — Streak freeze | **DONE** |
 | **P2** | **Feat-H** — Listening comprehension exercises | PM decision on audio source |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
 | **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |
