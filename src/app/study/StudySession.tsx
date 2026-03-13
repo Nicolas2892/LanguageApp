@@ -171,9 +171,10 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
       fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
     ]).then(([r1, r2, r3]) => {
-      const exercises = [r1, r2, r3].filter((ex) => ex && typeof ex.id === 'string')
+      const existingIds = new Set(dynamicItems.map(item => item.exercise.id))
+      const exercises = [r1, r2, r3].filter((ex) => ex && typeof ex.id === 'string' && !existingIds.has(ex.id))
       if (exercises.length === 0) {
-        setGenerateError('Error al generar ejercicios. Inténtalo de nuevo.')
+        setGenerateError('No hay más ejercicios únicos disponibles.')
         return
       }
       setDynamicItems((prev) => [
@@ -441,11 +442,12 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
         fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
       ])
+      const existingIds = new Set(dynamicItems.map(item => item.exercise.id))
       const exercises = [r1, r2, r3].filter(
-        (ex) => ex && typeof ex.id === 'string'
+        (ex) => ex && typeof ex.id === 'string' && !existingIds.has(ex.id)
       )
       if (exercises.length === 0) {
-        setGenerateError('Error al generar ejercicios. Inténtalo de nuevo.')
+        setGenerateError('No hay más ejercicios únicos disponibles.')
         return
       }
       const newItems: StudyItem[] = exercises.map((ex) => ({

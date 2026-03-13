@@ -26,6 +26,7 @@ function makeItem(exerciseId: string): StudyItem {
     hint_1: null,
     hint_2: null,
     annotations: null,
+    source: 'seed',
     created_at: '2024-01-01T00:00:00Z',
   }
   return { concept, exercise }

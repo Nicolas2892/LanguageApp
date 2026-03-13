@@ -26,6 +26,7 @@ function makeExercise(type: string, id = 'ex-1'): Exercise {
     hint_1: null,
     hint_2: null,
     annotations: null,
+    source: 'seed',
     created_at: '2026-01-01T00:00:00Z',
   }
 }

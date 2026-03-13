@@ -2,24 +2,41 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
 const EXERCISE_TYPES = ['gap_fill', 'transformation', 'translation', 'free_write', 'sentence_builder', 'error_correction']
+const SOURCE_OPTIONS = ['seed', 'ai_generated'] as const
 
 interface Props {
-  searchParams: Promise<{ concept?: string; type?: string }>
+  searchParams: Promise<{ concept?: string; type?: string; source?: string }>
+}
+
+function SourceBadge({ source }: { source: string }) {
+  const isAI = source === 'ai_generated'
+  return (
+    <span className={`inline-flex px-1.5 py-0.5 rounded text-[9px] font-semibold whitespace-nowrap ${
+      isAI
+        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300'
+        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
+    }`}>
+      {isAI ? 'AI' : 'seed'}
+    </span>
+  )
 }
 
 export default async function AdminExercisesPage({ searchParams }: Props) {
-  const { concept: conceptFilter, type: typeFilter } = await searchParams
+  const { concept: conceptFilter, type: typeFilter, source: sourceFilter } = await searchParams
   const supabase = await createClient()
 
   const [exercisesQueryBuilder, conceptsRes] = await Promise.all([
     (async () => {
       let q = supabase
         .from('exercises')
-        .select('id, concept_id, type, prompt, expected_answer, hint_1, hint_2')
+        .select('id, concept_id, type, prompt, expected_answer, hint_1, hint_2, source')
         .order('created_at', { ascending: false })
         .limit(100)
       if (conceptFilter) q = q.eq('concept_id', conceptFilter)
       if (typeFilter)    q = q.eq('type', typeFilter)
+      if (sourceFilter && (SOURCE_OPTIONS as readonly string[]).includes(sourceFilter)) {
+        q = q.eq('source', sourceFilter as 'seed' | 'ai_generated')
+      }
       return q
     })(),
     supabase.from('concepts').select('id, title').order('title'),
@@ -33,6 +50,7 @@ export default async function AdminExercisesPage({ searchParams }: Props) {
     expected_answer: string | null
     hint_1: string | null
     hint_2: string | null
+    source: string
   }
   type ConceptRow = { id: string; title: string }
 
@@ -47,7 +65,7 @@ export default async function AdminExercisesPage({ searchParams }: Props) {
         <h1 className="text-2xl font-bold tracking-tight">Exercises</h1>
         <p className="text-sm text-muted-foreground mt-1">
           {exercises.length} exercise{exercises.length !== 1 ? 's' : ''}
-          {conceptFilter || typeFilter ? ' (filtered)' : ''}
+          {conceptFilter || typeFilter || sourceFilter ? ' (filtered)' : ''}
           {' '}— showing up to 100
         </p>
       </div>
@@ -88,6 +106,22 @@ export default async function AdminExercisesPage({ searchParams }: Props) {
           </select>
         </div>
 
+        <div className="space-y-1">
+          <label htmlFor="source-filter" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Source
+          </label>
+          <select
+            id="source-filter"
+            name="source"
+            defaultValue={sourceFilter ?? ''}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+          >
+            <option value="">All sources</option>
+            <option value="seed">seed</option>
+            <option value="ai_generated">ai_generated</option>
+          </select>
+        </div>
+
         <button
           type="submit"
           className="h-9 px-4 rounded-md border bg-background text-sm font-medium hover:bg-muted transition-colors"
@@ -95,7 +129,7 @@ export default async function AdminExercisesPage({ searchParams }: Props) {
           Filter
         </button>
 
-        {(conceptFilter || typeFilter) && (
+        {(conceptFilter || typeFilter || sourceFilter) && (
           <Link
             href="/admin/exercises"
             className="h-9 px-4 rounded-md text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center"
@@ -116,6 +150,7 @@ export default async function AdminExercisesPage({ searchParams }: Props) {
                 <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Prompt</th>
                 <th className="text-left px-4 py-2.5 font-medium text-muted-foreground hidden md:table-cell">Expected answer</th>
                 <th className="text-left px-4 py-2.5 font-medium text-muted-foreground hidden lg:table-cell">Concept</th>
+                <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Source</th>
                 <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Hints</th>
                 <th className="text-left px-4 py-2.5 font-medium text-muted-foreground">Edit</th>
               </tr>
@@ -143,6 +178,9 @@ export default async function AdminExercisesPage({ searchParams }: Props) {
                     >
                       {conceptTitleById.get(ex.concept_id) ?? ex.concept_id}
                     </Link>
+                  </td>
+                  <td className="px-4 py-2.5 align-top">
+                    <SourceBadge source={ex.source} />
                   </td>
                   <td className="px-4 py-2.5 align-top text-xs text-muted-foreground whitespace-nowrap">
                     {ex.hint_1 ? '✓' : '—'} / {ex.hint_2 ? '✓' : '—'}

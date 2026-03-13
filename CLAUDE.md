@@ -156,6 +156,8 @@ CRON_SECRET                     # Bearer token for cron-triggered push send rout
 | `POST /api/push/test`           | Route handler   | Admin-only: send self-test push notification via webpush (Fix-L)                          |
 | `POST /api/push/subscribe`      | Route handler   | Save/delete push subscription to `profiles.push_subscription`                             |
 | `POST /api/push/send`           | Route handler   | Cron-triggered: batch push notifications to subscribers with due exercises                 |
+| `DELETE /api/admin/exercises/[id]` | Route handler | Admin-only: hard-delete exercise (FK ON DELETE SET NULL preserves attempt history)         |
+| `/admin/pool`                   | Server + Client | Admin exercise pool dashboard — concept × type grid with counts, "+" generate button      |
 
 
 ### Middleware Rules (`src/lib/supabase/middleware.ts`)
@@ -261,7 +263,7 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | Table                                    | Purpose                                                                                                                  |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `profiles`                               | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level`, `skip_gap_fill`               |
-| `modules / units / concepts / exercises` | Curriculum hierarchy (publicly readable); `concepts.level` = B1/B2/C1                                                    |
+| `modules / units / concepts / exercises` | Curriculum hierarchy (publicly readable); `concepts.level` = B1/B2/C1; `exercises.source` = 'seed' or 'ai_generated'     |
 | `user_progress`                          | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`, `production_mastered`, `is_hard`) |
 | `exercise_attempts`                      | Full attempt history with AI score + feedback                                                                            |
 | `study_sessions`                         | Session analytics — written by `/api/sessions/complete`                                                                  |
@@ -283,6 +285,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/015_verb_conjugations.sql` — `verb_conjugations` table (full 6-pronoun paradigm + stem per verb × tense)
 - `supabase/migrations/016_is_admin.sql` — `profiles.is_admin boolean NOT NULL DEFAULT false`; run `UPDATE profiles SET is_admin = true WHERE id = '<uuid>'` after applying
 - `supabase/migrations/017_skip_gap_fill.sql` — `profiles.skip_gap_fill boolean NOT NULL DEFAULT false`
+- `supabase/migrations/018_exercise_pool.sql` — `exercises.source text NOT NULL DEFAULT 'seed'` CHECK IN ('seed','ai_generated'); FK `exercise_attempts.exercise_id` changed to ON DELETE SET NULL
 
 ### Dashboard Stats
 
@@ -349,7 +352,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ### Key Shared Components & Utilities
 
-- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
+- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, EXERCISE_CAP_PER_TYPE=15, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
 - `src/lib/practiceUtils.ts` — `cycleToMinimum(items, min)` pads Open Practice sessions to at least MIN_PRACTICE_SIZE; avoids consecutive duplicates when pool ≥ 2
 - `src/lib/studyUtils.ts` — `biasedExercisePick(exercises, underweight)` (80% gap_fill exclusion in SRS) + `dropGapFillForPractice(items)` (~60% gap_fill drop in Open Practice)
 - `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map)
@@ -402,7 +405,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ## Current Status
 
-**Test suite: 1618 tests across 72 files — all passing.**
+**Test suite: 1644 tests across 75 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -441,7 +444,7 @@ Items are ordered by priority within each group. Full details of completed work 
 - Evaluate lightweight options: `supabase db push` (requires Supabase CLI), `dbmate`, or a custom `migrations` table with a simple runner script.
 - **Do not implement without a PM decision on tooling and whether Supabase CLI adoption is acceptable.**
 
-**Infra-D: A/B testing / feature flag infrastructure** *(P4 — needed before Ped-F adaptive strategy)*
+**Infra-D: A/B testing / feature flag infrastructure** *(P4 — needed before adaptive grading strategy)*
 
 - No feature flag system exists. Required before safely rolling out adaptive grading (Ped-F) or exercise pool changes.
 - Options: PostHog feature flags (if Infra-A adopts PostHog), LaunchDarkly, or simple DB-backed flags.
@@ -455,12 +458,15 @@ Items are ordered by priority within each group. Full details of completed work 
 - 135 exercises generated and seeded (+ 2 topup exercises for existing concept). All in DB.
 - Distinct from Module 1 (formal written connectors) — Module 8 covers colloquial spoken discourse markers with register awareness as key pedagogy.
 
-**Ped-F: Shared AI-generated exercise pool + adaptive grading strategy** *(PM research required before implementation)*
+**Ped-F: Shared AI-generated exercise pool** *(DONE)*
 
-- Currently, drill mode generates exercises per-user on demand, wasting tokens. AI-generated exercises should insert into the shared `exercises` table and be served to all users.
-- Define a per-concept exercise cap (e.g. 10–15). If `COUNT >= cap`, return existing exercises randomly rather than generating new ones.
-- Open questions: deduplication strategy, whether stratified sampling by exercise type is needed, admin tooling (Strat-B) for curation.
-- **Do not implement without a written PM decision on cap, dedup, and grading model.**
+- `EXERCISE_CAP_PER_TYPE = 15` per concept per type. When cap reached, random existing exercise returned (zero Claude cost).
+- `exercises.source` column: `'seed'` (default) or `'ai_generated'`. Migration 018.
+- `POST /api/exercises/generate` enhanced: cap check → serve cached, dedup context to Claude, post-generation dedup, `force` flag for admin bypass.
+- Admin pool dashboard (`/admin/pool`): concept × type grid, "+" generate button, colour-coded counts.
+- Admin exercise list: source filter + badge + delete button. Exercise detail: source badge + delete.
+- `DELETE /api/admin/exercises/[id]`: hard-delete with FK ON DELETE SET NULL (preserves attempt history).
+- StudySession dedup: ID-based filtering prevents duplicate exercises in auto-generate and "Generar 3 más".
 
 **Ped-I: Concept explanation content audit** *(very low priority — content only, no code)*
 
@@ -596,7 +602,7 @@ Items are ordered by priority within each group. Full details of completed work 
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
 | **P3** | **Debt-A** — Seed script idempotency | ✅ Done |
-| **P4** | **Infra-D** — A/B testing / feature flags | Needed before Ped-F |
+| **P4** | **Infra-D** — A/B testing / feature flags | Needed before adaptive grading |
 | **P4** | **Feat-F** — Offline exercise packs | PM decision on sync |
 | **P4** | **Feat-L** — Reading comprehension | Content strategy needed |
 | **P4** | **Feat-M** — Vocabulary feature | PM scope decision |

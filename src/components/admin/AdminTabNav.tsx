@@ -6,6 +6,7 @@ const TABS = [
   { href: '/admin',            label: 'Overview'   },
   { href: '/admin/curriculum', label: 'Curriculum' },
   { href: '/admin/exercises',  label: 'Exercises'  },
+  { href: '/admin/pool',       label: 'Pool'       },
 ]
 
 export function AdminTabNav() {

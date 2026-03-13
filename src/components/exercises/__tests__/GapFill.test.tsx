@@ -104,6 +104,7 @@ function makeExercise(overrides: Partial<Exercise> & { type?: string } = {}): Ex
     hint_1: null,
     hint_2: null,
     annotations: null,
+    source: 'seed',
     created_at: '2026-01-01',
     ...overrides,
   }

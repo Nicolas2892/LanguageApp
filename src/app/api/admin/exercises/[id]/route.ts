@@ -61,3 +61,42 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true })
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!validateOrigin(request)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { data: profileData } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+  const profile = profileData as Pick<Profile, 'is_admin'> | null
+  if (!profile?.is_admin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const { id } = await params
+
+  const { error } = await supabase
+    .from('exercises')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('[DELETE /api/admin/exercises/[id]]', error)
+    return NextResponse.json({ error: 'Failed to delete exercise' }, { status: 500 })
+  }
+
+  return NextResponse.json({ ok: true })
+}

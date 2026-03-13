@@ -174,6 +174,7 @@ export interface Database {
           hint_1: string | null
           hint_2: string | null
           annotations: AnnotationSpan[] | null
+          source: 'seed' | 'ai_generated'
           created_at: string
         }
         Insert: {
@@ -186,6 +187,7 @@ export interface Database {
           hint_1?: string | null
           hint_2?: string | null
           annotations?: AnnotationSpan[] | null
+          source?: 'seed' | 'ai_generated'
           created_at?: string
         }
         Update: {
@@ -198,6 +200,7 @@ export interface Database {
           hint_1?: string | null
           hint_2?: string | null
           annotations?: AnnotationSpan[] | null
+          source?: 'seed' | 'ai_generated'
           created_at?: string
         }
         Relationships: [

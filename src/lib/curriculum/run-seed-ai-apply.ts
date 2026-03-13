@@ -160,6 +160,7 @@ async function applyEntry(
       hint_1: ex.hint_1 ?? null,
       hint_2: ex.hint_2 ?? null,
       annotations: ex.annotations ?? null,
+      source: 'seed' as const,
     }))
 
     const { error: insertErr } = await supabase.from('exercises').insert(exercisesToInsert)
@@ -301,6 +302,7 @@ async function applyEntry(
     hint_1: ex.hint_1 ?? null,
     hint_2: ex.hint_2 ?? null,
     annotations: ex.annotations ?? null,
+    source: 'seed' as const,
   }))
 
   const { error: exErr } = await supabase.from('exercises').insert(exercisesToInsert)

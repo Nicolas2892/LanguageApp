@@ -10,6 +10,9 @@ export const MIN_PRACTICE_SIZE = 5
 /** interval_days threshold above which a concept is considered mastered */
 export const MASTERY_THRESHOLD = 21
 
+/** Max exercises per concept per exercise type before returning cached instead of generating */
+export const EXERCISE_CAP_PER_TYPE = 15
+
 /** Fraction of a CEFR level's concepts that must be attempted before the next level unlocks in the automatic queue */
 export const LEVEL_UNLOCK_THRESHOLD = 0.8
 

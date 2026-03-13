@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
 import type { Concept, Exercise, AnnotationSpan } from '@/lib/supabase/types'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { EXERCISE_CAP_PER_TYPE } from '@/lib/constants'
 
 function createServiceRoleClient() {
   return createAdminClient(
@@ -16,6 +17,7 @@ function createServiceRoleClient() {
 const GenerateSchema = z.object({
   concept_id: z.string().uuid(),
   type: z.enum(['gap_fill', 'translation', 'transformation', 'error_correction']),
+  force: z.boolean().optional(),
 })
 
 const TYPE_RULES: Record<string, string> = {
@@ -40,7 +42,24 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
     }
-    const { concept_id, type } = parsed.data
+    const { concept_id, type, force } = parsed.data
+
+    const serviceClient = createServiceRoleClient()
+
+    // Fetch existing exercises for this concept+type to check cap and avoid duplicates
+    const { data: existingData } = await serviceClient
+      .from('exercises')
+      .select('id, concept_id, type, prompt, expected_answer, answer_variants, hint_1, hint_2, annotations, source, created_at')
+      .eq('concept_id', concept_id)
+      .eq('type', type)
+
+    const existing = (existingData ?? []) as Exercise[]
+
+    // Cap check: if at or above cap and not forced, return a random existing exercise
+    if (existing.length >= EXERCISE_CAP_PER_TYPE && !force) {
+      const random = existing[Math.floor(Math.random() * existing.length)]
+      return NextResponse.json({ ...random, cached: true })
+    }
 
     // Fetch concept (explicit columns)
     const { data: conceptData } = await supabase
@@ -54,6 +73,12 @@ export async function POST(request: Request) {
 
     const typeLabel = type.replace(/_/g, ' ')
     const rule = TYPE_RULES[type]
+
+    // Build dedup context from existing prompts
+    const existingPrompts = existing.map((e) => e.prompt)
+    const dedupContext = existingPrompts.length > 0
+      ? `\n\nIMPORTANT: The following prompts already exist. Generate something DIFFERENT:\n${existingPrompts.map((p, i) => `${i + 1}. ${p}`).join('\n')}`
+      : ''
 
     const promptText = `You are a Spanish language exercise author for B1→B2 learners.
 Generate ONE new ${typeLabel} exercise for the concept "${concept.title}".
@@ -71,7 +96,7 @@ Return ONLY valid JSON (no markdown) in this exact shape:
 
 For "annotations", split the prompt text into spans covering every character. Use form: "subjunctive" for conjugated present/imperfect subjunctive verb forms, form: "indicative" for indicative forms (sparingly), form: null for everything else (nouns, conjunctions, blanks, punctuation). The concatenation of all span texts must equal the prompt exactly.
 
-Rules for ${typeLabel}: ${rule}`
+Rules for ${typeLabel}: ${rule}${dedupContext}`
 
     const message = await anthropic.messages.create({
       model: TUTOR_MODEL,
@@ -94,6 +119,12 @@ Rules for ${typeLabel}: ${rule}`
       return NextResponse.json({ error: 'Invalid AI response structure' }, { status: 500 })
     }
 
+    // Post-generation dedup: if the new prompt matches an existing one, return the existing one
+    const duplicate = existing.find((e) => e.prompt === generated.prompt)
+    if (duplicate) {
+      return NextResponse.json({ ...duplicate, cached: true })
+    }
+
     // For gap_fill, validate expected_answer is either a plain string (1-blank)
     // or a JSON array of strings (2-blank). Both are valid per the same-concept design.
     if (type === 'gap_fill') {
@@ -106,7 +137,6 @@ Rules for ${typeLabel}: ${rule}`
           return NextResponse.json({ error: 'AI returned invalid gap_fill answer format (multi-blank requires JSON array)' }, { status: 500 })
         }
       }
-      // 1-blank or 0-blank: plain string is fine — no further validation needed
     }
 
     // Validate annotations: concatenated spans must equal prompt
@@ -121,7 +151,6 @@ Rules for ${typeLabel}: ${rule}`
     }
 
     // Insert into exercises table using service role to bypass RLS
-    const serviceClient = createServiceRoleClient()
     const { data: newExercise, error: insertErr } = await serviceClient
       .from('exercises')
       .insert({
@@ -132,8 +161,9 @@ Rules for ${typeLabel}: ${rule}`
         hint_1: generated.hint_1 ?? null,
         hint_2: generated.hint_2 ?? null,
         annotations: validatedAnnotations,
+        source: 'ai_generated',
       })
-      .select('id, concept_id, type, prompt, expected_answer, answer_variants, hint_1, hint_2, annotations, created_at')
+      .select('id, concept_id, type, prompt, expected_answer, answer_variants, hint_1, hint_2, annotations, source, created_at')
       .single()
 
     if (insertErr || !newExercise) {
