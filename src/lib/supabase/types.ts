@@ -30,6 +30,9 @@ export interface Database {
           is_admin: boolean
           skip_gap_fill: boolean
           timezone: string | null
+          streak_freeze_remaining: number
+          streak_freeze_last_replenished: string | null
+          streak_freeze_used_date: string | null
         }
         Insert: {
           id: string
@@ -46,6 +49,9 @@ export interface Database {
           is_admin?: boolean
           skip_gap_fill?: boolean
           timezone?: string | null
+          streak_freeze_remaining?: number
+          streak_freeze_last_replenished?: string | null
+          streak_freeze_used_date?: string | null
         }
         Update: {
           id?: string
@@ -62,6 +68,9 @@ export interface Database {
           is_admin?: boolean
           skip_gap_fill?: boolean
           timezone?: string | null
+          streak_freeze_remaining?: number
+          streak_freeze_last_replenished?: string | null
+          streak_freeze_used_date?: string | null
         }
         Relationships: []
       }
@@ -480,7 +489,7 @@ export interface Database {
     Functions: {
       increment_streak_if_new_day: {
         Args: { p_user_id: string }
-        Returns: void
+        Returns: Json
       }
       get_subscribers_with_due_counts: {
         Args: { p_today: string; p_limit: number; p_offset: number }

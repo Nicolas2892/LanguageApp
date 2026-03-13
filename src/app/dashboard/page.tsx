@@ -7,6 +7,8 @@ import { DashboardDeferredSection, DashboardDeferredSkeleton } from '@/component
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { StreakMilestone } from '@/components/StreakMilestone'
+import { StreakFreezeNotification } from '@/components/StreakFreezeNotification'
+import { StreakFreezeStatus } from '@/components/StreakFreezeStatus'
 import { LevelUpOverlay } from '@/components/LevelUpOverlay'
 import type { Profile } from '@/lib/supabase/types'
 import { LEVEL_CHIP } from '@/lib/constants'
@@ -20,7 +22,7 @@ export default async function DashboardPage() {
   // Fetch profile first to get timezone for today's date calculation
   const { data: profileRaw } = await supabase
     .from('profiles')
-    .select('computed_level, display_name, streak, timezone')
+    .select('computed_level, display_name, streak, timezone, streak_freeze_remaining, streak_freeze_used_date')
     .eq('id', user.id)
     .single()
   const profile = profileRaw as Profile | null
@@ -63,6 +65,10 @@ export default async function DashboardPage() {
             </span>
           ) : null
         })()}
+        <StreakFreezeStatus
+          streak={profile?.streak ?? 0}
+          freezeRemaining={profile?.streak_freeze_remaining ?? 0}
+        />
       </div>
 
       <WindingPathSeparator />
@@ -150,6 +156,10 @@ export default async function DashboardPage() {
 
       <OnboardingTour />
       <StreakMilestone streak={profile?.streak ?? 0} />
+      <StreakFreezeNotification
+        freezeUsedDate={profile?.streak_freeze_used_date ?? null}
+        streak={profile?.streak ?? 0}
+      />
       <LevelUpOverlay currentLevel={profile?.computed_level ?? null} />
     </main>
   )

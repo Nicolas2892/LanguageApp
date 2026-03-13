@@ -34,4 +34,19 @@ describe('StreakBadge', () => {
     render(<StreakBadge streak={5} size="sm" />)
     expect(screen.queryByText('días')).not.toBeInTheDocument()
   })
+
+  it('renders shield icon when freezeAvailable={true} and streak > 0', () => {
+    render(<StreakBadge streak={5} freezeAvailable={true} />)
+    expect(screen.getByLabelText('Protección disponible')).toBeInTheDocument()
+  })
+
+  it('does not render shield when freezeAvailable={false}', () => {
+    render(<StreakBadge streak={5} freezeAvailable={false} />)
+    expect(screen.queryByLabelText('Protección disponible')).not.toBeInTheDocument()
+  })
+
+  it('does not render shield when streak is 0', () => {
+    render(<StreakBadge streak={0} freezeAvailable={true} />)
+    expect(screen.queryByLabelText('Protección disponible')).not.toBeInTheDocument()
+  })
 })

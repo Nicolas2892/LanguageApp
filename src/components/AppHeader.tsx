@@ -12,9 +12,10 @@ const TUTOR_ICON_ROUTES = ['/dashboard', '/curriculum', '/verbs']
 interface Props {
   userInitials: string
   streak: number
+  streakFreezeRemaining?: number
 }
 
-export function AppHeader({ userInitials, streak }: Props) {
+export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0 }: Props) {
   const pathname = usePathname()
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
@@ -38,7 +39,7 @@ export function AppHeader({ userInitials, streak }: Props) {
               <Bot className="h-5 w-5" strokeWidth={1.5} />
             </Link>
           )}
-          <StreakBadge streak={streak} size="sm" />
+          <StreakBadge streak={streak} size="sm" freezeAvailable={streakFreezeRemaining > 0} />
           <Link
             href="/account"
             aria-label="Account"

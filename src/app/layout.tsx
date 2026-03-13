@@ -90,6 +90,7 @@ export default async function RootLayout({
   let userInitials = ''
   let userId: string | undefined
   let streak = 0
+  let streakFreezeRemaining = 0
   let themePreference: 'light' | 'dark' | 'system' = 'system'
   let userTimezone: string | null = null
   try {
@@ -99,12 +100,13 @@ export default async function RootLayout({
       userId = user.id
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name, theme_preference, streak, timezone')
+        .select('display_name, theme_preference, streak, timezone, streak_freeze_remaining')
         .eq('id', user.id)
         .single()
-      const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null; timezone: string | null } | null
+      const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null; timezone: string | null; streak_freeze_remaining: number | null } | null
       userInitials = getInitials(p?.display_name ?? null, user.email!)
       streak = p?.streak ?? 0
+      streakFreezeRemaining = p?.streak_freeze_remaining ?? 0
       userTimezone = p?.timezone ?? null
       if (p?.theme_preference === 'light' || p?.theme_preference === 'dark' || p?.theme_preference === 'system') {
         themePreference = p.theme_preference
@@ -130,9 +132,9 @@ export default async function RootLayout({
       >
         <ThemeProvider initialTheme={themePreference}>
           <PostHogProvider userId={userId}>
-            <SideNav userInitials={userInitials} streak={streak} />
+            <SideNav userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} />
             <div className="lg:ml-[220px]">
-              <AppHeader userInitials={userInitials} streak={streak} />
+              <AppHeader userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} />
               <PageWrapper>{children}</PageWrapper>
             </div>
             <BottomNav />

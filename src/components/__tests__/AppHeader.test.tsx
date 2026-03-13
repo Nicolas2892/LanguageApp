@@ -7,7 +7,7 @@ vi.mock('next/navigation', () => ({
   usePathname: () => mockPathname,
 }))
 
-const defaultProps = { userInitials: 'NI', streak: 5 }
+const defaultProps = { userInitials: 'NI', streak: 5, streakFreezeRemaining: 1 }
 
 describe('AppHeader', () => {
   it('shows tutor icon on /dashboard', () => {

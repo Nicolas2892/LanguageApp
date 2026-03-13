@@ -21,9 +21,10 @@ const HIDDEN_ROUTES = ['/auth', '/onboarding', '/brand-preview', '/admin']
 interface Props {
   userInitials: string
   streak: number
+  streakFreezeRemaining?: number
 }
 
-export function SideNav({ userInitials, streak }: Props) {
+export function SideNav({ userInitials, streak, streakFreezeRemaining = 0 }: Props) {
   const pathname = usePathname()
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
@@ -89,7 +90,7 @@ export function SideNav({ userInitials, streak }: Props) {
       {/* Streak + Account at bottom */}
       <div className="p-3 border-t shrink-0 space-y-2" style={{ borderColor: 'var(--d5-nav-border)' }}>
         <div className="px-3">
-          <StreakBadge streak={streak} size="md" />
+          <StreakBadge streak={streak} size="md" freezeAvailable={streakFreezeRemaining > 0} />
         </div>
         <Link
           href="/account"

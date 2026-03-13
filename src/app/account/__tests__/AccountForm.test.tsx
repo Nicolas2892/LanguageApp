@@ -20,6 +20,9 @@ const baseProfile: Profile = {
   is_admin: false,
   skip_gap_fill: false,
   timezone: null,
+  streak_freeze_remaining: 1,
+  streak_freeze_last_replenished: null,
+  streak_freeze_used_date: null,
 }
 
 function renderWithTheme(ui: React.ReactElement) {
