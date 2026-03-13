@@ -349,6 +349,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/components/SvgSendaPath.tsx` — inline terracotta S-path; props: `size?` (default 20); used in SideNav + AppHeader wordmarks
 - `src/components/WindingPathSeparator.tsx` — calligraphic SVG divider; uses `--d5-separator`; place between dashboard sections
 - `src/components/BackgroundMagicS.tsx` — large watermark S-path (absolute positioned); parent must be `relative overflow-hidden`; props: `opacity?` (default 0.07)
+- `src/components/SplashScreen.tsx` — client-side fullscreen splash overlay; animates S-trail draw (800ms) + logo blur-fade (400ms, 400ms delay) → fade-out at 1200ms → unmount at 1700ms; uses `var(--background)` for dark mode; reduced-motion: static 600ms then fade; renders in `layout.tsx` as last child in `<PostHogProvider>`
 
 ### Key Shared Components & Utilities
 
@@ -387,6 +388,10 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `animate-page-in` — route transition fade+slide (200ms)
 - `animate-exercise-in` — exercise card entrance (200ms)
 - `animate-senda-pulse` — skeleton loading opacity pulse (1.4s, no scale); used with `senda-skeleton-fill` class (`oklch(0.145 0 0 / 0.05)` light, `oklch(0.985 0 0 / 0.07)` dark)
+- `splash-trail-draw` — stroke-dashoffset draw animation (800ms ease-out); used by SplashScreen S-trail
+- `splash-logo-in` — opacity 0→1 + blur(4px)→blur(0) (400ms, 400ms delay); used by SplashScreen logo
+- `splash-fade-out` — opacity 1→0 (500ms ease-in-out); applied to SplashScreen container on fade phase
+- `splash-vellum` — absolute noise texture overlay (SVG feTurbulence, 0.4 opacity); subtle paper grain
 
 ### API Security
 
@@ -405,7 +410,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ## Current Status
 
-**Test suite: 1644 tests across 75 files — all passing.**
+**Test suite: 1651 tests across 76 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 

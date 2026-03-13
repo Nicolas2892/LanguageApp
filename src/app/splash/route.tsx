@@ -12,69 +12,38 @@ export async function GET(request: NextRequest) {
     (
       <div
         style={{
-          background: '#ea580c',
+          background: '#FDFCF9',
           width: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '40px',
+          gap: '24px',
         }}
       >
-        {/* Speech bubble mark */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-          <div
-            style={{
-              width: '160px',
-              height: '114px',
-              borderRadius: '26px',
-              background: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.28)',
-            }}
-          >
-            <span
-              style={{
-                fontSize: '80px',
-                fontWeight: 900,
-                color: '#c2410c',
-                fontFamily: 'sans-serif',
-                lineHeight: 1,
-              }}
-            >
-              Ñ
-            </span>
-          </div>
-          {/* Tail: CSS border triangle pointing down-left */}
-          <div
-            style={{
-              width: 0,
-              height: 0,
-              borderTopWidth: '26px',
-              borderTopStyle: 'solid',
-              borderTopColor: 'white',
-              borderRightWidth: '26px',
-              borderRightStyle: 'solid',
-              borderRightColor: 'transparent',
-              marginLeft: '28px',
-            }}
+        {/* Terracotta S monogram */}
+        <svg viewBox="0 0 24 24" width="96" height="96" fill="none">
+          <path
+            d="M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2"
+            stroke="#C4522E"
+            strokeWidth={3}
+            strokeLinecap="round"
           />
-        </div>
+        </svg>
 
         {/* App name */}
         <span
           style={{
-            color: 'rgba(255,255,255,0.90)',
-            fontSize: 36,
+            color: '#1A1108',
+            fontSize: 48,
             fontWeight: 600,
-            fontFamily: 'sans-serif',
-            letterSpacing: '0.5px',
+            fontFamily: 'serif',
+            fontStyle: 'italic',
+            letterSpacing: '0.02em',
           }}
         >
-          Español Avanzado
+          Senda
         </span>
       </div>
     ),

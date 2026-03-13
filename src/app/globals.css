@@ -482,6 +482,47 @@
 }
 .animate-exercise-out { animation: exercise-fadeout 150ms var(--ease-senda) forwards; }
 
+/* Splash screen — trail draw animation (stroke-dashoffset full→0) */
+@keyframes splash-trail-draw {
+  from { stroke-dashoffset: 400; }
+  to   { stroke-dashoffset: 0; }
+}
+.splash-trail-draw {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: splash-trail-draw 800ms ease-out forwards;
+}
+
+/* Splash screen — logo entrance (blur + opacity) */
+@keyframes splash-logo-in {
+  from { opacity: 0; filter: blur(4px); }
+  to   { opacity: 1; filter: blur(0); }
+}
+.splash-logo-in {
+  opacity: 0;
+  animation: splash-logo-in 400ms ease-out 400ms forwards;
+}
+
+/* Splash screen — fade out entire overlay */
+@keyframes splash-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+.splash-fade-out {
+  animation: splash-fade-out 500ms ease-in-out forwards;
+}
+
+/* Splash screen — vellum noise texture pseudo-element */
+.splash-vellum {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.12'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
 /* Accessibility: suppress non-essential animations for reduced-motion users */
 @media (prefers-reduced-motion: reduce) {
   .animate-page-in,
@@ -493,7 +534,12 @@
   .animate-flash-orange,
   .animate-senda-pulse,
   .animate-message-in,
-  .animate-heart-bounce {
+  .animate-heart-bounce,
+  .splash-trail-draw,
+  .splash-logo-in {
     animation: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    stroke-dashoffset: 0 !important;
   }
 }

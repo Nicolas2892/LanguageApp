@@ -9,6 +9,7 @@ import { SideNav } from "@/components/SideNav";
 import { PageWrapper } from "@/components/PageWrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { PostHogProvider } from "@/components/PostHogProvider";
+import { SplashScreen } from "@/components/SplashScreen";
 import { createClient } from "@/lib/supabase/server";
 import { getInitials } from "@/lib/utils";
 
@@ -137,6 +138,7 @@ export default async function RootLayout({
             <BottomNav />
             <ServiceWorkerRegistration />
             <IOSInstallPrompt />
+            <SplashScreen />
           </PostHogProvider>
         </ThemeProvider>
       </body>

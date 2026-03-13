@@ -107,8 +107,10 @@ export default async function DashboardPage() {
       </div>
 
       {/* ── Card stack wrapper — BackgroundMagicS threads behind all three cards ── */}
-      <div className="relative overflow-hidden mt-4">
-        <BackgroundMagicS style={{ left: '-1.25rem', top: '1.25rem', right: 'auto', width: '17.5rem', height: '22.5rem' }} />
+      <div className="relative mt-4">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <BackgroundMagicS style={{ left: '-1.25rem', top: '1.25rem', right: 'auto', width: '17.5rem', height: '22.5rem' }} />
+        </div>
 
         <WindingPathSeparator />
 

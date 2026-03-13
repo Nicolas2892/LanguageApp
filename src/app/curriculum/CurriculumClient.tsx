@@ -137,7 +137,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
         <h1 className="senda-heading" style={{ fontSize: '1.625rem' }}>
           Tu Currículo
         </h1>
-        <p style={{ fontSize: '0.6875rem', color: 'var(--d5-body)', marginTop: '0.25rem' }}>B1 → B2 · Tu camino personal</p>
+        <p style={{ fontSize: '0.75rem', color: 'var(--d5-body)', marginTop: '0.25rem' }}>B1 → B2 · Tu camino personal</p>
       </div>
 
       {/* Timeline */}
@@ -268,8 +268,8 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                       onClick={e => e.stopPropagation()}
                       style={{
                         color: 'var(--d5-terracotta)',
-                        fontSize: 12,
-                        fontWeight: 500,
+                        fontSize: 13,
+                        fontWeight: 600,
                         whiteSpace: 'nowrap',
                         padding: '4px 0',
                         flexShrink: 0,
@@ -297,7 +297,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                 {state !== 'upcoming' && (
                   <div
                     style={{
-                      marginTop: '0.625rem',
+                      marginTop: '0.5rem',
                       height: 3,
                       borderRadius: 999,
                       background: 'var(--d5-line)',
@@ -342,7 +342,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                 marginBottom: '0.375rem',
                               }}
                             >
-                              <span className="senda-eyebrow" style={{ fontSize: '0.5rem' }}>
+                              <span className="senda-eyebrow">
                                 {unit.title}
                               </span>
                               <div style={{ flex: 1, height: '0.0625rem', background: 'rgba(196,82,46,0.12)' }} />
@@ -366,7 +366,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                   style={{
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    gap: '0.25rem',
+                                    gap: '0.125rem',
                                     marginTop: '0.625rem',
                                     paddingLeft: '1.25rem',
                                     borderLeft: '2px solid rgba(196,82,46,0.15)',
@@ -386,7 +386,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                       <span
                                         className="text-foreground"
                                         style={{
-                                          fontSize: 14,
+                                          fontSize: 12,
                                           fontWeight: 400,
                                           overflow: 'hidden',
                                           textOverflow: 'ellipsis',
@@ -438,7 +438,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
       <p
         style={{
           textAlign: 'center',
-          fontSize: 11,
+          fontSize: '0.75rem',
           color: 'var(--d5-body)',
           marginTop: 8,
           fontStyle: 'italic',

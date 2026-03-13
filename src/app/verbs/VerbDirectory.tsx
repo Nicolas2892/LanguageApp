@@ -55,7 +55,8 @@ export function VerbDirectory({ verbs }: Props) {
           placeholder="Buscar Verbos..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="senda-input pl-9 pr-4 py-2.5 rounded-xl"
+          className="senda-input pr-4 py-2.5 rounded-xl"
+          style={{ paddingLeft: '2.25rem' }}
         />
       </div>
 

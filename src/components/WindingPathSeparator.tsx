@@ -12,7 +12,7 @@ export function WindingPathSeparator() {
       >
         {/* Primary stroke — thin, moderate opacity */}
         <path
-          d="M 4 20 C 55 6, 115 26, 177 16 C 235 7, 295 22, 350 12"
+          d="M -10 22 C 50 6, 115 26, 177 16 C 235 7, 300 22, 364 10"
           stroke="var(--d5-separator)"
           strokeWidth={1.2}
           strokeLinecap="round"
@@ -21,7 +21,7 @@ export function WindingPathSeparator() {
         />
         {/* Echo stroke — thick, low opacity, adds depth */}
         <path
-          d="M 4 20 C 55 6, 115 26, 177 16 C 235 7, 295 22, 350 12"
+          d="M -10 22 C 50 6, 115 26, 177 16 C 235 7, 300 22, 364 10"
           stroke="var(--d5-separator)"
           strokeWidth={3}
           strokeLinecap="round"

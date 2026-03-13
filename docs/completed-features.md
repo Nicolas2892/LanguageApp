@@ -4,6 +4,57 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## D5 Splash Screen — animated brand overlay on app launch ✓ (2026-03-13)
+
+1651 tests across 76 files, all passing. Premium splash screen that bridges app launch to the dashboard using D5 design tokens.
+
+### Architecture
+
+Client-side overlay in `layout.tsx`, not a route. `<SplashScreen />` renders a fixed fullscreen `z-[100]` overlay on top of all content. After 1.7s total animation, it unmounts. Shows once per full page load (not on client-side navigations). Works on every entry point (dashboard, deep links, auth pages).
+
+### Animation Timeline (1700ms total)
+
+```
+0ms         400ms        800ms        1200ms       1700ms
+|───trail draw──────────|              |            |
+             |──logo fade+blur in──|   |            |
+                                       |──fade out──|
+                                                    → unmount
+```
+
+### Dark Mode
+
+Uses `var(--background)` which auto-swaps (paper in light, ink in dark). Logo wordmark uses `.senda-heading` (`var(--d5-heading)`). S-trail uses `var(--d5-magic-stroke)`. Footer uses `var(--d5-muted)`. No JS dark-mode detection needed.
+
+### Reduced Motion
+
+`prefers-reduced-motion: reduce` → CSS animations suppressed (opacity/filter/stroke-dashoffset forced to final state), JS timers shortened (600ms fade, 1100ms unmount).
+
+### iOS PWA
+
+Static Apple startup image (`/splash` route) updated to D5 brand (paper bg, terracotta S monogram, "Senda" italic wordmark). Matches animated splash for seamless static→animated transition on PWA launch. Existing home screen installs require re-add to pick up new static image (iOS caches aggressively).
+
+### CSS Classes Added (globals.css)
+
+- `splash-trail-draw` — stroke-dasharray/offset animation (800ms ease-out)
+- `splash-logo-in` — opacity + blur entrance (400ms, 400ms delay)
+- `splash-fade-out` — opacity 1→0 (500ms ease-in-out)
+- `splash-vellum` — SVG feTurbulence noise texture (0.4 opacity)
+- All splash classes added to `prefers-reduced-motion` suppression block
+
+### Files Created
+
+- `src/components/SplashScreen.tsx` — client component; 3-phase state machine (animate → fading → done)
+- `src/components/__tests__/SplashScreen.test.tsx` — 7 tests (render, timing, reduced motion, dark mode, pointer-events, SVG trail, logo animation)
+
+### Files Modified
+
+- `src/app/globals.css` — 4 new keyframes + splash-vellum class + reduced-motion additions
+- `src/app/layout.tsx` — `<SplashScreen />` added as last child inside `<PostHogProvider>`
+- `src/app/splash/route.tsx` — static startup image updated to D5 brand (paper bg, terracotta S, italic "Senda")
+
+---
+
 ## Perf-Audit: VAPID guard, dead code, font cleanup, query parallelisation, N+1 batch, SW versioning ✓ (2026-03-12)
 
 1421 tests across 65 files, all passing. Full PWA performance audit — 8 items addressed.
