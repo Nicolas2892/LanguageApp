@@ -6,6 +6,7 @@ import { VerbTenseMastery } from '@/components/verbs/VerbTenseMastery'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { userLocalToday, utcToLocalDate } from '@/lib/timezone'
 import { EmptyState } from '@/components/EmptyState'
 import type { WeekData } from './WeeklyActivityChart'
 import type { TenseSummary } from '@/components/verbs/VerbTenseMastery'
@@ -24,13 +25,14 @@ export default async function ProgressPage() {
   // ── 1. Profile (streak + computed level) ──────────────────────────────────
   const { data: profileData } = await supabase
     .from('profiles')
-    .select('streak, computed_level')
+    .select('streak, computed_level, timezone')
     .eq('id', user.id)
     .single()
 
-  const profile = profileData as { streak: number; computed_level: string } | null
+  const profile = profileData as { streak: number; computed_level: string; timezone: string | null } | null
   const currentStreak = profile?.streak ?? 0
   const computedLevel = profile?.computed_level ?? 'B1'
+  const userTz = profile?.timezone ?? null
 
   // ── 2. CEFR Journey + Accuracy (parallel) ─────────────────────────────────
   const [{ data: conceptRows }, { data: progressRows }, { data: attemptRows }, { data: exerciseRows }] = await Promise.all([
@@ -121,31 +123,32 @@ export default async function ProgressPage() {
     .eq('user_id', user.id)
     .gte('created_at', fourteenWeeksAgo.toISOString())
 
-  // Count by date for uniqueDaysStudied, then aggregate by week
+  // Count by date (user's local timezone) for uniqueDaysStudied, then aggregate by week
   const activityByDate = new Map<string, number>()
   for (const row of (activityRows ?? []) as Array<{ created_at: string }>) {
-    const date = row.created_at.split('T')[0]
+    const date = utcToLocalDate(row.created_at, userTz)
     activityByDate.set(date, (activityByDate.get(date) ?? 0) + 1)
   }
   const uniqueDaysStudied = activityByDate.size
 
-  // Build 14 weeks of data (Monday-aligned)
-  const today = new Date()
-  const dayOfWeek = today.getDay() // 0=Sun
+  // Build 14 weeks of data (Monday-aligned, using user's local today)
+  const todayStr = userLocalToday(userTz)
+  const today = new Date(todayStr + 'T00:00:00Z')
+  const dayOfWeek = today.getUTCDay() // 0=Sun
   const daysSinceMonday = (dayOfWeek + 6) % 7
   const thisMonday = new Date(today)
-  thisMonday.setDate(today.getDate() - daysSinceMonday)
+  thisMonday.setUTCDate(today.getUTCDate() - daysSinceMonday)
 
   const weeklyData: WeekData[] = []
   for (let w = 13; w >= 0; w--) {
     const weekStart = new Date(thisMonday)
-    weekStart.setDate(thisMonday.getDate() - w * 7)
+    weekStart.setUTCDate(thisMonday.getUTCDate() - w * 7)
     const weekStartIso = weekStart.toISOString().split('T')[0]
 
     let weekCount = 0
     for (let d = 0; d < 7; d++) {
       const date = new Date(weekStart)
-      date.setDate(weekStart.getDate() + d)
+      date.setUTCDate(weekStart.getUTCDate() + d)
       const iso = date.toISOString().split('T')[0]
       weekCount += activityByDate.get(iso) ?? 0
     }
@@ -154,9 +157,8 @@ export default async function ProgressPage() {
   }
 
   // ── 5. Study sessions this month ──────────────────────────────────────────
-  const monthStart = new Date()
-  monthStart.setDate(1)
-  monthStart.setHours(0, 0, 0, 0)
+  const monthStart = new Date(todayStr + 'T00:00:00Z')
+  monthStart.setUTCDate(1)
 
   const { data: sessionRows } = await supabase
     .from('study_sessions')

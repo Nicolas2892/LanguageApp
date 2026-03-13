@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { SpeakButton } from '@/components/SpeakButton'
 import type { Exercise } from '@/lib/supabase/types'
@@ -19,11 +19,10 @@ function parseWords(prompt: string): string[] {
 }
 
 export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
-  const words = useMemo(() => {
+  const [words] = useState(() => {
     const parsed = parseWords(exercise.prompt)
-    // eslint-disable-next-line react-hooks/purity
     return [...parsed].sort(() => Math.random() - 0.5)
-  }, [exercise.prompt])
+  })
 
   const [selected, setSelected] = useState<string[]>([])
   const [remaining, setRemaining] = useState<string[]>(words)

@@ -35,7 +35,10 @@ export async function updateStreakIfNeeded(
   supabase: SupabaseClient<any>,
   userId: string,
 ): Promise<void> {
-  await supabase.rpc('increment_streak_if_new_day', { p_user_id: userId })
+  const { error } = await supabase.rpc('increment_streak_if_new_day', { p_user_id: userId })
+  if (error) {
+    console.error('[updateStreakIfNeeded] RPC error:', error.message)
+  }
 }
 
 /**

@@ -38,7 +38,12 @@ export async function updateSession(request: NextRequest) {
   if (!user && !isPublic) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
-    return NextResponse.redirect(url)
+    const redirectResponse = NextResponse.redirect(url)
+    // Clear stale onboarding cookie so a new user on the same browser gets onboarding
+    if (request.cookies.has('onboarding_done')) {
+      redirectResponse.cookies.delete('onboarding_done')
+    }
+    return redirectResponse
   }
 
   // Redirect authenticated users who haven't completed onboarding
