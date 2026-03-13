@@ -83,20 +83,6 @@ export function SplashScreen() {
           Senda
         </span>
       </div>
-
-      {/* Footer micro-tag */}
-      <span
-        style={{
-          position: 'absolute',
-          bottom: 48,
-          fontSize: '0.75rem',
-          fontWeight: 500,
-          color: 'var(--d5-muted)',
-          fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
-        }}
-      >
-        Crafted with Senda
-      </span>
     </div>
   )
 }

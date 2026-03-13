@@ -19,7 +19,6 @@ afterEach(() => {
 describe('SplashScreen', () => {
   it('renders splash with branding text', () => {
     render(<SplashScreen />)
-    expect(screen.getByText('Crafted with Senda')).toBeInTheDocument()
     expect(screen.getByText('Senda')).toBeInTheDocument()
     expect(screen.getByTestId('splash-screen')).toBeInTheDocument()
   })
