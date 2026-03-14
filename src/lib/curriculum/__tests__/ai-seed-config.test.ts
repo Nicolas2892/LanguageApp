@@ -3,7 +3,7 @@ import {
   EXERCISE_TYPE_RULES,
   EXERCISE_GENERATION_RULES,
   EXERCISES_PER_TYPE,
-  EXERCISES_PER_CONCEPT,
+  exercisesPerConcept,
 } from '../ai-seed-config'
 import type { CefrLevel, ExerciseType } from '../ai-seed-config'
 
@@ -14,6 +14,9 @@ const VALID_EXERCISE_TYPES: ExerciseType[] = [
   'translation',
   'error_correction',
   'free_write',
+  'listening',
+  'proofreading',
+  'register_shift',
 ]
 
 describe('EXERCISE_TYPE_RULES', () => {
@@ -29,15 +32,19 @@ describe('EXERCISE_TYPE_RULES', () => {
     expect(keys.sort()).toEqual(['B1', 'B2', 'C1'])
   })
 
-  it('each level maps to a 3-tuple', () => {
-    for (const level of VALID_LEVELS) {
-      const tuple = EXERCISE_TYPE_RULES[level]
-      expect(Array.isArray(tuple)).toBe(true)
-      expect(tuple).toHaveLength(3)
-    }
+  it('B1 has 3 types', () => {
+    expect(EXERCISE_TYPE_RULES.B1).toHaveLength(3)
   })
 
-  it('each tuple contains only valid ExerciseType values', () => {
+  it('B2 has 5 types', () => {
+    expect(EXERCISE_TYPE_RULES.B2).toHaveLength(5)
+  })
+
+  it('C1 has 6 types', () => {
+    expect(EXERCISE_TYPE_RULES.C1).toHaveLength(6)
+  })
+
+  it('each level contains only valid ExerciseType values', () => {
     for (const level of VALID_LEVELS) {
       for (const type of EXERCISE_TYPE_RULES[level]) {
         expect(VALID_EXERCISE_TYPES).toContain(type)
@@ -49,12 +56,12 @@ describe('EXERCISE_TYPE_RULES', () => {
     expect(EXERCISE_TYPE_RULES.B1).toEqual(['gap_fill', 'transformation', 'translation'])
   })
 
-  it('B2 uses gap_fill, translation, error_correction', () => {
-    expect(EXERCISE_TYPE_RULES.B2).toEqual(['gap_fill', 'translation', 'error_correction'])
+  it('B2 uses gap_fill, translation, error_correction, listening, proofreading', () => {
+    expect(EXERCISE_TYPE_RULES.B2).toEqual(['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'])
   })
 
-  it('C1 uses transformation, translation, free_write', () => {
-    expect(EXERCISE_TYPE_RULES.C1).toEqual(['transformation', 'translation', 'free_write'])
+  it('C1 uses transformation, translation, free_write, listening, proofreading, register_shift', () => {
+    expect(EXERCISE_TYPE_RULES.C1).toEqual(['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'])
   })
 })
 
@@ -79,8 +86,9 @@ describe('constants', () => {
     expect(EXERCISES_PER_TYPE).toBe(3)
   })
 
-  it('EXERCISES_PER_CONCEPT is 9 (3 types × 3)', () => {
-    expect(EXERCISES_PER_CONCEPT).toBe(9)
-    expect(EXERCISES_PER_CONCEPT).toBe(EXERCISES_PER_TYPE * 3)
+  it('exercisesPerConcept returns correct count per level', () => {
+    expect(exercisesPerConcept('B1')).toBe(9)   // 3 types × 3
+    expect(exercisesPerConcept('B2')).toBe(15)  // 5 types × 3
+    expect(exercisesPerConcept('C1')).toBe(18)  // 6 types × 3
   })
 })

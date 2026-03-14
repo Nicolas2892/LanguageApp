@@ -17,7 +17,7 @@ const DEFAULT_TTL_MS = 300_000 // 5 minutes
  */
 export async function getCached<T>(
   key: string,
-  fetcher: () => Promise<T>,
+  fetcher: () => Promise<T> | PromiseLike<T>,
   ttlMs: number = DEFAULT_TTL_MS,
 ): Promise<T> {
   const existing = store.get(key)

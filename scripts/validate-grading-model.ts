@@ -31,7 +31,7 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !ANTHROPIC_API_KEY) {
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-const EXERCISE_TYPES = ['gap_fill', 'translation', 'transformation', 'error_correction', 'sentence_builder'] as const
+const EXERCISE_TYPES = ['gap_fill', 'translation', 'transformation', 'error_correction', 'sentence_builder', 'free_write', 'listening', 'proofreading', 'register_shift'] as const
 const SAMPLES_PER_TYPE = 12 // aim for ~60 total, trimmed to 50 if needed
 const AGREEMENT_THRESHOLD = 0.9
 

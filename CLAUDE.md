@@ -205,13 +205,16 @@ Session configure page (`/study/configure`) builds these params via a UI before 
 ### Exercise Types & Components
 
 
-| Type                                        | Component             | Notes                                                                               |
-| ------------------------------------------- | --------------------- | ----------------------------------------------------------------------------------- |
-| `gap_fill`                                  | `GapFill.tsx`         | Single-line input; SpeakButton wired                                                |
-| `transformation` `translation` `free_write` | `TextAnswer.tsx`      | Multi-line textarea; SpeakButton wired                                              |
-| `sentence_builder`                          | `SentenceBuilder.tsx` | Word chip bank; parses `[w1/w2/w3]` tokens from prompt; SpeakButton wired           |
-| `error_correction`                          | `ErrorCorrection.tsx` | Extracts `"quoted sentence"` from prompt, pre-populates textarea; SpeakButton wired |
-| `free_write` (write page)                   | `FreeWritePrompt.tsx` | SpeakButton + STT mic dictation (Web Speech API, es-ES)                             |
+| Type                                        | Component                    | Notes                                                                               |
+| ------------------------------------------- | ---------------------------- | ----------------------------------------------------------------------------------- |
+| `gap_fill`                                  | `GapFill.tsx`                | Single-line input; SpeakButton wired                                                |
+| `transformation` `translation` `free_write` | `TextAnswer.tsx`             | Multi-line textarea; SpeakButton wired                                              |
+| `sentence_builder`                          | `SentenceBuilder.tsx`        | Word chip bank; parses `[w1/w2/w3]` tokens from prompt; SpeakButton wired           |
+| `error_correction`                          | `ErrorCorrection.tsx`        | Extracts `"quoted sentence"` from prompt, pre-populates textarea; SpeakButton wired |
+| `listening`                                 | `ListeningComprehension.tsx` | PASSAGE/QUESTION format; TTS auto-plays passage; comprehension answer               |
+| `proofreading`                              | `Proofreading.tsx`           | TEXT/ERRORS format; user corrects 2–6 grammar errors in 6–8 sentence paragraph      |
+| `register_shift`                            | `RegisterShift.tsx`          | Informal→formal register transformation; SOURCE/TARGET/CONTEXT/TEXT format           |
+| `free_write` (write page)                   | `FreeWritePrompt.tsx`        | SpeakButton + STT mic dictation (Web Speech API, es-ES)                             |
 
 
 All routed through shared `ExerciseRenderer` in `src/components/exercises/ExerciseRenderer.tsx`.
@@ -315,7 +318,8 @@ Migrations (run once in Supabase SQL editor):
 - Module 5: Verbal Periphrases — 3 units, 13 concepts
 - Module 6: Complex Sentences — 3 units, 13 concepts
 - Module 8: Conversational & Pragmatic Markers — 4 units, 15 concepts
-- ~9 exercises per concept (3 per exercise type); 56/61 null-annotation exercises annotated
+- B1: 9 exercises per concept (3 types × 3); B2: 15 (5 types × 3); C1: 18 (6 types × 3)
+- 56/61 null-annotation exercises annotated
 - Full plan: `src/lib/curriculum/curriculum-plan.ts` (100 concepts); design reference: `docs/curriculum-design.md`
 - `pnpm seed:ai:apply` is now idempotent — skips concepts/exercises that already exist. Safe to re-run.
 
@@ -431,7 +435,7 @@ Tutor (`/tutor`) is a reactive support feature, not a primary nav destination. E
 
 ## Current Status
 
-**Test suite: 1745 tests across 90 files — all passing.**
+**Test suite: 1815 tests across 96 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -492,12 +496,14 @@ Items are ordered by priority within each group. Full details of completed work 
 - UI: `StreakBadge` shield icon, `StreakFreezeStatus` dashboard chip, `StreakFreezeNotification` toast.
 - Migration 020: 3 new `profiles` columns + updated `increment_streak_if_new_day` RPC (now `RETURNS jsonb`).
 
-**Feat-H: Listening comprehension exercise type** *(P2 — new modality)*
+**Feat-H: Listening comprehension + proofreading + register shift exercise types** *(DONE)*
 
-- Add a listening exercise type where the user hears a Spanish audio clip and answers a comprehension question (e.g. gap_fill from audio, transcription, or multiple-choice).
-- Could use TTS (`SpeakButton` already wired) to generate audio from existing exercise prompts, or curate dedicated audio content.
-- Requires new `listening` exercise type in `ExerciseRenderer`, new component, and curriculum content.
-- **Do not implement without a PM decision on audio source (TTS vs. curated) and exercise format.**
+- Three new exercise types added: `listening`, `proofreading`, `register_shift`
+- Components: `ListeningComprehension.tsx`, `Proofreading.tsx`, `RegisterShift.tsx` — wired in `ExerciseRenderer`
+- Seed config: generation rules in `ai-seed-config.ts`; B2 gets `listening` + `proofreading`, C1 gets all three
+- Exercise distribution: B1 = 3 types (9 exercises), B2 = 5 types (15 exercises), C1 = 6 types (18 exercises)
+- Grader: type-specific rubrics in `grader.ts` for all three new types
+- All hardcoded type lists updated: curriculum detail, admin pool, study page, session config, validation script
 
 **Feat-I: i18n architecture (next-intl or JSON dictionaries)** *(P2 — future market expansion)*
 
@@ -584,7 +590,7 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 | **P1** | **Fix-J** — STT replacement for iOS Safari | **DONE** |
 | **P1** | **Fix-L** — Verify push notifications on iOS PWA | Deploy + device test pending |
 | **P2** | **Feat-G** — Streak freeze | **DONE** |
-| **P2** | **Feat-H** — Listening comprehension exercises | PM decision on audio source |
+| **P2** | **Feat-H** — Listening + proofreading + register shift | **DONE** |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
 | **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |
 | **P3** | **Feat-J** — Verb SRS integration | PM decision on SRS model |

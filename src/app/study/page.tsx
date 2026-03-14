@@ -62,7 +62,7 @@ export default async function StudyPage({
   const params = await searchParams
   const sessionSize = params.size ? Math.min(Math.max(parseInt(params.size, 10) || SESSION_SIZE, 1), 50) : SESSION_SIZE
   const filterTypes = params.types ? params.types.split(',').filter(Boolean) : []
-  const GENERATABLE_TYPES = new Set(['gap_fill', 'translation', 'transformation', 'error_correction'])
+  const GENERATABLE_TYPES = new Set(['gap_fill', 'translation', 'transformation', 'error_correction', 'listening', 'proofreading', 'register_shift'])
 
   // isOpenPractice: any session with practice=true (no SRS gate)
   const isOpenPractice = params.practice === 'true'

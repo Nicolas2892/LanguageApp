@@ -12,6 +12,9 @@ const EXERCISE_TYPES = [
   { value: 'error_correction', label: 'Errores'        },
   { value: 'sentence_builder', label: 'Constructor'    },
   { value: 'free_write',       label: 'Escritura'      },
+  { value: 'listening',        label: 'Auditiva'       },
+  { value: 'proofreading',     label: 'Corrección'     },
+  { value: 'register_shift',   label: 'Registro'       },
 ]
 
 const SESSION_SIZES = [5, 10, 15, 20, 25] as const

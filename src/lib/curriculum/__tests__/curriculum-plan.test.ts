@@ -10,6 +10,9 @@ const VALID_EXERCISE_TYPES: ExerciseType[] = [
   'translation',
   'error_correction',
   'free_write',
+  'listening',
+  'proofreading',
+  'register_shift',
 ]
 
 describe('CURRICULUM_PLAN', () => {
@@ -58,9 +61,10 @@ describe('CURRICULUM_PLAN', () => {
           expect(concept.type.trim().length).toBeGreaterThan(0)
         })
 
-        it('has exerciseTypes as a 3-tuple of valid ExerciseType values', () => {
+        it('has exerciseTypes with valid values and correct length for its level', () => {
           expect(Array.isArray(concept.exerciseTypes)).toBe(true)
-          expect(concept.exerciseTypes).toHaveLength(3)
+          const expectedLengths: Record<string, number> = { B1: 3, B2: 5, C1: 6 }
+          expect(concept.exerciseTypes.length).toBe(expectedLengths[concept.level])
           for (const t of concept.exerciseTypes) {
             expect(VALID_EXERCISE_TYPES).toContain(t)
           }

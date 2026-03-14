@@ -3,7 +3,7 @@
  *
  * - Existing concepts (21 in DB) are included so the plan is complete.
  *   The seed:ai script skips them during concept creation but uses them for exercise top-up.
- * - exerciseTypes: authoritative 3-tuple of types to reach 3 exercises each (9 total per concept).
+ * - exerciseTypes: authoritative array of types to reach 3 exercises each (N×3 total per concept).
  * - description: context passed to Claude when generating exercises.
  */
 
@@ -20,7 +20,7 @@ export interface ConceptPlan {
   grammar_focus: GrammarFocus
   difficulty: 1 | 2 | 3 | 4 | 5
   type: string
-  exerciseTypes: [ExerciseType, ExerciseType, ExerciseType]
+  exerciseTypes: ExerciseType[]
 }
 
 export const CURRICULUM_PLAN: ConceptPlan[] = [
@@ -47,7 +47,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 3,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -58,7 +58,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'both',
     difficulty: 3,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -69,7 +69,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 4,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'transformation', 'free_write'],
+    exerciseTypes: ['gap_fill', 'transformation', 'free_write', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -80,7 +80,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'both',
     difficulty: 4,
     type: 'connector',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
   // Unit 1.2 — Causal & Consecutive Connectors
@@ -93,7 +93,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'translation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -104,7 +104,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'translation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -126,7 +126,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 5,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'transformation', 'free_write'],
+    exerciseTypes: ['gap_fill', 'transformation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -137,7 +137,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -172,7 +172,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -183,7 +183,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -216,7 +216,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'connector',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
   // Unit 1.4 — Linking, Structuring & Reformulation
@@ -262,7 +262,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'translation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -273,7 +273,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Connectors & Discourse Markers',
@@ -284,7 +284,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'connector',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
   // ─── Module 2a: The Subjunctive: Core / 2b: The Subjunctive: Advanced ─────
@@ -310,7 +310,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 3,
     type: 'subjunctive_trigger',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'The Subjunctive: Core',
@@ -321,7 +321,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 3,
     type: 'subjunctive_trigger',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'The Subjunctive: Core',
@@ -332,7 +332,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 4,
     type: 'subjunctive_trigger',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'The Subjunctive: Core',
@@ -343,7 +343,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 3,
     type: 'subjunctive_trigger',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
   // Unit 2.2 — Imperfect Subjunctive & Hypotheticals
@@ -356,7 +356,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 4,
     type: 'conditional',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'The Subjunctive: Advanced',
@@ -367,7 +367,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 5,
     type: 'conditional',
-    exerciseTypes: ['gap_fill', 'transformation', 'free_write'],
+    exerciseTypes: ['gap_fill', 'transformation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'The Subjunctive: Advanced',
@@ -378,7 +378,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 4,
     type: 'subjunctive_trigger',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'The Subjunctive: Advanced',
@@ -389,7 +389,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 5,
     type: 'reported_speech',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
   // Unit 2.3 — Complex Subjunctive Structures
@@ -402,7 +402,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 4,
     type: 'subjunctive_structure',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'The Subjunctive: Advanced',
@@ -413,7 +413,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 5,
     type: 'subjunctive_structure',
-    exerciseTypes: ['gap_fill', 'transformation', 'free_write'],
+    exerciseTypes: ['gap_fill', 'transformation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'The Subjunctive: Advanced',
@@ -424,7 +424,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'both',
     difficulty: 5,
     type: 'subjunctive_structure',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'The Subjunctive: Advanced',
@@ -435,7 +435,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 5,
     type: 'subjunctive_structure',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
   // ─── Module 3: Past Tenses ────────────────────────────────────────────────
@@ -472,7 +472,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'past_tense',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Past Tenses',
@@ -483,7 +483,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'past_tense',
-    exerciseTypes: ['gap_fill', 'translation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
 
   // Unit 3.2 — Perfect & Pluperfect
@@ -496,7 +496,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'past_tense',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Past Tenses',
@@ -507,7 +507,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'past_tense',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Past Tenses',
@@ -518,7 +518,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'past_tense',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
   // Unit 3.3 — Reported Speech
@@ -531,7 +531,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'both',
     difficulty: 4,
     type: 'reported_speech',
-    exerciseTypes: ['transformation', 'translation', 'error_correction'],
+    exerciseTypes: ['transformation', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Past Tenses',
@@ -542,7 +542,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'reported_speech',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Past Tenses',
@@ -553,7 +553,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'reported_speech',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'Past Tenses',
@@ -564,7 +564,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 5,
     type: 'reported_speech',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
   // ─── Module 4: Core Spanish Contrasts ────────────────────────────────────
@@ -601,7 +601,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'ser_estar',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Core Spanish Contrasts',
@@ -612,7 +612,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'ser_estar',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
 
   // Unit 4.2 — Por vs. Para
@@ -647,7 +647,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'por_para',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Core Spanish Contrasts',
@@ -658,7 +658,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'por_para',
-    exerciseTypes: ['gap_fill', 'translation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
 
   // Unit 4.3 — Reflexive Verbs & Verbs of Change
@@ -682,7 +682,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'reflexive',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Core Spanish Contrasts',
@@ -693,7 +693,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'reflexive',
-    exerciseTypes: ['transformation', 'translation', 'error_correction'],
+    exerciseTypes: ['transformation', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Core Spanish Contrasts',
@@ -704,7 +704,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'reflexive',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
   // ─── Module 5: Verbal Periphrases ─────────────────────────────────────────
@@ -741,7 +741,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'periphrasis',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Verbal Periphrases',
@@ -752,7 +752,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 2,
     type: 'periphrasis',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
   // Unit 5.2 — Aspectual Periphrases
@@ -776,7 +776,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'periphrasis',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Verbal Periphrases',
@@ -787,7 +787,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'periphrasis',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Verbal Periphrases',
@@ -798,7 +798,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'periphrasis',
-    exerciseTypes: ['transformation', 'translation', 'error_correction'],
+    exerciseTypes: ['transformation', 'translation', 'error_correction', 'listening', 'proofreading', 'register_shift'],
   },
 
   // Unit 5.3 — Advanced Periphrases
@@ -811,7 +811,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'periphrasis',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Verbal Periphrases',
@@ -822,7 +822,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'periphrasis',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Verbal Periphrases',
@@ -844,7 +844,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'periphrasis',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'Verbal Periphrases',
@@ -855,7 +855,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 5,
     type: 'periphrasis',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
   // ─── Module 6: Complex Sentences ─────────────────────────────────────────
@@ -881,7 +881,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'both',
     difficulty: 4,
     type: 'relative_clause',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Complex Sentences',
@@ -892,7 +892,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'relative_clause',
-    exerciseTypes: ['transformation', 'translation', 'error_correction'],
+    exerciseTypes: ['transformation', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Complex Sentences',
@@ -903,7 +903,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'relative_clause',
-    exerciseTypes: ['gap_fill', 'transformation', 'free_write'],
+    exerciseTypes: ['gap_fill', 'transformation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
   // Unit 6.2 — Passive Voice
@@ -916,7 +916,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'passive',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Complex Sentences',
@@ -927,7 +927,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'passive',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Complex Sentences',
@@ -938,7 +938,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'passive',
-    exerciseTypes: ['transformation', 'translation', 'error_correction'],
+    exerciseTypes: ['transformation', 'translation', 'error_correction', 'listening', 'proofreading', 'register_shift'],
   },
 
   // Unit 6.3 — Advanced Adverbial Clauses
@@ -951,7 +951,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 4,
     type: 'adverbial_clause',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Complex Sentences',
@@ -962,7 +962,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'both',
     difficulty: 4,
     type: 'adverbial_clause',
-    exerciseTypes: ['gap_fill', 'transformation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Complex Sentences',
@@ -973,7 +973,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'both',
     difficulty: 3,
     type: 'adverbial_clause',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Complex Sentences',
@@ -984,7 +984,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'both',
     difficulty: 5,
     type: 'adverbial_clause',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'Complex Sentences',
@@ -995,7 +995,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'both',
     difficulty: 5,
     type: 'adverbial_clause',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'Complex Sentences',
@@ -1006,7 +1006,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'subjunctive',
     difficulty: 5,
     type: 'adverbial_clause',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
   // ─── Module 8: Conversational & Pragmatic Markers ──────────────────────────
@@ -1067,7 +1067,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 2,
     type: 'pragmatic_marker',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Conversational & Pragmatic Markers',
@@ -1078,7 +1078,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 2,
     type: 'pragmatic_marker',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Conversational & Pragmatic Markers',
@@ -1089,7 +1089,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'pragmatic_marker',
-    exerciseTypes: ['gap_fill', 'error_correction', 'translation'],
+    exerciseTypes: ['gap_fill', 'error_correction', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Conversational & Pragmatic Markers',
@@ -1100,7 +1100,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'pragmatic_marker',
-    exerciseTypes: ['gap_fill', 'translation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Conversational & Pragmatic Markers',
@@ -1111,7 +1111,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 2,
     type: 'pragmatic_marker',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
   // Unit 8.3 — Hedges, Justifiers & Emphatic Markers (Atenuadores y enfatizadores)
@@ -1124,7 +1124,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'pragmatic_marker',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Conversational & Pragmatic Markers',
@@ -1135,7 +1135,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'pragmatic_marker',
-    exerciseTypes: ['gap_fill', 'translation', 'error_correction'],
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
     module: 'Conversational & Pragmatic Markers',
@@ -1146,7 +1146,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 3,
     type: 'pragmatic_marker',
-    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
   // Unit 8.4 — Advanced Colloquial Markers & Register Switching (Marcadores coloquiales avanzados)
@@ -1159,7 +1159,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'pragmatic_marker',
-    exerciseTypes: ['transformation', 'error_correction', 'free_write'],
+    exerciseTypes: ['transformation', 'error_correction', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'Conversational & Pragmatic Markers',
@@ -1170,7 +1170,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'pragmatic_marker',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
     module: 'Conversational & Pragmatic Markers',
@@ -1181,6 +1181,6 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     grammar_focus: 'indicative',
     difficulty: 4,
     type: 'pragmatic_marker',
-    exerciseTypes: ['transformation', 'translation', 'free_write'],
+    exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 ]

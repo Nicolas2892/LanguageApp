@@ -17,6 +17,7 @@ import {
 import {
   PartyPopper, CheckCircle2, XCircle,
   Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles, Timer, X, Loader2,
+  Headphones, FileSearch, RefreshCw,
 } from 'lucide-react'
 import { PushPermissionPrompt } from '@/components/PushPermissionPrompt'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
@@ -63,6 +64,9 @@ const EXERCISE_TYPE_META: Record<string, { label: string; Icon: React.ElementTyp
   sentence_builder: { label: 'Constructor De Frases',   Icon: Shuffle       },
   error_correction: { label: 'Corrección De Errores',   Icon: AlertTriangle },
   free_write:       { label: 'Escritura Libre',         Icon: PenLine       },
+  listening:        { label: 'Comprensión Auditiva',    Icon: Headphones    },
+  proofreading:     { label: 'Corrección De Texto',     Icon: FileSearch    },
+  register_shift:   { label: 'Cambio De Registro',      Icon: RefreshCw     },
 }
 
 function formatTime(totalSeconds: number): string {

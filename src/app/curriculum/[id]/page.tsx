@@ -24,6 +24,10 @@ const EXERCISE_TYPES = [
   { type: 'transformation',   label: 'Transformación' },
   { type: 'sentence_builder', label: 'Construir frase' },
   { type: 'error_correction', label: 'Corregir error' },
+  { type: 'free_write',       label: 'Escritura libre' },
+  { type: 'listening',        label: 'Comprensión auditiva' },
+  { type: 'proofreading',     label: 'Corrección de texto' },
+  { type: 'register_shift',   label: 'Cambio de registro' },
 ] as const
 
 // Maps concept titles (exact DB values) to a VerbTense for the conjugation insight card.

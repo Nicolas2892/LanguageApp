@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
-const EXERCISE_TYPES = ['gap_fill', 'transformation', 'translation', 'free_write', 'sentence_builder', 'error_correction']
+const EXERCISE_TYPES = ['gap_fill', 'transformation', 'translation', 'free_write', 'sentence_builder', 'error_correction', 'listening', 'proofreading', 'register_shift']
 const SOURCE_OPTIONS = ['seed', 'ai_generated'] as const
 
 interface Props {

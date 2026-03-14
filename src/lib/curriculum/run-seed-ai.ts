@@ -142,7 +142,7 @@ Return ONLY valid JSON (no markdown, no commentary) in this exact structure:
   ],
   "exercises": [
     {
-      "type": "gap_fill|transformation|translation|error_correction|free_write",
+      "type": "gap_fill|transformation|translation|error_correction|free_write|listening|proofreading|register_shift",
       "prompt": "...",
       "expected_answer": "...",
       "hint_1": "...",
@@ -182,7 +182,7 @@ Return ONLY valid JSON (no markdown, no commentary) in this exact structure:
 {
   "exercises": [
     {
-      "type": "gap_fill|transformation|translation|error_correction|free_write",
+      "type": "gap_fill|transformation|translation|error_correction|free_write|listening|proofreading|register_shift",
       "prompt": "...",
       "expected_answer": "...",
       "hint_1": "...",
