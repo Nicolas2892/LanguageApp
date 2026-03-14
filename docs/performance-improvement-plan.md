@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-14
 **Status:** Phase 1, 2 & 3 complete
-**Revised:** 2026-03-14 (Phase 1 & 2 implemented — commit `1d6b70b`)
+**Revised:** 2026-03-14 (Phase 1 & 2 — commit `1d6b70b`; Phase 3 — commit `9f4d11e`)
 
 ---
 
