@@ -197,7 +197,7 @@ export async function POST(request: Request) {
                   .eq('concept_id', concept_id),
               )
             }
-            bgOps.push(updateComputedLevel(supabase, user.id))
+            bgOps.push(updateComputedLevel(supabase, user.id, { justMastered }))
           }
           Promise.all(bgOps).catch(console.error)
         } catch (err) {

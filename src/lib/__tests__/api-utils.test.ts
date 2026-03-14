@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { validateOrigin } from '../api-utils'
+import { validateOrigin, updateComputedLevel } from '../api-utils'
 
 function makeRequest(origin: string | null): Request {
   const headers = new Headers()
@@ -54,5 +54,45 @@ describe('validateOrigin', () => {
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://myapp.vercel.app')
     expect(validateOrigin(makeRequest('http://localhost:3000'))).toBe(false)
+  })
+})
+
+vi.mock('@/lib/mastery/computeLevel', () => ({
+  computeLevel: vi.fn().mockReturnValue('B1'),
+}))
+
+describe('updateComputedLevel', () => {
+  function makeSupabase(levelRows: unknown[] = []) {
+    const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
+    const eq = vi.fn().mockResolvedValue({ data: levelRows, error: null })
+    const select = vi.fn().mockReturnValue({ eq })
+    const from = vi.fn().mockImplementation((table: string) => {
+      if (table === 'concepts') return { select }
+      if (table === 'profiles') return { update }
+      return {}
+    })
+    return { from, update } as unknown as { from: ReturnType<typeof vi.fn>; update: ReturnType<typeof vi.fn> }
+  }
+
+  it('skips computation when justMastered is false', async () => {
+    const sb = makeSupabase()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await updateComputedLevel(sb as any, 'user-1', { justMastered: false })
+    expect(sb.from).not.toHaveBeenCalled()
+  })
+
+  it('skips computation when opts is undefined', async () => {
+    const sb = makeSupabase()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await updateComputedLevel(sb as any, 'user-1')
+    expect(sb.from).not.toHaveBeenCalled()
+  })
+
+  it('runs computation when justMastered is true', async () => {
+    const sb = makeSupabase([])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await updateComputedLevel(sb as any, 'user-1', { justMastered: true })
+    expect(sb.from).toHaveBeenCalledWith('concepts')
+    expect(sb.from).toHaveBeenCalledWith('profiles')
   })
 })

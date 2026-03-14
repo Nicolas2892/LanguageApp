@@ -126,7 +126,7 @@ export async function POST(request: Request) {
 
     // 6–8. Fire-and-forget: computed level, attempt record, streak
     Promise.all([
-      updateComputedLevel(supabase, user.id),
+      updateComputedLevel(supabase, user.id, { justMastered: true }),
       supabase.from('exercise_attempts').insert({
         user_id: user.id,
         exercise_id: null,

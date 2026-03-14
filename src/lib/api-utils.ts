@@ -49,7 +49,9 @@ export async function updateComputedLevel(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: SupabaseClient<any>,
   userId: string,
+  opts?: { justMastered?: boolean },
 ): Promise<void> {
+  if (!opts?.justMastered) return // level can only change on mastery events
   const { data: levelRows } = await supabase
     .from('concepts')
     .select('level, user_progress!inner(production_mastered, interval_days)')
