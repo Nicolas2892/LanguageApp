@@ -1,7 +1,7 @@
 # Performance Improvement Plan
 
 **Date:** 2026-03-14
-**Status:** Phase 1 & 2 complete
+**Status:** Phase 1, 2 & 3 complete
 **Revised:** 2026-03-14 (Phase 1 & 2 implemented — commit `1d6b70b`)
 
 ---
@@ -70,7 +70,7 @@ User taps Submit
 | **6** | Optimistic local grading — **fuzzy** (Levenshtein ≤ 2) for gap_fill only | `/api/submit` — gap_fill only | **~1.5s** for additional ~15% of gap_fill | Mood/accent confusion (está/esté) is 1–2 chars even in single words | Only apply when answer is 1–3 words; never apply to sentence-level types |
 | **7** | Optimistic grading: handle Claude disagreement via "Confirmando..." phase | Client UX (StudySession) | Enables #5 and #6 safely | "Correct → actually wrong" correction erodes trust; user sees a Next button they can't press during confirmation | New `optimistic-feedback` session phase: green/red flash shown instantly, Next button shows "Confirmando..." spinner until Claude confirms; if Claude disagrees, orange correction animation + scores array updated retroactively; SRS always uses Claude's score; ~2–5% disagreement rate for exact-match; UX design decision required |
 | **8** | Enrich `answer_variants` via Claude batch (seed script) | Offline / seed data | Raises #5 hit rate from ~15–20% → ~35–40% for translation/transformation | Bad variants teach wrong answers; maintenance burden on re-seed | Human review of generated variants; add to `seed:ai` pipeline |
-| **9** | Progress page: replace 5,000-row `exercise_attempts` fetch with aggregate RPC | `/progress` page load | **100–250ms** now; prevents **unbounded growth** as user history accumulates | New migration to deploy; RPC must be maintained alongside schema changes | `--dry-run` test; fallback to current query if RPC missing |
+| **9** ✅ | Progress page: replace 5,000-row `exercise_attempts` fetch with aggregate RPC | `/progress` page load | **100–250ms** now; prevents **unbounded growth** as user history accumulates | New migration to deploy; RPC must be maintained alongside schema changes | `--dry-run` test; fallback to current query if RPC missing |
 | **10** ✅ | Dashboard: parallelize profile fetch with due/total/studied queries | `/dashboard` page load | **50–100ms** | Timezone wrong on date boundary (UTC vs user TZ) → off-by-one on due count for users near midnight | Only affects users near midnight; self-corrects on next load |
 | **11** ✅ | Progress page: parallelize stages 3–5 (activity, sessions, verb progress) with stage 2 | `/progress` page load | **100–200ms** | None — all queries are independent | — |
 | **12** ✅ | DashboardDeferredSection: merge weakest-progress query into batch 3 | `/dashboard` deferred section | **50–80ms** | Slightly more complex query logic | Pure refactor; covered by existing tests |
@@ -169,7 +169,7 @@ When local grader produces a verdict but Claude hasn't confirmed yet:
 |-------|-------|--------|------|-------------------|
 | **Phase 1** ✅ | 1, 2, 3, 4, 15 | ~1 day | Near-zero | −200–350ms on every submit |
 | **Phase 2** ✅ | 10, 11, 12 | ~half day | Near-zero | +−150–300ms on page loads |
-| **Phase 3** | 9 | ~half day | Low (migration) | Progress page stable at ~500ms |
+| **Phase 3** ✅ | 9 | ~half day | Low (migration) | Progress page stable at ~500ms |
 | **Phase 4** | 5, 7 | ~3–3.5 days | Medium (UX complexity, new session phase) | ~15–55% of submits feel instant (varies by type) |
 | **Phase 5** | 8 | ~1 day + review | Low (content quality) | Translation/transformation hit rate rises to ~35–40% |
 | **Phase 6** | 6, 13 | ~half day | Low | gap_fill fuzzy match; debounced level |

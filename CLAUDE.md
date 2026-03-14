@@ -292,6 +292,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/018_exercise_pool.sql` — `exercises.source text NOT NULL DEFAULT 'seed'` CHECK IN ('seed','ai_generated'); FK `exercise_attempts.exercise_id` changed to ON DELETE SET NULL
 - `supabase/migrations/019_user_timezone.sql` — `profiles.timezone text DEFAULT NULL`; replaces `increment_streak_if_new_day` RPC to use user's IANA timezone (Audit-E1)
 - `supabase/migrations/020_streak_freeze.sql` — `profiles.streak_freeze_remaining integer DEFAULT 1`, `streak_freeze_last_replenished text`, `streak_freeze_used_date text`; replaces `increment_streak_if_new_day` RPC (now `RETURNS jsonb`) with freeze logic + auto-replenish. **Note:** must `DROP FUNCTION increment_streak_if_new_day(uuid)` before running (return type change)
+- `supabase/migrations/021_accuracy_rpc.sql` — `get_accuracy_by_type(p_user_id uuid)` RPC; returns per-type + `_total` accuracy rows (replaces unbounded exercise_attempts fetch on progress page)
 
 ### Dashboard Stats
 

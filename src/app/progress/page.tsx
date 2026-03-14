@@ -45,8 +45,7 @@ export default async function ProgressPage() {
   const [
     { data: conceptRows },
     { data: progressRows },
-    { data: attemptRows },
-    { data: exerciseRows },
+    { data: accuracyData },
     { data: activityRows },
     { data: sessionRows },
     { data: verbProgressRows },
@@ -55,12 +54,7 @@ export default async function ProgressPage() {
     supabase.from('user_progress')
       .select('concept_id, interval_days, production_mastered')
       .eq('user_id', user.id),
-    supabase
-      .from('exercise_attempts')
-      .select('ai_score, exercise_id')
-      .eq('user_id', user.id)
-      .limit(5000),
-    supabase.from('exercises').select('id, type'),
+    supabase.rpc('get_accuracy_by_type', { p_user_id: user.id }),
     supabase
       .from('exercise_attempts')
       .select('created_at')
@@ -112,37 +106,14 @@ export default async function ProgressPage() {
     total: totalByLevel.get(level) ?? 0,
   }))
 
-  // ── Accuracy (overall) — joined in TypeScript (no Supabase join syntax) ──
-  type AttemptRow = { ai_score: number | null; exercise_id: string | null }
-  type ExerciseRow = { id: string; type: string }
-
-  const exerciseTypeMap = new Map(
-    ((exerciseRows ?? []) as ExerciseRow[]).map((e) => [e.id, e.type])
-  )
-
-  const byType = new Map<string, { total: number; correct: number }>()
-  for (const row of (attemptRows ?? []) as AttemptRow[]) {
-    const type = (row.exercise_id && exerciseTypeMap.get(row.exercise_id)) ?? 'unknown'
-    const agg = byType.get(type) ?? { total: 0, correct: 0 }
-    agg.total += 1
-    if ((row.ai_score ?? 0) >= 2) agg.correct += 1
-    byType.set(type, agg)
-  }
-
-  const exerciseAccuracy = Array.from(byType.entries())
-    .filter(([, v]) => v.total >= 1)
-    .map(([, v]) => ({
-      accuracy: Math.round((v.correct / v.total) * 100),
-      attempts: v.total,
-    }))
-
-  const totalAttempts = exerciseAccuracy.reduce((s, e) => s + e.attempts, 0)
-  const overallAccuracy =
-    totalAttempts > 0
-      ? Math.round(
-          exerciseAccuracy.reduce((s, e) => s + e.accuracy * e.attempts, 0) / totalAttempts
-        )
-      : 0
+  // ── Accuracy (overall) — from RPC aggregate ──────────────────────────────
+  type AccuracyRow = { exercise_type: string; total_attempts: number; correct_count: number }
+  const accuracyRows = (accuracyData ?? []) as AccuracyRow[]
+  const totalRow = accuracyRows.find(r => r.exercise_type === '_total')
+  const totalAttempts = totalRow?.total_attempts ?? 0
+  const overallAccuracy = totalAttempts > 0
+    ? Math.round(((totalRow?.correct_count ?? 0) / totalAttempts) * 100)
+    : 0
 
   // ── Weekly activity chart (last 14 weeks) ─────────────────────────────────
   const activityByDate = new Map<string, number>()

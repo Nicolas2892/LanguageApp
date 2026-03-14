@@ -504,6 +504,14 @@ export interface Database {
         Args: { p_user_id: string; p_verb_id: string; p_tense: string; p_correct: boolean }
         Returns: void
       }
+      get_accuracy_by_type: {
+        Args: { p_user_id: string }
+        Returns: Array<{
+          exercise_type: string
+          total_attempts: number
+          correct_count: number
+        }>
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
