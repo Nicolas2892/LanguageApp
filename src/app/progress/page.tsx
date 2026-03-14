@@ -34,8 +34,23 @@ export default async function ProgressPage() {
   const computedLevel = profile?.computed_level ?? 'B1'
   const userTz = profile?.timezone ?? null
 
-  // ── 2. CEFR Journey + Accuracy (parallel) ─────────────────────────────────
-  const [{ data: conceptRows }, { data: progressRows }, { data: attemptRows }, { data: exerciseRows }] = await Promise.all([
+  // ── 2. All data queries in parallel (Item 11: merge stages 2–6) ──────────
+  const fourteenWeeksAgo = new Date()
+  fourteenWeeksAgo.setDate(fourteenWeeksAgo.getDate() - 98)
+
+  const todayStr = userLocalToday(userTz)
+  const monthStart = new Date(todayStr + 'T00:00:00Z')
+  monthStart.setUTCDate(1)
+
+  const [
+    { data: conceptRows },
+    { data: progressRows },
+    { data: attemptRows },
+    { data: exerciseRows },
+    { data: activityRows },
+    { data: sessionRows },
+    { data: verbProgressRows },
+  ] = await Promise.all([
     supabase.from('concepts').select('id, level'),
     supabase.from('user_progress')
       .select('concept_id, interval_days, production_mastered')
@@ -46,8 +61,24 @@ export default async function ProgressPage() {
       .eq('user_id', user.id)
       .limit(5000),
     supabase.from('exercises').select('id, type'),
+    supabase
+      .from('exercise_attempts')
+      .select('created_at')
+      .eq('user_id', user.id)
+      .gte('created_at', fourteenWeeksAgo.toISOString()),
+    supabase
+      .from('study_sessions')
+      .select('started_at, ended_at')
+      .eq('user_id', user.id)
+      .gte('started_at', monthStart.toISOString()),
+    supabase
+      .from('verb_progress')
+      .select('tense, attempt_count, correct_count')
+      .eq('user_id', user.id)
+      .gt('attempt_count', 0),
   ])
 
+  // ── CEFR Journey ──────────────────────────────────────────────────────────
   type ConceptRow = { id: string; level: string }
   type ProgressRow = { concept_id: string; interval_days: number; production_mastered: boolean }
 
@@ -81,7 +112,7 @@ export default async function ProgressPage() {
     total: totalByLevel.get(level) ?? 0,
   }))
 
-  // ── 3. Accuracy (overall) — joined in TypeScript (no Supabase join syntax)
+  // ── Accuracy (overall) — joined in TypeScript (no Supabase join syntax) ──
   type AttemptRow = { ai_score: number | null; exercise_id: string | null }
   type ExerciseRow = { id: string; type: string }
 
@@ -113,17 +144,7 @@ export default async function ProgressPage() {
         )
       : 0
 
-  // ── 4. Weekly activity chart (last 14 weeks) ──────────────────────────────
-  const fourteenWeeksAgo = new Date()
-  fourteenWeeksAgo.setDate(fourteenWeeksAgo.getDate() - 98)
-
-  const { data: activityRows } = await supabase
-    .from('exercise_attempts')
-    .select('created_at')
-    .eq('user_id', user.id)
-    .gte('created_at', fourteenWeeksAgo.toISOString())
-
-  // Count by date (user's local timezone) for uniqueDaysStudied, then aggregate by week
+  // ── Weekly activity chart (last 14 weeks) ─────────────────────────────────
   const activityByDate = new Map<string, number>()
   for (const row of (activityRows ?? []) as Array<{ created_at: string }>) {
     const date = utcToLocalDate(row.created_at, userTz)
@@ -132,7 +153,6 @@ export default async function ProgressPage() {
   const uniqueDaysStudied = activityByDate.size
 
   // Build 14 weeks of data (Monday-aligned, using user's local today)
-  const todayStr = userLocalToday(userTz)
   const today = new Date(todayStr + 'T00:00:00Z')
   const dayOfWeek = today.getUTCDay() // 0=Sun
   const daysSinceMonday = (dayOfWeek + 6) % 7
@@ -156,16 +176,7 @@ export default async function ProgressPage() {
     weeklyData.push({ weekStart: weekStartIso, count: weekCount })
   }
 
-  // ── 5. Study sessions this month ──────────────────────────────────────────
-  const monthStart = new Date(todayStr + 'T00:00:00Z')
-  monthStart.setUTCDate(1)
-
-  const { data: sessionRows } = await supabase
-    .from('study_sessions')
-    .select('started_at, ended_at')
-    .eq('user_id', user.id)
-    .gte('started_at', monthStart.toISOString())
-
+  // ── Study sessions this month ─────────────────────────────────────────────
   type SessionRow = { started_at: string; ended_at: string | null }
   const sessionCount = (sessionRows ?? []).length
   const totalMinutes = (sessionRows ?? [] as SessionRow[]).reduce((sum, s) => {
@@ -173,13 +184,6 @@ export default async function ProgressPage() {
     const ms = new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()
     return sum + Math.round(ms / 60000)
   }, 0)
-
-  // ── 6. Verb conjugation mastery ────────────────────────────────────────────
-  const { data: verbProgressRows } = await supabase
-    .from('verb_progress')
-    .select('tense, attempt_count, correct_count')
-    .eq('user_id', user.id)
-    .gt('attempt_count', 0)
 
   type VerbProgressRow = { tense: string; attempt_count: number; correct_count: number }
   const verbTenseMap = new Map<string, { correct: number; attempts: number }>()

@@ -19,21 +19,13 @@ export default async function DashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  // Fetch profile first to get timezone for today's date calculation
-  const { data: profileRaw } = await supabase
-    .from('profiles')
-    .select('computed_level, display_name, streak, timezone, streak_freeze_remaining, streak_freeze_used_date')
-    .eq('id', user.id)
-    .single()
-  const profile = profileRaw as Profile | null
-  const today = userLocalToday(profile?.timezone)
-
-  const [dueRes, totalConceptsRes, studiedRes] = await Promise.all([
+  // Item 10: Parallelise profile fetch with timezone-independent queries
+  const [{ data: profileRaw }, totalConceptsRes, studiedRes] = await Promise.all([
     supabase
-      .from('user_progress')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .lte('due_date', today),
+      .from('profiles')
+      .select('computed_level, display_name, streak, timezone, streak_freeze_remaining, streak_freeze_used_date')
+      .eq('id', user.id)
+      .single(),
     supabase
       .from('concepts')
       .select('id', { count: 'exact', head: true }),
@@ -42,6 +34,15 @@ export default async function DashboardPage() {
       .select('id', { count: 'exact', head: true })
       .eq('user_id', user.id),
   ])
+  const profile = profileRaw as Profile | null
+  const today = userLocalToday(profile?.timezone)
+
+  // Due count query needs timezone (for today's date), so runs after profile fetch
+  const dueRes = await supabase
+    .from('user_progress')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .lte('due_date', today)
 
   const dueCount = dueRes.count ?? 0
   const totalConcepts = totalConceptsRes.count ?? 0

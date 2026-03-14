@@ -30,6 +30,7 @@ export async function gradeAnswer({
   prompt,
   expectedAnswer,
   userAnswer,
+  answerVariants,
   model = GRADE_MODEL,
 }: {
   conceptTitle: string
@@ -38,16 +39,19 @@ export async function gradeAnswer({
   prompt: string
   expectedAnswer: string | null
   userAnswer: string
+  answerVariants?: string[] | null
   model?: string
 }): Promise<GradeResult> {
   const systemPrompt = `You are a Spanish language tutor grading exercises for a B1→B2 learner.
 You are strict but fair. You evaluate correctness, naturalness, and whether the target concept was applied.
 Always respond with valid JSON only — no markdown, no extra text.`
 
+  const truncatedExplanation = conceptExplanation.slice(0, 100)
+
   const multiBlankAnswers =
     exerciseType === 'gap_fill' ? parseExpectedAnswers(expectedAnswer) : null
 
-  const expectedLine = multiBlankAnswers
+  let expectedLine = multiBlankAnswers
     ? `Expected answers per blank (in order): ${JSON.stringify(multiBlankAnswers)}
 Student's answer is pipe-delimited — each segment before " | " corresponds to a blank in left-to-right order.
 Evaluate each blank separately. Score 3 = all blanks perfect; 2 = all correct with minor errors; 1 = at least one blank correct; 0 = all wrong.
@@ -56,11 +60,15 @@ In "corrected_version", write the FULL sentence(s) with every blank filled corre
       ? `Expected answer (or an acceptable variant): ${expectedAnswer}`
       : 'This is an open-ended exercise — evaluate based on correct use of the concept.'
 
+  if (answerVariants?.length) {
+    expectedLine += `\nAlso accept these variants: ${JSON.stringify(answerVariants)}`
+  }
+
   const safeAnswer = userAnswer.slice(0, 1000)
   const userPrompt = `Grade this Spanish exercise response.
 
 Concept being tested: ${conceptTitle}
-Concept explanation: ${conceptExplanation}
+Concept explanation: ${truncatedExplanation}
 Exercise type: ${exerciseType}
 Exercise prompt: ${prompt}
 ${expectedLine}
@@ -124,6 +132,7 @@ export async function* gradeAnswerStream({
   prompt,
   expectedAnswer,
   userAnswer,
+  answerVariants,
   model = GRADE_MODEL,
 }: {
   conceptTitle: string
@@ -132,16 +141,19 @@ export async function* gradeAnswerStream({
   prompt: string
   expectedAnswer: string | null
   userAnswer: string
+  answerVariants?: string[] | null
   model?: string
 }): AsyncGenerator<ScoreChunk | DetailsChunk> {
   const systemPrompt = `You are a Spanish language tutor grading exercises for a B1→B2 learner.
 You are strict but fair. You evaluate correctness, naturalness, and whether the target concept was applied.
 Always respond with valid JSON only — no markdown, no extra text.`
 
+  const truncatedExplanation = conceptExplanation.slice(0, 100)
+
   const multiBlankAnswers =
     exerciseType === 'gap_fill' ? parseExpectedAnswers(expectedAnswer) : null
 
-  const expectedLine = multiBlankAnswers
+  let expectedLine = multiBlankAnswers
     ? `Expected answers per blank (in order): ${JSON.stringify(multiBlankAnswers)}
 Student's answer is pipe-delimited — each segment before " | " corresponds to a blank in left-to-right order.
 Evaluate each blank separately. Score 3 = all blanks perfect; 2 = all correct with minor errors; 1 = at least one blank correct; 0 = all wrong.
@@ -150,11 +162,15 @@ In "corrected_version", write the FULL sentence(s) with every blank filled corre
       ? `Expected answer (or an acceptable variant): ${expectedAnswer}`
       : 'This is an open-ended exercise — evaluate based on correct use of the concept.'
 
+  if (answerVariants?.length) {
+    expectedLine += `\nAlso accept these variants: ${JSON.stringify(answerVariants)}`
+  }
+
   const safeAnswer = userAnswer.slice(0, 1000)
   const userPrompt = `Grade this Spanish exercise response.
 
 Concept being tested: ${conceptTitle}
-Concept explanation: ${conceptExplanation}
+Concept explanation: ${truncatedExplanation}
 Exercise type: ${exerciseType}
 Exercise prompt: ${prompt}
 ${expectedLine}

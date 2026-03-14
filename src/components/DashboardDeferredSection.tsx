@@ -27,32 +27,29 @@ export async function DashboardDeferredSection({
 }: Props) {
   const supabase = await createClient()
 
-  // Batch 1 — weakest concept for Escritura Libre suggestion
-  const weakestProgressRes = await supabase
-    .from('user_progress')
-    .select('concept_id, interval_days')
-    .eq('user_id', userId)
-    .lt('interval_days', MASTERY_THRESHOLD)
-    .order('interval_days', { ascending: true })
-    .limit(1)
+  // Item 12: Merge weakest-progress query with curriculum state queries into one batch
+  const [weakestProgressRes, modulesRes, unitsRes, conceptsRes, allProgressRes] = await Promise.all([
+    supabase
+      .from('user_progress')
+      .select('concept_id, interval_days')
+      .eq('user_id', userId)
+      .lt('interval_days', MASTERY_THRESHOLD)
+      .order('interval_days', { ascending: true })
+      .limit(1),
+    supabase.from('modules').select('id, title, order_index').order('order_index', { ascending: true }),
+    supabase.from('units').select('id, module_id'),
+    supabase.from('concepts').select('id, unit_id, title'),
+    supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', userId),
+  ])
 
   const weakestConceptId =
     (weakestProgressRes.data?.[0] as { concept_id: string } | undefined)?.concept_id ?? null
 
-  // Batch 2 — write concept lookup
-  const writeConceptRes = !isNewUser && weakestConceptId
-    ? await supabase.from('concepts').select('id, title').eq('id', weakestConceptId).single()
-    : { data: null, error: null }
-
-  const writeConcept = writeConceptRes.data as Pick<Concept, 'id' | 'title'> | null
-
-  // Batch 3 — curriculum state (3 public reads + 1 user read, all parallel)
-  const [modulesRes, unitsRes, conceptsRes, allProgressRes] = await Promise.all([
-    supabase.from('modules').select('id, title, order_index').order('order_index', { ascending: true }),
-    supabase.from('units').select('id, module_id'),
-    supabase.from('concepts').select('id, unit_id'),
-    supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', userId),
-  ])
+  // Look up concept name from the already-fetched concepts data (no extra query needed)
+  const allConceptsFull = (conceptsRes.data ?? []) as Array<{ id: string; unit_id: string; title: string }>
+  const writeConcept = !isNewUser && weakestConceptId
+    ? allConceptsFull.find(c => c.id === weakestConceptId) as Pick<Concept, 'id' | 'title'> | undefined ?? null
+    : null
 
   const allModules   = (modulesRes.data   ?? []) as ModuleRow[]
   const allUnits     = (unitsRes.data     ?? []) as UnitRow[]

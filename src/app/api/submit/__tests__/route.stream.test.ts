@@ -30,6 +30,8 @@ vi.mock('@/lib/srs', () => ({
   DEFAULT_PROGRESS: { ease_factor: 2.5, interval_days: 0, repetitions: 0 },
 }))
 
+import { clearCache } from '@/lib/cache'
+
 const EXERCISE_ID = '11111111-1111-1111-1111-111111111111'
 const CONCEPT_ID = '22222222-2222-2222-2222-222222222222'
 
@@ -38,6 +40,7 @@ const mockExercise = {
   type: 'gap_fill',
   prompt: 'Test ___',
   expected_answer: 'answer',
+  answer_variants: null,
   concept_id: CONCEPT_ID,
   annotations: null,
   hint_1: null,
@@ -151,6 +154,7 @@ function makeRequest(extra: Record<string, unknown> = {}) {
 describe('POST /api/submit — Perf-A streaming NDJSON', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    clearCache()
     setupMocks()
     vi.mocked(gradeAnswerStream).mockImplementation(() =>
       makeStreamGen(

@@ -11,6 +11,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib/api-utils'
 import { MASTERY_THRESHOLD, HARD_INTERVAL_MULTIPLIER } from '@/lib/constants'
 import { userLocalToday } from '@/lib/timezone'
+import { getCached } from '@/lib/cache'
 import * as Sentry from '@sentry/nextjs'
 
 const SubmitSchema = z.object({
@@ -30,34 +31,42 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Rate limit: 60 requests per 10 minutes per user
-    if (!(await checkRateLimit(user.id, 'submit', { maxRequests: 60, windowMs: 10 * 60 * 1000 })).allowed) {
-      return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
-    }
-
     const parsed = SubmitSchema.safeParse(await request.json())
     if (!parsed.success) {
       return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
     }
     const { exercise_id, concept_id, user_answer, skip_srs } = parsed.data
 
-    // 1. Fetch exercise + concept in parallel (2 concurrent queries, no join syntax risk)
-    const [
-      { data: exercise, error: exErr },
-      { data: concept, error: conceptErr },
-    ] = await Promise.all([
-      supabase
-        .from('exercises')
-        .select('id, type, prompt, expected_answer, concept_id, annotations, hint_1, hint_2')
-        .eq('id', exercise_id)
-        .eq('concept_id', concept_id)
-        .single(),
-      supabase
-        .from('concepts')
-        .select('id, title, explanation, level, type, difficulty, grammar_focus, unit_id, examples')
-        .eq('id', concept_id)
-        .single(),
+    // Item 2: Parallelise rate-limit check with exercise+concept fetch
+    const [rateLimitResult, exerciseResult, conceptResult] = await Promise.all([
+      checkRateLimit(user.id, 'submit', { maxRequests: 60, windowMs: 10 * 60 * 1000 }),
+      // Item 15: Cache exercise rows (static curriculum data, 5-min TTL)
+      getCached(`exercise:${exercise_id}`, () =>
+        supabase
+          .from('exercises')
+          .select('id, type, prompt, expected_answer, answer_variants, concept_id, annotations, hint_1, hint_2')
+          .eq('id', exercise_id)
+          .eq('concept_id', concept_id)
+          .single()
+          .then(r => r as { data: Exercise | null; error: unknown }),
+      ),
+      // Item 15: Cache concept rows (static curriculum data, 5-min TTL)
+      getCached(`concept:${concept_id}`, () =>
+        supabase
+          .from('concepts')
+          .select('id, title, explanation, level, type, difficulty, grammar_focus, unit_id, examples')
+          .eq('id', concept_id)
+          .single()
+          .then(r => r as { data: Concept | null; error: unknown }),
+      ),
     ])
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
+    }
+
+    const { data: exercise, error: exErr } = exerciseResult
+    const { data: concept, error: conceptErr } = conceptResult
 
     if (exErr || !exercise) return NextResponse.json({ error: 'Exercise not found' }, { status: 404 })
     if (conceptErr || !concept) return NextResponse.json({ error: 'Concept not found' }, { status: 404 })
@@ -72,7 +81,26 @@ export async function POST(request: Request) {
       prompt: typedExercise.prompt,
       expectedAnswer: typedExercise.expected_answer,
       userAnswer: user_answer,
+      // Item 4: Pass answer_variants to Claude prompt
+      answerVariants: (typedExercise as Exercise & { answer_variants?: string[] | null }).answer_variants,
     })
+
+    // Item 1: Pre-fetch SRS data in parallel with Claude call
+    const srsDataPromise = !skip_srs
+      ? Promise.all([
+          supabase
+            .from('user_progress')
+            .select('ease_factor, interval_days, repetitions, due_date, production_mastered, is_hard')
+            .eq('user_id', user.id)
+            .eq('concept_id', concept_id)
+            .single(),
+          supabase
+            .from('profiles')
+            .select('timezone')
+            .eq('id', user.id)
+            .single(),
+        ])
+      : null
 
     const encoder = new TextEncoder()
     const isProductionType = (PRODUCTION_TYPES as readonly string[]).includes(typedExercise.type)
@@ -87,21 +115,9 @@ export async function POST(request: Request) {
           let nextReviewInDays = 0
           let justMastered = false
 
-          if (!skip_srs) {
-            // Fetch current user_progress + user timezone in parallel
-            const [{ data: existingProgress }, { data: profileTz }] = await Promise.all([
-              supabase
-                .from('user_progress')
-                .select('ease_factor, interval_days, repetitions, due_date, production_mastered, is_hard')
-                .eq('user_id', user.id)
-                .eq('concept_id', concept_id)
-                .single(),
-              supabase
-                .from('profiles')
-                .select('timezone')
-                .eq('id', user.id)
-                .single(),
-            ])
+          if (!skip_srs && srsDataPromise) {
+            // Item 1: Await the already-in-flight SRS promises
+            const [{ data: existingProgress }, { data: profileTz }] = await srsDataPromise
 
             const timezone = (profileTz as { timezone: string | null } | null)?.timezone ?? null
             const prevIntervalDays = existingProgress?.interval_days ?? 0

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { validateOrigin } from '@/lib/api-utils'
+import { invalidateCache } from '@/lib/cache'
 import type { Profile } from '@/lib/supabase/types'
 import * as Sentry from '@sentry/nextjs'
 
@@ -61,6 +62,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Failed to update exercise' }, { status: 500 })
   }
 
+  invalidateCache(`exercise:${id}`)
   return NextResponse.json({ ok: true })
   } catch (err) {
     Sentry.captureException(err)
@@ -106,6 +108,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Failed to delete exercise' }, { status: 500 })
   }
 
+  invalidateCache(`exercise:${id}`)
   return NextResponse.json({ ok: true })
   } catch (err) {
     Sentry.captureException(err)

@@ -33,6 +33,7 @@ vi.mock('@/lib/srs', () => ({
 }))
 
 import { sm2 } from '@/lib/srs'
+import { clearCache } from '@/lib/cache'
 import type { SRSScore } from '@/lib/srs'
 
 const MASTERY_THRESHOLD = 21
@@ -45,6 +46,7 @@ const mockExercise = {
   type: 'gap_fill',
   prompt: 'Test prompt ___',
   expected_answer: 'answer',
+  answer_variants: null,
   concept_id: CONCEPT_ID,
   annotations: null,
   hint_1: null,
@@ -181,6 +183,7 @@ function makeRequest(extra: Record<string, unknown> = {}) {
 describe('POST /api/submit — UX-AA just_mastered flag', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    clearCache()
   })
 
   it('returns just_mastered: false when prev interval already >= threshold', async () => {
