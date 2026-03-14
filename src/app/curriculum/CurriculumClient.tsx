@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
-import { getMasteryState, MASTERY_BADGE } from '@/lib/mastery/badge'
+import { getMasteryState, MASTERY_DOT } from '@/lib/mastery/badge'
 import { LevelChip } from '@/components/LevelChip'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { HardFlagButton } from '@/components/HardFlagButton'
@@ -351,7 +351,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                           {(conceptsByUnit.get(unit.id) ?? []).map(concept => {
                             const p = progressMap.get(concept.id)
                             const masteryState = getMasteryState(p?.interval_days)
-                            const badge = MASTERY_BADGE[masteryState]
+                            const dot = MASTERY_DOT[masteryState]
                             const locked = isLocked(concept)
                             const isHard = p?.is_hard ?? false
 
@@ -397,7 +397,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                       </span>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                                      <span style={badge.style}>{badge.label}</span>
+                                      <span title={dot.title} style={dot.style} />
                                       <div
                                         onClick={e => e.stopPropagation()}
                                         style={{ position: 'relative', zIndex: 20 }}

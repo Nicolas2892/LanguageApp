@@ -553,11 +553,7 @@ Items are ordered by priority within each group. Full details of completed work 
 
 **Fix-J: STT — replace Web Speech API with OpenAI Whisper** *(DONE — see completed-features.md)*
 
-**Fix-L: Verify push notifications on iOS PWA** *(TOOLING COMPLETE — pending device verification)*
-
-- Full implementation details in `docs/completed-features.md`. Checklist: `docs/ios-push-verification.md`.
-- **Known limitation**: single `push_subscription` per profile row — only last-subscribed device gets pushes.
-- **Next step: deploy with VAPID env vars, run checklist on a physical iPhone (iOS 16.4+) in Safari standalone mode.**
+**Fix-L: Verify push notifications on iOS PWA** *(DONE — see completed-features.md)*
 
 ### Technical Debt
 
@@ -588,7 +584,7 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 | -------- | ---- | ---- |
 | **P1** | **Audit-E1** — Timezone-aware streak RPC | **DONE** |
 | **P1** | **Fix-J** — STT replacement for iOS Safari | **DONE** |
-| **P1** | **Fix-L** — Verify push notifications on iOS PWA | Deploy + device test pending |
+| **P1** | **Fix-L** — Verify push notifications on iOS PWA | **DONE** |
 | **P2** | **Feat-G** — Streak freeze | **DONE** |
 | **P2** | **Feat-H** — Listening + proofreading + register shift | **DONE** |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |

@@ -12,6 +12,45 @@ export function getMasteryState(intervalDays: number | undefined): MasteryState 
  * Mastery badge config — adaptive tokens for dark mode support.
  * Uses CSS custom properties from globals.css so colours swap automatically.
  */
+/**
+ * Mastery dot config — compact 7px circle for curriculum concept rows.
+ * Two visual states: filled terracotta (mastered) vs muted outline (learning/new).
+ */
+export const MASTERY_DOT: Record<MasteryState, { title: string; style: React.CSSProperties }> = {
+  mastered: {
+    title: 'Dominado',
+    style: {
+      width: 7,
+      height: 7,
+      borderRadius: 9999,
+      background: 'var(--d5-terracotta)',
+      flexShrink: 0,
+    },
+  },
+  learning: {
+    title: 'Aprendiendo',
+    style: {
+      width: 7,
+      height: 7,
+      borderRadius: 9999,
+      background: 'transparent',
+      border: '1.5px solid var(--d5-muted)',
+      flexShrink: 0,
+    },
+  },
+  new: {
+    title: 'Nuevo',
+    style: {
+      width: 7,
+      height: 7,
+      borderRadius: 9999,
+      background: 'transparent',
+      border: '1.5px solid var(--d5-muted)',
+      flexShrink: 0,
+    },
+  },
+}
+
 export const MASTERY_BADGE: Record<MasteryState, { label: string; style: React.CSSProperties }> = {
   mastered: {
     label: 'Dominado',
