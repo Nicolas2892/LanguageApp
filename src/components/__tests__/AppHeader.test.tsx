@@ -7,7 +7,11 @@ vi.mock('next/navigation', () => ({
   usePathname: () => mockPathname,
 }))
 
-const defaultProps = { userInitials: 'NI', streak: 5, streakFreezeRemaining: 1 }
+vi.mock('@/components/StreakCalendarModal', () => ({
+  StreakCalendarModal: () => null,
+}))
+
+const defaultProps = { userInitials: 'NI', streak: 5, streakFreezeRemaining: 1, timezone: 'Europe/Berlin' }
 
 describe('AppHeader', () => {
   it('shows tutor icon on /dashboard', () => {

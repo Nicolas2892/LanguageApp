@@ -24,11 +24,11 @@ export interface ConceptPlan {
 }
 
 export const CURRICULUM_PLAN: ConceptPlan[] = [
-  // ─── Module 1: Connectors & Discourse Markers ────────────────────────────
+  // ─── Module 1: Connectors ────────────────────────────
 
   // Unit 1.1 — Concessive Connectors
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Concessive Connectors',
     title: 'aunque (+ indicativo)',
     description: 'aunque followed by indicative mood to express concession when the conceded fact is real, certain, or already known to both speakers',
@@ -39,7 +39,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Concessive Connectors',
     title: 'aunque (+ subjuntivo)',
     description: 'aunque followed by subjunctive mood to concede a hypothetical, uncertain, or irrelevant condition — contrasting with the indicative use',
@@ -50,7 +50,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Concessive Connectors',
     title: 'a pesar de (que)',
     description: 'a pesar de + noun/infinitive and a pesar de que + indicative/subjunctive to introduce a strong concession, equivalent to "despite / in spite of the fact that"',
@@ -61,7 +61,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Concessive Connectors',
     title: 'por más que / por mucho que',
     description: 'por más que and por mucho que with subjunctive to express that even a maximum degree of effort or quantity does not change the outcome — "no matter how much"',
@@ -72,7 +72,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'free_write', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Concessive Connectors',
     title: 'si bien / aun cuando',
     description: 'si bien and aun cuando as formal/literary concessive connectors equivalent to "even though / although", typically used in written registers at C1 level',
@@ -85,7 +85,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 1.2 — Causal & Consecutive Connectors
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Causal & Consecutive Connectors',
     title: 'puesto que / ya que',
     description: 'puesto que and ya que as formal causal connectors meaning "since / given that", used when the cause is already known or obvious to the listener',
@@ -96,7 +96,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Causal & Consecutive Connectors',
     title: 'dado que / en vista de que',
     description: 'dado que and en vista de que as formal causal connectors meaning "given that / in view of the fact that", typical of academic and administrative registers',
@@ -107,7 +107,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Causal & Consecutive Connectors',
     title: 'por lo tanto / por consiguiente',
     description: 'por lo tanto and por consiguiente as consecutive connectors meaning "therefore / consequently", used to introduce a logical result or conclusion',
@@ -118,7 +118,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Causal & Consecutive Connectors',
     title: 'de ahí que (+ subjuntivo)',
     description: 'de ahí que followed by subjunctive to introduce a consequence derived from the preceding statement — formal equivalent of "hence / that is why", always triggering subjunctive',
@@ -129,7 +129,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Causal & Consecutive Connectors',
     title: 'tanto… que / tal… que',
     description: 'tanto/tanta/tantos/tantas… que and tal/tales… que to express a degree so high that it produces a consequence — "so much/many… that" and "such… that"',
@@ -140,7 +140,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Causal & Consecutive Connectors',
     title: 'por eso / por esa razón',
     description: 'por eso and por esa razón as high-frequency consecutive connectors meaning "that is why / for that reason", used to link a cause already mentioned to its result',
@@ -151,7 +151,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Causal & Consecutive Connectors',
     title: 'así que',
     description: 'así que as a colloquial consecutive connector meaning "so / and so", introducing a result or decision that follows from what was just said — common in spoken and informal written Spanish',
@@ -164,7 +164,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 1.3 — Adversative & Contrast Connectors
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Adversative & Contrast Connectors',
     title: 'sin embargo',
     description: 'sin embargo as the core adversative connector meaning "however / nevertheless", used to introduce a contrast or limitation to the preceding statement',
@@ -175,7 +175,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Adversative & Contrast Connectors',
     title: 'no obstante',
     description: 'no obstante as a formal adversative connector equivalent to sin embargo but more typical of written, academic and legal registers — "nevertheless / notwithstanding"',
@@ -186,7 +186,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Adversative & Contrast Connectors',
     title: 'en cambio / por el contrario',
     description: 'en cambio and por el contrario to introduce a contrast between two elements or situations — en cambio is more neutral, por el contrario more emphatic',
@@ -197,7 +197,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Adversative & Contrast Connectors',
     title: 'mientras que',
     description: 'mientras que to mark a contrast or opposition between two simultaneous or parallel situations — "whereas / while" in a contrastive (not temporal) sense',
@@ -208,7 +208,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Adversative & Contrast Connectors',
     title: 'ahora bien / con todo',
     description: 'ahora bien and con todo as formal adversative connectors that signal a nuanced reservation or qualification after a concession — "that said / be that as it may / all the same"',
@@ -221,7 +221,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 1.4 — Linking, Structuring & Reformulation
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Linking, Structuring & Reformulation',
     title: 'en primer lugar / a continuación / por último',
     description: 'discourse sequencing markers: en primer lugar (first of all), a continuación / seguidamente (next / then), por último / finalmente (lastly / finally) — used to organise numbered points in speech and writing',
@@ -232,7 +232,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Linking, Structuring & Reformulation',
     title: 'es decir / o sea',
     description: 'es decir and o sea as reformulation markers meaning "that is to say / in other words" — es decir is neutral/formal, o sea is colloquial — used to clarify, paraphrase or specify what has just been said',
@@ -243,7 +243,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Linking, Structuring & Reformulation',
     title: 'además',
     description: 'además as the core additive connector meaning "moreover / furthermore / also", used to add a new point that supports or extends the previous one — the entry-level additive all B1 learners need',
@@ -254,7 +254,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Linking, Structuring & Reformulation',
     title: 'asimismo / del mismo modo / incluso',
     description: 'asimismo and del mismo modo as formal additive connectors ("likewise / in the same way"), and incluso as an inclusive additive meaning "even / including" — all used to add emphasis or a further supporting point',
@@ -265,7 +265,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Linking, Structuring & Reformulation',
     title: 'en cuanto a / con respecto a',
     description: 'en cuanto a and con respecto a as topic-framing connectors meaning "as for / regarding / with respect to", used to introduce a new topic or shift focus to a new aspect of the discussion',
@@ -276,7 +276,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Connectors & Discourse Markers',
+    module: 'Connectors',
     unit: 'Linking, Structuring & Reformulation',
     title: 'en definitiva / en conclusión / en suma',
     description: 'en definitiva, en conclusión and en suma as summary and conclusion markers meaning "in short / in conclusion / all in all" — used to wrap up an argument by restating the main point',
@@ -707,6 +707,41 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
+  // Unit 4.4 — Temporal Adverbs & Focus Particles
+  {
+    module: 'Core Spanish Contrasts',
+    unit: 'Temporal Adverbs & Focus Particles',
+    title: 'todavía / aún vs. ya (contraste temporal afirmativo)',
+    description: 'affirmative temporal contrast: todavía / aún (still — action continues) vs. ya (already / now — change has happened); core opposition that structures how Spanish marks time relative to expectations',
+    level: 'B2',
+    grammar_focus: 'indicative',
+    difficulty: 3,
+    type: 'adverbial',
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
+  },
+  {
+    module: 'Core Spanish Contrasts',
+    unit: 'Temporal Adverbs & Focus Particles',
+    title: 'todavía no vs. ya no (contraste temporal negativo)',
+    description: 'negative mirror of todavía/ya: todavía no (not yet — expected action has not happened) vs. ya no (no longer — action that was true has stopped); negation flips meaning while preserving the continuity/change axis',
+    level: 'B2',
+    grammar_focus: 'indicative',
+    difficulty: 3,
+    type: 'adverbial',
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
+  },
+  {
+    module: 'Core Spanish Contrasts',
+    unit: 'Temporal Adverbs & Focus Particles',
+    title: 'ni siquiera / siquiera (partícula de foco)',
+    description: 'emphatic scalar particle: ni siquiera (not even) adds surprise or emphasis to negation, marking the lowest expected item on a scale; siquiera (even / at least) in questions, conditionals, and concessive clauses — often triggers subjunctive',
+    level: 'B2',
+    grammar_focus: 'both',
+    difficulty: 4,
+    type: 'adverbial',
+    exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
+  },
+
   // ─── Module 5: Verbal Periphrases ─────────────────────────────────────────
 
   // Unit 5.1 — Modal Periphrases
@@ -858,11 +893,11 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
-  // ─── Module 6: Complex Sentences ─────────────────────────────────────────
+  // ─── Module 6: Advanced Clauses ─────────────────────────────────────────
 
   // Unit 6.1 — Relative Clauses
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Relative Clauses',
     title: 'Oraciones de relativo especificativas con que / quien / donde',
     description: 'restrictive relative clauses with que (for things and people), quien/quienes (for people after prepositions), and donde (for places) — defining or identifying the antecedent, no commas',
@@ -873,7 +908,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Relative Clauses',
     title: 'Oraciones de relativo con antecedente indefinido (+ subjuntivo)',
     description: 'relative clauses requiring subjunctive when the antecedent is unknown, non-existent, or being sought — "busco un secretario que hable chino" (I\'m looking for a secretary who speaks Chinese — don\'t know if one exists)',
@@ -884,7 +919,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Relative Clauses',
     title: 'el cual / la cual / lo cual: relativas formales y explicativas',
     description: 'el cual/la cual/los cuales/las cuales and lo cual in non-restrictive (explanatory) relative clauses, especially after prepositions — more formal than que, used to add information rather than restrict the antecedent',
@@ -895,7 +930,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['transformation', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Relative Clauses',
     title: 'cuyo/cuya: posesión en oraciones de relativo',
     description: 'cuyo/cuya/cuyos/cuyas as possessive relative pronoun meaning "whose" — agrees in gender and number with the noun it precedes (the thing possessed), not the antecedent; used in formal written registers',
@@ -908,7 +943,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 6.2 — Passive Voice
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Passive Voice',
     title: 'Pasiva perifrástica: ser + participio',
     description: 'periphrastic passive: ser + past participle (+ por + agent) — the subject receives the action; participle agrees with subject in gender/number; used in formal/written registers when the action itself is the focus',
@@ -919,7 +954,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Passive Voice',
     title: 'Pasiva refleja: se + verbo activo',
     description: 'reflexive passive: se + active verb in 3rd person (singular or plural agreeing with the grammatical subject) — typically used when no agent is mentioned; more common than ser passive in everyday spoken and written Spanish',
@@ -930,7 +965,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Passive Voice',
     title: 'Pasiva refleja vs. perifrástica: registro y uso',
     description: 'choosing between ser + participio and se + verbo in context — ser passive is formal/literary and can name the agent; se passive is more neutral and avoids naming the agent; both are correct in formal writing but serve different communicative purposes',
@@ -943,7 +978,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 6.3 — Advanced Adverbial Clauses
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Advanced Adverbial Clauses',
     title: 'Oraciones condicionales con a menos que / con tal de que (+ subjuntivo)',
     description: 'conditional clauses with a menos que (unless) and con tal de que (as long as / provided that) — both always require subjunctive and express the condition under which the main clause is true or false',
@@ -954,7 +989,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Advanced Adverbial Clauses',
     title: 'Oraciones concesivas con por mucho que / aunque (indicativo vs. subjuntivo)',
     description: 'concessive adverbial clauses: por mucho que (always subjunctive) vs. aunque + indicative (known fact) vs. aunque + subjunctive (hypothetical/irrelevant) — mapping the factual/hypothetical distinction onto concessive connectors',
@@ -965,7 +1000,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Advanced Adverbial Clauses',
     title: 'Oraciones temporales con nada más / en cuanto / tan pronto como',
     description: 'temporal clauses expressing "as soon as": nada más + infinitivo (very immediate), en cuanto + subjunctive (future), tan pronto como + subjunctive (future/formal) — all expressing immediacy of sequence, with subjunctive for future events',
@@ -976,7 +1011,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Advanced Adverbial Clauses',
     title: 'Oraciones modales: según + indicativo/subjuntivo; como si + subjuntivo',
     description: 'modal adverbial clauses: según + indicative (as/according to what is stated) vs. según + subjunctive (depending on what may be), and como si + imperfect/pluperfect subjunctive for comparisons to hypothetical situations ("as if")',
@@ -987,7 +1022,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Advanced Adverbial Clauses',
     title: 'Oraciones consecutivas con de modo que / de forma que (+ subjuntivo/indicativo)',
     description: 'consecutive clauses with de modo que and de forma que: indicative when expressing a real result ("so that, as a result"), subjunctive when expressing a purpose or intended result ("so that, in order that") — the same connector with two different meanings',
@@ -998,7 +1033,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
-    module: 'Complex Sentences',
+    module: 'Advanced Clauses',
     unit: 'Advanced Adverbial Clauses',
     title: 'Oraciones causales negadas: no porque + subjuntivo',
     description: 'negated causal clauses: no + main clause + porque + subjunctive to deny a cause while (optionally) asserting a different one — "No lo hago porque sea fácil, sino porque es necesario"; the subjunctive in the denied cause is obligatory',
@@ -1009,11 +1044,11 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
 
-  // ─── Module 8: Conversational & Pragmatic Markers ──────────────────────────
+  // ─── Module 8: Conversational Spanish ──────────────────────────
 
   // Unit 8.1 — Fillers & Hesitation Markers (Muletillas de apoyo)
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Fillers & Hesitation Markers',
     title: 'bueno (marcador conversacional)',
     description: 'bueno as a conversational marker (NOT adjective "good"): turn-opener ("Bueno, te cuento..."), hesitation filler ("Bueno... no sé"), topic shift ("Bueno, cambiando de tema"), softened disagreement ("Bueno, yo no diría eso"). All spoken registers from casual to semi-formal. Register awareness: acceptable in speech, avoid in formal writing.',
@@ -1024,7 +1059,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Fillers & Hesitation Markers',
     title: 'pues (marcador conversacional)',
     description: 'pues as a conversational marker: turn-taking filler ("Pues, mira..."), hesitation ("Pues... no estoy seguro"), emphasis ("¡Pues claro!"), spoken consequence ("Pues entonces vamos"). Very frequent in Peninsular Spanish. Register awareness: natural in speech at all levels, inappropriate in formal/academic writing.',
@@ -1035,7 +1070,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Fillers & Hesitation Markers',
     title: 'o sea (muletilla pragmática)',
     description: 'o sea as a pragmatic filler/hedge (distinct from Module 1 reformulation connector): self-correction ("Llegué tarde, o sea, no tan tarde"), approximation ("Costaba como... o sea, unos veinte euros"), hedging ("O sea, no es que no quiera..."), mild surprise ("¿O sea que ya lo sabías?"). Overuse marks very casual/youth speech. Register awareness: strictly oral, strongly informal.',
@@ -1046,7 +1081,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'error_correction', 'translation'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Fillers & Hesitation Markers',
     title: 'a ver',
     description: 'a ver as a conversational marker: buying thinking time ("A ver... ¿cómo te lo explico?"), introducing explanation ("A ver, el problema es que..."), expressing curiosity/anticipation ("¡A ver qué pasa!"), informal attention-caller ("A ver, escuchadme"). Register awareness: common in speech from casual to semi-formal, avoid in formal writing.',
@@ -1059,7 +1094,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 8.2 — Attention-Getters & Reaction Markers (Captadores y reacciones)
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Attention-Getters & Reaction Markers',
     title: 'claro / por supuesto / desde luego',
     description: 'Agreement and confirmation markers with varying formality: claro = enthusiastic agreement ("¡Claro que sí!"), hedged concession ("Claro, pero..."), sarcasm ("Claro, como siempre"). por supuesto = emphatic formal agreement. desde luego = formal emphatic certainty, sometimes expressing exasperation ("Desde luego, qué desastre"). Register awareness: claro (all registers), por supuesto (formal+neutral), desde luego (formal, sometimes ironic).',
@@ -1070,7 +1105,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Attention-Getters & Reaction Markers',
     title: 'mira / oye',
     description: 'Grammaticalized imperatives as attention-getters and topic-introducers: mira = draws attention to what follows ("Mira, te voy a ser sincero"), oye = calls attention / introduces request or topic change ("Oye, ¿te puedo preguntar algo?"). Both have lost literal imperative force. Register awareness: common in spoken Spanish, casual to neutral register. Oye slightly more informal than mira.',
@@ -1081,7 +1116,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Attention-Getters & Reaction Markers',
     title: 'hombre / mujer (marcador)',
     description: 'hombre/mujer as reaction markers (NOT gendered address): surprise ("¡Hombre, cuánto tiempo!"), protest or softened disagreement ("Hombre, eso no es justo"), reinforcement ("¡Hombre, claro que sí!"). Strongly colloquial, Peninsular Spanish. Can be used regardless of addressee gender (hombre especially). Register awareness: strictly informal spoken, inappropriate in writing or formal contexts.',
@@ -1092,7 +1127,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'error_correction', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Attention-Getters & Reaction Markers',
     title: 'venga / vaya / vale',
     description: 'Three high-frequency Peninsular reaction markers: venga = encouragement ("¡Venga, anímate!"), informal farewell ("Venga, hasta luego"), mild disbelief ("¡Venga ya!"). vaya = surprise/exasperation ("¡Vaya, no me lo esperaba!", "¡Vaya lío!"). vale = confirmation/agreement ("Vale, quedamos a las ocho"), conversation closer ("Vale, vale, lo entiendo"). Register awareness: all strictly oral/colloquial, very Peninsular.',
@@ -1103,7 +1138,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Attention-Getters & Reaction Markers',
     title: '¿no? / ¿verdad? / ¿sabes? (coletillas)',
     description: 'Tag questions (coletillas) for confirmation-seeking and listener engagement: ¿no? = most common tag ("Hace frío, ¿no?"), ¿verdad? = seeks stronger confirmation ("Es difícil, ¿verdad?"), ¿sabes? = engagement/phatic ("Es complicado, ¿sabes?"). Register awareness: ¿no? and ¿verdad? acceptable in all spoken registers, ¿sabes? more informal and can be overused.',
@@ -1116,7 +1151,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 8.3 — Hedges, Justifiers & Emphatic Markers (Atenuadores y enfatizadores)
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Hedges, Justifiers & Emphatic Markers',
     title: 'es que',
     description: 'es que as a justification/excuse marker: "The thing is..." ("Es que no tuve tiempo"), "It\'s just that..." ("Es que me da vergüenza"). Very high frequency in spoken Spanish. Often introduces explanations that function as excuses or mitigating reasons. Register awareness: natural in speech from casual to semi-formal, avoid in formal/academic writing. Overuse can sound defensive.',
@@ -1127,7 +1162,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Hedges, Justifiers & Emphatic Markers',
     title: 'de hecho (registro oral)',
     description: 'de hecho as an emphatic "actually/in fact" in spoken discourse: corrects misconceptions ("De hecho, no fue así"), strengthens assertions ("De hecho, es el mejor de todos"), introduces surprising information ("De hecho, ya lo sabía"). Register awareness: acceptable in semi-formal and formal speech/writing (unlike most markers in this module), but in spoken use often carries more emphatic force than in writing.',
@@ -1138,7 +1173,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Hedges, Justifiers & Emphatic Markers',
     title: 'eso sí',
     description: 'eso sí as a concessive-adversative marker meaning "mind you / that said / though": introduces a caveat or exception after a positive or neutral statement ("La comida estaba buena; eso sí, el servicio fue lento", "Puedes ir, eso sí, llega antes de las diez"). Register awareness: common in spoken Spanish, also acceptable in informal writing. Requires preceding context to function.',
@@ -1151,7 +1186,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
 
   // Unit 8.4 — Advanced Colloquial Markers & Register Switching (Marcadores coloquiales avanzados)
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Advanced Colloquial Markers & Register Switching',
     title: 'en plan / tipo (atenuadores coloquiales)',
     description: 'en plan and tipo as youth hedges for approximation and vagueness: en plan = "like, sort of" ("Estaba en plan borde", "Lo dijo en plan broma"), tipo = "like, kind of" ("Era tipo una fiesta pero no"). Both are strongly informal and generationally marked (youth/millennial Spanish). Key skill: knowing WHEN NOT to use these — inappropriate in formal, professional, or academic contexts. Register awareness: strictly informal/colloquial, avoid in writing.',
@@ -1162,7 +1197,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['transformation', 'error_correction', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Advanced Colloquial Markers & Register Switching',
     title: 'total (que) / vamos (marcador)',
     description: 'total (que) as a spoken summariser: "long story short / basically" ("Total, que al final no fuimos"). vamos as an emphatic self-correction or intensifier: "I mean" ("Es caro, vamos, carísimo"), "come on" ("¡Vamos, que podemos!"). Both are oral-only markers. Register awareness: strictly colloquial spoken Spanish, never in formal/academic writing. vamos (marker) is distinct from vamos (verb "we go").',
@@ -1173,7 +1208,7 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
   },
   {
-    module: 'Conversational & Pragmatic Markers',
+    module: 'Conversational Spanish',
     unit: 'Advanced Colloquial Markers & Register Switching',
     title: 'entonces (marcador oral) / o sea que',
     description: 'entonces as a spoken transition/consequence marker beyond its textbook meaning: topic transition ("Entonces, ¿qué hacemos?"), drawing conclusions ("Entonces no te gustó"), narrative sequencing ("Y entonces llegó ella"). o sea que as a colloquial consequence marker: "so basically" ("O sea que no vienes, ¿no?"). Register awareness: entonces is versatile across registers but its discourse-marker uses are oral; o sea que is strictly colloquial.',

@@ -1,10 +1,12 @@
 'use client'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Bot, FileText } from 'lucide-react'
 import { UserAvatar } from '@/components/UserAvatar'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { StreakBadge } from '@/components/StreakBadge'
+import { StreakCalendarModal } from '@/components/StreakCalendarModal'
 
 const HIDDEN_ROUTES = ['/auth', '/study', '/tutor', '/onboarding', '/brand-preview']
 const TUTOR_ICON_ROUTES = ['/dashboard', '/curriculum', '/verbs']
@@ -14,10 +16,12 @@ interface Props {
   streak: number
   streakFreezeRemaining?: number
   unreadReportCount?: number
+  timezone?: string | null
 }
 
-export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unreadReportCount = 0 }: Props) {
+export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unreadReportCount = 0, timezone }: Props) {
   const pathname = usePathname()
+  const [calendarOpen, setCalendarOpen] = useState(false)
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
   return (
@@ -58,7 +62,14 @@ export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unr
               />
             </Link>
           )}
-          <StreakBadge streak={streak} size="sm" freezeAvailable={streakFreezeRemaining > 0} />
+          <StreakBadge streak={streak} size="sm" freezeAvailable={streakFreezeRemaining > 0} onClick={() => setCalendarOpen(true)} />
+          <StreakCalendarModal
+            open={calendarOpen}
+            onOpenChange={setCalendarOpen}
+            streak={streak}
+            freezeRemaining={streakFreezeRemaining}
+            timezone={timezone}
+          />
           <Link
             href="/account"
             aria-label="Account"

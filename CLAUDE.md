@@ -166,6 +166,7 @@ CRON_SECRET                     # Bearer token for cron-triggered push send rout
 | `POST /api/offline/reports/[id]/review` | Route handler | Mark an offline report as reviewed (Feat-F)                                         |
 | `/offline/reports`              | Server          | List of offline session reports (unreviewed + reviewed) (Feat-F)                          |
 | `/offline/reports/[id]`         | Server          | Report detail: per-attempt scores, feedback, mark reviewed (Feat-F)                       |
+| `GET /api/streak/calendar`      | Route handler   | Streak calendar data — studied dates for month, streak, freeze status                     |
 | `DELETE /api/admin/exercises/[id]` | Route handler | Admin-only: hard-delete exercise (FK ON DELETE SET NULL preserves attempt history)         |
 | `/admin/pool`                   | Server + Client | Admin exercise pool dashboard — concept × type grid with counts, "+" generate button      |
 
@@ -327,6 +328,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/021_accuracy_rpc.sql` — `get_accuracy_by_type(p_user_id uuid)` RPC; returns per-type + `_total` accuracy rows (replaces unbounded exercise_attempts fetch on progress page)
 - `supabase/migrations/022_offline_reports.sql` — `offline_reports` + `offline_report_attempts` tables with indexes (Feat-F; applied 2026-03-16)
 - `supabase/migrations/023_verb_sentence_english.sql` — `verb_sentences.english text DEFAULT NULL` (UX-Verb; ⚠️ pending — run in Supabase SQL editor)
+- `supabase/migrations/024_rename_modules.sql` — Rename 3 module titles: Connectors, Advanced Clauses, Conversational Spanish (⚠️ pending — run in Supabase SQL editor)
 
 ### Dashboard Stats
 
@@ -339,19 +341,19 @@ Migrations (run once in Supabase SQL editor):
 
 ### Curriculum Seed Content
 
-**Currently in DB** (100 concepts, 924 exercises):
+**Currently in DB** (103 concepts, 969 exercises):
 
-- Module 1: Connectors & Discourse Markers — 4 units, 23 concepts
+- Module 1: Connectors — 4 units, 23 concepts
 - Module 2a: The Subjunctive: Core — 1 unit, 5 concepts
 - Module 2b: The Subjunctive: Advanced — 2 units, 8 concepts
 - Module 3: Past Tenses — 3 units, 11 concepts
-- Module 4: Core Spanish Contrasts — 3 units, 12 concepts
+- Module 4: Core Spanish Contrasts — 4 units, 15 concepts
 - Module 5: Verbal Periphrases — 3 units, 13 concepts
-- Module 6: Complex Sentences — 3 units, 13 concepts
-- Module 8: Conversational & Pragmatic Markers — 4 units, 15 concepts
+- Module 6: Advanced Clauses — 3 units, 13 concepts
+- Module 8: Conversational Spanish — 4 units, 15 concepts
 - B1: 9 exercises per concept (3 types × 3); B2: 15 (5 types × 3); C1: 18 (6 types × 3)
 - 56/61 null-annotation exercises annotated
-- Full plan: `src/lib/curriculum/curriculum-plan.ts` (100 concepts); design reference: `docs/curriculum-design.md`
+- Full plan: `src/lib/curriculum/curriculum-plan.ts` (103 concepts); design reference: `docs/curriculum-design.md`
 - `pnpm seed:ai:apply` is now idempotent — skips concepts/exercises that already exist. Safe to re-run.
 
 ### Verb Seed Content

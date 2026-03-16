@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
-import { Lock, ChevronRight, ChevronDown } from 'lucide-react'
+import { Lock, ChevronRight, ChevronDown, X, Search } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { getMasteryState, MASTERY_DOT } from '@/lib/mastery/badge'
 import { LevelChip } from '@/components/LevelChip'
-import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { HardFlagButton } from '@/components/HardFlagButton'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
@@ -51,6 +50,7 @@ function getModuleState(allModConcepts: ConceptRow[], progressMap: Map<string, P
 export function CurriculumClient({ modules, units, concepts, progressEntries, unlockedLevelsList }: Props) {
   const [expandedModuleId, setExpandedModuleId] = useState<string | null>(null)
   const [celebratingModule, setCelebratingModule] = useState<{ id: string; title: string } | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const progressMap = new Map(progressEntries.map(p => [p.concept_id, p]))
   const unlockedLevels = new Set(unlockedLevelsList)
@@ -67,6 +67,23 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
     arr.push(c)
     conceptsByUnit.set(c.unit_id, arr)
   }
+
+  // Sort concepts alphabetically within each unit
+  for (const [unitId, unitConcepts] of conceptsByUnit) {
+    conceptsByUnit.set(unitId, [...unitConcepts].sort((a, b) => a.title.localeCompare(b.title, 'es')))
+  }
+
+  // Search filtering
+  const isSearching = searchQuery.trim().length > 0
+  const searchLower = searchQuery.trim().toLowerCase()
+  const matchingConceptIds = useMemo(() => {
+    if (!isSearching) return null
+    const ids = new Set<string>()
+    for (const c of concepts) {
+      if (c.title.toLowerCase().includes(searchLower)) ids.add(c.id)
+    }
+    return ids
+  }, [concepts, searchLower, isSearching])
 
   // Module completion celebration
   useEffect(() => {
@@ -146,17 +163,79 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
         <p style={{ fontSize: '0.75rem', color: 'var(--d5-body)', marginTop: '0.25rem' }}>B1 → B2 · Tu camino personal</p>
       </div>
 
+      {/* Search bar */}
+      <div style={{ marginBottom: '1.25rem', position: 'relative' }}>
+        <Search
+          size={14}
+          strokeWidth={1.5}
+          style={{
+            position: 'absolute',
+            left: 12,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'var(--d5-muted)',
+            pointerEvents: 'none',
+          }}
+        />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Buscar concepto..."
+          aria-label="Buscar concepto"
+          style={{
+            width: '100%',
+            padding: '0.5rem 2rem 0.5rem 2rem',
+            borderRadius: 10,
+            border: '1px solid var(--d5-border-subtle)',
+            background: 'var(--d5-surface-tint)',
+            fontSize: '0.8125rem',
+            color: 'var(--foreground)',
+            outline: 'none',
+          }}
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            aria-label="Limpiar búsqueda"
+            style={{
+              position: 'absolute',
+              right: 8,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 4,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--d5-muted)',
+            }}
+          >
+            <X size={14} strokeWidth={1.5} />
+          </button>
+        )}
+      </div>
+
       {/* Timeline */}
       <div>
         {modules.map((mod, idx) => {
           const modUnits = unitsByModule.get(mod.id) ?? []
           const allModConcepts = modUnits.flatMap(u => conceptsByUnit.get(u.id) ?? [])
+
+          // During search: skip modules with no matching concepts
+          const hasMatchInModule = matchingConceptIds
+            ? allModConcepts.some(c => matchingConceptIds.has(c.id))
+            : true
+          if (isSearching && !hasMatchInModule) return null
+
           const masteredCount = allModConcepts.filter(
             c => isConceptMastered(progressMap.get(c.id))
           ).length
           const masteredPct = allModConcepts.length > 0 ? (masteredCount / allModConcepts.length) * 100 : 0
           const state = getModuleState(allModConcepts, progressMap)
-          const isExpanded = expandedModuleId === mod.id
+          const isExpanded = isSearching ? hasMatchInModule : expandedModuleId === mod.id
           const isFirst = idx === 0
           const isLast = idx === modules.length - 1
 
@@ -357,7 +436,9 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                               <div style={{ flex: 1, height: '0.0625rem', background: 'rgba(196,82,46,0.12)' }} />
                             </div>
                           )}
-                          {(conceptsByUnit.get(unit.id) ?? []).map(concept => {
+                          {(conceptsByUnit.get(unit.id) ?? [])
+                            .filter(concept => !matchingConceptIds || matchingConceptIds.has(concept.id))
+                            .map(concept => {
                             const p = progressMap.get(concept.id)
                             const masteryState = getMasteryState(p?.interval_days, p?.production_mastered)
                             const dot = MASTERY_DOT[masteryState]
@@ -374,59 +455,48 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                 <div
                                   style={{
                                     display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '0.125rem',
-                                    marginTop: '0.625rem',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: '0.5rem',
+                                    marginTop: '0.75rem',
                                     paddingLeft: '1.25rem',
                                     borderLeft: '2px solid rgba(196,82,46,0.15)',
                                     opacity: locked ? 0.4 : 1,
                                   }}
                                 >
-                                  {/* Row 1: icon + title + right section */}
-                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
-                                      {locked && (
-                                        <Lock
-                                          size={12}
-                                          strokeWidth={1.5}
-                                          style={{ flexShrink: 0, color: 'var(--d5-subtle)' }}
-                                        />
-                                      )}
-                                      <span
-                                        className="text-foreground"
-                                        style={{
-                                          fontSize: 12,
-                                          fontWeight: 400,
-                                          overflow: 'hidden',
-                                          textOverflow: 'ellipsis',
-                                          whiteSpace: 'nowrap',
-                                        }}
-                                      >
-                                        {concept.title}
-                                      </span>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                                      <span title={dot.title} style={dot.style} />
-                                      <div
-                                        onClick={e => e.stopPropagation()}
-                                        style={{ position: 'relative', zIndex: 20 }}
-                                      >
-                                        <HardFlagButton conceptId={concept.id} initialIsHard={isHard} />
-                                      </div>
-                                      <ChevronRight
-                                        size={14}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
+                                    {locked && (
+                                      <Lock
+                                        size={12}
                                         strokeWidth={1.5}
-                                        style={{ color: 'var(--d5-pill-text-soft)', flexShrink: 0 }}
+                                        style={{ flexShrink: 0, color: 'var(--d5-subtle)' }}
                                       />
-                                    </div>
+                                    )}
+                                    <LevelChip level={concept.level} />
+                                    <span
+                                      className="text-foreground"
+                                      style={{
+                                        fontSize: 13,
+                                        fontWeight: 400,
+                                      }}
+                                    >
+                                      {concept.title}
+                                    </span>
                                   </div>
-                                  {/* Row 2: chips below title */}
-                                  {(concept.level || concept.grammar_focus) && (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingLeft: locked ? 18 : 0 }}>
-                                      <LevelChip level={concept.level} />
-                                      <GrammarFocusChip focus={concept.grammar_focus} />
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                                    <span title={dot.title} style={dot.style} />
+                                    <div
+                                      onClick={e => e.stopPropagation()}
+                                      style={{ position: 'relative', zIndex: 20 }}
+                                    >
+                                      <HardFlagButton conceptId={concept.id} initialIsHard={isHard} />
                                     </div>
-                                  )}
+                                    <ChevronRight
+                                      size={14}
+                                      strokeWidth={1.5}
+                                      style={{ color: 'var(--d5-pill-text-soft)', flexShrink: 0 }}
+                                    />
+                                  </div>
                                 </div>
                               </Link>
                             )

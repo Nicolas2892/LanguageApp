@@ -16,8 +16,8 @@ const VALID_EXERCISE_TYPES: ExerciseType[] = [
 ]
 
 describe('CURRICULUM_PLAN', () => {
-  it('contains exactly 100 concepts', () => {
-    expect(CURRICULUM_PLAN).toHaveLength(100)
+  it('contains exactly 103 concepts', () => {
+    expect(CURRICULUM_PLAN).toHaveLength(103)
   })
 
   describe('each concept has required fields', () => {
@@ -105,18 +105,18 @@ describe('CURRICULUM_PLAN', () => {
 
     it('contains the expected 8 module names', () => {
       const modules = new Set(CURRICULUM_PLAN.map((c) => c.module))
-      expect(modules).toContain('Connectors & Discourse Markers')
+      expect(modules).toContain('Connectors')
       expect(modules).toContain('The Subjunctive: Core')
       expect(modules).toContain('The Subjunctive: Advanced')
       expect(modules).toContain('Past Tenses')
       expect(modules).toContain('Core Spanish Contrasts')
       expect(modules).toContain('Verbal Periphrases')
-      expect(modules).toContain('Complex Sentences')
-      expect(modules).toContain('Conversational & Pragmatic Markers')
+      expect(modules).toContain('Advanced Clauses')
+      expect(modules).toContain('Conversational Spanish')
     })
 
     it('has Module 1 with 23 concepts', () => {
-      const count = CURRICULUM_PLAN.filter((c) => c.module === 'Connectors & Discourse Markers').length
+      const count = CURRICULUM_PLAN.filter((c) => c.module === 'Connectors').length
       expect(count).toBe(23)
     })
 
@@ -135,9 +135,9 @@ describe('CURRICULUM_PLAN', () => {
       expect(count).toBe(11)
     })
 
-    it('has Module 4 with 12 concepts', () => {
+    it('has Module 4 with 15 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'Core Spanish Contrasts').length
-      expect(count).toBe(12)
+      expect(count).toBe(15)
     })
 
     it('has Module 5 with 13 concepts', () => {
@@ -146,19 +146,19 @@ describe('CURRICULUM_PLAN', () => {
     })
 
     it('has Module 6 with 13 concepts', () => {
-      const count = CURRICULUM_PLAN.filter((c) => c.module === 'Complex Sentences').length
+      const count = CURRICULUM_PLAN.filter((c) => c.module === 'Advanced Clauses').length
       expect(count).toBe(13)
     })
 
     it('has Module 8 with 15 concepts', () => {
-      const count = CURRICULUM_PLAN.filter((c) => c.module === 'Conversational & Pragmatic Markers').length
+      const count = CURRICULUM_PLAN.filter((c) => c.module === 'Conversational Spanish').length
       expect(count).toBe(15)
     })
 
     it('has Module 1 Unit 1.2 with 7 concepts (including por eso and así que)', () => {
       const unit = CURRICULUM_PLAN.filter(
         (c) =>
-          c.module === 'Connectors & Discourse Markers' &&
+          c.module === 'Connectors' &&
           c.unit === 'Causal & Consecutive Connectors'
       )
       expect(unit).toHaveLength(7)
@@ -170,7 +170,7 @@ describe('CURRICULUM_PLAN', () => {
     it('has Module 1 Unit 1.4 renamed to "Linking, Structuring & Reformulation" with 6 concepts', () => {
       const unit = CURRICULUM_PLAN.filter(
         (c) =>
-          c.module === 'Connectors & Discourse Markers' &&
+          c.module === 'Connectors' &&
           c.unit === 'Linking, Structuring & Reformulation'
       )
       expect(unit).toHaveLength(6)

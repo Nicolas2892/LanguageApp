@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { StreakBadge } from '../StreakBadge'
 
@@ -48,5 +48,19 @@ describe('StreakBadge', () => {
   it('does not render shield when streak is 0', () => {
     render(<StreakBadge streak={0} freezeAvailable={true} />)
     expect(screen.queryByLabelText('Protección disponible')).not.toBeInTheDocument()
+  })
+
+  it('renders as button when onClick is provided', () => {
+    const onClick = vi.fn()
+    render(<StreakBadge streak={5} onClick={onClick} />)
+    const button = screen.getByRole('button')
+    expect(button).toBeInTheDocument()
+    button.click()
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders as div when onClick is not provided', () => {
+    render(<StreakBadge streak={5} />)
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 })

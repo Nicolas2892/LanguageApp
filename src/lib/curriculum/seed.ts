@@ -1,7 +1,7 @@
 /**
  * Curriculum seed data — Spanish B1→B2
  *
- * Module 1: Connectors & Discourse Markers
+ * Module 1: Connectors
  * Module 2: Subjunctive Mastery
  *
  * Run via: tsx src/lib/curriculum/run-seed.ts
@@ -9,7 +9,7 @@
 
 export const SEED_MODULES = [
   {
-    title: 'Connectors & Discourse Markers',
+    title: 'Connectors',
     description:
       'Master the linking words and phrases that make Spanish writing coherent and sophisticated at B2 level.',
     order_index: 1,
@@ -27,7 +27,7 @@ export const SEED_UNITS: Array<{
   title: string
   order_index: number
 }> = [
-  // Module 1 — Connectors
+  // Module 1
   { module_index: 0, title: 'Concessive Connectors', order_index: 1 },
   { module_index: 0, title: 'Causal & Consecutive Connectors', order_index: 2 },
   { module_index: 0, title: 'Adversative & Contrast Connectors', order_index: 3 },

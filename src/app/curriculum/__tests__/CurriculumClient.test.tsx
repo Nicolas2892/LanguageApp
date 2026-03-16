@@ -12,9 +12,6 @@ vi.mock('@/components/HardFlagButton', () => ({
 vi.mock('@/components/LevelChip', () => ({
   LevelChip: ({ level }: { level: string | null }) => <span>{level}</span>,
 }))
-vi.mock('@/components/GrammarFocusChip', () => ({
-  GrammarFocusChip: ({ focus }: { focus: string | null }) => <span>{focus}</span>,
-}))
 vi.mock('@/components/WindingPathSeparator', () => ({
   WindingPathSeparator: () => <hr />,
 }))
@@ -184,6 +181,78 @@ describe('CurriculumClient', () => {
     await user.click(screen.getByText('Conectores'))
     // 'Unidad 1' is the single unit title — should NOT appear as a sub-header
     expect(screen.queryByText('Unidad 1')).not.toBeInTheDocument()
+  })
+
+  it('renders search input', () => {
+    render(<CurriculumClient {...defaultProps} />)
+    expect(screen.getByLabelText('Buscar concepto')).toBeInTheDocument()
+  })
+
+  it('filters concepts by search query and auto-expands matching modules', async () => {
+    const user = userEvent.setup()
+    render(<CurriculumClient {...defaultProps} />)
+
+    const searchInput = screen.getByLabelText('Buscar concepto')
+    await user.type(searchInput, 'Sin embargo')
+
+    // Module with match should be auto-expanded
+    const conceptText = screen.getByText('Sin embargo')
+    expect(conceptText.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'false')
+
+    // Non-matching concept should not be visible
+    expect(screen.queryByText('Que subjuntivo')).not.toBeInTheDocument()
+  })
+
+  it('clears search when X button is clicked', async () => {
+    const user = userEvent.setup()
+    render(<CurriculumClient {...defaultProps} />)
+
+    const searchInput = screen.getByLabelText('Buscar concepto')
+    await user.type(searchInput, 'Sin')
+
+    const clearBtn = screen.getByLabelText('Limpiar búsqueda')
+    await user.click(clearBtn)
+
+    expect(searchInput).toHaveValue('')
+  })
+
+  it('sorts concepts alphabetically within a unit', async () => {
+    const user = userEvent.setup()
+    const concepts = [
+      { id: 'con-z', unit_id: 'unit-1', title: 'Zorro', difficulty: 1, level: 'B1', grammar_focus: null },
+      { id: 'con-a', unit_id: 'unit-1', title: 'Además', difficulty: 1, level: 'B1', grammar_focus: null },
+      { id: 'con-m', unit_id: 'unit-1', title: 'Mientras', difficulty: 1, level: 'B1', grammar_focus: null },
+    ]
+    render(
+      <CurriculumClient
+        modules={[MODULES[0]]}
+        units={[UNITS[0]]}
+        concepts={concepts}
+        progressEntries={[]}
+        unlockedLevelsList={['B1']}
+      />
+    )
+
+    await user.click(screen.getByText('Conectores'))
+
+    // Get all concept links in order
+    const links = screen.getAllByRole('link').filter(l => l.getAttribute('href')?.startsWith('/curriculum/con-'))
+    const titles = links.map(l => l.textContent!)
+    // First should be "Además" (alphabetically first)
+    expect(titles[0]).toContain('Además')
+    expect(titles[1]).toContain('Mientras')
+    expect(titles[2]).toContain('Zorro')
+  })
+
+  it('renders LevelChip inline with concept title (no GrammarFocusChip in rows)', async () => {
+    const user = userEvent.setup()
+    render(<CurriculumClient {...defaultProps} />)
+    await user.click(screen.getByText('Conectores'))
+
+    // LevelChip is rendered (mocked as <span>{level}</span>)
+    expect(screen.getByText('B1')).toBeInTheDocument()
+    // GrammarFocusChip should NOT be rendered in concept rows
+    expect(screen.queryByText('Subjunctive')).not.toBeInTheDocument()
   })
 
   it('shows lock icon for locked concepts', async () => {

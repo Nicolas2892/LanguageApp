@@ -28,7 +28,7 @@ New exercises to generate: (64 new × 9) + (21 existing × 6) = 576 + 126 = **70
 
 ---
 
-## Module 1 — Connectors & Discourse Markers
+## Module 1 — Connectors
 *Linking ideas with nuance and register*
 
 ### Unit 1.1 — Concessive Connectors
@@ -200,7 +200,7 @@ New exercises to generate: (64 new × 9) + (21 existing × 6) = 576 + 126 = **70
 
 ---
 
-## Module 6 — Complex Sentences *(new module)*
+## Module 6 — Advanced Clauses *(new module)*
 *Relative clauses, passive voice, and advanced adverbial clauses*
 
 ### Unit 6.1 — Relative Clauses
@@ -236,12 +236,12 @@ New exercises to generate: (64 new × 9) + (21 existing × 6) = 576 + 126 = **70
 
 | Module | Units | Concepts | Existing | New |
 |---|---|---|---|---|
-| 1 — Connectors & Discourse Markers | 4 | 23 | 12 | 11 |
+| 1 — Connectors | 4 | 23 | 12 | 11 |
 | 2 — The Subjunctive | 3 | 13 | 9 | 4 |
 | 3 — Past Tenses | 3 | 11 | 0 | 11 |
 | 4 — Core Spanish Contrasts | 3 | 12 | 0 | 12 |
 | 5 — Verbal Periphrases | 3 | 13 | 0 | 13 |
-| 6 — Complex Sentences | 3 | 13 | 0 | 13 |
+| 6 — Advanced Clauses | 3 | 13 | 0 | 13 |
 | **Total** | **19** | **85** | **21** | **64** |
 
 ---

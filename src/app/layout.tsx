@@ -144,9 +144,9 @@ export default async function RootLayout({
       >
         <ThemeProvider initialTheme={themePreference}>
           <PostHogProvider userId={userId}>
-            <SideNav userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} unreadReportCount={unreadReportCount} />
+            <SideNav userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} unreadReportCount={unreadReportCount} timezone={userTimezone} />
             <div className="lg:ml-[220px]">
-              <AppHeader userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} unreadReportCount={unreadReportCount} />
+              <AppHeader userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} unreadReportCount={unreadReportCount} timezone={userTimezone} />
               <PageWrapper>{children}</PageWrapper>
             </div>
             <BottomNav />

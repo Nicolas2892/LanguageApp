@@ -4,17 +4,18 @@ interface Props {
   streak: number
   size?: 'sm' | 'md'
   freezeAvailable?: boolean
+  onClick?: () => void
 }
 
-export function StreakBadge({ streak, size = 'sm', freezeAvailable = false }: Props) {
+export function StreakBadge({ streak, size = 'sm', freezeAvailable = false, onClick }: Props) {
   const isActive = streak > 0
   const color = isActive ? 'var(--d5-terracotta)' : 'var(--d5-muted)'
   const iconSize = size === 'sm' ? 16 : 20
   const shieldSize = size === 'sm' ? 8 : 10
   const showShield = freezeAvailable && streak > 0
 
-  return (
-    <div className="flex items-center gap-1" aria-label={`${streak} día${streak !== 1 ? 's' : ''} de racha`}>
+  const content = (
+    <>
       <svg
         width={iconSize}
         height={iconSize}
@@ -62,6 +63,25 @@ export function StreakBadge({ streak, size = 'sm', freezeAvailable = false }: Pr
           </span>
         )}
       </div>
+    </>
+  )
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
+        aria-label={`${streak} día${streak !== 1 ? 's' : ''} de racha`}
+      >
+        {content}
+      </button>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-1" aria-label={`${streak} día${streak !== 1 ? 's' : ''} de racha`}>
+      {content}
     </div>
   )
 }
