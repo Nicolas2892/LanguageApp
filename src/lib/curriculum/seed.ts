@@ -86,7 +86,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     type: 'connector',
     title: 'a pesar de (que)',
     explanation:
-      '"A pesar de" + noun/infinitive, or "a pesar de que" + indicative/subjunctive. Formal concessive connector meaning "in spite of / despite".',
+      'Use "a pesar de (que)" when you want a more formal alternative to "aunque" for concessions. "A pesar de" takes a noun or infinitive; "a pesar de que" takes a full clause. Key pitfall: never combine it with "pero" — "a pesar de que" already carries the contrast.',
     examples: [
       { es: 'A pesar del frío, fue a nadar.', en: 'In spite of the cold, she went swimming.' },
       { es: 'A pesar de que estaba enfermo, fue al trabajo.', en: 'Despite being ill, he went to work.' },
@@ -149,7 +149,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     type: 'connector',
     title: 'dado que / en vista de que',
     explanation:
-      '"Dado que" (given that) and "en vista de que" (in view of the fact that) are formal causal connectors presenting a fact as the obvious reason for something.',
+      '"Dado que" and "en vista de que" work like "ya que" but belong to a higher register — use them in written reports, presentations, or formal speeches. They present the cause as an obvious, shared fact that justifies a decision.',
     examples: [
       { es: 'Dado que el tiempo es limitado, seré breve.', en: 'Given that time is limited, I will be brief.' },
       { es: 'En vista de que no llegaba, nos marchamos.', en: 'In view of the fact that she was not arriving, we left.' },
@@ -164,7 +164,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     type: 'connector',
     title: 'por lo tanto / por consiguiente',
     explanation:
-      '"Por lo tanto" and "por consiguiente" are consecutive connectors meaning "therefore / consequently". They introduce the logical result of the preceding statement.',
+      '"Por lo tanto" and "por consiguiente" mean "therefore / consequently" and introduce the logical result of what you just said. They always follow a semicolon or full stop, never a comma alone.',
     examples: [
       { es: 'No estudió; por lo tanto, suspendió.', en: 'She did not study; therefore, she failed.' },
       { es: 'El presupuesto es insuficiente; por consiguiente, el proyecto se cancela.', en: 'The budget is insufficient; consequently, the project is cancelled.' },
@@ -245,7 +245,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     type: 'subjunctive',
     title: 'Verbos de deseo (querer, esperar, desear)',
     explanation:
-      'Verbs expressing wishes (querer, esperar, desear, ojalá) trigger the subjunctive in the subordinate clause when the subject changes. Pattern: querer que + subjunctive.',
+      'When you wish for someone else to do something, use querer/esperar/desear + que + subjunctive (Quiero que vengas). When the subject is the same, drop "que" and use the infinitive instead (Quiero venir). The classic B1 mistake is using subjunctive with the same subject.',
     examples: [
       { es: 'Quiero que vengas a la fiesta.', en: 'I want you to come to the party.' },
       { es: 'Espero que todo salga bien.', en: 'I hope everything goes well.' },
@@ -260,7 +260,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     type: 'subjunctive',
     title: 'Verbos de emoción (alegrarse, temer, sorprender)',
     explanation:
-      'Verbs and expressions of emotion (alegrarse de, temer, sorprender, estar contento de) trigger the subjunctive when the subject of the emotion is different from the subject of the subordinate verb.',
+      'Emotion verbs (alegrarse de, temer, sorprender) work like wish verbs: different subjects → que + subjunctive (Me alegra que vengas); same subject → infinitive (Me alegro de venir). Watch for "me sorprende que" — it always takes subjunctive because the surprise and the action have different grammatical subjects.',
     examples: [
       { es: 'Me alegra que hayas venido.', en: 'I am glad that you have come.' },
       { es: 'Temo que no lleguen a tiempo.', en: 'I fear they will not arrive on time.' },
@@ -305,7 +305,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     type: 'subjunctive',
     title: 'Conjunciones finales (para que, a fin de que)',
     explanation:
-      '"Para que" and "a fin de que" (so that / in order that) always trigger the subjunctive because they refer to an intended future result whose achievement is uncertain.',
+      '"Para que" and "a fin de que" (so that) always take the subjunctive. Key pitfall: when both clauses share the same subject, use "para + infinitive" instead (Estudio para aprobar), not *Estudio para que apruebe. Only use "para que" when someone else is the one acting.',
     examples: [
       { es: 'Te lo explico para que lo entiendas.', en: 'I am explaining it to you so that you understand.' },
       { es: 'Habló despacio para que todos pudieran seguirle.', en: 'He spoke slowly so that everyone could follow him.' },
@@ -323,7 +323,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     type: 'subjunctive',
     title: 'Condicional tipo 2: Si + imperfecto de subjuntivo',
     explanation:
-      'The type 2 conditional expresses hypothetical or unlikely situations in the present/future. Pattern: Si + imperfect subjunctive, + conditional. Used when the speaker considers the condition improbable or contrary to reality.',
+      'Use the type 2 conditional for "what if" scenarios you consider unlikely or contrary to reality. Pattern: Si + imperfect subjunctive (-ra/-se), + conditional. Critical rule: NEVER put the conditional after "si" — *Si tendría is always wrong. The -ra and -se forms (tuviera/tuviese) are fully interchangeable.',
     examples: [
       { es: 'Si tuviera más tiempo, aprendería a tocar la guitarra.', en: 'If I had more time, I would learn to play the guitar.' },
       { es: 'Si fuera rico, viajaría por todo el mundo.', en: 'If I were rich, I would travel all over the world.' },
@@ -338,7 +338,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     type: 'subjunctive',
     title: 'Condicional tipo 3: Si + pluscuamperfecto de subjuntivo',
     explanation:
-      'The type 3 conditional refers to hypothetical situations in the past that did not happen. Pattern: Si + pluperfect subjunctive, + conditional perfect (or conditional + haber). Used to express regret or speculation about past events.',
+      'The type 3 conditional expresses regret or speculation about past events that did not happen. Pattern: Si + hubiera/hubiese + participle, + habría + participle. Same rule as type 2: NEVER use the conditional after "si" — *Si habría estudiado is always wrong.',
     examples: [
       { es: 'Si hubiera estudiado más, habría aprobado.', en: 'If I had studied more, I would have passed.' },
       { es: 'Si hubieras llegado antes, lo habrías visto.', en: 'If you had arrived earlier, you would have seen it.' },
@@ -368,7 +368,7 @@ export const SEED_CONCEPTS: ConceptSeed[] = [
     type: 'subjunctive',
     title: 'Imperfecto de subjuntivo en estilo indirecto',
     explanation:
-      'When reporting speech in the past, present subjunctive in the original utterance becomes imperfect subjunctive in reported speech. This is called "concordancia de tiempos" (sequence of tenses).',
+      'When reporting what someone said in the past, two shifts happen: the main verb moves to imperfect (quiere → quería) and any subjunctive in the original moves to imperfect subjunctive (venga → viniera/viniese). Think of it as "everything slides one step into the past".',
     examples: [
       { es: '"Quiero que vengas" → Dijo que quería que fuera.', en: '"I want you to come" → He said he wanted her to come.' },
       { es: '"Espero que apruebe" → Esperaba que aprobara.', en: '"I hope he passes" → She hoped he would pass.' },
