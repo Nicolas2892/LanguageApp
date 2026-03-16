@@ -36,7 +36,7 @@ pnpm seed:verbs           # Generate verb sentences via Claude Haiku → docs/ve
 pnpm seed:verbs:apply     # Insert verb_sentences rows from review JSON
 pnpm validate:grading     # ARCH-02 offline validation: grade 50 attempts with Haiku vs Sonnet baseline
 pnpm push:keygen          # Generate VAPID key pair for push notifications
-pnpm backfill:translations # Backfill verb_sentences.english via Claude Haiku (~2700 rows)
+pnpm backfill:translations # Backfill verb_sentences.english via Claude Haiku (~11250 rows)
 ```
 
 Post-deploy API smoke check (requires env vars):
@@ -206,7 +206,7 @@ Session configure page (`/study/configure`) builds these params via a UI before 
 | Param     | Values                                     | Effect                                 |
 | --------- | ------------------------------------------ | -------------------------------------- |
 | `tenses`  | comma-separated tense keys                 | Which tenses to drill                  |
-| `verbSet` | `favorites` | `top25` | `top50` | `top100` | `single` | Which verbs to draw sentences from     |
+| `verbSet` | `favorites` | `top25` | `top50` | `top100` | `top250` | `single` | Which verbs to draw sentences from     |
 | `verb`    | infinitive string                          | Used when `verbSet=single`             |
 | `length`  | `10` | `20` | `30`                         | Max sentences per session              |
 | `hint`    | `1`                                        | Show `[infinitive]` hint next to blank |
@@ -262,6 +262,7 @@ Concept mastery requires **both** conditions:
 7. `SpeakButton` on sentence (speaks completed sentence with correct form inserted)
 8. English translation shown below sentence when `verb_sentences.english` is non-null (gracefully hidden before backfill)
 9. `VerbFeedbackPanel` shows `completedSentence` (full sentence with answer) + `tenseRule` on all outcomes (not just incorrect)
+10. **Infinitive drill mode**: tense `'infinitive'` shows English meaning as prompt, user types Spanish infinitive. No `verb_sentences` needed — uses `verbs.english` directly. Eyebrow shows "Infinitivo" instead of "Conjugación". Hint toggle disabled when only infinitive selected.
 
 ### Streak Logic
 
@@ -303,7 +304,7 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | `exercise_attempts`                      | Full attempt history with AI score + feedback                                                                            |
 | `study_sessions`                         | Session analytics — written by `/api/sessions/complete`                                                                  |
 | `verbs`                                  | 50 high-frequency verbs; `infinitive`, `english`, `frequency_rank`, `verb_group`                                         |
-| `verb_sentences`                         | 3 sentences per verb × tense (≥1,050 rows); `sentence` contains `_____` blank token; `english` nullable translation      |
+| `verb_sentences`                         | 5 sentences per verb × tense (≥11,250 rows); `sentence` contains `_____` blank token; `english` nullable translation     |
 | `user_verb_favorites`                    | User ↔ verb many-to-many favorites; unique (user_id, verb_id)                                                            |
 | `verb_progress`                          | Per-user accuracy per verb × tense; `attempt_count`, `correct_count`; upserted via RPC                                   |
 | `verb_conjugations`                      | Full 6-pronoun paradigm per verb × tense; `stem` = invariant prefix ('' = fully irregular); PK (verb_id, tense)          |
@@ -360,9 +361,9 @@ Migrations (run once in Supabase SQL editor):
 
 **Status: LIVE — migrations 014 + 015 applied, all seed data in DB**
 
-- 100 verbs hard-coded in `src/lib/curriculum/run-seed-verbs.ts` (ranks 1–100)
-- 9 tenses × 100 verbs × 3 sentences = 2,700 `verb_sentences` rows in DB
-- 9 tenses × 100 verbs = 900 `verb_conjugations` rows in DB
+- 250 verbs hard-coded in `src/lib/curriculum/run-seed-verbs.ts` (ranks 1–250)
+- 9 tenses × 250 verbs × 5 sentences = 11,250 `verb_sentences` rows in DB
+- 9 tenses × 250 verbs = 2,250 `verb_conjugations` rows in DB
 - `verb_sentences.english` — nullable English translation column; backfilled via `pnpm backfill:translations` (Claude Haiku, batches of 20, resume-safe)
 - `pnpm seed:conjugations` — generates full 6-pronoun paradigm + stem per verb × tense via Claude Haiku → `docs/verb-conjugations-YYYY-MM-DD.json`; resume-safe
 - `pnpm seed:conjugations:apply <file>` — upserts `verb_conjugations` rows; idempotent (ON CONFLICT DO UPDATE)
@@ -406,7 +407,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/lib/practiceUtils.ts` — `cycleToMinimum(items, min)` pads Open Practice sessions to at least MIN_PRACTICE_SIZE; avoids consecutive duplicates when pool ≥ 2
 - `src/lib/studyUtils.ts` — `biasedExercisePick(exercises, underweight)` (80% gap_fill exclusion in SRS) + `dropGapFillForPractice(items)` (~60% gap_fill drop in Open Practice)
 - `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map)
-- `src/lib/verbs/constants.ts` — `TENSES`, `TENSE_LABELS` (Spanish names), `TENSE_DESCRIPTIONS`, `VerbTense` type
+- `src/lib/verbs/constants.ts` — `TENSES` (10 incl. infinitive), `CONJUGATION_TENSES` (9 conjugation-only), `TENSE_LABELS` (Spanish names), `TENSE_DESCRIPTIONS`, `VerbTense` type
 - `src/lib/verbs/grader.ts` — `normalizeSpanish(s)` + `gradeConjugation(userAnswer, correctForm, tenseRule)` → `VerbGradeResult`; pure functions, no network calls
 - `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
 - `src/lib/hooks/useSpeech.ts` — TTS hook; `src/components/SpeakButton.tsx` — speaker button (wired in all 5 exercise types)
@@ -485,7 +486,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 1952 tests across 110 files — all passing.**
+**Test suite: 2025 tests across 116 files — all passing (2 pre-existing FreeWritePrompt failures unrelated to recent changes).**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 

@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { VerbSession } from './VerbSession'
 import type { SessionItem } from './VerbSession'
 import type { VerbSentence, Verb } from '@/lib/supabase/types'
-import { TENSES } from '@/lib/verbs/constants'
+import { TENSES, CONJUGATION_TENSES } from '@/lib/verbs/constants'
 
 interface Props {
   searchParams: Promise<{
@@ -62,8 +62,8 @@ export default async function VerbSessionPage({ searchParams }: Props) {
     if (verbRow) verbIds = [(verbRow as Pick<Verb, 'id'>).id]
     if (verbIds.length === 0) redirect('/verbs/configure')
   } else {
-    // top25, top50, or top100
-    const limit = verbSet === 'top100' ? 100 : verbSet === 'top50' ? 50 : 25
+    // top25, top50, top100, or top250
+    const limit = verbSet === 'top250' ? 250 : verbSet === 'top100' ? 100 : verbSet === 'top50' ? 50 : 25
     const { data: verbRows } = await supabase
       .from('verbs')
       .select('id')
@@ -72,33 +72,41 @@ export default async function VerbSessionPage({ searchParams }: Props) {
     verbIds = (verbRows as Pick<Verb, 'id'>[] ?? []).map((v) => v.id)
   }
 
-  // Fetch sentences + verb infinitives in parallel
-  const [{ data: sentenceRows }, { data: verbRows2 }] = await Promise.all([
-    supabase
-      .from('verb_sentences')
-      .select('id, verb_id, tense, pronoun, sentence, correct_form, tense_rule, english')
-      .in('verb_id', verbIds)
-      .in('tense', selectedTenses),
-    supabase
-      .from('verbs')
-      .select('id, infinitive')
-      .in('id', verbIds),
+  // Split tenses into conjugation tenses vs infinitive
+  const conjugationTenses = selectedTenses.filter((t) =>
+    (CONJUGATION_TENSES as readonly string[]).includes(t)
+  )
+  const hasInfinitive = selectedTenses.includes('infinitive')
+
+  // Fetch verb data + sentences in parallel
+  const sentenceQuery = conjugationTenses.length > 0
+    ? supabase
+        .from('verb_sentences')
+        .select('id, verb_id, tense, pronoun, sentence, correct_form, tense_rule, english')
+        .in('verb_id', verbIds)
+        .in('tense', conjugationTenses)
+    : null
+  const verbQuery = supabase
+    .from('verbs')
+    .select('id, infinitive, english')
+    .in('id', verbIds)
+
+  const [sentenceResult, verbResult] = await Promise.all([
+    sentenceQuery ?? Promise.resolve({ data: [] as unknown[] }),
+    verbQuery,
   ])
 
   type SentenceRow = Pick<VerbSentence, 'id' | 'verb_id' | 'tense' | 'pronoun' | 'sentence' | 'correct_form' | 'tense_rule' | 'english'>
-  const sentences = sentenceRows as SentenceRow[] ?? []
+  const sentences = sentenceResult.data as SentenceRow[] ?? []
 
-  // Build verb_id → infinitive lookup
-  const infinitiveMap = new Map(
-    (verbRows2 as Pick<Verb, 'id' | 'infinitive'>[] ?? []).map((v) => [v.id, v.infinitive])
-  )
+  type VerbRow = Pick<Verb, 'id' | 'infinitive' | 'english'>
+  const verbs = verbResult.data as VerbRow[] ?? []
 
-  if (sentences.length === 0) redirect('/verbs/configure')
+  // Build verb_id → verb lookup
+  const infinitiveMap = new Map(verbs.map((v) => [v.id, v.infinitive]))
 
-  // Shuffle and take up to sessionLength
-  const shuffled = shuffle(sentences).slice(0, sessionLength)
-
-  const items: SessionItem[] = shuffled.map((s) => ({
+  // Build conjugation items
+  const conjugationItems: SessionItem[] = sentences.map((s) => ({
     verbId:      s.verb_id,
     infinitive:  infinitiveMap.get(s.verb_id) ?? '',
     tense:       s.tense,
@@ -108,6 +116,26 @@ export default async function VerbSessionPage({ searchParams }: Props) {
     tenseRule:   s.tense_rule,
     english:     s.english ?? null,
   }))
+
+  // Build infinitive drill items
+  const infinitiveItems: SessionItem[] = hasInfinitive
+    ? verbs.map((v) => ({
+        verbId:      v.id,
+        infinitive:  v.infinitive,
+        tense:       'infinitive',
+        pronoun:     '',
+        sentence:    v.english ?? v.infinitive,
+        correctForm: v.infinitive,
+        tenseRule:   '',
+        english:     null,
+      }))
+    : []
+
+  const allItems = [...conjugationItems, ...infinitiveItems]
+  if (allItems.length === 0) redirect('/verbs/configure')
+
+  // Shuffle and take up to sessionLength
+  const items: SessionItem[] = shuffle(allItems).slice(0, sessionLength)
 
   // Build the "practice again" URL to the same session config
   const sessionUrl = `/verbs/session?${new URLSearchParams({

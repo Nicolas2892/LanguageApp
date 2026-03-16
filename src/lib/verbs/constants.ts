@@ -8,7 +8,11 @@ export const TENSES = [
   'imperfect_subjunctive',
   'imperative_affirmative',
   'imperative_negative',
+  'infinitive',
 ] as const
+
+/** The 9 conjugation tenses (excludes infinitive drill) */
+export const CONJUGATION_TENSES = TENSES.filter((t) => t !== 'infinitive')
 
 export type VerbTense = typeof TENSES[number]
 
@@ -22,6 +26,7 @@ export const TENSE_LABELS: Record<VerbTense, string> = {
   imperfect_subjunctive:  'Pretérito Imperfecto de Subjuntivo',
   imperative_affirmative: 'Imperativo Afirmativo',
   imperative_negative:    'Imperativo Negativo',
+  infinitive:             'Infinitivo',
 }
 
 export const TENSE_DESCRIPTIONS: Record<VerbTense, string> = {
@@ -34,4 +39,5 @@ export const TENSE_DESCRIPTIONS: Record<VerbTense, string> = {
   imperfect_subjunctive:  'Used in past subjunctive contexts and contrary-to-fact conditionals.',
   imperative_affirmative: 'Used to give direct commands or instructions. No yo form exists.',
   imperative_negative:    'Used to tell someone not to do something (no + subjunctive form). No yo form exists.',
+  infinitive:             'Translate the English meaning to the Spanish infinitive.',
 }

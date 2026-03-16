@@ -13,9 +13,10 @@ interface Props {
 const INDICATIVE_TENSES = ['present_indicative', 'preterite', 'imperfect', 'future', 'conditional'] as const
 const SUBJUNCTIVE_TENSES = ['present_subjunctive', 'imperfect_subjunctive'] as const
 const IMPERATIVE_TENSES = ['imperative_affirmative', 'imperative_negative'] as const
+const VOCABULARY_TENSES = ['infinitive'] as const
 const LENGTHS = [10, 20, 30] as const
 
-type VerbSet = 'favorites' | 'top25' | 'top50' | 'top100' | 'single'
+type VerbSet = 'favorites' | 'top25' | 'top50' | 'top100' | 'top250' | 'single'
 
 // Shared eyebrow style — uses adaptive --d5-eyebrow token
 const EYEBROW: React.CSSProperties = {
@@ -38,6 +39,7 @@ const VERB_SET_OPTIONS: Array<{ id: VerbSet; title: string; subtitle: string; re
   { id: 'top25',  title: 'Top 25',  subtitle: 'más comunes' },
   { id: 'top50',  title: 'Top 50',  subtitle: 'más comunes' },
   { id: 'top100', title: 'Top 100', subtitle: 'más comunes' },
+  { id: 'top250', title: 'Top 250', subtitle: 'más comunes' },
   { id: 'single', title: 'Solo', subtitle: '', requiresSingle: true },
 ]
 
@@ -73,6 +75,9 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
     if (showHint) params.set('hint', '1')
     router.push(`/verbs/session?${params.toString()}`)
   }
+
+  // Infinitive-only mode disables hint toggle (not relevant)
+  const onlyInfinitive = selectedTenses.size === 1 && selectedTenses.has('infinitive')
 
   // Build visible verb set options
   const visibleOptions = VERB_SET_OPTIONS.filter((opt) => {
@@ -118,8 +123,22 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
         <p style={{ fontSize: '0.625rem', fontWeight: 600, color: 'var(--d5-muted)', marginBottom: '0.375rem', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
           Imperativo
         </p>
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
           {IMPERATIVE_TENSES.map((tense) => (
+            <TenseChip
+              key={tense}
+              label={TENSE_LABELS[tense]}
+              selected={selectedTenses.has(tense)}
+              onToggle={() => toggleTense(tense)}
+            />
+          ))}
+        </div>
+
+        <p style={{ fontSize: '0.625rem', fontWeight: 600, color: 'var(--d5-muted)', marginBottom: '0.375rem', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+          Vocabulario
+        </p>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {VOCABULARY_TENSES.map((tense) => (
             <TenseChip
               key={tense}
               label={TENSE_LABELS[tense]}
@@ -217,11 +236,12 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
 
       {/* ── Hint toggle ────────────────────────────────────────────── */}
       <div className="px-4 mt-4">
-        <label className="flex items-center gap-3 cursor-pointer">
+        <label className={`flex items-center gap-3 ${onlyInfinitive ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}>
           <input
             type="checkbox"
-            checked={showHint}
+            checked={showHint && !onlyInfinitive}
             onChange={(e) => setShowHint(e.target.checked)}
+            disabled={onlyInfinitive}
             className="h-4 w-4 rounded accent-primary"
           />
           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--d5-heading)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>

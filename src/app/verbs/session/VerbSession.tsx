@@ -216,6 +216,8 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
 
   if (!current) return null
 
+  const isInfinitiveDrill = current.tense === 'infinitive'
+
   // Parse sentence: replace '_____' with blank display
   const parts = current.sentence.split('_____')
   const beforeBlank = parts[0] ?? ''
@@ -272,9 +274,15 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
 
           {/* Row 2: metadata eyebrow */}
           <div className="flex items-center gap-1.5 text-xs flex-wrap">
-            <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>Conjugación</span>
-            <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-            <span className="text-[var(--d5-muted)]">{current.infinitive}</span>
+            <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>
+              {isInfinitiveDrill ? 'Infinitivo' : 'Conjugación'}
+            </span>
+            {!isInfinitiveDrill && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+                <span className="text-[var(--d5-muted)]">{current.infinitive}</span>
+              </>
+            )}
             <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
             <span className="text-[var(--d5-muted)]">{tenseLabel}</span>
             <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
@@ -287,36 +295,49 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
           <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 animate-exercise-in ${flashClass}`}>
             {/* Sentence card */}
             <div className="senda-card space-y-4">
-              <div className="flex items-start gap-2">
-                <p className="text-base leading-relaxed flex-1">
-                  {beforeBlank}
-                  <span className="inline-block min-w-[4rem] border-b-2 border-primary mx-1 align-bottom" />
-                  {afterBlank}
-                </p>
-                <SpeakButton text={current.sentence.replace('_____', current.correctForm)} />
-              </div>
-
-              {/* English translation */}
-              {current.english && (
-                <p className="text-sm italic text-[var(--d5-muted)]">{current.english}</p>
-              )}
-
-              {/* Hint row */}
-              {showHint && (
-                <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
-                  <span className="px-2 py-1 rounded bg-muted font-mono font-medium">[{current.infinitive}]</span>
-                  <span>·</span>
-                  <span>{tenseLabel}</span>
-                  <span>·</span>
-                  <span>{pronounLabel}</span>
+              {isInfinitiveDrill ? (
+                /* Infinitive drill: show English meaning as prompt */
+                <div className="flex items-start gap-2">
+                  <p className="text-base leading-relaxed flex-1 font-medium">
+                    {current.sentence}
+                  </p>
+                  <SpeakButton text={current.correctForm} />
                 </div>
-              )}
-              {!showHint && (
-                <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
-                  <span>{tenseLabel}</span>
-                  <span>·</span>
-                  <span>{pronounLabel}</span>
-                </div>
+              ) : (
+                /* Conjugation drill: blank sentence + optional English */
+                <>
+                  <div className="flex items-start gap-2">
+                    <p className="text-base leading-relaxed flex-1">
+                      {beforeBlank}
+                      <span className="inline-block min-w-[4rem] border-b-2 border-primary mx-1 align-bottom" />
+                      {afterBlank}
+                    </p>
+                    <SpeakButton text={current.sentence.replace('_____', current.correctForm)} />
+                  </div>
+
+                  {/* English translation */}
+                  {current.english && (
+                    <p className="text-sm italic text-[var(--d5-muted)]">{current.english}</p>
+                  )}
+
+                  {/* Hint row */}
+                  {showHint && (
+                    <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
+                      <span className="px-2 py-1 rounded bg-muted font-mono font-medium">[{current.infinitive}]</span>
+                      <span>·</span>
+                      <span>{tenseLabel}</span>
+                      <span>·</span>
+                      <span>{pronounLabel}</span>
+                    </div>
+                  )}
+                  {!showHint && (
+                    <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
+                      <span>{tenseLabel}</span>
+                      <span>·</span>
+                      <span>{pronounLabel}</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -330,7 +351,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
                   onChange={(e) => setAnswer(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter' && phase.kind === 'answering') handleCheck() }}
                   disabled={phase.kind === 'feedback'}
-                  placeholder="Escribe la forma conjugada…"
+                  placeholder={isInfinitiveDrill ? 'Escribe el infinitivo…' : 'Escribe la forma conjugada…'}
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck={false}
@@ -356,7 +377,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
                 onNext={handleNext}
                 onTryAgain={handleTryAgain}
                 isLast={isLast}
-                completedSentence={current.sentence.replace('_____', current.correctForm)}
+                completedSentence={isInfinitiveDrill ? current.correctForm : current.sentence.replace('_____', current.correctForm)}
               />
             )}
           </div>

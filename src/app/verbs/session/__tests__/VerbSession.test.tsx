@@ -256,4 +256,101 @@ describe('VerbSession', () => {
     // but we verify the component is wired by checking the DOM structure exists
     expect(screen.getByText(/español todos los días/)).toBeInTheDocument()
   })
+
+  // ── Infinitive drill tests ─────────────────────────────────────────────────
+
+  const makeInfinitiveItem = (overrides: Partial<SessionItem> = {}): SessionItem => ({
+    verbId:      '00000000-0000-0000-0000-000000000002',
+    infinitive:  'hablar',
+    tense:       'infinitive',
+    pronoun:     '',
+    sentence:    'to speak / talk',
+    correctForm: 'hablar',
+    tenseRule:   '',
+    english:     null,
+    ...overrides,
+  })
+
+  it('renders Infinitivo eyebrow for infinitive drill', () => {
+    render(
+      <VerbSession
+        items={[makeInfinitiveItem()]}
+        showHint={false}
+        sessionUrl="/verbs/session?test"
+      />
+    )
+    // The eyebrow has class senda-eyebrow with text "Infinitivo"
+    const eyebrows = screen.getAllByText('Infinitivo')
+    expect(eyebrows.length).toBeGreaterThanOrEqual(1)
+    expect(screen.queryByText('Conjugación')).not.toBeInTheDocument()
+  })
+
+  it('shows English meaning as prompt for infinitive drill', () => {
+    render(
+      <VerbSession
+        items={[makeInfinitiveItem()]}
+        showHint={false}
+        sessionUrl="/verbs/session?test"
+      />
+    )
+    expect(screen.getByText('to speak / talk')).toBeInTheDocument()
+  })
+
+  it('uses infinitive-specific placeholder text', () => {
+    render(
+      <VerbSession
+        items={[makeInfinitiveItem()]}
+        showHint={false}
+        sessionUrl="/verbs/session?test"
+      />
+    )
+    expect(screen.getByPlaceholderText('Escribe el infinitivo…')).toBeInTheDocument()
+  })
+
+  it('grades infinitive drill correctly', async () => {
+    const user = userEvent.setup()
+
+    render(
+      <VerbSession
+        items={[makeInfinitiveItem()]}
+        showHint={false}
+        sessionUrl="/verbs/session?test"
+      />
+    )
+
+    await user.type(screen.getByPlaceholderText('Escribe el infinitivo…'), 'hablar')
+    await user.click(screen.getByRole('button', { name: /Comprobar/ }))
+
+    expect(screen.getByText('¡Correcto!')).toBeInTheDocument()
+  })
+
+  it('does not show infinitive verb name in eyebrow for infinitive drill', () => {
+    render(
+      <VerbSession
+        items={[makeInfinitiveItem()]}
+        showHint={false}
+        sessionUrl="/verbs/session?test"
+      />
+    )
+    // In conjugation mode, the verb infinitive appears as a separate muted span.
+    // In infinitive mode, the eyebrow should NOT show "hablar" as a separate metadata item.
+    // Find the senda-eyebrow element
+    const eyebrow = screen.getAllByText('Infinitivo')[0]
+    const metadataRow = eyebrow.closest('div')!
+    const muted = metadataRow.querySelectorAll('.text-\\[var\\(--d5-muted\\)\\]')
+    const mutedTexts = Array.from(muted).map((el) => el.textContent)
+    expect(mutedTexts).not.toContain('hablar')
+  })
+
+  it('does not show hint row for infinitive drill even with showHint=true', () => {
+    render(
+      <VerbSession
+        items={[makeInfinitiveItem()]}
+        showHint={true}
+        sessionUrl="/verbs/session?test"
+      />
+    )
+    // No [hablar] hint should appear since it's not a conjugation drill
+    expect(screen.queryByText('[hablar]')).not.toBeInTheDocument()
+  })
 })
