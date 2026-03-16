@@ -18,11 +18,12 @@ import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { HardFlagButton } from '@/components/HardFlagButton'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
+import { DownloadButton } from '@/components/offline/DownloadButton'
 
 type ModuleRow  = { id: string; title: string; order_index: number }
 type UnitRow    = { id: string; module_id: string; title: string; order_index: number }
 type ConceptRow = { id: string; unit_id: string; title: string; difficulty: number; level: string | null; grammar_focus: string | null }
-type ProgressRow = { concept_id: string; interval_days: number; is_hard: boolean }
+type ProgressRow = { concept_id: string; interval_days: number; is_hard: boolean; production_mastered: boolean }
 type ModuleState = 'mastered' | 'active' | 'upcoming'
 
 interface Props {
@@ -33,9 +34,14 @@ interface Props {
   unlockedLevelsList: string[]
 }
 
+function isConceptMastered(p: ProgressRow | undefined): boolean {
+  if (!p) return false
+  return p.interval_days >= MASTERY_THRESHOLD && p.production_mastered
+}
+
 function getModuleState(allModConcepts: ConceptRow[], progressMap: Map<string, ProgressRow>): ModuleState {
   if (allModConcepts.length === 0) return 'upcoming'
-  const mastered = allModConcepts.filter(c => (progressMap.get(c.id)?.interval_days ?? -1) >= MASTERY_THRESHOLD).length
+  const mastered = allModConcepts.filter(c => isConceptMastered(progressMap.get(c.id))).length
   const attempted = allModConcepts.filter(c => progressMap.has(c.id)).length
   if (mastered === allModConcepts.length) return 'mastered'
   if (attempted > 0) return 'active'
@@ -146,7 +152,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
           const modUnits = unitsByModule.get(mod.id) ?? []
           const allModConcepts = modUnits.flatMap(u => conceptsByUnit.get(u.id) ?? [])
           const masteredCount = allModConcepts.filter(
-            c => (progressMap.get(c.id)?.interval_days ?? -1) >= MASTERY_THRESHOLD
+            c => isConceptMastered(progressMap.get(c.id))
           ).length
           const masteredPct = allModConcepts.length > 0 ? (masteredCount / allModConcepts.length) * 100 : 0
           const state = getModuleState(allModConcepts, progressMap)
@@ -261,8 +267,11 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                       </span>
                     </div>
                   </div>
-                  {/* Module practice link */}
+                  {/* Module actions: download + practice */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                    <div onClick={e => e.stopPropagation()}>
+                      <DownloadButton moduleId={mod.id} />
+                    </div>
                     <Link
                       href={`/study?practice=true&module=${mod.id}`}
                       onClick={e => e.stopPropagation()}
@@ -350,7 +359,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                           )}
                           {(conceptsByUnit.get(unit.id) ?? []).map(concept => {
                             const p = progressMap.get(concept.id)
-                            const masteryState = getMasteryState(p?.interval_days)
+                            const masteryState = getMasteryState(p?.interval_days, p?.production_mastered)
                             const dot = MASTERY_DOT[masteryState]
                             const locked = isLocked(concept)
                             const isHard = p?.is_hard ?? false

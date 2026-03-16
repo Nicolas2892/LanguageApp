@@ -21,6 +21,11 @@ vi.mock('@/components/WindingPathSeparator', () => ({
 vi.mock('@/components/BackgroundMagicS', () => ({
   BackgroundMagicS: () => null,
 }))
+vi.mock('@/components/offline/DownloadButton', () => ({
+  DownloadButton: ({ moduleId }: { moduleId: string }) => (
+    <button data-testid={`download-${moduleId}`}>Download</button>
+  ),
+}))
 vi.mock('@/components/ui/dialog', () => ({
   Dialog: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -78,7 +83,7 @@ describe('CurriculumClient', () => {
     render(
       <CurriculumClient
         {...defaultProps}
-        progressEntries={[{ concept_id: 'con-1', interval_days: 1, is_hard: false }]}
+        progressEntries={[{ concept_id: 'con-1', interval_days: 1, is_hard: false, production_mastered: false }]}
       />
     )
     expect(screen.getByText('En Progreso')).toBeInTheDocument()
@@ -88,7 +93,7 @@ describe('CurriculumClient', () => {
     render(
       <CurriculumClient
         {...defaultProps}
-        progressEntries={[{ concept_id: 'con-1', interval_days: 21, is_hard: false }]}
+        progressEntries={[{ concept_id: 'con-1', interval_days: 21, is_hard: false, production_mastered: true }]}
       />
     )
     expect(screen.getByText('Completado')).toBeInTheDocument()

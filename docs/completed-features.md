@@ -4,6 +4,109 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Production Mastery Gate ✓ (2026-03-15)
+
+1843 tests across 98 files, all passing.
+
+### Problem
+
+Concept mastery was determined solely by `interval_days >= 21` (SRS retention). A user could reach "mastered" status by only doing gap_fill exercises, which test recognition — not active production. The `computeLevel()` function already used a dual gate (`interval_days >= 21 AND production_mastered`), but the rest of the app (badges, dots, dashboard, curriculum, progress page) only checked the SRS threshold.
+
+### New Mastery Rule
+
+Mastery = BOTH conditions met:
+1. **SRS retention**: `interval_days >= 21`
+2. **Production breadth**: ≥3 correct attempts on non-gap_fill exercises, across ≥2 different exercise types
+
+Gap_fill is excluded from counting toward production breadth.
+
+### Changes
+
+**`src/lib/mastery/badge.ts`** — Core mastery logic:
+- Added `MasteryProgress` interface (`srsReady`, `correctNonGapFill`, `uniqueTypes`, `productionReady`, `mastered`)
+- Added `getMasteryProgress(intervalDays, correctNonGapFill, uniqueTypes)` function
+- Updated `getMasteryState(intervalDays, productionMastered?)` — accepts optional production flag; when `false` and SRS is met, returns `'learning'` instead of `'mastered'`; backward-compatible (omitted = SRS-only)
+- Constants: `PRODUCTION_CORRECT_REQUIRED = 3`, `PRODUCTION_TYPES_REQUIRED = 2`
+
+**`src/app/api/submit/route.ts`** — Submit route (Steps 2 + 7):
+- Added parallel query for non-gap_fill exercises in `srsDataPromise`
+- Added query for correct non-gap_fill attempts from `exercise_attempts`
+- Current attempt included in breadth count (hasn't been inserted yet but type+score known)
+- `justMastered` now requires both SRS threshold crossing AND production breadth
+- `production_mastered` flag only set when full breadth gate is met (was: any production type scores ≥2)
+- Hoisted `productionReady` and `existingProductionMastered` to avoid scope issues with fire-and-forget block
+
+**`src/app/curriculum/[id]/page.tsx`** — Concept detail page (Steps 3 + 4):
+- Fetches `production_mastered` in progress query
+- Added query for correct non-gap_fill attempts (parallel with attempt count + module queries)
+- Computes `correctNonGapFill`, `uniqueTypes`, and `correctProductionTypes` set
+- `getMasteryState()` uses live production breadth check (not just cached flag)
+- Added "Progreso hacia dominio" milestone card (only when `masteryState === 'learning'`):
+  - SRS milestone: CheckCircle2 (terracotta) / Circle (muted) + `X / 21 días de intervalo`
+  - Production answers: `X / 3 correctas (sin completar espacios)`
+  - Exercise variety: `X / 2 tipos distintos` + terracotta type chips for completed types
+
+**`src/app/curriculum/CurriculumClient.tsx`** — Curriculum tree (Step 5):
+- `ProgressRow` type now includes `production_mastered: boolean`
+- Added `isConceptMastered(p)` helper — checks both `interval_days >= MASTERY_THRESHOLD && p.production_mastered`
+- Module state (`getModuleState`), mastered counts, and concept dot indicators all use dual gate
+- `getMasteryState()` call passes `p?.production_mastered`
+
+**`src/app/curriculum/page.tsx`** — Server component:
+- Progress query now selects `production_mastered`
+
+**`src/app/progress/page.tsx`** — Progress page (Step 6):
+- CEFR bars now count mastered as `interval_days >= MASTERY_THRESHOLD && row.production_mastered`
+
+**`src/components/DashboardDeferredSection.tsx`** — Dashboard:
+- `ProgressRow` type includes `production_mastered`
+- Progress query selects `production_mastered`
+- Module state calculation uses dual mastery gate
+
+### Tests
+
+**New: `src/lib/mastery/__tests__/badge.test.ts`** (15 tests):
+- `getMasteryState()` — new, learning, mastered, SRS-met but production false
+- `getMasteryProgress()` — all false, SRS only, production only, both, caps, boundary conditions, insufficient types, insufficient count
+
+**Updated: `src/app/api/submit/__tests__/route.mastery.test.ts`** (7 tests):
+- `just_mastered: false` when prev interval already >= threshold (even with production breadth)
+- `just_mastered: false` when interval still below threshold
+- `just_mastered: true` when both SRS + production breadth met
+- `just_mastered: false` when SRS crossed but no production breadth
+- `just_mastered: false` when SRS crossed but only 1 production type
+- `just_mastered: true` even with is_hard multiplier (mastery check before multiplier)
+- `just_mastered: false` when skip_srs is true
+- Mock setup updated: exercises mock handles 2 calls (exercise fetch + non-gap_fill query), exercise_attempts mock handles production breadth query
+
+**Updated: `src/app/api/submit/__tests__/route.stream.test.ts`** (8 tests):
+- Mock setup updated: exercises mock handles `.neq()` chain for non-gap_fill query
+- exercise_attempts mock handles production breadth query with `.in().eq()` chain
+
+**Updated: `src/app/curriculum/__tests__/CurriculumClient.test.tsx`**:
+- Progress fixtures include `production_mastered` field
+- "Completado" test uses `production_mastered: true`
+
+### No Migration Required
+
+The `production_mastered` boolean already exists on `user_progress`. The change is purely in when it gets set to `true` (stricter breadth gate) and using it more broadly across the app. Existing `true` values may be slightly generous but this is acceptable.
+
+### Files Modified
+
+- `src/lib/mastery/badge.ts`
+- `src/app/api/submit/route.ts`
+- `src/app/curriculum/[id]/page.tsx`
+- `src/app/curriculum/CurriculumClient.tsx`
+- `src/app/curriculum/page.tsx`
+- `src/app/progress/page.tsx`
+- `src/components/DashboardDeferredSection.tsx`
+- `src/lib/mastery/__tests__/badge.test.ts` (new)
+- `src/app/api/submit/__tests__/route.mastery.test.ts`
+- `src/app/api/submit/__tests__/route.stream.test.ts`
+- `src/app/curriculum/__tests__/CurriculumClient.test.tsx`
+
+---
+
 ## Move Tutor Out of Bottom Nav + Audit-D2 Fix ✓ (2026-03-13)
 
 1692 tests across 85 files, all passing.

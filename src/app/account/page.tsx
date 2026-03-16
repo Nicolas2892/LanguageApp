@@ -48,7 +48,7 @@ export default async function AccountPage() {
           </div>
           <div>
             {profile.display_name && (
-              <p className="text-sm font-semibold dark:text-[var(--d5-paper)]" style={{ color: 'var(--d5-ink)', lineHeight: 1.3 }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--d5-heading)', lineHeight: 1.3 }}>
                 {profile.display_name}
               </p>
             )}

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { WeeklyActivityChart } from '../WeeklyActivityChart'
 import type { WeekData } from '../WeeklyActivityChart'
 
@@ -125,5 +126,34 @@ describe('WeeklyActivityChart', () => {
     const innerBars = barContainer.querySelectorAll('.rounded-t-sm')
     // Zero count bars should still render (height > 0 after mount)
     expect(innerBars.length).toBe(14)
+  })
+
+  it('shows tooltip on tap and hides on second tap', async () => {
+    const data = makeWeeks({ 5: 12 })
+    const { container } = render(
+      <WeeklyActivityChart
+        data={data}
+        sessionCount={1}
+        totalMinutes={30}
+        uniqueDaysStudied={1}
+      />
+    )
+
+    const barContainer = container.querySelector('.flex.items-end.gap-1')!
+    const barWrappers = barContainer.children
+    const wrapper = barWrappers[5] as HTMLElement
+    const tooltipEl = wrapper.firstElementChild as HTMLElement
+
+    // Before tap: tooltip has opacity-0 (hidden)
+    expect(tooltipEl.className).toContain('opacity-0')
+
+    // Tap bar 5 (has count=12) — tooltip becomes visible
+    await userEvent.click(wrapper)
+    expect(tooltipEl.className).not.toContain('opacity-0')
+    expect(tooltipEl.textContent).toContain('12 ejercicios')
+
+    // Tap same bar again → tooltip hidden (opacity-0 restored)
+    await userEvent.click(wrapper)
+    expect(tooltipEl.className).toContain('opacity-0')
   })
 })

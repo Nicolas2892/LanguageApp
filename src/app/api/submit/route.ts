@@ -7,6 +7,7 @@ import { sm2, DEFAULT_PROGRESS } from '@/lib/srs'
 import type { SRSScore } from '@/lib/srs'
 import type { Concept, Exercise, UserProgress } from '@/lib/supabase/types'
 import { PRODUCTION_TYPES } from '@/lib/mastery/computeLevel'
+import { PRODUCTION_CORRECT_REQUIRED, PRODUCTION_TYPES_REQUIRED } from '@/lib/mastery/badge'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib/api-utils'
 import { MASTERY_THRESHOLD, HARD_INTERVAL_MULTIPLIER } from '@/lib/constants'
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
       answerVariants: (typedExercise as Exercise & { answer_variants?: string[] | null }).answer_variants,
     })
 
-    // Item 1: Pre-fetch SRS data in parallel with Claude call
+    // Item 1: Pre-fetch SRS data + production breadth in parallel with Claude call
     const srsDataPromise = !skip_srs
       ? Promise.all([
           supabase
@@ -99,6 +100,12 @@ export async function POST(request: Request) {
             .select('timezone')
             .eq('id', user.id)
             .single(),
+          // Fetch non-gap_fill exercises for this concept (for production breadth check)
+          supabase
+            .from('exercises')
+            .select('id, type')
+            .eq('concept_id', concept_id)
+            .neq('type', 'gap_fill'),
         ])
       : null
 
@@ -114,10 +121,13 @@ export async function POST(request: Request) {
 
           let nextReviewInDays = 0
           let justMastered = false
+          let productionReady = false
+          let existingProductionMastered = false
 
           if (!skip_srs && srsDataPromise) {
             // Item 1: Await the already-in-flight SRS promises
-            const [{ data: existingProgress }, { data: profileTz }] = await srsDataPromise
+            const [{ data: existingProgress }, { data: profileTz }, { data: nonGapFillExercises }] = await srsDataPromise
+            existingProductionMastered = existingProgress?.production_mastered ?? false
 
             const timezone = (profileTz as { timezone: string | null } | null)?.timezone ?? null
             const prevIntervalDays = existingProgress?.interval_days ?? 0
@@ -131,8 +141,43 @@ export async function POST(request: Request) {
             // Calculate new SRS values
             const newSRS = sm2(currentProgress as Pick<UserProgress, 'ease_factor' | 'interval_days' | 'repetitions'>, score as SRSScore, timezone)
 
-            // Check mastery BEFORE applying hard-flag multiplier
-            justMastered = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD
+            // Build production breadth check: query correct attempts on non-gap_fill exercises
+            type NonGapFillExRow = { id: string; type: string }
+            const nonGapFillExRows = (nonGapFillExercises ?? []) as NonGapFillExRow[]
+            const nonGapFillIds = nonGapFillExRows.map(e => e.id)
+            const exerciseTypeMap = new Map(nonGapFillExRows.map(e => [e.id, e.type]))
+
+            let correctNonGapFill = 0
+            const correctTypes = new Set<string>()
+
+            if (nonGapFillIds.length > 0) {
+              const { data: correctAttempts } = await supabase
+                .from('exercise_attempts')
+                .select('exercise_id')
+                .eq('user_id', user.id)
+                .in('exercise_id', nonGapFillIds)
+                .eq('is_correct', true)
+
+              for (const att of (correctAttempts ?? []) as { exercise_id: string }[]) {
+                correctNonGapFill++
+                const t = exerciseTypeMap.get(att.exercise_id)
+                if (t) correctTypes.add(t)
+              }
+            }
+
+            // Include the current attempt in the production breadth count
+            if (isProductionType && is_correct) {
+              correctNonGapFill++
+              correctTypes.add(typedExercise.type)
+            }
+
+            productionReady =
+              correctNonGapFill >= PRODUCTION_CORRECT_REQUIRED &&
+              correctTypes.size >= PRODUCTION_TYPES_REQUIRED
+
+            // Check mastery BEFORE applying hard-flag multiplier — requires both SRS + production breadth
+            const srsThresholdCrossed = prevIntervalDays < MASTERY_THRESHOLD && newSRS.interval_days >= MASTERY_THRESHOLD
+            justMastered = srsThresholdCrossed && productionReady
 
             // Apply hard-flag multiplier on correct answers to schedule ~40% more frequently
             if (existingProgress?.is_hard && score >= 2) {
@@ -188,7 +233,8 @@ export async function POST(request: Request) {
             updateStreakIfNeeded(supabase, user.id),
           ]
           if (!skip_srs) {
-            if (isProductionType && score >= 2) {
+            // Set production_mastered when breadth gate is met (≥3 correct, ≥2 types)
+            if (productionReady && !existingProductionMastered) {
               bgOps.push(
                 supabase
                   .from('user_progress')

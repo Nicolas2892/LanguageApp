@@ -134,9 +134,9 @@ Respond with this exact JSON structure:
 {
   "score": <0|1|2|3>,
   "is_correct": <true if score >= 2>,
-  "feedback": "<one sentence of direct feedback to the student in English>",
+  "feedback": "<one SHORT sentence: what was right or wrong about the student's specific answer — no grammar theory>",
   "corrected_version": "<the correct Spanish answer>",
-  "explanation": "<1-2 sentences explaining why, referencing the grammar rule>"
+  "explanation": "<one sentence stating the transferable grammar rule as a general principle — do NOT repeat what feedback already said, do NOT reference the student's answer>"
 }`
 
   const message = await anthropic.messages.create({
@@ -237,7 +237,7 @@ ${typeRubric || defaultRubric}
 
 Respond with EXACTLY two JSON objects on separate lines (no markdown, no other text):
 Line 1 (output immediately): {"score": <0|1|2|3>, "is_correct": <true if score >= 2>}
-Line 2 (output after): {"feedback": "<one sentence of direct feedback to the student in English>", "corrected_version": "<the correct Spanish answer>", "explanation": "<1-2 sentences explaining why, referencing the grammar rule>"}`
+Line 2 (output after): {"feedback": "<one SHORT sentence: what was right or wrong about the student's specific answer — no grammar theory>", "corrected_version": "<the correct Spanish answer>", "explanation": "<one sentence stating the transferable grammar rule as a general principle — do NOT repeat what feedback already said, do NOT reference the student's answer>"}`
 
   let buffer = ''
   let scoreEmitted = false

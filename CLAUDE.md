@@ -102,6 +102,7 @@ Remote: `https://github.com/Nicolas2892/LanguageApp.git`
 - `zod` pinned to **v3** — do NOT upgrade; v4 breaks `@hookform/resolvers@4`
 - Supabase types are hand-written in `src/lib/supabase/types.ts` (not CLI-generated). Every table must have a `Relationships: []` array or the SDK types all columns as `never`. After any `.select()` / `.single()`, always cast: `data as MyType`.
 - Do NOT use join syntax (e.g. `verbs(id, infinitive)`) in `.select()` calls for tables with `Relationships: []` — the SDK returns `SelectQueryError`. Fetch related data in a separate query and join in TypeScript.
+- `idb` v8 — Promise-based IndexedDB wrapper (Feat-F offline storage). `fake-indexeddb` v6 for Vitest tests. IDB stores use `0 | 1` for synced flags (IDB can't index booleans).
 
 ### Environment Variables (`.env.local`)
 
@@ -157,6 +158,13 @@ CRON_SECRET                     # Bearer token for cron-triggered push send rout
 | `POST /api/push/subscribe`      | Route handler   | Save/delete push subscription to `profiles.push_subscription`                             |
 | `POST /api/push/send`           | Route handler   | Cron-triggered: batch push notifications to subscribers with due exercises                 |
 | `POST /api/transcribe`          | Route handler   | OpenAI Whisper STT — accepts FormData with `audio` blob, returns `{ text }` (Fix-J)      |
+| `GET /api/offline/module/[id]`   | Route handler   | Download bundle for offline study: exercises, concepts, units, progress, free-write prompts (Feat-F) |
+| `GET /api/offline/verbs`        | Route handler   | Full verb data bundle; supports `?version=` for 304 Not Modified (Feat-F)                 |
+| `POST /api/offline/grade-batch` | Route handler   | Batch grade queued offline attempts via Claude; creates report + push notification (Feat-F) |
+| `POST /api/offline/verb-sync`   | Route handler   | Sync queued verb attempts via `increment_verb_progress` RPC (Feat-F)                      |
+| `POST /api/offline/reports/[id]/review` | Route handler | Mark an offline report as reviewed (Feat-F)                                         |
+| `/offline/reports`              | Server          | List of offline session reports (unreviewed + reviewed) (Feat-F)                          |
+| `/offline/reports/[id]`         | Server          | Report detail: per-attempt scores, feedback, mark reviewed (Feat-F)                       |
 | `DELETE /api/admin/exercises/[id]` | Route handler | Admin-only: hard-delete exercise (FK ON DELETE SET NULL preserves attempt history)         |
 | `/admin/pool`                   | Server + Client | Admin exercise pool dashboard — concept × type grid with counts, "+" generate button      |
 
@@ -222,10 +230,24 @@ All routed through shared `ExerciseRenderer` in `src/components/exercises/Exerci
 ### Core Learning Loop
 
 1. `StudySession.tsx` state: `answering → feedback → [try again | next] → done`
-2. `POST /api/submit` — Claude grades → SM-2 update → DB writes → streak update (once per day)
+2. `POST /api/submit` — Claude grades → SM-2 update → production breadth check → DB writes → streak update (once per day)
 3. `POST /api/sessions/complete` — fired (fire-and-forget) when session ends; writes `study_sessions` row
 4. `src/lib/srs/index.ts` — pure `sm2(progress, score)` function; scores 0–3 from Claude only
 5. New users auto-bootstrapped with 5 easiest concepts on first visit (unless onboarding seeded SRS)
+
+### Mastery Gate (Production Breadth)
+
+Concept mastery requires **both** conditions:
+1. **SRS retention**: `interval_days >= 21`
+2. **Production breadth**: ≥3 correct attempts on non-gap_fill exercises, across ≥2 different exercise types
+
+`gap_fill` is excluded from production breadth — it tests recognition, not active production.
+
+- `src/lib/mastery/badge.ts` — `getMasteryProgress(intervalDays, correctNonGapFill, uniqueTypes)` returns `MasteryProgress` with `srsReady`, `productionReady`, `mastered`. `getMasteryState(intervalDays, productionMastered?)` accepts optional production flag; when `false`, SRS-met concepts show as `'learning'` not `'mastered'`.
+- `user_progress.production_mastered` — cached boolean flag, set to `true` when breadth gate is met (≥3 correct, ≥2 types). Used by curriculum dots, progress CEFR bars, dashboard module state, and `updateComputedLevel()`.
+- `/api/submit` — queries non-gap_fill exercises + correct attempts for the concept; includes current attempt in breadth count; `justMastered` requires both gates.
+- Concept detail page — shows "Progreso hacia dominio" milestone card (3 rows: SRS, correct count, type variety + chips) when concept is in `learning` state.
+- Constants: `PRODUCTION_CORRECT_REQUIRED = 3`, `PRODUCTION_TYPES_REQUIRED = 2`
 
 ### Verb Conjugation Loop
 
@@ -279,6 +301,8 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | `user_verb_favorites`                    | User ↔ verb many-to-many favorites; unique (user_id, verb_id)                                                            |
 | `verb_progress`                          | Per-user accuracy per verb × tense; `attempt_count`, `correct_count`; upserted via RPC                                   |
 | `verb_conjugations`                      | Full 6-pronoun paradigm per verb × tense; `stem` = invariant prefix ('' = fully irregular); PK (verb_id, tense)          |
+| `offline_reports`                        | Aggregated results from offline batch grading; `reviewed` flag for report-out UI (Feat-F)                                |
+| `offline_report_attempts`                | Per-attempt results within an offline report: score, feedback, corrected_version, explanation (Feat-F)                    |
 
 
 Migrations (run once in Supabase SQL editor):
@@ -296,11 +320,12 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/019_user_timezone.sql` — `profiles.timezone text DEFAULT NULL`; replaces `increment_streak_if_new_day` RPC to use user's IANA timezone (Audit-E1)
 - `supabase/migrations/020_streak_freeze.sql` — `profiles.streak_freeze_remaining integer DEFAULT 1`, `streak_freeze_last_replenished text`, `streak_freeze_used_date text`; replaces `increment_streak_if_new_day` RPC (now `RETURNS jsonb`) with freeze logic + auto-replenish. **Note:** must `DROP FUNCTION increment_streak_if_new_day(uuid)` before running (return type change)
 - `supabase/migrations/021_accuracy_rpc.sql` — `get_accuracy_by_type(p_user_id uuid)` RPC; returns per-type + `_total` accuracy rows (replaces unbounded exercise_attempts fetch on progress page)
+- `supabase/migrations/022_offline_reports.sql` — `offline_reports` + `offline_report_attempts` tables with indexes (Feat-F; ⚠️ pending — run in Supabase SQL editor)
 
 ### Dashboard Stats
 
 - **Streak**: live from `profiles.streak` (updated on first daily submit)
-- **Mastered**: `user_progress` rows where `interval_days >= 21` (matches curriculum mastery threshold)
+- **Mastered**: `user_progress` rows where `interval_days >= 21 AND production_mastered = true` (dual mastery gate)
 - **Curriculum progress bar**: mastered / total concepts × 100%
 - `isNewUser` flag uses `studiedCount` (any `user_progress` row), not `masteredCount`
 - **Sprint card removed** — Escritura Libre card is the primary deferred action on the dashboard
@@ -383,6 +408,8 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/components/ErrorBoundary.tsx` — wraps StudySession, DiagnosticSession, WriteSession
 - `src/components/HardFlagButton.tsx` — orange Flag icon; optimistic toggle with revert on failure; rate-limited via `/api/concepts/[id]/hard`
 - `src/lib/rate-limit.ts` — `checkRateLimit(userId, routeKey, opts)` sliding-window (backed by @vercel/kv)
+- `src/lib/mastery/badge.ts` — `getMasteryState(intervalDays, productionMastered?)`, `getMasteryProgress(intervalDays, correctNonGapFill, uniqueTypes)`, `MASTERY_DOT`, `MASTERY_BADGE`; constants `PRODUCTION_CORRECT_REQUIRED=3`, `PRODUCTION_TYPES_REQUIRED=2`
+- `src/lib/mastery/computeLevel.ts` — `computeLevel(masteredByLevel, totalByLevel)` + `PRODUCTION_TYPES` array
 - `src/lib/api-utils.ts` — `updateStreakIfNeeded` + `updateComputedLevel` shared by submit + grade
 - `src/components/verbs/VerbCard.tsx` — verb grid card with mastery dots + favorite button
 - `src/components/verbs/VerbFavoriteButton.tsx` — optimistic heart toggle → `POST /api/verbs/favorite`
@@ -435,7 +462,7 @@ Tutor (`/tutor`) is a reactive support feature, not a primary nav destination. E
 
 ## Current Status
 
-**Test suite: 1815 tests across 96 files — all passing.**
+**Test suite: 1927 tests across 108 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -484,11 +511,15 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### New Features
 
-**Feat-F: Offline exercise packs (module download)** *(PM decision required first)*
+**Feat-F: Offline exercise packs (module download)** *(DONE — migration 022 pending)*
 
-- `gap_fill` + `sentence_builder` graded locally (accent-normalised string match); open-ended types (`translation`, `transformation`, `error_correction`) queued for AI grading on reconnect; `free_write` always excluded.
-- SRS updates queued in IndexedDB, flushed when `navigator.onLine` is true; conflict resolution strategy needed.
-- **Do not implement without a written PM decision on conflict resolution and sync UI.**
+- 6-phase implementation: IDB storage layer (`idb` v8), download manager + verb auto-cache, offline session engine, batch grading API, sync engine, report-out UI.
+- IndexedDB stores: 15 object stores for exercises, concepts, units, progress snapshots, queued attempts, verb cache, sessions, free-write prompts.
+- Download: per-module bundle via `GET /api/offline/module/[id]` with pre-generated free-write prompts (Claude, concurrency=3). Verb data auto-cached on login + `/verbs` visit via `VerbCacheManager`.
+- Offline session: neutral "Respuesta registrada" feedback; exercises queued in IDB; SRS-based queue builder across all downloaded modules with module filter option.
+- Sync: on reconnect, `SyncBanner` shows progress; `POST /api/offline/grade-batch` grades via Claude (batches of 5), applies SM-2 sequentially with server-wins conflict resolution; creates `offline_reports` + push notification.
+- Report-out: `/offline/reports` list + `/offline/reports/[id]` detail with per-attempt scores, feedback, corrected version. Dashboard badge (AppHeader + SideNav) for unread reports.
+- Migration 022: `offline_reports` + `offline_report_attempts` tables.
 
 **Feat-G: Streak freeze** *(DONE — migration 020 applied)*
 
@@ -593,7 +624,7 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
 | **P4** | **Infra-D** — A/B testing / feature flags | Needed before adaptive grading |
-| **P4** | **Feat-F** — Offline exercise packs | PM decision on sync |
+| **P4** | **Feat-F** — Offline exercise packs | **DONE** |
 | **P4** | **Feat-L** — Reading comprehension | Content strategy needed |
 | **P4** | **Feat-M** — Vocabulary feature | PM scope decision |
 | **P4** | **Feat-N** — Social / accountability | PM research needed |

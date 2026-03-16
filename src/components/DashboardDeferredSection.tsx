@@ -13,7 +13,7 @@ interface Props {
 type ModuleRow   = { id: string; title: string; order_index: number }
 type UnitRow     = { id: string; module_id: string }
 type ConceptRow  = { id: string; unit_id: string }
-type ProgressRow = { concept_id: string; interval_days: number }
+type ProgressRow = { concept_id: string; interval_days: number; production_mastered: boolean }
 type ModuleState = 'mastered' | 'active' | 'upcoming'
 
 interface ModuleSummary {
@@ -39,7 +39,7 @@ export async function DashboardDeferredSection({
     supabase.from('modules').select('id, title, order_index').order('order_index', { ascending: true }),
     supabase.from('units').select('id, module_id'),
     supabase.from('concepts').select('id, unit_id, title'),
-    supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', userId),
+    supabase.from('user_progress').select('concept_id, interval_days, production_mastered').eq('user_id', userId),
   ])
 
   const weakestConceptId =
@@ -71,9 +71,9 @@ export async function DashboardDeferredSection({
     conceptsByUnit.set(c.unit_id, arr)
   }
 
-  const progressMap = new Map<string, number>()
+  const progressMap = new Map<string, ProgressRow>()
   for (const p of allProgress) {
-    progressMap.set(p.concept_id, p.interval_days)
+    progressMap.set(p.concept_id, p)
   }
 
   const moduleSummaries: ModuleSummary[] = allModules.map((mod) => {
@@ -82,10 +82,10 @@ export async function DashboardDeferredSection({
     let mastered = 0
     let studied = 0
     for (const cid of conceptIds) {
-      const days = progressMap.get(cid)
-      if (days !== undefined) {
+      const prog = progressMap.get(cid)
+      if (prog !== undefined) {
         studied++
-        if (days >= MASTERY_THRESHOLD) mastered++
+        if (prog.interval_days >= MASTERY_THRESHOLD && prog.production_mastered) mastered++
       }
     }
     const total = conceptIds.length

@@ -11,6 +11,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { PostHogProvider } from "@/components/PostHogProvider";
 import { SplashScreen } from "@/components/SplashScreen";
 import { TimezoneSync } from "@/components/TimezoneSync";
+import { VerbCacheManager } from "@/components/offline/VerbCacheManager";
+import { SyncBanner } from "@/components/offline/SyncBanner";
 import { createClient } from "@/lib/supabase/server";
 import { getInitials } from "@/lib/utils";
 
@@ -91,6 +93,7 @@ export default async function RootLayout({
   let userId: string | undefined
   let streak = 0
   let streakFreezeRemaining = 0
+  let unreadReportCount = 0
   let themePreference: 'light' | 'dark' | 'system' = 'system'
   let userTimezone: string | null = null
   try {
@@ -98,15 +101,23 @@ export default async function RootLayout({
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       userId = user.id
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name, theme_preference, streak, timezone, streak_freeze_remaining')
-        .eq('id', user.id)
-        .single()
+      const [{ data: profile }, { count: reportCount }] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('display_name, theme_preference, streak, timezone, streak_freeze_remaining')
+          .eq('id', user.id)
+          .single(),
+        supabase
+          .from('offline_reports')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('reviewed', false),
+      ])
       const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null; timezone: string | null; streak_freeze_remaining: number | null } | null
       userInitials = getInitials(p?.display_name ?? null, user.email!)
       streak = p?.streak ?? 0
       streakFreezeRemaining = p?.streak_freeze_remaining ?? 0
+      unreadReportCount = reportCount ?? 0
       userTimezone = p?.timezone ?? null
       if (p?.theme_preference === 'light' || p?.theme_preference === 'dark' || p?.theme_preference === 'system') {
         themePreference = p.theme_preference
@@ -132,9 +143,9 @@ export default async function RootLayout({
       >
         <ThemeProvider initialTheme={themePreference}>
           <PostHogProvider userId={userId}>
-            <SideNav userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} />
+            <SideNav userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} unreadReportCount={unreadReportCount} />
             <div className="lg:ml-[220px]">
-              <AppHeader userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} />
+              <AppHeader userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} unreadReportCount={unreadReportCount} />
               <PageWrapper>{children}</PageWrapper>
             </div>
             <BottomNav />
@@ -142,6 +153,8 @@ export default async function RootLayout({
             <IOSInstallPrompt />
             <SplashScreen />
             {userId && <TimezoneSync serverTimezone={userTimezone} />}
+            {userId && <VerbCacheManager />}
+            {userId && <SyncBanner />}
           </PostHogProvider>
         </ThemeProvider>
       </body>

@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { FileText } from 'lucide-react'
 import { UserAvatar } from '@/components/UserAvatar'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { StreakBadge } from '@/components/StreakBadge'
@@ -22,9 +23,10 @@ interface Props {
   userInitials: string
   streak: number
   streakFreezeRemaining?: number
+  unreadReportCount?: number
 }
 
-export function SideNav({ userInitials, streak, streakFreezeRemaining = 0 }: Props) {
+export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unreadReportCount = 0 }: Props) {
   const pathname = usePathname()
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
@@ -89,6 +91,22 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0 }: Pro
 
       {/* Streak + Account at bottom */}
       <div className="p-3 border-t shrink-0 space-y-2" style={{ borderColor: 'var(--d5-nav-border)' }}>
+        {unreadReportCount > 0 && (
+          <Link
+            href="/offline/reports"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-muted"
+            style={{ color: 'var(--d5-terracotta)' }}
+          >
+            <span className="relative">
+              <FileText className="h-4 w-4" strokeWidth={1.5} />
+              <span
+                className="absolute -top-0.5 -right-0.5 rounded-full"
+                style={{ width: 6, height: 6, background: 'var(--d5-terracotta)' }}
+              />
+            </span>
+            {unreadReportCount} {unreadReportCount === 1 ? 'informe' : 'informes'}
+          </Link>
+        )}
         <div className="px-3">
           <StreakBadge streak={streak} size="md" freezeAvailable={streakFreezeRemaining > 0} />
         </div>

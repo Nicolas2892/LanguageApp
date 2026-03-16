@@ -66,4 +66,24 @@ describe('AppHeader', () => {
     expect(link.className).toContain('min-w-[44px]')
     expect(link.className).toContain('min-h-[44px]')
   })
+
+  it('shows report badge when unreadReportCount > 0', () => {
+    mockPathname = '/dashboard'
+    render(<AppHeader {...defaultProps} unreadReportCount={3} />)
+    const link = screen.getByLabelText('Informes offline')
+    expect(link).toBeTruthy()
+    expect(link.getAttribute('href')).toBe('/offline/reports')
+  })
+
+  it('does not show report badge when unreadReportCount is 0', () => {
+    mockPathname = '/dashboard'
+    render(<AppHeader {...defaultProps} unreadReportCount={0} />)
+    expect(screen.queryByLabelText('Informes offline')).toBeNull()
+  })
+
+  it('does not show report badge by default', () => {
+    mockPathname = '/dashboard'
+    render(<AppHeader {...defaultProps} />)
+    expect(screen.queryByLabelText('Informes offline')).toBeNull()
+  })
 })

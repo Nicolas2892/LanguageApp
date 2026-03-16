@@ -2,9 +2,9 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { StudySession } from './StudySession'
+import { OfflineGate } from './OfflineGate'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { SESSION_SIZE, BOOTSTRAP_SIZE, MIN_PRACTICE_SIZE } from '@/lib/constants'
-import { cycleToMinimum } from '@/lib/practiceUtils'
+import { SESSION_SIZE, BOOTSTRAP_SIZE } from '@/lib/constants'
 import { biasedExercisePick, dropGapFillForPractice } from '@/lib/studyUtils'
 import { computeUnlockedLevels } from '@/lib/curriculum/prerequisites'
 import type { CefrLevel } from '@/lib/curriculum/prerequisites'
@@ -342,8 +342,8 @@ export default async function StudyPage({
   // Underweight gap_fill in Open Practice before cycling
   const filteredItems = (isMixedTypes && isOpenPractice) ? dropGapFillForPractice(items) : items
 
-  // Apply minimum cycling for Open Practice sessions (Fix-H)
-  const paddedItems = isOpenPractice ? cycleToMinimum(filteredItems, MIN_PRACTICE_SIZE) : filteredItems
+  // No exercise repetition — use available exercises as-is (never cycle/pad with duplicates)
+  const paddedItems = filteredItems
 
   // Interleave by unit in SRS/sprint modes so each session mixes grammar areas (Ped-H)
   const shouldInterleave = !isOpenPractice && !isSprint && !params.concept && !params.unit && !params.module && params.mode !== 'review'
@@ -372,29 +372,31 @@ export default async function StudyPage({
     : 'Review session'
 
   return (
-    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
-      <div className="mb-8">
-        <h1 className="senda-heading text-2xl">Sesión de Estudio</h1>
-      </div>
-      <ErrorBoundary>
-        <StudySession
-          items={cappedItems}
-          practiceMode={isDrillMode}
-          generateConfig={
-            isDrillMode && params.concept && filterTypes[0] && GENERATABLE_TYPES.has(filterTypes[0])
-              ? {
-                  conceptId: params.concept,
-                  concept: conceptMap.get(params.concept)!,
-                  exerciseType: filterTypes[0],
-                }
-              : undefined
-          }
-          returnHref={isDrillMode && params.concept ? `/curriculum/${params.concept}` : undefined}
-          sprintConfig={isSprint ? { limitType: sprintLimitType, limit: sprintLimit } : undefined}
-          freeWriteConceptId={params.concept && !isSprint ? params.concept : undefined}
-          sessionLabel={sessionLabel}
-        />
-      </ErrorBoundary>
-    </main>
+    <OfflineGate>
+      <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+        <div className="mb-8">
+          <h1 className="senda-heading text-2xl">Sesión de Estudio</h1>
+        </div>
+        <ErrorBoundary>
+          <StudySession
+            items={cappedItems}
+            practiceMode={isDrillMode}
+            generateConfig={
+              isDrillMode && params.concept && filterTypes[0] && GENERATABLE_TYPES.has(filterTypes[0])
+                ? {
+                    conceptId: params.concept,
+                    concept: conceptMap.get(params.concept)!,
+                    exerciseType: filterTypes[0],
+                  }
+                : undefined
+            }
+            returnHref={isDrillMode && params.concept ? `/curriculum/${params.concept}` : undefined}
+            sprintConfig={isSprint ? { limitType: sprintLimitType, limit: sprintLimit } : undefined}
+            freeWriteConceptId={params.concept && !isSprint ? params.concept : undefined}
+            sessionLabel={sessionLabel}
+          />
+        </ErrorBoundary>
+      </main>
+    </OfflineGate>
   )
 }

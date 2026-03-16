@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Bot } from 'lucide-react'
+import { Bot, FileText } from 'lucide-react'
 import { UserAvatar } from '@/components/UserAvatar'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { StreakBadge } from '@/components/StreakBadge'
@@ -13,9 +13,10 @@ interface Props {
   userInitials: string
   streak: number
   streakFreezeRemaining?: number
+  unreadReportCount?: number
 }
 
-export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0 }: Props) {
+export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unreadReportCount = 0 }: Props) {
   const pathname = usePathname()
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
@@ -37,6 +38,24 @@ export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0 }: P
                          min-h-[44px] flex items-center justify-center text-[var(--d5-nav-inactive)]"
             >
               <Bot className="h-5 w-5" strokeWidth={1.5} />
+            </Link>
+          )}
+          {unreadReportCount > 0 && (
+            <Link
+              href="/offline/reports"
+              aria-label="Informes offline"
+              className="relative rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
+                         min-h-[44px] flex items-center justify-center"
+            >
+              <FileText className="h-5 w-5" strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)' }} />
+              <span
+                className="absolute top-1.5 right-1.5 rounded-full"
+                style={{
+                  width: 8,
+                  height: 8,
+                  background: 'var(--d5-terracotta)',
+                }}
+              />
             </Link>
           )}
           <StreakBadge streak={streak} size="sm" freezeAvailable={streakFreezeRemaining > 0} />

@@ -2,9 +2,53 @@ import { MASTERY_THRESHOLD } from '../constants'
 
 export type MasteryState = 'mastered' | 'learning' | 'new'
 
-export function getMasteryState(intervalDays: number | undefined): MasteryState {
+/** Required correct non-gap_fill attempts for production gate */
+export const PRODUCTION_CORRECT_REQUIRED = 3
+/** Required distinct non-gap_fill types for production gate */
+export const PRODUCTION_TYPES_REQUIRED = 2
+
+export interface MasteryProgress {
+  srsReady: boolean
+  correctNonGapFill: number
+  uniqueTypes: number
+  productionReady: boolean
+  mastered: boolean
+}
+
+/**
+ * Compute detailed mastery progress for a concept.
+ */
+export function getMasteryProgress(
+  intervalDays: number | undefined,
+  correctNonGapFill: number,
+  uniqueTypes: number,
+): MasteryProgress {
+  const srsReady = (intervalDays ?? 0) >= MASTERY_THRESHOLD
+  const productionReady =
+    correctNonGapFill >= PRODUCTION_CORRECT_REQUIRED &&
+    uniqueTypes >= PRODUCTION_TYPES_REQUIRED
+  return {
+    srsReady,
+    correctNonGapFill: Math.min(correctNonGapFill, PRODUCTION_CORRECT_REQUIRED),
+    uniqueTypes: Math.min(uniqueTypes, PRODUCTION_TYPES_REQUIRED),
+    productionReady,
+    mastered: srsReady && productionReady,
+  }
+}
+
+/**
+ * Simple mastery state check. When `productionMastered` is provided, requires
+ * both SRS + production gates. When omitted, falls back to SRS-only.
+ */
+export function getMasteryState(
+  intervalDays: number | undefined,
+  productionMastered?: boolean,
+): MasteryState {
   if (intervalDays === undefined) return 'new'
-  if (intervalDays >= MASTERY_THRESHOLD) return 'mastered'
+  if (intervalDays >= MASTERY_THRESHOLD) {
+    if (productionMastered === undefined || productionMastered) return 'mastered'
+    return 'learning'
+  }
   return 'learning'
 }
 

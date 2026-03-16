@@ -177,7 +177,7 @@ describe('StudySession — Perf-A #4 prefetch & auto-generation', () => {
     )
   })
 
-  it('calls /api/exercises/generate ×3 during feedback on last drill exercise', async () => {
+  it('does not auto-generate during feedback — session reaches done screen naturally', async () => {
     const generateConfig = {
       conceptId: 'concept-1',
       concept: mockConcept,
@@ -187,53 +187,15 @@ describe('StudySession — Perf-A #4 prefetch & auto-generation', () => {
       <StudySession items={[makeItem()]} practiceMode generateConfig={generateConfig} />,
     )
     await submitAndWaitForFeedback()
-    await waitFor(() => {
-      const generateCalls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[0] === '/api/exercises/generate',
-      )
-      expect(generateCalls).toHaveLength(3)
-    })
-  })
-
-  it('does not trigger auto-generation twice even if effect re-runs', async () => {
-    const generateConfig = {
-      conceptId: 'concept-1',
-      concept: mockConcept,
-      exerciseType: 'gap_fill',
-    }
-    render(
-      <StudySession items={[makeItem()]} practiceMode generateConfig={generateConfig} />,
-    )
-    await submitAndWaitForFeedback()
-    // Wait for generation to complete so effect can re-run with new dynamicItems.length
-    await waitFor(() => {
-      const generateCalls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[0] === '/api/exercises/generate',
-      )
-      expect(generateCalls).toHaveLength(3)
-    })
-    // Allow any potential re-trigger to surface
+    // No auto-generation calls should fire during feedback
     await act(async () => { await new Promise((r) => setTimeout(r, 50)) })
     const generateCalls = (global.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(
       (call) => call[0] === '/api/exercises/generate',
     )
-    expect(generateCalls).toHaveLength(3)
-  })
-
-  it('shows "Generate 3 more" button when auto-generation fails', async () => {
-    global.fetch = makeFetch({ generateFails: true })
-    const generateConfig = {
-      conceptId: 'concept-1',
-      concept: mockConcept,
-      exerciseType: 'gap_fill',
-    }
-    render(
-      <StudySession items={[makeItem()]} practiceMode generateConfig={generateConfig} />,
-    )
-    await submitAndWaitForFeedback()
-    // Click next to reach done screen (generate failed → no extra items)
+    expect(generateCalls).toHaveLength(0)
+    // Click next → done screen appears with "Seguir practicando" button
     await userEvent.click(screen.getByTestId('next-btn'))
-    await waitFor(() => screen.getByText('Generar 3 más'))
+    await waitFor(() => screen.getByText('Seguir practicando'))
   })
 
   it('does not call /api/exercises/generate in a normal (non-practice) session', async () => {
@@ -358,68 +320,33 @@ describe('StudySession — UX-AA mastery overlay', () => {
   })
 })
 
-// ── Fix-I: Drill auto-generation race condition ────────────────────────────────
-describe('StudySession — Fix-I drill generation disables Next button', () => {
+// ── Done screen: "Seguir practicando" generates more exercises ───────────────
+describe('StudySession — done screen generate more', () => {
   const generateConfig = {
     conceptId: 'concept-1',
     concept: mockConcept,
     exerciseType: 'gap_fill' as const,
   }
 
-  it('disables Next button while generation is in-flight', async () => {
-    // Never resolve the generate call so generatingMore stays true
-    global.fetch = vi.fn().mockImplementation((url: string) => {
-      if (url === '/api/submit') {
-        return Promise.resolve(makeStreamingSubmitResponse())
-      }
-      if (url === '/api/sessions/complete') {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
-      }
-      if (url === '/api/exercises/generate') {
-        return new Promise(() => {}) // never resolves
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) })
-    })
-
+  it('Next button is never disabled by auto-generation (auto-generation removed)', async () => {
     render(
       <StudySession items={[makeItem()]} practiceMode generateConfig={generateConfig} />,
     )
     await submitAndWaitForFeedback()
 
-    // Wait for generation to start (button shows "Generating…" and is disabled)
-    await waitFor(() => {
-      const btn = screen.getByTestId('next-btn')
-      expect(btn).toBeDisabled()
-    })
-    expect(screen.getByTestId('next-btn').textContent).toBe('Generando…')
+    // Button should show "Finalizar sesión" and be enabled
+    const btn = screen.getByTestId('next-btn')
+    expect(btn).not.toBeDisabled()
+    expect(btn.textContent).toBe('Finalizar sesión')
   })
 
-  it('re-enables Next button when generation completes successfully', async () => {
+  it('done screen shows "Seguir practicando" button in drill mode', async () => {
     render(
       <StudySession items={[makeItem()]} practiceMode generateConfig={generateConfig} />,
     )
     await submitAndWaitForFeedback()
-
-    // Initially may be disabled (generation in-flight), then re-enables
-    await waitFor(() => {
-      const btn = screen.getByTestId('next-btn')
-      expect(btn).not.toBeDisabled()
-    })
-  })
-
-  it('re-enables Next button when generation fails', async () => {
-    global.fetch = makeFetch({ generateFails: true })
-
-    render(
-      <StudySession items={[makeItem()]} practiceMode generateConfig={generateConfig} />,
-    )
-    await submitAndWaitForFeedback()
-
-    // After failure, generatingMore = false → button re-enabled
-    await waitFor(() => {
-      const btn = screen.getByTestId('next-btn')
-      expect(btn).not.toBeDisabled()
-    })
+    await userEvent.click(screen.getByTestId('next-btn'))
+    await waitFor(() => screen.getByText('Seguir practicando'))
   })
 })
 

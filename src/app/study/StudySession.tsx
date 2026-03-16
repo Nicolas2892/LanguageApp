@@ -103,7 +103,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   // Holds details chunk that arrived before the 300ms flash timer fires
   const pendingDetailsRef = useRef<{ feedback: string; corrected_version: string; explanation: string } | null>(null)
   const confettiFired = useRef(false)
-  const autoGenerateTriggeredRef = useRef(false)
 
   // UX-AB: concept explanation collapsed by default
   const [isConceptExpanded, setIsConceptExpanded] = useState(false)
@@ -132,14 +131,19 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     return () => { if (flashTimerRef.current) clearTimeout(flashTimerRef.current) }
   }, [])
 
-  // Confetti on done screen (≥70% accuracy)
+  // Confetti on done screen — contextual intensity
   useEffect(() => {
     if (state.phase !== 'done') return
     const pct = state.total > 0 ? Math.round((state.correct / state.total) * 100) : 0
-    if (pct >= 70 && !confettiFired.current) {
+    if (pct >= 50 && !confettiFired.current) {
       confettiFired.current = true
       import('canvas-confetti').then(({ default: confetti }) => {
-        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } })
+        if (pct >= 70) {
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } })
+        } else {
+          // Subtle single-pop for 50-69%
+          confetti({ particleCount: 35, spread: 50, origin: { y: 0.6 }, colors: ['#C4522E', '#8C6A3F', '#B8AA99'] })
+        }
       }).catch((err) => console.warn('confetti load failed', err))
     }
   }, [state])
@@ -157,41 +161,26 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     return () => clearTimeout(id)
   }, [masteryOverlayOpen])
 
-  // Auto-generate drill exercises during feedback on last loaded exercise
+  // Animated counter for done screen
+  const [displayPct, setDisplayPct] = useState(0)
   useEffect(() => {
-    if (state.phase !== 'feedback') return
-    if (!practiceMode || !generateConfig) return
-    if (index + 1 < dynamicItems.length) return  // more items already available
-    if (generatingMore || autoGenerateTriggeredRef.current) return
-
-    autoGenerateTriggeredRef.current = true
-    setGeneratingMore(true)
-    setGenerateError(null)
-
-    const body = JSON.stringify({ concept_id: generateConfig.conceptId, type: generateConfig.exerciseType })
-    const headers = { 'Content-Type': 'application/json' }
-
-    Promise.all([
-      fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
-      fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
-      fetch('/api/exercises/generate', { method: 'POST', headers, body }).then((r) => r.json()),
-    ]).then(([r1, r2, r3]) => {
-      const existingIds = new Set(dynamicItems.map(item => item.exercise.id))
-      const exercises = [r1, r2, r3].filter((ex) => ex && typeof ex.id === 'string' && !existingIds.has(ex.id))
-      if (exercises.length === 0) {
-        setGenerateError('No hay más ejercicios únicos disponibles.')
-        return
-      }
-      setDynamicItems((prev) => [
-        ...prev,
-        ...exercises.map((ex) => ({ concept: generateConfig.concept, exercise: ex as Exercise })),
-      ])
-    }).catch(() => {
-      setGenerateError('Error al generar ejercicios. Inténtalo de nuevo.')
-    }).finally(() => {
-      setGeneratingMore(false)
-    })
-  }, [state.phase, index, practiceMode, generateConfig, dynamicItems.length, generatingMore])
+    if (state.phase !== 'done') return
+    const target = state.total > 0 ? Math.round((state.correct / state.total) * 100) : 0
+    if (target === 0) { setDisplayPct(0); return }
+    const duration = 800
+    const start = performance.now()
+    let raf: number
+    function tick(now: number) {
+      const elapsed = now - start
+      const progress = Math.min(elapsed / duration, 1)
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setDisplayPct(Math.round(eased * target))
+      if (progress < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [state])
 
   // Effective length for count mode (must be above handleNext)
   const effectiveLength = sprintConfig?.limitType === 'count'
@@ -228,7 +217,6 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         // UX-AB: collapse concept note on each new exercise
         setIsConceptExpanded(false)
         startTransition(() => {
-          autoGenerateTriggeredRef.current = false
           setIndex((i) => i + 1)
           setState({ phase: 'answering' })
           setWrongAttempts(0)
@@ -506,23 +494,23 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     const pct = state.total > 0 ? Math.round((state.correct / state.total) * 100) : 0
     const missed = state.total - state.correct
     const backLabel = returnHref ? 'Volver al concepto' : sprintConfig ? 'Volver al inicio' : 'Hecho'
-    const sessionLabel = pct >= 90
+    const doneMessage = pct >= 90
       ? 'Impecable.'
       : pct >= 70
       ? 'Buen trabajo — los huecos ya están en cola.'
       : pct >= 50
-      ? 'Las difíciles son las que vale la pena repetir.'
-      : 'Sesión difícil — para eso es el repaso.'
+      ? 'Paso a paso — las difíciles son las que vale la pena repetir.'
+      : 'Sesión difícil — pero cuenta.'
     return (
-      <div className="space-y-6 text-center py-8">
+      <div className="animate-done-stagger space-y-6 text-center py-8">
         <div className="flex justify-center">
-          <div className={pct < 70 ? 'rounded-full ring-2 ring-orange-400 ring-offset-2 animate-pulse p-2' : ''}>
-            <PartyPopper className="h-14 w-14 text-orange-500 animate-in zoom-in-50 duration-500" strokeWidth={1.5} />
+          <div className={pct < 50 ? 'rounded-full ring-2 ring-orange-400 ring-offset-2 animate-pulse p-2' : ''}>
+            <PartyPopper className="h-14 w-14 text-orange-500" strokeWidth={1.5} />
           </div>
         </div>
         <div>
-          <p className="text-5xl font-extrabold">{pct}%</p>
-          <p className="text-muted-foreground mt-1 text-sm">{sessionLabel}</p>
+          <p className="text-5xl font-extrabold tabular-nums">{displayPct}%</p>
+          <p className="text-muted-foreground mt-1 text-sm">{doneMessage}</p>
         </div>
         <div className="flex justify-center gap-6">
           <div className="flex items-center gap-1.5">
@@ -587,7 +575,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-primary text-primary px-6 py-2.5 text-sm font-semibold hover:bg-primary/5 active:scale-95 transition-transform disabled:opacity-60"
             >
               <Sparkles className="h-4 w-4" strokeWidth={1.5} />
-              {generatingMore ? 'Generando…' : 'Generar 3 más'}
+              {generatingMore ? 'Generando…' : 'Seguir practicando'}
             </button>
           )}
           <button
@@ -766,7 +754,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                 onNext={handleNext}
                 onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
                 isLast={isLast}
-                isGenerating={generatingMore || streamingDetails}
+                isGenerating={streamingDetails}
                 conceptId={item.concept.id}
               />
             </div>

@@ -354,7 +354,7 @@
   border: 1.5px dashed var(--d5-muted);
   border-radius: 12px;
   background: var(--d5-paper);
-  padding: 0.75rem 0.875rem;
+  padding: 0.75rem 1rem;
 }
 .dark .senda-dashed-input {
   background: rgba(26, 17, 8, 0.30);
@@ -427,6 +427,24 @@
 .animate-card-in {
   animation: card-fade-in var(--duration-senda) var(--ease-senda) backwards;
 }
+
+/* Done screen — staggered entrance for child elements */
+@keyframes done-slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-done-stagger > * {
+  opacity: 0;
+  animation: done-slide-up 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-done-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.animate-done-stagger > *:nth-child(2) { animation-delay: 100ms; }
+.animate-done-stagger > *:nth-child(3) { animation-delay: 200ms; }
+.animate-done-stagger > *:nth-child(4) { animation-delay: 300ms; }
+.animate-done-stagger > *:nth-child(5) { animation-delay: 400ms; }
+.animate-done-stagger > *:nth-child(6) { animation-delay: 500ms; }
+.animate-done-stagger > *:nth-child(7) { animation-delay: 600ms; }
+.animate-done-stagger > *:nth-child(8) { animation-delay: 700ms; }
 
 /* Senda skeleton loading — gentle opacity pulse, no scale transform */
 @keyframes senda-skeleton {
@@ -534,6 +552,7 @@
   .animate-flash-orange,
   .animate-senda-pulse,
   .animate-message-in,
+  .animate-done-stagger > *,
   .animate-heart-bounce,
   .splash-trail-draw,
   .splash-logo-in {

@@ -484,6 +484,90 @@ export interface Database {
         }
         Relationships: []
       }
+      offline_reports: {
+        Row: {
+          id: string
+          user_id: string
+          session_id: string
+          attempt_count: number
+          correct_count: number
+          accuracy: number | null
+          reviewed: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          session_id: string
+          attempt_count?: number
+          correct_count?: number
+          accuracy?: number | null
+          reviewed?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          session_id?: string
+          attempt_count?: number
+          correct_count?: number
+          accuracy?: number | null
+          reviewed?: boolean
+          created_at?: string
+        }
+        Relationships: []
+      }
+      offline_report_attempts: {
+        Row: {
+          id: string
+          report_id: string
+          exercise_id: string | null
+          concept_id: string
+          concept_title: string
+          exercise_type: string
+          exercise_prompt: string
+          user_answer: string
+          score: number
+          is_correct: boolean
+          feedback: string
+          corrected_version: string
+          explanation: string
+          attempted_at: string
+        }
+        Insert: {
+          id?: string
+          report_id: string
+          exercise_id?: string | null
+          concept_id: string
+          concept_title: string
+          exercise_type: string
+          exercise_prompt: string
+          user_answer: string
+          score: number
+          is_correct: boolean
+          feedback?: string
+          corrected_version?: string
+          explanation?: string
+          attempted_at: string
+        }
+        Update: {
+          id?: string
+          report_id?: string
+          exercise_id?: string | null
+          concept_id?: string
+          concept_title?: string
+          exercise_type?: string
+          exercise_prompt?: string
+          user_answer?: string
+          score?: number
+          is_correct?: boolean
+          feedback?: string
+          corrected_version?: string
+          explanation?: string
+          attempted_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -532,3 +616,5 @@ export type VerbSentence = Database['public']['Tables']['verb_sentences']['Row']
 export type UserVerbFavorite = Database['public']['Tables']['user_verb_favorites']['Row']
 export type VerbProgress = Database['public']['Tables']['verb_progress']['Row']
 export type VerbConjugation = Database['public']['Tables']['verb_conjugations']['Row']
+export type OfflineReport = Database['public']['Tables']['offline_reports']['Row']
+export type OfflineReportAttempt = Database['public']['Tables']['offline_report_attempts']['Row']

@@ -30,6 +30,7 @@ function formatWeekTooltip(weekStart: string, count: number): string {
 
 export function WeeklyActivityChart({ data, sessionCount, totalMinutes, uniqueDaysStudied }: Props) {
   const [mounted, setMounted] = useState(false)
+  const [selectedBar, setSelectedBar] = useState<number | null>(null)
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 80)
@@ -88,7 +89,7 @@ export function WeeklyActivityChart({ data, sessionCount, totalMinutes, uniqueDa
       </div>
 
       {/* Bar chart */}
-      <div className="senda-card">
+      <div className="senda-card" onClick={(e) => { if (e.target === e.currentTarget) setSelectedBar(null) }}>
         <div
           className="flex items-end gap-1"
           style={{ height: MAX_HEIGHT }}
@@ -97,17 +98,21 @@ export function WeeklyActivityChart({ data, sessionCount, totalMinutes, uniqueDa
             const heightPct = week.count > 0 ? Math.max((week.count / maxCount) * 100, 4) : 2
             const barHeight = (heightPct / 100) * MAX_HEIGHT
 
+            const isSelected = selectedBar === i
+
             return (
               <div
                 key={week.weekStart}
-                className="flex-1 flex items-end justify-center group relative"
+                className="flex-1 flex items-end justify-center group relative cursor-pointer"
                 style={{ height: MAX_HEIGHT }}
+                onClick={() => setSelectedBar(isSelected ? null : i)}
               >
-                {/* Tooltip */}
+                {/* Tooltip — visible on hover (desktop) or tap (mobile) */}
                 <div
-                  className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap
-                             rounded px-2 py-1 text-[10px] font-medium opacity-0 group-hover:opacity-100
-                             transition-opacity pointer-events-none z-10"
+                  className={`absolute bottom-full mb-2 left-1/2 -translate-x-1/2 whitespace-nowrap
+                             rounded px-2 py-1 text-[10px] font-medium
+                             transition-opacity pointer-events-none z-10
+                             ${isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
                   style={{
                     background: 'var(--d5-ink)',
                     color: 'var(--d5-paper)',
@@ -124,6 +129,8 @@ export function WeeklyActivityChart({ data, sessionCount, totalMinutes, uniqueDa
                     maxWidth: 28,
                     background: getBarColor(week.count),
                     transitionDelay: `${i * 30}ms`,
+                    transform: isSelected ? 'scaleY(1.05)' : 'scaleY(1)',
+                    transformOrigin: 'bottom',
                   }}
                 />
               </div>

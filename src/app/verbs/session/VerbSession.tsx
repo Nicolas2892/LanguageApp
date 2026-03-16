@@ -18,6 +18,7 @@ import type { VerbTense } from '@/lib/verbs/constants'
 import { VerbFeedbackPanel } from '@/components/verbs/VerbFeedbackPanel'
 import { VerbSummary } from '@/components/verbs/VerbSummary'
 import { useHaptics } from '@/lib/hooks/useHaptics'
+import { queueVerbAttempt } from '@/lib/offline/db'
 import { trackVerbDrillStarted, trackVerbDrillCompleted } from '@/lib/analytics'
 
 const PRONOUN_LABELS: Record<string, string> = {
@@ -123,14 +124,29 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
       if (attemptRecordedRef.current.has(idx)) return
       attemptRecordedRef.current.add(idx)
 
-      try {
-        await fetch('/api/verbs/grade', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ verb_id: verbId, tense, is_correct: isCorrect }),
-        })
-      } catch {
-        // fire-and-forget; don't block UI on network failure
+      if (navigator.onLine) {
+        try {
+          await fetch('/api/verbs/grade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ verb_id: verbId, tense, is_correct: isCorrect }),
+          })
+        } catch {
+          // fire-and-forget; don't block UI on network failure
+        }
+      } else {
+        // Offline — queue for later sync
+        try {
+          await queueVerbAttempt({
+            verb_id: verbId,
+            tense,
+            correct: isCorrect,
+            attempted_at: new Date().toISOString(),
+            synced: 0,
+          })
+        } catch {
+          // IDB not available — silently fail
+        }
       }
     },
     [],

@@ -2,6 +2,8 @@
  * UX-AA: Tests for the just_mastered flag in POST /api/submit
  *
  * These tests focus on the mastery threshold crossing logic.
+ * Mastery requires both SRS (interval_days >= 21) and production breadth
+ * (≥3 correct non-gap_fill attempts across ≥2 exercise types).
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { POST } from '../route'
@@ -40,6 +42,8 @@ const MASTERY_THRESHOLD = 21
 
 const EXERCISE_ID = '11111111-1111-1111-1111-111111111111'
 const CONCEPT_ID = '22222222-2222-2222-2222-222222222222'
+const TRANSLATION_EX_ID = '33333333-3333-3333-3333-333333333333'
+const TRANSFORMATION_EX_ID = '44444444-4444-4444-4444-444444444444'
 
 const mockExercise = {
   id: EXERCISE_ID,
@@ -92,16 +96,41 @@ function makeStreamGen(scoreChunk = mockScoreChunk, detailsChunk = mockDetailsCh
   })()
 }
 
-function setupMocks(prevIntervalDays: number, newIntervalDays: number, opts?: { is_hard?: boolean }) {
-  let callCount = 0
+interface SetupOpts {
+  is_hard?: boolean
+  /** Non-gap_fill exercises that exist for this concept */
+  nonGapFillExercises?: { id: string; type: string }[]
+  /** Correct attempts on non-gap_fill exercises */
+  correctProductionAttempts?: { exercise_id: string }[]
+}
+
+function setupMocks(prevIntervalDays: number, newIntervalDays: number, opts: SetupOpts = {}) {
+  let progressCallCount = 0
+  let exerciseCallCount = 0
+  let attemptCallCount = 0
+
+  const nonGapFillExercises = opts.nonGapFillExercises ?? []
+  const correctProductionAttempts = opts.correctProductionAttempts ?? []
+
   const mockFrom = vi.fn().mockImplementation((table: string) => {
     if (table === 'exercises') {
+      exerciseCallCount++
+      if (exerciseCallCount === 1) {
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                single: vi.fn().mockResolvedValue({ data: mockExercise, error: null }),
+              }),
+            }),
+          }),
+        }
+      }
+      // Second call: non-gap_fill exercises for production breadth
       return {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({ data: mockExercise, error: null }),
-            }),
+            neq: vi.fn().mockResolvedValue({ data: nonGapFillExercises, error: null }),
           }),
         }),
       }
@@ -116,15 +145,14 @@ function setupMocks(prevIntervalDays: number, newIntervalDays: number, opts?: { 
       }
     }
     if (table === 'user_progress') {
-      callCount++
-      if (callCount === 1) {
-        // First call: fetch existing progress
+      progressCallCount++
+      if (progressCallCount === 1) {
         return {
           select: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
               eq: vi.fn().mockReturnValue({
                 single: vi.fn().mockResolvedValue({
-                  data: { ease_factor: 2.5, interval_days: prevIntervalDays, repetitions: 3, due_date: '2026-01-01', production_mastered: false, is_hard: opts?.is_hard ?? false },
+                  data: { ease_factor: 2.5, interval_days: prevIntervalDays, repetitions: 3, due_date: '2026-01-01', production_mastered: false, is_hard: opts.is_hard ?? false },
                   error: null,
                 }),
               }),
@@ -132,7 +160,6 @@ function setupMocks(prevIntervalDays: number, newIntervalDays: number, opts?: { 
           }),
         }
       }
-      // Subsequent calls: upsert / update
       return {
         upsert: vi.fn().mockResolvedValue({ error: null }),
         update: vi.fn().mockReturnValue({
@@ -152,6 +179,19 @@ function setupMocks(prevIntervalDays: number, newIntervalDays: number, opts?: { 
       }
     }
     if (table === 'exercise_attempts') {
+      attemptCallCount++
+      if (attemptCallCount === 1 && nonGapFillExercises.length > 0) {
+        // First call: production breadth query
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              in: vi.fn().mockReturnValue({
+                eq: vi.fn().mockResolvedValue({ data: correctProductionAttempts, error: null }),
+              }),
+            }),
+          }),
+        }
+      }
       return { insert: vi.fn().mockResolvedValue({ error: null }) }
     }
     return { select: vi.fn(), insert: vi.fn(), upsert: vi.fn(), update: vi.fn() }
@@ -187,7 +227,17 @@ describe('POST /api/submit — UX-AA just_mastered flag', () => {
   })
 
   it('returns just_mastered: false when prev interval already >= threshold', async () => {
-    setupMocks(MASTERY_THRESHOLD, MASTERY_THRESHOLD + 10)
+    setupMocks(MASTERY_THRESHOLD, MASTERY_THRESHOLD + 10, {
+      nonGapFillExercises: [
+        { id: TRANSLATION_EX_ID, type: 'translation' },
+        { id: TRANSFORMATION_EX_ID, type: 'transformation' },
+      ],
+      correctProductionAttempts: [
+        { exercise_id: TRANSLATION_EX_ID },
+        { exercise_id: TRANSLATION_EX_ID },
+        { exercise_id: TRANSFORMATION_EX_ID },
+      ],
+    })
     const res = await POST(makeRequest())
     expect(res.status).toBe(200)
     const body = await readNDJSONMerged(res)
@@ -203,8 +253,18 @@ describe('POST /api/submit — UX-AA just_mastered flag', () => {
     expect(body.just_mastered).toBe(false)
   })
 
-  it('returns just_mastered: true with concept title when crossing the threshold', async () => {
-    setupMocks(15, MASTERY_THRESHOLD)
+  it('returns just_mastered: true when SRS threshold crossed AND production breadth met', async () => {
+    setupMocks(15, MASTERY_THRESHOLD, {
+      nonGapFillExercises: [
+        { id: TRANSLATION_EX_ID, type: 'translation' },
+        { id: TRANSFORMATION_EX_ID, type: 'transformation' },
+      ],
+      correctProductionAttempts: [
+        { exercise_id: TRANSLATION_EX_ID },
+        { exercise_id: TRANSLATION_EX_ID },
+        { exercise_id: TRANSFORMATION_EX_ID },
+      ],
+    })
     const res = await POST(makeRequest())
     expect(res.status).toBe(200)
     const body = await readNDJSONMerged(res)
@@ -212,10 +272,47 @@ describe('POST /api/submit — UX-AA just_mastered flag', () => {
     expect(body.mastered_concept_title).toBe('El Subjuntivo')
   })
 
-  it('returns just_mastered: true even when is_hard multiplier would reduce interval below threshold', async () => {
-    // SM-2 returns 21 (exactly at threshold), but hard-flag multiplier would reduce to 13.
-    // Mastery check must happen BEFORE the multiplier is applied.
-    setupMocks(15, MASTERY_THRESHOLD, { is_hard: true })
+  it('returns just_mastered: false when SRS threshold crossed but no production breadth', async () => {
+    // SRS threshold crossed but no non-gap_fill exercises at all
+    setupMocks(15, MASTERY_THRESHOLD)
+    const res = await POST(makeRequest())
+    expect(res.status).toBe(200)
+    const body = await readNDJSONMerged(res)
+    expect(body.just_mastered).toBe(false)
+    expect(body.mastered_concept_title).toBeNull()
+  })
+
+  it('returns just_mastered: false when SRS crossed but only 1 production type', async () => {
+    // 3 correct attempts but all same type — only 1 unique type, needs 2
+    setupMocks(15, MASTERY_THRESHOLD, {
+      nonGapFillExercises: [
+        { id: TRANSLATION_EX_ID, type: 'translation' },
+      ],
+      correctProductionAttempts: [
+        { exercise_id: TRANSLATION_EX_ID },
+        { exercise_id: TRANSLATION_EX_ID },
+        { exercise_id: TRANSLATION_EX_ID },
+      ],
+    })
+    const res = await POST(makeRequest())
+    expect(res.status).toBe(200)
+    const body = await readNDJSONMerged(res)
+    expect(body.just_mastered).toBe(false)
+  })
+
+  it('returns just_mastered: true even when is_hard multiplier would reduce interval', async () => {
+    setupMocks(15, MASTERY_THRESHOLD, {
+      is_hard: true,
+      nonGapFillExercises: [
+        { id: TRANSLATION_EX_ID, type: 'translation' },
+        { id: TRANSFORMATION_EX_ID, type: 'transformation' },
+      ],
+      correctProductionAttempts: [
+        { exercise_id: TRANSLATION_EX_ID },
+        { exercise_id: TRANSLATION_EX_ID },
+        { exercise_id: TRANSFORMATION_EX_ID },
+      ],
+    })
     const res = await POST(makeRequest())
     expect(res.status).toBe(200)
     const body = await readNDJSONMerged(res)

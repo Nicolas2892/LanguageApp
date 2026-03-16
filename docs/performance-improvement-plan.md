@@ -2,7 +2,7 @@
 
 **Date:** 2026-03-14
 **Status:** Phase 1, 2 & 3 complete
-**Revised:** 2026-03-14 (Phase 1 & 2 — commit `1d6b70b`; Phase 3 — commit `9f4d11e`)
+**Revised:** 2026-03-14 (Phase 1 & 2 — commit `1d6b70b`; Phase 3 — commit `9f4d11e`; Phase 4 re-scoped after Feat-H audit)
 
 ---
 
@@ -50,9 +50,23 @@ User taps Submit
 
 ### Exercise-Type-Specific Observations
 
-- **gap_fill:** Single-word answers with exact `expected_answer`. Strong candidate for local grading (exact + fuzzy match safe for short answers).
-- **translation / transformation:** Full-sentence answers with `expected_answer` + `answer_variants` (0-1 variants per exercise currently). Only exact case-insensitive match is safe; `normalizeSpanish()` strips accents and is **not safe** for sentences because mood errors (está/esté, pidiera/pidió) are accent-level differences that represent fundamentally wrong grammar. Fuzzy/Levenshtein matching must never be used for full sentences.
-- **sentence_builder / error_correction / free_write:** Open-ended, no local grading shortcut available.
+**Local grading feasibility matrix** (revised after Feat-H added `listening`, `proofreading`, `register_shift`):
+
+| Type | User Input | Answer Space | Local Grading | Notes |
+|------|-----------|--------------|:---:|-------|
+| `gap_fill` | Text field(s) per blank | Closed (single correct form + variants) | **Yes** | Exact + accent-normalized match; multi-blank via pipe-delimited parsing |
+| `sentence_builder` | Chip bank assembly | Closed (word bank is finite set) | **Yes** | Exact match against `expected_answer`; user assembles from given tokens |
+| `translation` | Textarea | Open (many valid translations) | No | Synonym substitution, word order, register variations |
+| `transformation` | Textarea | Open (many valid paraphrases) | No | Semantic equivalence required |
+| `error_correction` | Textarea (pre-populated) | Semi-open (correction quality) | No | Must detect which errors fixed, whether new errors introduced |
+| `free_write` | Textarea + mic | Open (discourse-level) | No | Communicative intent + grammar correctness |
+| `listening` | Textarea | Open (comprehension inference) | No | Grading is on inference/synthesis, not dictation |
+| `proofreading` | Textarea (pre-populated) | Semi-open (2–6 distributed errors) | No | Must identify, categorize, and evaluate each error fix |
+| `register_shift` | Textarea | Open (socio-pragmatic) | No | Pronoun politeness, discourse markers, lexical formality |
+
+**Key constraint:** `normalizeSpanish()` strips all diacritics. Safe for gap_fill (single-word, accent errors are minor) but **dangerous for sentences** where accent differences signal grammatical mood (está/esté, pidió/pidiera). These mood errors are exactly what B1→B2 exercises test.
+
+**Offline-mode alignment (Feat-F):** The local grading boundary directly maps to the offline boundary — types that can be graded locally work offline; types that require Claude queue for grading on reconnect. This is a deliberate architectural decision (see Section 7).
 
 ---
 
@@ -66,9 +80,9 @@ User taps Submit
 | **2** ✅ | Parallelize rate-limit check with exercise+concept DB fetch | `/api/submit` — all types | **30–80ms** per submit | Wasted DB work if rate-limited (0.1% of requests) | Negligible cost; rate-limited users are rare |
 | **3** ✅ | Truncate `conceptExplanation` to 100 chars in grading prompt (keep full `conceptTitle`) | `/api/submit` — all types | **30–80ms** TTFT + cost reduction | Slight grading accuracy drop if truncated explanation loses critical rule info | Run `pnpm validate:grading` before/after; revert if agreement drops below 90%; most disambiguation is in the title already (e.g. "aunque (+ subjuntivo)") |
 | **4** ✅ | Pass `answer_variants` to Claude prompt | `/api/submit` — translation, transformation | **0ms** latency, but fewer wrong grades → fewer retries | None | — |
-| **5** | Optimistic local grading — **exact case-insensitive match only** against `expected_answer` + `answer_variants` (NO `normalizeSpanish`, NO fuzzy) for full-sentence types; exact + accent-normalized for gap_fill | `/api/submit` — all types with `expected_answer` | **~1.5s** for ~15–20% of translation/transformation; ~40% of gap_fill | False positive if a variant in seed data is incorrect | Only fire on exact case-insensitive match for sentences; accent-normalized match only for gap_fill (single-word answers where mood confusion doesn't apply) |
-| **6** | Optimistic local grading — **fuzzy** (Levenshtein ≤ 2) for gap_fill only | `/api/submit` — gap_fill only | **~1.5s** for additional ~15% of gap_fill | Mood/accent confusion (está/esté) is 1–2 chars even in single words | Only apply when answer is 1–3 words; never apply to sentence-level types |
-| **7** | Optimistic grading: handle Claude disagreement via "Confirmando..." phase | Client UX (StudySession) | Enables #5 and #6 safely | "Correct → actually wrong" correction erodes trust; user sees a Next button they can't press during confirmation | New `optimistic-feedback` session phase: green/red flash shown instantly, Next button shows "Confirmando..." spinner until Claude confirms; if Claude disagrees, orange correction animation + scores array updated retroactively; SRS always uses Claude's score; ~2–5% disagreement rate for exact-match; UX design decision required |
+| **5** | **Authoritative** local grading for `gap_fill` + `sentence_builder` — exact case-insensitive match against `expected_answer` + `answer_variants`; accent-normalized match (score 2) for gap_fill only. Returns `result \| null`; null → fall through to Claude. No Claude call when matched. | `/api/submit` — gap_fill, sentence_builder | **~1.7s** for ~40–55% of gap_fill, ~30–40% of sentence_builder | False positive if `expected_answer` in seed data is incorrect | Same data shown as "correct answer" in feedback — if we trust it for display, we trust it for grading |
+| **~~6~~** | ~~Optimistic local grading — fuzzy (Levenshtein ≤ 2) for gap_fill only~~ | — | — | **DROPPED (see Section 7, note 3):** Levenshtein ≤ 2 catches mood-significant accent pairs (está/esté = distance 1) even in single words. Risk outweighs the ~15% incremental hit rate. Can revisit if `answer_variants` enrichment (Item 8) closes the gap instead. | — |
+| **~~7~~** | ~~Optimistic grading: handle Claude disagreement via "Confirmando..." phase~~ | — | — | **DROPPED (see Section 7, note 1):** Contradicts offline-mode architecture (Feat-F). Adds a third grading category ("tentative local") that doesn't exist offline. Trust-eroding UX ("correct → actually wrong"). ~3.5 days effort for a pattern that would be ripped out when offline lands. | — |
 | **8** | Enrich `answer_variants` via Claude batch (seed script) | Offline / seed data | Raises #5 hit rate from ~15–20% → ~35–40% for translation/transformation | Bad variants teach wrong answers; maintenance burden on re-seed | Human review of generated variants; add to `seed:ai` pipeline |
 | **9** ✅ | Progress page: replace 5,000-row `exercise_attempts` fetch with aggregate RPC | `/progress` page load | **100–250ms** now; prevents **unbounded growth** as user history accumulates | New migration to deploy; RPC must be maintained alongside schema changes | `--dry-run` test; fallback to current query if RPC missing |
 | **10** ✅ | Dashboard: parallelize profile fetch with due/total/studied queries | `/dashboard` page load | **50–100ms** | Timezone wrong on date boundary (UTC vs user TZ) → off-by-one on due count for users near midnight | Only affects users near midnight; self-corrects on next load |
@@ -87,10 +101,18 @@ User taps Submit
 | Scenario | Before | After | Reduction |
 |----------|--------|-------|-----------|
 | **Every answer submit (P50)** | ~2.0s | ~1.7–1.8s | **−200–350ms** (items 1–4, 15) |
-| **gap_fill with local match (exact + fuzzy)** | ~2.0s | ~50ms | **−1.95s** (items 5–6, ~55% of gap_fill submits) |
-| **translation/transformation with exact match** | ~2.0s | ~50ms | **−1.95s** (item 5, ~15–20% of submits) |
-| **translation/transformation with enriched variants** | ~2.0s | ~50ms | **−1.95s** (items 5+8, ~35–40% of submits) |
-| **translation/transformation, no local match** | ~2.0s | ~1.7–1.8s | **−200–350ms** (items 1–4, 15) |
+| **gap_fill with local match** | ~2.0s | ~50ms | **−1.95s** (item 5, ~40–55% of gap_fill submits) |
+| **sentence_builder with local match** | ~2.0s | ~50ms | **−1.95s** (item 5, ~30–40% of sentence_builder submits) |
+| **gap_fill / sentence_builder, no local match** | ~2.0s | ~1.7–1.8s | **−200–350ms** (falls through to Claude) |
+| **All other types (7 of 9)** | ~2.0s | ~1.7–1.8s | **−200–350ms** (items 1–4, 15 only — always Claude) |
+
+**Overall local-grade hit rate by level** (after Feat-H exercise distribution):
+
+| Level | Locally-gradable types | % of exercise pool | Effective local-grade rate |
+|-------|----------------------|-------------------|--------------------------|
+| B1 | gap_fill, sentence_builder | 2 of 3 types (~67%) | ~25–35% of submits |
+| B2 | gap_fill, sentence_builder | 2 of 5 types (~40%) | ~15–22% of submits |
+| C1 | gap_fill, sentence_builder | 2 of 6 types (~33%) | ~12–18% of submits |
 
 ### Page Loads
 
@@ -101,65 +123,93 @@ User taps Submit
 
 ---
 
-## 4. Translation / Transformation Deep Dive
+## 4. Local Grading Architecture (Revised)
 
-These are the hardest exercise types to speed up because correctness depends on grammar, word order, and semantic equivalence that only an LLM can fully judge.
+### Design principle: authoritative, not optimistic
 
-### What we have to work with
+The original plan (Items 5–7) proposed an **optimistic** pattern: show a local verdict instantly, then confirm with Claude in the background, and correct retroactively if Claude disagrees. This was dropped (see Section 7) in favour of an **authoritative** pattern:
 
-Each exercise stores:
-- `expected_answer`: canonical correct sentence (e.g. `"Aunque está cansado, sigue trabajando."`)
-- `answer_variants`: array of acceptable alternates (e.g. `["Sigue trabajando aunque está cansado."]`) — currently 0–1 per exercise
+```
+localGrade(exercise, userAnswer) → LocalGradeResult | null
+```
 
-### Why `normalizeSpanish()` is NOT safe for sentences
+- **Non-null return** = the grade is final. No Claude call. No confirmation step. The `StudySession` state machine is unchanged — it just receives the result faster.
+- **Null return** = the local grader cannot determine correctness. Fall through to Claude as today.
 
-`normalizeSpanish()` strips all diacritics (accents). This is fine for gap_fill single-word answers where accent errors are minor, but **dangerous for full sentences** where accent differences signal grammatical mood:
+This binary split directly maps to offline mode (Feat-F): types that return non-null work offline; types that return null queue for grading on reconnect. No third "tentative" category exists.
+
+### Why NOT optimistic-with-confirmation
+
+1. **Offline contradiction:** Offline mode needs "local = authoritative" for gap_fill/sentence_builder. An optimistic pattern trains users on "local = tentative, Claude = real" — the opposite mental model.
+2. **Trust erosion:** "You got it right! ...wait, actually wrong" (~2–5% of locally-graded submissions) is worse than waiting 1.7s for a definitive answer.
+3. **Effort/impact mismatch:** ~3.5 days of work (new session phase, correction animations, retroactive score updates) for a pattern that would be dismantled when offline mode ships.
+4. **State machine complexity:** New `optimistic-feedback` phase in `StudySession.tsx` adds a state that interacts with try-again, hint gating, and done-screen score arrays — high surface area for bugs.
+
+### Why NOT local grading for translation / transformation
+
+The original plan included exact case-insensitive match for these types (~15–20% hit rate). Dropped because:
+
+- **Low ROI:** Users rarely type the exact `expected_answer` for open-ended sentence types. The match rate doesn't justify the code paths.
+- **No offline benefit:** These types require Claude for the ~80–85% non-matching cases anyway, so they can never work offline. Adding local grading for the small matching slice creates a mixed-mode type that complicates Feat-F.
+- **Variant enrichment dependency:** To raise the hit rate meaningfully (Item 8), we'd need 3–5 reviewed variants per exercise — a content effort with ongoing maintenance burden, all to locally-grade a type that still needs Claude most of the time.
+
+### Local grading strategy per type
+
+**gap_fill** (single-word / short phrase):
+```
+exact case-insensitive match (expected + variants)              → score 3
+normalizeSpanish(user) === normalizeSpanish(expected/variant)   → score 2 (accent error)
+else                                                            → null (fall through to Claude)
+```
+
+Multi-blank exercises: parse `expected_answer` as JSON array, split user answer on pipe delimiter, grade each blank independently. All blanks must match for a local grade; any miss → null.
+
+**sentence_builder** (word chip assembly):
+```
+exact case-insensitive match against expected_answer            → score 3
+else                                                            → null (fall through to Claude)
+```
+
+The word bank is a closed set parsed from the prompt (`[w1/w2/w3]`). The user assembles from given tokens, so the answer space is constrained. No accent normalization needed — chips are pre-spelled.
+
+**All other types** (7 of 9): always return null → Claude.
+
+### Hit rate estimates (revised post Feat-H)
+
+| Type | Match strategy | % of submits graded locally | Time to verdict |
+|------|---------------|----------------------------|-----------------|
+| **gap_fill** | Exact + accent-normalized | ~40–55% | <1ms |
+| **sentence_builder** | Exact | ~30–40% | <1ms |
+| **All other types (7)** | — | 0% (always Claude) | ~1.7s |
+
+### Offline-mode alignment (Feat-F)
+
+The `localGrade()` interface is the **exact same function** Feat-F needs:
+
+| Mode | localGrade returns result | localGrade returns null |
+|------|--------------------------|------------------------|
+| **Online** | Use result, skip Claude, save API cost | Call Claude as today |
+| **Offline** | Show result, works without network | Queue for grading on reconnect |
+
+No adaptation layer, no mode-specific branching. The grader is environment-agnostic.
+
+### Why `normalizeSpanish()` is NOT safe for sentences (unchanged)
+
+`normalizeSpanish()` strips all diacritics. Dangerous for full sentences where accent differences signal grammatical mood:
 
 - `está` (indicative "is") → `esté` (subjunctive "be") — both normalize to `esta`
-- `pidió` (preterite "asked") → `pidiera` (imperfect subjunctive) — different after normalization, but other pairs exist
+- `pidió` (preterite "asked") → `pidiera` (imperfect subjunctive)
 - `este` (demonstrative "this") → `esté` (subjunctive) — normalize identically
 
-These mood errors are **exactly what B1→B2 exercises test**. A local grader using `normalizeSpanish` would mark `"Aunque esta cansado"` as score=3 when it should be score=0 (wrong mood entirely).
+These mood errors are exactly what B1→B2 exercises test. This is why accent normalization is restricted to gap_fill (single-word answers where mood confusion is rare) and never applied to sentence-level types.
 
-### Optimistic local pre-grading strategy
+### Feedback generation for locally-graded exercises
 
-For **translation / transformation** (full sentences):
-```
-user.trim().toLowerCase() === expected.trim().toLowerCase()     → score 3, instant
-user.trim().toLowerCase() === anyVariant.trim().toLowerCase()   → score 3, instant
-else                                                            → unknown, wait for Claude
-```
+When the local grader returns a result, we skip Claude entirely — meaning no AI-generated `feedback`, `corrected_version`, or `explanation`. For locally-graded exercises:
 
-For **gap_fill** (single words / short phrases):
-```
-user.trim().toLowerCase() === expected.trim().toLowerCase()     → score 3, instant
-normalizeSpanish(user) === normalizeSpanish(expected)           → score 2, instant (accent diff)
-levenshtein(normalized(user), normalized(expected)) ≤ 2         → score 2, tentative
-else                                                            → unknown, wait for Claude
-```
-
-### Hit rate estimates
-
-| Type | Variant coverage | % of submits graded locally | Time to verdict |
-|------|------------------|-----------------------------|-----------------|
-| **gap_fill** | N/A (exact + fuzzy) | ~55% | ~50ms |
-| **translation/transformation** | Current (0–1 variants) | ~15–20% | ~50ms |
-| **translation/transformation** | After enrichment (3–5 variants) | ~35–40% | ~50ms |
-| **All types, no local match** | — | ~45–85% depending on type | ~1.7s (with items 1–4) |
-
-### Claude disagreement handling
-
-When local grader produces a verdict but Claude hasn't confirmed yet:
-1. Green/red flash shown instantly based on local verdict
-2. Next button shows "Confirmando..." with spinner (new `optimistic-feedback` phase)
-3. User cannot advance until Claude confirms (~1-2s wait)
-4. If Claude agrees: transition to normal feedback phase
-5. If Claude disagrees (~2–5% of locally-graded submissions):
-   - Orange correction animation replaces green flash
-   - Scores array updated retroactively
-   - SRS always uses Claude's score (never the local estimate)
-
-**Design decision needed:** Whether the "Confirmando..." blocker is acceptable UX or whether it makes the optimistic signal feel hollow. Alternative: allow navigation but queue background correction (riskier — score mismatch on done screen).
+- **score 3 (correct):** Feedback = `"¡Correcto!"`. No corrected version needed. No explanation needed — the user got it right.
+- **score 2 (accent error, gap_fill only):** Feedback = `"Casi — revisa los acentos."`. Corrected version = `expected_answer`. No explanation needed — the error type is self-evident.
+- These fixed strings are sufficient because local grading only fires on near-exact matches. The pedagogical value of AI feedback is highest when the answer is wrong or creative — exactly the cases that still go to Claude.
 
 ---
 
@@ -170,22 +220,33 @@ When local grader produces a verdict but Claude hasn't confirmed yet:
 | **Phase 1** ✅ | 1, 2, 3, 4, 15 | ~1 day | Near-zero | −200–350ms on every submit |
 | **Phase 2** ✅ | 10, 11, 12 | ~half day | Near-zero | +−150–300ms on page loads |
 | **Phase 3** ✅ | 9 | ~half day | Low (migration) | Progress page stable at ~500ms |
-| **Phase 4** | 5, 7 | ~3–3.5 days | Medium (UX complexity, new session phase) | ~15–55% of submits feel instant (varies by type) |
-| **Phase 5** | 8 | ~1 day + review | Low (content quality) | Translation/transformation hit rate rises to ~35–40% |
-| **Phase 6** | 6, 13 | ~half day | Low | gap_fill fuzzy match; debounced level |
+| **Phase 4** | 5 (revised) | ~1.5–2 days | Low | ~15–25% of all submits feel instant (gap_fill + sentence_builder) |
+| **Phase 5** | 8 | ~1 day + review | Low (content quality) | Raises gap_fill local hit rate via richer variants |
+| **Phase 6** | 13 | ~half day | Low | Debounced computed level |
+
+### Phase 4 — Detailed Breakdown
+
+| Sub-task | Description | Effort | Files |
+|----------|-------------|--------|-------|
+| **4a** | `localGrader.ts` — gap_fill grading (exact + accent-normalized, single + multi-blank, variant support) | ~0.5 day | New `src/lib/exercises/localGrader.ts` |
+| **4b** | `localGrader.ts` — sentence_builder grading (exact match) | ~0.25 day | Same file |
+| **4c** | Wire into `/api/submit` — if `localGrade()` returns non-null, skip Claude call, return immediately with fixed feedback strings; SRS update still runs | ~0.5 day | `src/app/api/submit/route.ts` |
+| **4d** | Unit tests for localGrader (exact, accent, multi-blank, variants, null fallthrough per type) + submit route short-circuit tests | ~0.5 day | New `src/lib/exercises/__tests__/localGrader.test.ts`, `src/app/api/submit/__tests__/route.test.ts` |
+
+**Not modified:** `src/app/study/StudySession.tsx` — no new session phase, no UI changes. The client receives the same response shape whether the grade came from local or Claude.
 
 ### Key files to modify
 
 - **Phase 1:** `src/app/api/submit/route.ts`, `src/lib/claude/grader.ts`
 - **Phase 2:** `src/app/dashboard/page.tsx`, `src/components/DashboardDeferredSection.tsx`, `src/app/progress/page.tsx`
 - **Phase 3:** New migration `supabase/migrations/021_accuracy_rpc.sql`, `src/app/progress/page.tsx`
-- **Phase 4:** New `src/lib/exercises/localGrader.ts`, `src/app/api/submit/route.ts`, `src/app/study/StudySession.tsx`
+- **Phase 4:** New `src/lib/exercises/localGrader.ts`, `src/app/api/submit/route.ts`
 - **Phase 5:** New `scripts/enrich-variants.ts`, seed data
-- **Phase 6:** `src/lib/exercises/localGrader.ts`, `src/lib/api-utils.ts`
+- **Phase 6:** `src/lib/api-utils.ts`
 
 ---
 
-## 6. Critical Review Notes (2026-03-14)
+## 6. Critical Review Notes (2026-03-14, initial)
 
 Corrections made after re-reading the source code against original estimates:
 
@@ -206,3 +267,29 @@ Corrections made after re-reading the source code against original estimates:
 8. **Item 15 added:** In-memory cache for exercise + concept rows. These are static curriculum data that rarely change. Eliminates a DB round-trip (~50–100ms) on every submit with minimal staleness risk.
 
 9. **Overall submit savings revised:** Original claimed −400ms; revised to −200–350ms (items 1–4, 15). Original total Phase 4 effort was ~2 days; revised to ~3–3.5 days.
+
+---
+
+## 7. Phase 4 Re-scope Notes (2026-03-14, post Feat-H audit)
+
+Full re-audit of Items 5–7 after Feat-H added three new exercise types (`listening`, `proofreading`, `register_shift`) and considering forward-compatibility with offline mode (Feat-F). Changes:
+
+1. **Item 7 dropped — "Confirmando..." optimistic UX.** Four reasons: (a) Contradicts offline-mode architecture — offline needs a binary "local = authoritative" / "cloud = queued" split, not a third "tentative local" category. Building the optimistic pattern now means dismantling it when Feat-F ships. (b) Trust-eroding UX — "correct → actually wrong" corrections (~2–5%) are worse than a 1.7s wait for a definitive answer. (c) State machine complexity — new `optimistic-feedback` phase interacts with try-again, hint gating, and done-screen score arrays. (d) Effort/impact mismatch — ~3.5 days for a transitional pattern. Phase 4 drops from ~3.5 days to ~1.5–2 days.
+
+2. **Item 5 re-scoped — authoritative local grading for gap_fill + sentence_builder only.** Translation/transformation exact-match dropped: ~15–20% hit rate doesn't justify the code paths, and these types can never work offline (Claude needed for the ~80–85% non-matching cases). Sentence_builder added: word bank is a closed set (user assembles from given tokens), so exact match is reliable. The `localGrade()` function returns `result | null` — the exact interface Feat-F needs with zero adaptation.
+
+3. **Item 6 dropped — fuzzy Levenshtein matching for gap_fill.** Even in single words, Levenshtein ≤ 2 catches mood-significant accent pairs (está/esté = edit distance 1). The ~15% incremental hit rate doesn't justify the false-positive risk for a B1→B2 grammar app. If gap_fill hit rates need improvement, Item 8 (variant enrichment) is the safer path — adding reviewed variants rather than loosening match criteria.
+
+4. **New exercise types assessed — all Claude-only.** `listening` requires comprehension inference (not dictation accuracy). `proofreading` requires detecting and evaluating 2–6 distributed errors in a paragraph. `register_shift` requires socio-pragmatic judgment (pronoun politeness, discourse marker register, lexical formality). None have a deterministic answer space suitable for string matching.
+
+5. **Local-grade hit rate revised downward.** With 3 new Claude-only types in the exercise pool, locally-gradable types (gap_fill + sentence_builder) represent a smaller share: ~67% of B1 exercises, ~40% of B2, ~33% of C1. Effective local-grade rate across all submits: ~12–35% depending on level (down from the original 15–55% estimate which assumed translation/transformation exact-match and only 5 exercise types).
+
+6. **Feedback for locally-graded exercises.** No Claude call means no AI-generated feedback. For score 3 (correct): `"¡Correcto!"`. For score 2 (accent error): `"Casi — revisa los acentos."` + `corrected_version = expected_answer`. These fixed strings are sufficient because local grading only fires on near-exact matches — the pedagogical value of AI feedback is highest when the answer is wrong or creative, which still routes to Claude.
+
+7. **`StudySession.tsx` unchanged.** No new session phase, no UI changes. The client receives the same NDJSON response shape whether the grade came from local or Claude. The speed improvement is transparent to the frontend.
+
+### Open questions (decide before Phase 4 implementation)
+
+1. **`exercise_attempts` — grading source column.** Currently the fire-and-forget path inserts an `exercise_attempts` row with `ai_score`, `ai_feedback`, etc. For locally-graded exercises, the feedback is a fixed string (`"¡Correcto!"`) and there is no Claude attribution. Should we add a `grading_source: 'local' | 'claude'` column now? This matters for analytics accuracy (distinguishing AI-graded vs locally-graded accuracy) and for Feat-F offline mode (queued attempts synced on reconnect will need a similar distinction). Adding it now avoids a migration later; leaving it means we can't distinguish grading methods in historical data. **PM decision required.**
+
+2. **Item 8 (variant enrichment) — re-scope or drop.** The original plan targeted translation/transformation variants to raise their local-grade hit rate from ~15–20% → ~35–40%. With local grading dropped for those types, Item 8 as written has no consumer. Options: (a) Re-scope to gap_fill variants only — directly improves local hit rate from ~40–55% → ~60–70%. (b) Drop entirely — gap_fill already hits ~40–55% without enrichment, and the maintenance burden of reviewed variants may not be worth the incremental gain. (c) Keep for Claude grading quality — richer variants in the prompt help Claude grade faster/more accurately even without local grading. **PM decision required.**

@@ -18,6 +18,7 @@ const SHELL_URLS = [
   '/progress',
   '/curriculum',
   '/offline',
+  '/offline/reports',
   '/manifest.webmanifest',
   '/icon',
   '/apple-icon',
@@ -124,6 +125,18 @@ self.addEventListener('fetch', (e) => {
             return res
           })
       )
+    )
+  }
+})
+
+// Background Sync — triggered when connectivity is restored (Chromium only)
+// Safari falls back to the 'online' event + useSyncManager hook in the client.
+self.addEventListener('sync', (event) => {
+  if (event.tag === 'sync-offline-attempts') {
+    event.waitUntil(
+      clients.matchAll({ type: 'window' }).then((clientList) => {
+        clientList.forEach((client) => client.postMessage({ type: 'SYNC_TRIGGERED' }))
+      })
     )
   }
 })

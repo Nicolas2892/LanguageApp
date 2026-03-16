@@ -2,8 +2,9 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { SpeakButton } from '@/components/SpeakButton'
-import { getMasteryState, MASTERY_BADGE } from '@/lib/mastery/badge'
-import { ChevronLeft, CheckCircle2, Pencil, Bot } from 'lucide-react'
+import { getMasteryState, getMasteryProgress, MASTERY_BADGE, PRODUCTION_CORRECT_REQUIRED, PRODUCTION_TYPES_REQUIRED } from '@/lib/mastery/badge'
+import { ChevronLeft, CheckCircle2, Pencil, Bot, Circle } from 'lucide-react'
+import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { LevelChip } from '@/components/LevelChip'
 import { HardFlagButton } from '@/components/HardFlagButton'
@@ -77,7 +78,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
     supabase.from('exercises').select('id, type').eq('concept_id', id),
     supabase
       .from('user_progress')
-      .select('interval_days, due_date, repetitions, is_hard')
+      .select('interval_days, due_date, repetitions, is_hard, production_mastered')
       .eq('user_id', user.id)
       .eq('concept_id', id)
       .maybeSingle(),
@@ -88,7 +89,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
   ])
 
   type UnitRow     = { id: string; title: string; module_id: string }
-  type ProgressRow = { interval_days: number; due_date: string; repetitions: number; is_hard: boolean }
+  type ProgressRow = { interval_days: number; due_date: string; repetitions: number; is_hard: boolean; production_mastered: boolean }
   type ExerciseRow = { id: string; type: string }
 
   const unit     = unitRes.data     as UnitRow     | null
@@ -119,9 +120,13 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
   }
   const exerciseIds = typedExercises.map((e) => e.id)
   const exerciseTypes = new Set(typedExercises.map((e) => e.type))
+  const exerciseTypeMap = new Map(typedExercises.map((e) => [e.id, e.type]))
 
-  // Fetch attempt count and module name in parallel
-  const [attemptCountResult, moduleResult] = await Promise.all([
+  // Non-gap_fill exercise IDs for production breadth query
+  const nonGapFillIds = typedExercises.filter(e => e.type !== 'gap_fill').map(e => e.id)
+
+  // Fetch attempt count, correct non-gap_fill attempts, and module name in parallel
+  const [attemptCountResult, correctProductionResult, moduleResult] = await Promise.all([
     exerciseIds.length > 0
       ? supabase
           .from('exercise_attempts')
@@ -129,6 +134,14 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
           .eq('user_id', user.id)
           .in('exercise_id', exerciseIds)
       : Promise.resolve({ count: 0 }),
+    nonGapFillIds.length > 0
+      ? supabase
+          .from('exercise_attempts')
+          .select('exercise_id')
+          .eq('user_id', user.id)
+          .in('exercise_id', nonGapFillIds)
+          .eq('is_correct', true)
+      : Promise.resolve({ data: [] }),
     unit
       ? supabase.from('modules').select('title').eq('id', unit.module_id).single()
       : Promise.resolve({ data: null }),
@@ -137,10 +150,19 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
   const attemptCount = attemptCountResult.count ?? 0
   const moduleName = (moduleResult.data as { title: string } | null)?.title ?? null
 
+  // Compute production breadth
+  const correctProductionAttempts = (correctProductionResult.data ?? []) as { exercise_id: string }[]
+  const correctNonGapFill = correctProductionAttempts.length
+  const correctProductionTypes = new Set(
+    correctProductionAttempts.map(a => exerciseTypeMap.get(a.exercise_id)).filter(Boolean)
+  )
+  const uniqueTypes = correctProductionTypes.size
+  const masteryProgress = getMasteryProgress(progress?.interval_days, correctNonGapFill, uniqueTypes)
+
   const isHard = progress?.is_hard ?? false
 
-  // Mastery state
-  const masteryState = getMasteryState(progress?.interval_days)
+  // Mastery state (use live production breadth check rather than cached flag)
+  const masteryState = getMasteryState(progress?.interval_days, masteryProgress.productionReady)
   const badge = MASTERY_BADGE[masteryState]
 
   // Parse examples
@@ -296,6 +318,89 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
           </div>
         )}
       </div>
+
+      {/* ── Mastery Progress (only for learning state) ── */}
+      {masteryState === 'learning' && (
+        <>
+          <div
+            className="rounded-2xl mb-4"
+            style={{
+              background: 'rgba(140,106,63,0.07)',
+              padding: '1rem 1.25rem',
+            }}
+          >
+            <span className="senda-eyebrow block mb-3">Progreso hacia dominio</span>
+
+            {/* SRS milestone */}
+            <div className="flex items-center gap-2.5 mb-2.5">
+              {masteryProgress.srsReady ? (
+                <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
+              ) : (
+                <Circle size={16} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
+              )}
+              <div className="flex-1">
+                <p className="text-sm text-foreground font-medium">Retención SRS</p>
+                <p className="text-xs" style={{ color: 'var(--d5-warm)' }}>
+                  {progress ? Math.min(progress.interval_days, MASTERY_THRESHOLD) : 0} / {MASTERY_THRESHOLD} días de intervalo
+                </p>
+              </div>
+            </div>
+
+            {/* Production breadth — correct attempts */}
+            <div className="flex items-center gap-2.5 mb-2.5">
+              {masteryProgress.correctNonGapFill >= PRODUCTION_CORRECT_REQUIRED ? (
+                <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
+              ) : (
+                <Circle size={16} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
+              )}
+              <div className="flex-1">
+                <p className="text-sm text-foreground font-medium">Respuestas de producción</p>
+                <p className="text-xs" style={{ color: 'var(--d5-warm)' }}>
+                  {masteryProgress.correctNonGapFill} / {PRODUCTION_CORRECT_REQUIRED} correctas (sin completar espacios)
+                </p>
+              </div>
+            </div>
+
+            {/* Production breadth — unique types */}
+            <div className="flex items-center gap-2.5">
+              {masteryProgress.uniqueTypes >= PRODUCTION_TYPES_REQUIRED ? (
+                <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
+              ) : (
+                <Circle size={16} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
+              )}
+              <div className="flex-1">
+                <p className="text-sm text-foreground font-medium">Variedad de ejercicios</p>
+                <p className="text-xs" style={{ color: 'var(--d5-warm)' }}>
+                  {masteryProgress.uniqueTypes} / {PRODUCTION_TYPES_REQUIRED} tipos distintos
+                </p>
+                {/* Show which types the user has correct attempts in */}
+                {correctProductionTypes.size > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {Array.from(correctProductionTypes).map(type => {
+                      const label = EXERCISE_TYPES.find(t => t.type === type)?.label ?? type
+                      return (
+                        <span
+                          key={type}
+                          style={{
+                            fontSize: 10,
+                            padding: '1px 6px',
+                            borderRadius: 9999,
+                            background: 'rgba(196,82,46,0.1)',
+                            color: 'var(--d5-terracotta)',
+                            fontWeight: 500,
+                          }}
+                        >
+                          {label}
+                        </span>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ── Tier 1: Primary CTA ── */}
       <Link

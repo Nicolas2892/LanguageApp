@@ -81,14 +81,28 @@ function setupMocks(opts: { prevIntervalDays?: number } = {}) {
   const upsertMock = vi.fn().mockResolvedValue({ error: null })
 
   let progressCallCount = 0
+  let exerciseCallCount = 0
+  let attemptCallCount = 0
   const mockFrom = vi.fn().mockImplementation((table: string) => {
     if (table === 'exercises') {
+      exerciseCallCount++
+      if (exerciseCallCount === 1) {
+        // First call: exercise fetch (cached)
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                single: vi.fn().mockResolvedValue({ data: mockExercise, error: null }),
+              }),
+            }),
+          }),
+        }
+      }
+      // Second call: non-gap_fill exercises for production breadth
       return {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({ data: mockExercise, error: null }),
-            }),
+            neq: vi.fn().mockResolvedValue({ data: [], error: null }),
           }),
         }),
       }
@@ -130,6 +144,20 @@ function setupMocks(opts: { prevIntervalDays?: number } = {}) {
       }
     }
     if (table === 'exercise_attempts') {
+      attemptCallCount++
+      if (attemptCallCount === 1) {
+        // First call: production breadth query (correct non-gap_fill attempts)
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              in: vi.fn().mockReturnValue({
+                eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+              }),
+            }),
+          }),
+          insert: vi.fn().mockResolvedValue({ error: null }),
+        }
+      }
       return { insert: vi.fn().mockResolvedValue({ error: null }) }
     }
     return { select: vi.fn(), insert: vi.fn(), upsert: vi.fn() }

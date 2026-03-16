@@ -91,7 +91,7 @@ export default async function ProgressPage() {
   for (const row of (progressRows as ProgressRow[] ?? [])) {
     const level = conceptLevelMap.get(row.concept_id)
     if (!level) continue
-    if (row.interval_days >= MASTERY_THRESHOLD) {
+    if (row.interval_days >= MASTERY_THRESHOLD && row.production_mastered) {
       masteredByLevel.set(level, (masteredByLevel.get(level) ?? 0) + 1)
       totalMastered++
     }
@@ -220,7 +220,7 @@ export default async function ProgressPage() {
 
               {/* Mastered */}
               <div className="senda-card-sm text-center">
-                <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-ink)', lineHeight: 1.2 }}>{totalMastered}</p>
+                <p className="text-foreground" style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.2 }}>{totalMastered}</p>
                 <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2, lineHeight: 1.3, whiteSpace: 'pre-line' }}>
                   {`de ${totalConcepts}\ndominados`}
                 </p>
@@ -228,7 +228,7 @@ export default async function ProgressPage() {
 
               {/* Accuracy */}
               <div className="senda-card-sm text-center">
-                <p style={{ fontSize: 20, fontWeight: 800, color: 'var(--d5-ink)', lineHeight: 1.2 }}>{overallAccuracy}%</p>
+                <p className="text-foreground" style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.2 }}>{overallAccuracy}%</p>
                 <p style={{ fontSize: 9, color: 'var(--d5-muted)', marginTop: 2, lineHeight: 1.3, whiteSpace: 'pre-line' }}>
                   {`precisión\nglobal`}
                 </p>

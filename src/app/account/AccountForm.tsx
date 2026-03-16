@@ -6,6 +6,7 @@ import { Volume2, VolumeX, CheckCircle2, EyeOff, Eye } from 'lucide-react'
 import { useSpeech } from '@/lib/hooks/useSpeech'
 import { useTheme } from '@/components/ThemeProvider'
 import { LEVEL_CHIP } from '@/lib/constants'
+import { OfflineStorageManager } from '@/components/offline/OfflineStorageManager'
 import type { Profile } from '@/lib/supabase/types'
 
 type ThemeValue = 'light' | 'dark' | 'system'
@@ -181,7 +182,7 @@ export function AccountForm({ profile }: Props) {
           }}
         >
           {audioEnabled === false ? (
-            <VolumeX size={16} strokeWidth={1.5} className="shrink-0 opacity-40" style={{ color: 'var(--d5-ink)' }} />
+            <VolumeX size={16} strokeWidth={1.5} className="shrink-0 opacity-40" style={{ color: 'var(--d5-heading)' }} />
           ) : (
             <Volume2 size={16} strokeWidth={1.5} className="shrink-0" style={{ color: 'var(--d5-terracotta)' }} />
           )}
@@ -218,7 +219,7 @@ export function AccountForm({ profile }: Props) {
           {skipGapFill ? (
             <EyeOff size={16} strokeWidth={1.5} className="shrink-0" style={{ color: 'var(--d5-terracotta)' }} />
           ) : (
-            <Eye size={16} strokeWidth={1.5} className="shrink-0 opacity-40" style={{ color: 'var(--d5-ink)' }} />
+            <Eye size={16} strokeWidth={1.5} className="shrink-0 opacity-40" style={{ color: 'var(--d5-heading)' }} />
           )}
           <div>
             <p className={`text-sm font-medium ${skipGapFill ? 'text-[var(--d5-ink)] dark:text-[var(--d5-paper)]' : 'text-[var(--d5-muted)]'}`}>
@@ -238,7 +239,15 @@ export function AccountForm({ profile }: Props) {
 
       <div style={{ height: '1.5rem' }} />
 
-      {/* ── Section 4: Nivel actual ── */}
+      {/* ── Section 4: Datos Offline ── */}
+      <div style={{ padding: '0.25rem 0 1rem' }}>
+        <span className="senda-eyebrow block mb-3">Datos Offline</span>
+        <OfflineStorageManager />
+      </div>
+
+      <div style={{ height: '1.5rem' }} />
+
+      {/* ── Section 5: Nivel actual ── */}
       <div className="flex items-center justify-between" style={{ padding: '0.25rem 0 1rem' }}>
         <span className="senda-field-label">Nivel actual</span>
         {levelChip ? (
@@ -257,7 +266,7 @@ export function AccountForm({ profile }: Props) {
             padding: '0.125rem 0.625rem',
             borderRadius: 9999,
             background: 'rgba(245,158,11,0.12)',
-            color: 'var(--d5-ink)',
+            color: 'var(--d5-heading)',
           }}>
             {computedLevel}
           </span>
