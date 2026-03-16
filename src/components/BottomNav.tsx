@@ -48,7 +48,7 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center justify-center gap-1
+              className={`tap-highlight flex-1 flex flex-col items-center justify-center gap-1
                           transition-colors touch-manipulation
                           ${active ? 'text-primary' : 'text-[var(--d5-nav-inactive)]'}`}
             >

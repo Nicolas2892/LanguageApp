@@ -136,7 +136,7 @@ Respond with this exact JSON structure:
   "is_correct": <true if score >= 2>,
   "feedback": "<one SHORT sentence: what was right or wrong about the student's specific answer — no grammar theory>",
   "corrected_version": "<the correct Spanish answer>",
-  "explanation": "<one sentence stating the transferable grammar rule as a general principle — do NOT repeat what feedback already said, do NOT reference the student's answer>"
+  "explanation": "<one sentence stating the transferable grammar rule as a general principle — wrap grammatical patterns and rule names in **double asterisks** for emphasis (e.g. **aunque + subjuntivo**, **ser vs estar**) — do NOT repeat what feedback already said, do NOT reference the student's answer>"
 }`
 
   const message = await anthropic.messages.create({
@@ -237,7 +237,7 @@ ${typeRubric || defaultRubric}
 
 Respond with EXACTLY two JSON objects on separate lines (no markdown, no other text):
 Line 1 (output immediately): {"score": <0|1|2|3>, "is_correct": <true if score >= 2>}
-Line 2 (output after): {"feedback": "<one SHORT sentence: what was right or wrong about the student's specific answer — no grammar theory>", "corrected_version": "<the correct Spanish answer>", "explanation": "<one sentence stating the transferable grammar rule as a general principle — do NOT repeat what feedback already said, do NOT reference the student's answer>"}`
+Line 2 (output after): {"feedback": "<one SHORT sentence: what was right or wrong about the student's specific answer — no grammar theory>", "corrected_version": "<the correct Spanish answer>", "explanation": "<one sentence stating the transferable grammar rule as a general principle — wrap grammatical patterns and rule names in **double asterisks** for emphasis (e.g. **aunque + subjuntivo**, **ser vs estar**) — do NOT repeat what feedback already said, do NOT reference the student's answer>"}`
 
   let buffer = ''
   let scoreEmitted = false

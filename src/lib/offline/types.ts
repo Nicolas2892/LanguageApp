@@ -127,6 +127,7 @@ export interface CachedVerbSentence {
   sentence: string
   correct_form: string
   tense_rule: string
+  english: string | null
 }
 
 export interface CachedVerbConjugation {

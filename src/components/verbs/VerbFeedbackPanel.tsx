@@ -9,9 +9,10 @@ interface Props {
   onNext: () => void
   onTryAgain: () => void
   isLast: boolean
+  completedSentence?: string
 }
 
-export function VerbFeedbackPanel({ result, onNext, onTryAgain, isLast }: Props) {
+export function VerbFeedbackPanel({ result, onNext, onTryAgain, isLast, completedSentence }: Props) {
   const { outcome, userAnswer, correctForm, tenseRule } = result
 
   const pillConfig = {
@@ -49,10 +50,13 @@ export function VerbFeedbackPanel({ result, onNext, onTryAgain, isLast }: Props)
             <div className="senda-heading text-lg text-primary">{correctForm}</div>
           </>
         )}
+        {completedSentence && (
+          <p className="text-xs text-[var(--d5-muted)]">{completedSentence}</p>
+        )}
       </div>
 
       {/* Tense rule explanation */}
-      {outcome === 'incorrect' && tenseRule && (
+      {tenseRule && (
         <>
           <div className="h-px bg-[var(--d5-muted)] opacity-25" />
           <p className="text-sm text-[var(--d5-muted)] italic">{tenseRule}</p>

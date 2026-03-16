@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     // Fetch verb sentences
     const { data: rawSentences } = await supabase
       .from('verb_sentences')
-      .select('id, verb_id, tense, pronoun, sentence, correct_form, tense_rule')
+      .select('id, verb_id, tense, pronoun, sentence, correct_form, tense_rule, english')
     const verbSentences = (rawSentences ?? []) as Omit<VerbSentence, 'created_at'>[]
 
     // Fetch verb conjugations

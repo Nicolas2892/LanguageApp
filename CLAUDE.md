@@ -36,6 +36,7 @@ pnpm seed:verbs           # Generate verb sentences via Claude Haiku → docs/ve
 pnpm seed:verbs:apply     # Insert verb_sentences rows from review JSON
 pnpm validate:grading     # ARCH-02 offline validation: grade 50 attempts with Haiku vs Sonnet baseline
 pnpm push:keygen          # Generate VAPID key pair for push notifications
+pnpm backfill:translations # Backfill verb_sentences.english via Claude Haiku (~2700 rows)
 ```
 
 Post-deploy API smoke check (requires env vars):
@@ -256,6 +257,10 @@ Concept mastery requires **both** conditions:
 3. Three outcomes: `correct` (auto-advance 1.5s, green flash) · `accent_error` (orange flash, manual Next) · `incorrect` (red flash, Try Again or Next)
 4. Fire-and-forget `POST /api/verbs/grade` records attempt in `verb_progress` via `increment_verb_progress` RPC
 5. Session done screen shows overall % + per-tense breakdown sorted worst-first
+6. Page wrapper: `max-w-2xl mx-auto` with bottom-nav-aware padding; exercise area vertically centered via flexbox
+7. `SpeakButton` on sentence (speaks completed sentence with correct form inserted)
+8. English translation shown below sentence when `verb_sentences.english` is non-null (gracefully hidden before backfill)
+9. `VerbFeedbackPanel` shows `completedSentence` (full sentence with answer) + `tenseRule` on all outcomes (not just incorrect)
 
 ### Streak Logic
 
@@ -297,7 +302,7 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | `exercise_attempts`                      | Full attempt history with AI score + feedback                                                                            |
 | `study_sessions`                         | Session analytics — written by `/api/sessions/complete`                                                                  |
 | `verbs`                                  | 50 high-frequency verbs; `infinitive`, `english`, `frequency_rank`, `verb_group`                                         |
-| `verb_sentences`                         | 3 sentences per verb × tense (≥1,050 rows); `sentence` contains `_____` blank token                                      |
+| `verb_sentences`                         | 3 sentences per verb × tense (≥1,050 rows); `sentence` contains `_____` blank token; `english` nullable translation      |
 | `user_verb_favorites`                    | User ↔ verb many-to-many favorites; unique (user_id, verb_id)                                                            |
 | `verb_progress`                          | Per-user accuracy per verb × tense; `attempt_count`, `correct_count`; upserted via RPC                                   |
 | `verb_conjugations`                      | Full 6-pronoun paradigm per verb × tense; `stem` = invariant prefix ('' = fully irregular); PK (verb_id, tense)          |
@@ -320,7 +325,8 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/019_user_timezone.sql` — `profiles.timezone text DEFAULT NULL`; replaces `increment_streak_if_new_day` RPC to use user's IANA timezone (Audit-E1)
 - `supabase/migrations/020_streak_freeze.sql` — `profiles.streak_freeze_remaining integer DEFAULT 1`, `streak_freeze_last_replenished text`, `streak_freeze_used_date text`; replaces `increment_streak_if_new_day` RPC (now `RETURNS jsonb`) with freeze logic + auto-replenish. **Note:** must `DROP FUNCTION increment_streak_if_new_day(uuid)` before running (return type change)
 - `supabase/migrations/021_accuracy_rpc.sql` — `get_accuracy_by_type(p_user_id uuid)` RPC; returns per-type + `_total` accuracy rows (replaces unbounded exercise_attempts fetch on progress page)
-- `supabase/migrations/022_offline_reports.sql` — `offline_reports` + `offline_report_attempts` tables with indexes (Feat-F; ⚠️ pending — run in Supabase SQL editor)
+- `supabase/migrations/022_offline_reports.sql` — `offline_reports` + `offline_report_attempts` tables with indexes (Feat-F; applied 2026-03-16)
+- `supabase/migrations/023_verb_sentence_english.sql` — `verb_sentences.english text DEFAULT NULL` (UX-Verb; ⚠️ pending — run in Supabase SQL editor)
 
 ### Dashboard Stats
 
@@ -355,6 +361,7 @@ Migrations (run once in Supabase SQL editor):
 - 100 verbs hard-coded in `src/lib/curriculum/run-seed-verbs.ts` (ranks 1–100)
 - 9 tenses × 100 verbs × 3 sentences = 2,700 `verb_sentences` rows in DB
 - 9 tenses × 100 verbs = 900 `verb_conjugations` rows in DB
+- `verb_sentences.english` — nullable English translation column; backfilled via `pnpm backfill:translations` (Claude Haiku, batches of 20, resume-safe)
 - `pnpm seed:conjugations` — generates full 6-pronoun paradigm + stem per verb × tense via Claude Haiku → `docs/verb-conjugations-YYYY-MM-DD.json`; resume-safe
 - `pnpm seed:conjugations:apply <file>` — upserts `verb_conjugations` rows; idempotent (ON CONFLICT DO UPDATE)
 
@@ -440,10 +447,24 @@ Tutor (`/tutor`) is a reactive support feature, not a primary nav destination. E
 - `animate-page-in` — route transition fade+slide (200ms)
 - `animate-exercise-in` — exercise card entrance (200ms)
 - `animate-senda-pulse` — skeleton loading opacity pulse (1.4s, no scale); used with `senda-skeleton-fill` class (`oklch(0.145 0 0 / 0.05)` light, `oklch(0.985 0 0 / 0.07)` dark)
+- `animate-card-in` — staggered card entrance (used with `animationDelay` in dashboard cards)
 - `splash-trail-draw` — stroke-dashoffset draw animation (800ms ease-out); used by SplashScreen S-trail
 - `splash-logo-in` — opacity 0→1 + blur(4px)→blur(0) (400ms, 400ms delay); used by SplashScreen logo
 - `splash-fade-out` — opacity 1→0 (500ms ease-in-out); applied to SplashScreen container on fade phase
 - `splash-vellum` — absolute noise texture overlay (SVG feTurbulence, 0.4 opacity); subtle paper grain
+
+### Loading Skeletons
+
+All 7 main routes have `loading.tsx` files that mirror the real page layout to prevent layout shift during navigation:
+- `dashboard/loading.tsx` — greeting bone + level chip, WindingPathSeparators, Tu Senda Diaria card, Exploración Abierta card, 3 deferred section placeholders (matches `DashboardDeferredSkeleton` pattern)
+- `progress/loading.tsx` — header, 3-col stats grid (`senda-card-sm`), CEFR bars, verb mastery bars, weekly chart placeholder; WindingPathSeparators between sections
+- `curriculum/loading.tsx` — 4 module accordion skeletons with nested concept bones
+- `account/loading.tsx` — avatar row, profile form (4 fields), security form (2 fields), notification toggle; WindingPathSeparators between sections
+- `tutor/loading.tsx` — full-height flex: real `SvgSendaPath` in header, empty state with logo + starter button bones, input bar at bottom
+- `study/loading.tsx` — progress bar, exercise card with input area + submit button
+- `verbs/loading.tsx` — header, search bar, 2×6 / 3×4 verb card grid with mastery dot bones
+
+**Rules:** Use `senda-skeleton-fill animate-senda-pulse` for all bone elements (not `bg-foreground/5`). Use `senda-card` / `senda-card-sm` for card containers. Import `WindingPathSeparator` and `SvgSendaPath` freely — they are static SVGs with no data dependencies.
 
 ### API Security
 
@@ -462,7 +483,7 @@ Tutor (`/tutor`) is a reactive support feature, not a primary nav destination. E
 
 ## Current Status
 
-**Test suite: 1927 tests across 108 files — all passing.**
+**Test suite: 1952 tests across 110 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -490,6 +511,13 @@ Items are ordered by priority within each group. Full details of completed work 
 - Evaluate lightweight options: `supabase db push` (requires Supabase CLI), `dbmate`, or a custom `migrations` table with a simple runner script.
 - **Do not implement without a PM decision on tooling and whether Supabase CLI adoption is acceptable.**
 
+**Infra-E: Custom domain for Supabase Auth (Google OAuth branding)** *(P2 — user-facing trust)*
+
+- Google OAuth consent screen currently shows `<hash>.supabase.co wants to access your Google account` — looks untrustworthy to users.
+- Fix: configure a Supabase custom domain (e.g. `auth.senda.app`) via Supabase Dashboard → Settings → Custom Domains (requires Pro plan). Then update Google Cloud Console OAuth credentials (redirect URIs, JS origins) and Supabase Auth provider config to use the custom domain.
+- Also configure the Google OAuth consent screen (app name, logo) in Google Cloud Console for a polished branded experience.
+- **Requires Supabase Pro plan. Do not implement until custom domain is provisioned and DNS CNAME is verified.**
+
 **Infra-D: A/B testing / feature flag infrastructure** *(P4 — needed before adaptive grading strategy)*
 
 - No feature flag system exists. Required before safely rolling out adaptive grading (Ped-F) or exercise pool changes.
@@ -511,7 +539,7 @@ Items are ordered by priority within each group. Full details of completed work 
 
 ### New Features
 
-**Feat-F: Offline exercise packs (module download)** *(DONE — migration 022 pending)*
+**Feat-F: Offline exercise packs (module download)** *(DONE — migration 022 applied)*
 
 - 6-phase implementation: IDB storage layer (`idb` v8), download manager + verb auto-cache, offline session engine, batch grading API, sync engine, report-out UI.
 - IndexedDB stores: 15 object stores for exercises, concepts, units, progress snapshots, queued attempts, verb cache, sessions, free-write prompts.
@@ -623,8 +651,9 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 | **P3** | **Feat-J** — Verb SRS integration | PM decision on SRS model |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
+| **P2** | **Infra-E** — Custom domain for Supabase Auth (Google OAuth branding) | Supabase Pro plan + DNS setup |
 | **P4** | **Infra-D** — A/B testing / feature flags | Needed before adaptive grading |
-| **P4** | **Feat-F** — Offline exercise packs | **DONE** |
+| **P2** | **Feat-F** — Offline exercise packs | **DONE** (migration 022 applied) |
 | **P4** | **Feat-L** — Reading comprehension | Content strategy needed |
 | **P4** | **Feat-M** — Vocabulary feature | PM scope decision |
 | **P4** | **Feat-N** — Social / accountability | PM research needed |

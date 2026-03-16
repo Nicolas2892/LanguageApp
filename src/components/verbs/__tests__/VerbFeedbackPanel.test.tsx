@@ -87,4 +87,41 @@ describe('VerbFeedbackPanel', () => {
     )
     expect(screen.getByRole('button', { name: /Finalizar sesión/ })).toBeInTheDocument()
   })
+
+  it('renders completedSentence when provided', () => {
+    render(
+      <VerbFeedbackPanel
+        result={{ ...baseResult, outcome: 'correct', correctForm: 'habló' }}
+        onNext={vi.fn()}
+        onTryAgain={vi.fn()}
+        isLast={false}
+        completedSentence="Yo habló español todos los días."
+      />
+    )
+    expect(screen.getByText('Yo habló español todos los días.')).toBeInTheDocument()
+  })
+
+  it('renders tenseRule for correct outcome', () => {
+    render(
+      <VerbFeedbackPanel
+        result={{ ...baseResult, outcome: 'correct', correctForm: 'habló' }}
+        onNext={vi.fn()}
+        onTryAgain={vi.fn()}
+        isLast={false}
+      />
+    )
+    expect(screen.getByText(baseResult.tenseRule)).toBeInTheDocument()
+  })
+
+  it('renders tenseRule for accent_error outcome', () => {
+    render(
+      <VerbFeedbackPanel
+        result={{ ...baseResult, outcome: 'accent_error' }}
+        onNext={vi.fn()}
+        onTryAgain={vi.fn()}
+        isLast={false}
+      />
+    )
+    expect(screen.getByText(baseResult.tenseRule)).toBeInTheDocument()
+  })
 })

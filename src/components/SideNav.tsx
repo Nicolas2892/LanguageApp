@@ -38,7 +38,7 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unrea
       {/* Logo */}
       <Link
         href="/dashboard"
-        className="flex items-center gap-2.5 px-5 h-14 shrink-0 border-b"
+        className="tap-highlight flex items-center gap-2.5 px-5 h-14 shrink-0 border-b"
         style={{ borderColor: 'var(--d5-nav-border)' }}
       >
         <SvgSendaPath size={20} />
@@ -66,7 +66,7 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unrea
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+              className="tap-highlight flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
               style={{
                 background: active ? 'var(--d5-nav-active-bg)' : 'transparent',
                 color: active ? 'var(--d5-terracotta)' : 'var(--d5-nav-inactive)',
@@ -94,7 +94,7 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unrea
         {unreadReportCount > 0 && (
           <Link
             href="/offline/reports"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-muted"
+            className="tap-highlight flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-muted"
             style={{ color: 'var(--d5-terracotta)' }}
           >
             <span className="relative">
@@ -112,7 +112,7 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unrea
         </div>
         <Link
           href="/account"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
+          className="tap-highlight flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
           style={{
             background: pathname.startsWith('/account') ? 'var(--d5-nav-active-bg)' : 'transparent',
             color: pathname.startsWith('/account') ? 'var(--d5-terracotta)' : 'var(--d5-nav-inactive)',

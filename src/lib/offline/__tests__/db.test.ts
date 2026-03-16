@@ -412,6 +412,7 @@ describe('Verb Sentences Cache', () => {
     sentence: 'Yo _____ estudiante.',
     correct_form: 'soy',
     tense_rule: 'irregular',
+    english: null,
   }
 
   it('puts and gets sentences by verb_id', async () => {

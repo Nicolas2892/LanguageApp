@@ -24,7 +24,7 @@ export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unr
     <header className="sticky top-0 z-50 bg-background lg:hidden">
       <div className="h-14 flex items-center justify-between px-5">
         {/* Logo */}
-        <Link href="/dashboard" aria-label="Senda home">
+        <Link href="/dashboard" aria-label="Senda home" className="tap-highlight">
           <SvgSendaPath size={26} strokeWidth={3.5} />
         </Link>
 
@@ -34,7 +34,7 @@ export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unr
             <Link
               href="/tutor"
               aria-label="Tutor"
-              className="rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
+              className="tap-highlight rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
                          min-h-[44px] flex items-center justify-center text-[var(--d5-nav-inactive)]"
             >
               <Bot className="h-5 w-5" strokeWidth={1.5} />
@@ -44,7 +44,7 @@ export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unr
             <Link
               href="/offline/reports"
               aria-label="Informes offline"
-              className="relative rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
+              className="tap-highlight relative rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
                          min-h-[44px] flex items-center justify-center"
             >
               <FileText className="h-5 w-5" strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)' }} />
@@ -62,7 +62,7 @@ export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unr
           <Link
             href="/account"
             aria-label="Account"
-            className="rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
+            className="tap-highlight rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
                        min-h-[44px] flex items-center justify-center"
           >
             <UserAvatar initials={userInitials} size="md" />

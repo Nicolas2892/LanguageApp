@@ -373,6 +373,7 @@ export interface Database {
           sentence: string
           correct_form: string
           tense_rule: string
+          english: string | null
           created_at: string
         }
         Insert: {
@@ -383,6 +384,7 @@ export interface Database {
           sentence: string
           correct_form: string
           tense_rule: string
+          english?: string | null
           created_at?: string
         }
         Update: {
@@ -393,6 +395,7 @@ export interface Database {
           sentence?: string
           correct_form?: string
           tense_rule?: string
+          english?: string | null
           created_at?: string
         }
         Relationships: []

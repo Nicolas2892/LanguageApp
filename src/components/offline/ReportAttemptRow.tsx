@@ -1,6 +1,7 @@
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { SCORE_CONFIG } from '@/lib/scoring'
 import type { OfflineReportAttempt } from '@/lib/supabase/types'
+import { formatBold } from '@/lib/formatBold'
 
 interface Props {
   attempt: OfflineReportAttempt
@@ -61,7 +62,7 @@ export function ReportAttemptRow({ attempt }: Props) {
       {/* Feedback */}
       {attempt.feedback && (
         <p className="text-xs mb-1.5" style={{ color: 'var(--d5-body)' }}>
-          {attempt.feedback}
+          {formatBold(attempt.feedback)}
         </p>
       )}
 
@@ -81,7 +82,7 @@ export function ReportAttemptRow({ attempt }: Props) {
       {/* Explanation */}
       {attempt.explanation && (
         <p className="text-xs italic" style={{ color: 'var(--d5-muted)' }}>
-          {attempt.explanation}
+          {formatBold(attempt.explanation)}
         </p>
       )}
     </div>

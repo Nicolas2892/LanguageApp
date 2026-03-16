@@ -17,6 +17,7 @@ import { TENSE_LABELS } from '@/lib/verbs/constants'
 import type { VerbTense } from '@/lib/verbs/constants'
 import { VerbFeedbackPanel } from '@/components/verbs/VerbFeedbackPanel'
 import { VerbSummary } from '@/components/verbs/VerbSummary'
+import { SpeakButton } from '@/components/SpeakButton'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import { queueVerbAttempt } from '@/lib/offline/db'
 import { trackVerbDrillStarted, trackVerbDrillCompleted } from '@/lib/analytics'
@@ -38,6 +39,7 @@ export interface SessionItem {
   sentence:    string   // contains '_____'
   correctForm: string
   tenseRule:   string
+  english:     string | null
 }
 
 interface TenseStat {
@@ -244,104 +246,120 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
         </DialogContent>
       </Dialog>
 
-      <div className="space-y-4">
-        {/* Row 1: segmented progress dots + X exit button */}
-        <div className="flex items-center gap-2">
-          <div className="flex flex-1 gap-1">
-            {Array.from({ length: items.length }, (_, i) => (
-              <div
-                key={i}
-                className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                  i <= index ? 'bg-primary' : 'bg-[var(--d5-muted)]/30'
-                }`}
+      <div className="flex flex-col min-h-[calc(100dvh-10rem)]">
+        {/* Pinned top: progress + eyebrow */}
+        <div className="shrink-0 space-y-4">
+          {/* Row 1: segmented progress dots + X exit button */}
+          <div className="flex items-center gap-2">
+            <div className="flex flex-1 gap-1">
+              {Array.from({ length: items.length }, (_, i) => (
+                <div
+                  key={i}
+                  className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                    i <= index ? 'bg-primary' : 'bg-[var(--d5-muted)]/30'
+                  }`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={() => setShowExitDialog(true)}
+              aria-label="Salir de la sesión"
+              className="text-[var(--d5-muted)] hover:text-foreground transition-colors shrink-0"
+            >
+              <X className="h-4 w-4" strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {/* Row 2: metadata eyebrow */}
+          <div className="flex items-center gap-1.5 text-xs flex-wrap">
+            <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>Conjugación</span>
+            <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+            <span className="text-[var(--d5-muted)]">{current.infinitive}</span>
+            <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+            <span className="text-[var(--d5-muted)]">{tenseLabel}</span>
+            <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+            <span className="text-[var(--d5-muted)]">{index + 1}/{items.length}</span>
+          </div>
+        </div>
+
+        {/* Centered exercise area */}
+        <div className="flex-1 flex flex-col justify-center py-4">
+          <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 animate-exercise-in ${flashClass}`}>
+            {/* Sentence card */}
+            <div className="senda-card space-y-4">
+              <div className="flex items-start gap-2">
+                <p className="text-base leading-relaxed flex-1">
+                  {beforeBlank}
+                  <span className="inline-block min-w-[4rem] border-b-2 border-primary mx-1 align-bottom" />
+                  {afterBlank}
+                </p>
+                <SpeakButton text={current.sentence.replace('_____', current.correctForm)} />
+              </div>
+
+              {/* English translation */}
+              {current.english && (
+                <p className="text-sm italic text-[var(--d5-muted)]">{current.english}</p>
+              )}
+
+              {/* Hint row */}
+              {showHint && (
+                <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
+                  <span className="px-2 py-1 rounded bg-muted font-mono font-medium">[{current.infinitive}]</span>
+                  <span>·</span>
+                  <span>{tenseLabel}</span>
+                  <span>·</span>
+                  <span>{pronounLabel}</span>
+                </div>
+              )}
+              {!showHint && (
+                <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
+                  <span>{tenseLabel}</span>
+                  <span>·</span>
+                  <span>{pronounLabel}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Input */}
+            <div className="space-y-3">
+              <div className="senda-dashed-input">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && phase.kind === 'answering') handleCheck() }}
+                  disabled={phase.kind === 'feedback'}
+                  placeholder="Escribe la forma conjugada…"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className="w-full text-base border-0 bg-transparent focus:outline-none focus-visible:ring-0 disabled:opacity-50"
+                />
+              </div>
+
+              {phase.kind === 'answering' && (
+                <Button
+                  onClick={handleCheck}
+                  disabled={!answer.trim()}
+                  className="w-full rounded-full active:scale-95 transition-transform"
+                >
+                  Comprobar →
+                </Button>
+              )}
+            </div>
+
+            {/* Feedback */}
+            {phase.kind === 'feedback' && (
+              <VerbFeedbackPanel
+                result={phase.result}
+                onNext={handleNext}
+                onTryAgain={handleTryAgain}
+                isLast={isLast}
+                completedSentence={current.sentence.replace('_____', current.correctForm)}
               />
-            ))}
-          </div>
-          <button
-            onClick={() => setShowExitDialog(true)}
-            aria-label="Salir de la sesión"
-            className="text-[var(--d5-muted)] hover:text-foreground transition-colors shrink-0"
-          >
-            <X className="h-4 w-4" strokeWidth={1.5} />
-          </button>
-        </div>
-
-        {/* Row 2: metadata eyebrow */}
-        <div className="flex items-center gap-1.5 text-xs flex-wrap">
-          <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>Conjugación</span>
-          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-          <span className="text-[var(--d5-muted)]">{current.infinitive}</span>
-          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-          <span className="text-[var(--d5-muted)]">{tenseLabel}</span>
-          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-          <span className="text-[var(--d5-muted)]">{index + 1}/{items.length}</span>
-        </div>
-
-        {/* Exercise area with flash + entrance animation */}
-        <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 animate-exercise-in ${flashClass}`}>
-          {/* Sentence card */}
-          <div className="senda-card space-y-4">
-            <p className="text-base leading-relaxed">
-              {beforeBlank}
-              <span className="inline-block min-w-[4rem] border-b-2 border-primary mx-1 align-bottom" />
-              {afterBlank}
-            </p>
-
-            {/* Hint row */}
-            {showHint && (
-              <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
-                <span className="px-2 py-1 rounded bg-muted font-mono font-medium">[{current.infinitive}]</span>
-                <span>·</span>
-                <span>{tenseLabel}</span>
-                <span>·</span>
-                <span>{pronounLabel}</span>
-              </div>
-            )}
-            {!showHint && (
-              <div className="flex items-center gap-2 text-xs text-[var(--d5-muted)]">
-                <span>{tenseLabel}</span>
-                <span>·</span>
-                <span>{pronounLabel}</span>
-              </div>
             )}
           </div>
-
-          {/* Input */}
-          <div className="space-y-3">
-            <input
-              ref={inputRef}
-              type="text"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter' && phase.kind === 'answering') handleCheck() }}
-              disabled={phase.kind === 'feedback'}
-              placeholder="Escribe la forma conjugada…"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              className="w-full rounded-xl border border-[var(--d5-muted)]/30 bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
-            />
-
-            {phase.kind === 'answering' && (
-              <Button
-                onClick={handleCheck}
-                disabled={!answer.trim()}
-                className="w-full rounded-full active:scale-95 transition-transform"
-              >
-                Comprobar →
-              </Button>
-            )}
-          </div>
-
-          {/* Feedback */}
-          {phase.kind === 'feedback' && (
-            <VerbFeedbackPanel
-              result={phase.result}
-              onNext={handleNext}
-              onTryAgain={handleTryAgain}
-              isLast={isLast}
-            />
-          )}
         </div>
       </div>
     </>

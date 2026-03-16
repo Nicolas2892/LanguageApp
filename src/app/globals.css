@@ -408,6 +408,23 @@
 }
 .animate-flash-orange { animation: flash-orange var(--duration-senda) var(--ease-senda); }
 
+/* Tap feedback — instant scale-down on press for all nav targets */
+.tap-highlight {
+  transition: transform 100ms ease;
+}
+.tap-highlight:active {
+  transform: scale(0.92);
+}
+
+/* Mic recording — sonar ring radiating outward */
+@keyframes mic-sonar {
+  0%   { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.animate-mic-sonar {
+  animation: mic-sonar 1.5s ease-out infinite;
+}
+
 @keyframes page-fade-in {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -554,6 +571,8 @@
   .animate-message-in,
   .animate-done-stagger > *,
   .animate-heart-bounce,
+  .animate-mic-sonar,
+  .tap-highlight:active,
   .splash-trail-draw,
   .splash-logo-in {
     animation: none !important;

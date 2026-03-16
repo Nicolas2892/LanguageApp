@@ -76,7 +76,7 @@ export default async function VerbSessionPage({ searchParams }: Props) {
   const [{ data: sentenceRows }, { data: verbRows2 }] = await Promise.all([
     supabase
       .from('verb_sentences')
-      .select('id, verb_id, tense, pronoun, sentence, correct_form, tense_rule')
+      .select('id, verb_id, tense, pronoun, sentence, correct_form, tense_rule, english')
       .in('verb_id', verbIds)
       .in('tense', selectedTenses),
     supabase
@@ -85,7 +85,7 @@ export default async function VerbSessionPage({ searchParams }: Props) {
       .in('id', verbIds),
   ])
 
-  type SentenceRow = Pick<VerbSentence, 'id' | 'verb_id' | 'tense' | 'pronoun' | 'sentence' | 'correct_form' | 'tense_rule'>
+  type SentenceRow = Pick<VerbSentence, 'id' | 'verb_id' | 'tense' | 'pronoun' | 'sentence' | 'correct_form' | 'tense_rule' | 'english'>
   const sentences = sentenceRows as SentenceRow[] ?? []
 
   // Build verb_id → infinitive lookup
@@ -106,6 +106,7 @@ export default async function VerbSessionPage({ searchParams }: Props) {
     sentence:    s.sentence,
     correctForm: s.correct_form,
     tenseRule:   s.tense_rule,
+    english:     s.english ?? null,
   }))
 
   // Build the "practice again" URL to the same session config
@@ -117,5 +118,9 @@ export default async function VerbSessionPage({ searchParams }: Props) {
     ...(showHint ? { hint: '1' } : {}),
   }).toString()}`
 
-  return <VerbSession items={items} showHint={showHint} sessionUrl={sessionUrl} />
+  return (
+    <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+      <VerbSession items={items} showHint={showHint} sessionUrl={sessionUrl} />
+    </main>
+  )
 }

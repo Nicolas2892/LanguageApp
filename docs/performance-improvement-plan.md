@@ -1,8 +1,8 @@
 # Performance Improvement Plan
 
 **Date:** 2026-03-14
-**Status:** Phase 1, 2 & 3 complete
-**Revised:** 2026-03-14 (Phase 1 & 2 — commit `1d6b70b`; Phase 3 — commit `9f4d11e`; Phase 4 re-scoped after Feat-H audit)
+**Status:** Complete (Phases 1–3 & 6 implemented; Phases 4–5 dropped)
+**Revised:** 2026-03-16 (Phases 4–5 dropped per PM decision — local grading scratched entirely; Phase 6 completed)
 
 ---
 
@@ -80,15 +80,15 @@ User taps Submit
 | **2** ✅ | Parallelize rate-limit check with exercise+concept DB fetch | `/api/submit` — all types | **30–80ms** per submit | Wasted DB work if rate-limited (0.1% of requests) | Negligible cost; rate-limited users are rare |
 | **3** ✅ | Truncate `conceptExplanation` to 100 chars in grading prompt (keep full `conceptTitle`) | `/api/submit` — all types | **30–80ms** TTFT + cost reduction | Slight grading accuracy drop if truncated explanation loses critical rule info | Run `pnpm validate:grading` before/after; revert if agreement drops below 90%; most disambiguation is in the title already (e.g. "aunque (+ subjuntivo)") |
 | **4** ✅ | Pass `answer_variants` to Claude prompt | `/api/submit` — translation, transformation | **0ms** latency, but fewer wrong grades → fewer retries | None | — |
-| **5** | **Authoritative** local grading for `gap_fill` + `sentence_builder` — exact case-insensitive match against `expected_answer` + `answer_variants`; accent-normalized match (score 2) for gap_fill only. Returns `result \| null`; null → fall through to Claude. No Claude call when matched. | `/api/submit` — gap_fill, sentence_builder | **~1.7s** for ~40–55% of gap_fill, ~30–40% of sentence_builder | False positive if `expected_answer` in seed data is incorrect | Same data shown as "correct answer" in feedback — if we trust it for display, we trust it for grading |
+| **~~5~~** | ~~**Authoritative** local grading for `gap_fill` + `sentence_builder`~~ | — | — | **DROPPED (2026-03-16):** PM decision to scratch local grading entirely. Claude grading quality is more important than latency savings for a learning app — incorrect local grades undermine trust in the pedagogical loop. | — |
 | **~~6~~** | ~~Optimistic local grading — fuzzy (Levenshtein ≤ 2) for gap_fill only~~ | — | — | **DROPPED (see Section 7, note 3):** Levenshtein ≤ 2 catches mood-significant accent pairs (está/esté = distance 1) even in single words. Risk outweighs the ~15% incremental hit rate. Can revisit if `answer_variants` enrichment (Item 8) closes the gap instead. | — |
 | **~~7~~** | ~~Optimistic grading: handle Claude disagreement via "Confirmando..." phase~~ | — | — | **DROPPED (see Section 7, note 1):** Contradicts offline-mode architecture (Feat-F). Adds a third grading category ("tentative local") that doesn't exist offline. Trust-eroding UX ("correct → actually wrong"). ~3.5 days effort for a pattern that would be ripped out when offline lands. | — |
-| **8** | Enrich `answer_variants` via Claude batch (seed script) | Offline / seed data | Raises #5 hit rate from ~15–20% → ~35–40% for translation/transformation | Bad variants teach wrong answers; maintenance burden on re-seed | Human review of generated variants; add to `seed:ai` pipeline |
+| **~~8~~** | ~~Enrich `answer_variants` via Claude batch (seed script)~~ | — | — | **DROPPED (2026-03-16):** Depended on Item 5 (local grading) which was scratched. No consumer for enriched variants. | — |
 | **9** ✅ | Progress page: replace 5,000-row `exercise_attempts` fetch with aggregate RPC | `/progress` page load | **100–250ms** now; prevents **unbounded growth** as user history accumulates | New migration to deploy; RPC must be maintained alongside schema changes | `--dry-run` test; fallback to current query if RPC missing |
 | **10** ✅ | Dashboard: parallelize profile fetch with due/total/studied queries | `/dashboard` page load | **50–100ms** | Timezone wrong on date boundary (UTC vs user TZ) → off-by-one on due count for users near midnight | Only affects users near midnight; self-corrects on next load |
 | **11** ✅ | Progress page: parallelize stages 3–5 (activity, sessions, verb progress) with stage 2 | `/progress` page load | **100–200ms** | None — all queries are independent | — |
 | **12** ✅ | DashboardDeferredSection: merge weakest-progress query into batch 3 | `/dashboard` deferred section | **50–80ms** | Slightly more complex query logic | Pure refactor; covered by existing tests |
-| **13** | Debounce `updateComputedLevel` — only run every 5th submit or on mastery change | `/api/submit` fire-and-forget | Reduces background DB load (~4 queries saved per 5 submits) | Computed level stale by up to 5 exercises | Level only changes at mastery boundaries; 5-submit lag is imperceptible |
+| **13** ✅ | Debounce `updateComputedLevel` — only run every 5th submit or on mastery change | `/api/submit` fire-and-forget | Reduces background DB load (~4 queries saved per 5 submits) | Computed level stale by up to 5 exercises | Level only changes at mastery boundaries; 5-submit lag is imperceptible |
 | **~~14~~** | ~~Speculative Claude connection warm-up during DB fetch~~ | — | — | **DROPPED:** Anthropic Node SDK creates new HTTP connections per request with no exposed keep-alive or pool config. Would require bypassing the SDK to manage raw HTTPS sockets — fragile, unmaintainable, and fights the abstraction. | — |
 | **15** ✅ | In-memory cache for exercise + concept rows (5-min TTL) | `/api/submit` — all types | **50–100ms** per submit (eliminates DB round-trip for static curriculum data) | Stale data if admin edits/deletes exercises via pool dashboard | Invalidate on admin pool mutations; 5-min TTL limits staleness; exercise/concept data changes very rarely |
 
@@ -220,9 +220,9 @@ When the local grader returns a result, we skip Claude entirely — meaning no A
 | **Phase 1** ✅ | 1, 2, 3, 4, 15 | ~1 day | Near-zero | −200–350ms on every submit |
 | **Phase 2** ✅ | 10, 11, 12 | ~half day | Near-zero | +−150–300ms on page loads |
 | **Phase 3** ✅ | 9 | ~half day | Low (migration) | Progress page stable at ~500ms |
-| **Phase 4** | 5 (revised) | ~1.5–2 days | Low | ~15–25% of all submits feel instant (gap_fill + sentence_builder) |
-| **Phase 5** | 8 | ~1 day + review | Low (content quality) | Raises gap_fill local hit rate via richer variants |
-| **Phase 6** | 13 | ~half day | Low | Debounced computed level |
+| **~~Phase 4~~** | ~~5 (revised)~~ | — | — | **DROPPED** — local grading scratched per PM decision (2026-03-16) |
+| **~~Phase 5~~** | ~~8~~ | — | — | **DROPPED** — depended on Phase 4 |
+| **Phase 6** ✅ | 13 | ~half day | Low | Debounced computed level |
 
 ### Phase 4 — Detailed Breakdown
 

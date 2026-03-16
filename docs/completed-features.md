@@ -4,6 +4,70 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Verb Session UX Improvements + English Translations ✓ (2026-03-16)
+
+1952 tests across 110 files, all passing.
+
+### Problem
+
+The verb conjugation session (`/verbs/session`) had several UX gaps compared to the regular study session: no page wrapper (content had no max-width), no vertical centering (active elements far from thumb zone on tall phones), no SpeakButton for TTS, no English translation for context, and the feedback panel didn't show the full completed sentence or the tense rule on correct/accent_error outcomes.
+
+### Changes
+
+**`supabase/migrations/023_verb_sentence_english.sql`** — New migration:
+- Adds `english text DEFAULT NULL` column to `verb_sentences`
+- Nullable — backfilled via `pnpm backfill:translations`
+
+**`src/lib/supabase/types.ts`** — Type update:
+- Added `english: string | null` to `verb_sentences` Row, Insert, Update
+
+**`src/lib/offline/types.ts`** — Offline type update:
+- Added `english: string | null` to `CachedVerbSentence`
+
+**`src/app/api/offline/verbs/route.ts`** — API update:
+- Added `english` to `.select()` call for verb sentences
+
+**`scripts/backfill-verb-translations.ts`** — New backfill script:
+- Fetches all `verb_sentences` where `english IS NULL` (resume-safe)
+- Batches 20 sentences per Claude Haiku call
+- Prompt: translate completed Spanish sentences to English
+- Updates DB row-by-row, writes progress to `docs/verb-translations-YYYY-MM-DD.json`
+- Added `"backfill:translations"` script to `package.json`
+
+**`src/app/verbs/session/page.tsx`** — Data flow + layout wrapper:
+- Added `english` to `.select()` call and `SentenceRow` type
+- Maps `english: s.english ?? null` into SessionItem
+- Wrapped return in `<main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">`
+
+**`src/app/verbs/session/VerbSession.tsx`** — UI improvements:
+- Added `english: string | null` to `SessionItem` interface
+- Imported `SpeakButton` — renders next to sentence, speaks completed sentence (blank replaced with correct form)
+- Added English translation display: `text-sm italic text-[var(--d5-muted)]`, gracefully hidden when null
+- Restructured layout: progress bar + eyebrow pinned top (`shrink-0`), exercise area vertically centered via `flex-1 flex flex-col justify-center` with `min-h-[calc(100dvh-10rem)]`
+- Passes `completedSentence` prop to `VerbFeedbackPanel`
+
+**`src/components/verbs/VerbFeedbackPanel.tsx`** — Feedback improvements:
+- Added `completedSentence?: string` prop — shown below correct form as `text-xs text-[var(--d5-muted)]`
+- Removed `outcome === 'incorrect'` gate on tenseRule display — now shown for all outcomes (correct, accent_error, incorrect)
+
+### Tests added
+
+**`src/app/verbs/session/__tests__/VerbSession.test.tsx`** (+3 tests):
+- Added `english: null` to `makeItem` defaults
+- Renders English translation when provided
+- Does not render translation when null
+- Renders SpeakButton structure
+
+**`src/components/verbs/__tests__/VerbFeedbackPanel.test.tsx`** (+3 tests):
+- Renders completedSentence when provided
+- Renders tenseRule for correct outcome
+- Renders tenseRule for accent_error outcome
+
+**`src/lib/offline/__tests__/db.test.ts`** — Fixed fixture:
+- Added `english: null` to `CachedVerbSentence` test fixture
+
+---
+
 ## Production Mastery Gate ✓ (2026-03-15)
 
 1843 tests across 98 files, all passing.
@@ -1991,3 +2055,51 @@ Full codebase audit performed. 22 findings grouped by severity. All resolved exc
 - Verification checklist with developer setup instructions: `docs/ios-push-verification.md`
 - Tests: `src/app/api/push/__tests__/test-push.test.ts` (5 tests), updated `NotificationSettings.test.tsx` (+4 tests)
 - **Known limitation**: single `push_subscription` per profile row — only last-subscribed device gets pushes
+
+---
+
+## Loading Skeleton Rewrite — Layout-Matched Skeletons (2026-03-16)
+
+1946 tests across 110 files, all passing.
+
+### Problem
+
+All 6 main pages had `loading.tsx` skeletons, but they didn't match the actual page layouts — wrong `max-w` values, missing `WindingPathSeparator` dividers, wrong grid column counts, and inner elements using `bg-foreground/5` instead of `senda-skeleton-fill`. This caused visible layout jumps when the real page replaced the skeleton.
+
+### Changes
+
+**`src/app/dashboard/loading.tsx`** — Full rewrite:
+- Fixed `max-w-lg` → `max-w-2xl` with correct padding (`px-5 pt-5 pb-[calc(...)]`)
+- Added `WindingPathSeparator` between all sections (matching `page.tsx`)
+- Structure: greeting bone + level chip → separator → Tu Senda Diaria `senda-card` (eyebrow, heading, description, CTA bones) → separator → Exploración Abierta card → separator → 3 deferred section placeholders (matching `DashboardDeferredSkeleton` pattern)
+
+**`src/app/progress/loading.tsx`** — Full rewrite:
+- Changed stats grid from `grid-cols-2 md:grid-cols-4` (4 cards) → `grid-cols-3` (3 cards using `senda-card-sm`)
+- Added `WindingPathSeparator` between all sections
+- Added verb mastery section (4 bar rows)
+- Replaced all `bg-foreground/5` inner bones with `senda-skeleton-fill` Bone components
+
+**`src/app/curriculum/loading.tsx`** — Minor fix:
+- Replaced `bg-foreground/5` inner elements with nested `Bone` components using `senda-skeleton-fill`
+
+**`src/app/account/loading.tsx`** — Full rewrite:
+- Fixed `max-w-lg` → `max-w-2xl` with correct padding
+- Added avatar row matching actual page layout (circle bone + name/email bones)
+- Added `WindingPathSeparator` between sections
+- Added security section (2 fields + button) and notification section (label + toggle bone)
+
+**`src/app/tutor/loading.tsx`** — New file:
+- Full-height flex layout matching `tutor/page.tsx`
+- Header: real `SvgSendaPath` + eyebrow/heading bones (with `--d5-line` border)
+- Chat area: centered empty state with real `SvgSendaPath` logo, heading/body bones, 4 starter button bones
+- Input bar: textarea bone + send button bone (with `--d5-line` border)
+
+**`src/app/verbs/loading.tsx`** — Minor fix:
+- Replaced `bg-foreground/5` inner elements with `senda-skeleton-fill` Bone components
+
+**`src/app/study/loading.tsx`** — Already using correct classes, no changes needed.
+
+### Rules established
+- All skeleton bone elements must use `senda-skeleton-fill animate-senda-pulse` (never `bg-foreground/5`)
+- Card containers in skeletons should use `senda-card` / `senda-card-sm`
+- `WindingPathSeparator` and `SvgSendaPath` are safe to import in skeletons — static SVGs with no data dependencies

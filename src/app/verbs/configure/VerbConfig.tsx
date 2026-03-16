@@ -167,7 +167,7 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
                 )}
                 <div style={{
                   fontFamily: 'var(--font-lora), serif', fontWeight: 600, fontStyle: 'italic', fontSize: 14,
-                  color: active ? 'var(--d5-paper)' : 'var(--d5-ink)',
+                  color: active ? 'var(--d5-paper)' : 'var(--d5-heading)',
                   marginBottom: opt.subtitle ? '0.125rem' : 0,
                 }}>
                   {displayTitle}
@@ -224,7 +224,7 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
             onChange={(e) => setShowHint(e.target.checked)}
             className="h-4 w-4 rounded accent-primary"
           />
-          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--d5-ink)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--d5-heading)', fontFamily: 'var(--font-dm-sans), system-ui, sans-serif' }}>
             Mostrar pista del infinitivo
           </span>
         </label>

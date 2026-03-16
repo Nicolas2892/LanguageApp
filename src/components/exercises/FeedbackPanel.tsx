@@ -7,6 +7,7 @@ import { Sparkles, Bot } from 'lucide-react'
 import { SpeakButton } from '@/components/SpeakButton'
 import { SvgTilde } from '@/components/SvgTilde'
 import type { GradeResult } from '@/lib/claude/grader'
+import { formatBold } from '@/lib/formatBold'
 
 interface Props {
   result: GradeResult & { next_review_in_days: number }
@@ -46,7 +47,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, 
       {result.feedback === '' ? (
         <div className="h-4 w-3/4 mx-auto senda-skeleton-fill animate-senda-pulse rounded" />
       ) : (
-        <p className="text-sm text-foreground">{result.feedback}</p>
+        <p className="text-sm text-foreground">{formatBold(result.feedback)}</p>
       )}
 
       {/* Answer display */}
@@ -80,7 +81,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, 
         <div className="h-4 w-1/2 mx-auto senda-skeleton-fill animate-senda-pulse rounded" />
       ) : result.explanation ? (
         <p className="text-sm text-[var(--d5-muted)] italic">
-          {result.explanation}
+          {formatBold(result.explanation)}
         </p>
       ) : null}
 

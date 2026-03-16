@@ -212,12 +212,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
       </Link>
 
       {/* ── Header section ── */}
-      <div className="mb-4">
-        {/* Level chip — above title (mockup pattern) */}
-        <div className="mb-2">
-          <LevelChip level={concept.level} />
-        </div>
-
+      <div className="mb-6">
         {/* Title + hard flag */}
         <div className="flex items-start gap-2">
           <h1 className="senda-heading text-xl flex-1">
@@ -226,19 +221,13 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
           <HardFlagButton conceptId={id} initialIsHard={isHard} />
         </div>
 
-        {/* Metadata row */}
+        {/* Metadata row — all chips on one line */}
         <div className="flex items-center gap-2 flex-wrap mt-2">
+          <LevelChip level={concept.level} />
           <GrammarFocusChip focus={concept.grammar_focus} />
           <span style={badge.style}>{badge.label}</span>
-          {moduleName && unit && (
-            <span className="text-xs" style={{ color: 'var(--d5-warm)' }}>
-              {moduleName} · {unit.title}
-            </span>
-          )}
         </div>
       </div>
-
-      <WindingPathSeparator />
 
       {/* ── Explanation (tinted container, clamped) ── */}
       <div
@@ -250,132 +239,178 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
       >
         <span className="senda-eyebrow block mb-2">Cómo funciona</span>
         <ExpandableExplanation text={concept.explanation} />
-        {attemptCount > 0 && (
-          <p className="flex items-center gap-1.5 text-xs mt-3" style={{ color: 'var(--d5-warm)' }}>
-            <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
-            {attemptCount} ejercicio{attemptCount !== 1 ? 's' : ''} completado{attemptCount !== 1 ? 's' : ''}
-          </p>
-        )}
       </div>
 
       {/* ── Examples ── */}
       {examples.length > 0 && (
-        <>
-          <WindingPathSeparator />
-          <div>
-            <span className="senda-eyebrow block mb-3">Ejemplos</span>
-            <div className="flex flex-col gap-4">
-              {examples.map((ex, i) => (
-                <div
-                  key={i}
-                  style={{
-                    borderLeft: '2px solid var(--d5-terracotta)',
-                    paddingLeft: '0.75rem',
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-foreground text-base font-medium">{ex.es}</span>
-                    <SpeakButton text={ex.es} />
-                  </div>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>{ex.en}</p>
+        <div className="mt-6">
+          <span className="text-xs font-medium block mb-3" style={{ color: 'var(--d5-warm)' }}>Ejemplos</span>
+          <div className="flex flex-col gap-3">
+            {examples.map((ex, i) => (
+              <div
+                key={i}
+                style={{
+                  borderLeft: '2px solid var(--d5-terracotta)',
+                  paddingLeft: '0.75rem',
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-foreground text-base font-medium">{ex.es}</span>
+                  <SpeakButton text={ex.es} />
                 </div>
-              ))}
-            </div>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>{ex.en}</p>
+              </div>
+            ))}
           </div>
-        </>
+        </div>
       )}
 
       {/* ── Conjugation Insight (only for tense-mapped concepts) ── */}
       {insightRows && tenseKey && (
-        <>
-          <WindingPathSeparator />
-          <div>
-            <span className="senda-eyebrow block mb-1.5">
-              Conjugación de ejemplo
-            </span>
-            <p className="text-xs mb-3" style={{ color: 'var(--d5-muted)' }}>
-              hablar · {TENSE_LABELS[tenseKey]}
-            </p>
-            <ConjugationInsightTable rows={insightRows} />
-          </div>
-        </>
+        <div className="mt-6">
+          <span className="text-xs font-medium block mb-1.5" style={{ color: 'var(--d5-warm)' }}>
+            Conjugación de ejemplo
+          </span>
+          <p className="text-xs mb-3" style={{ color: 'var(--d5-muted)' }}>
+            hablar · {TENSE_LABELS[tenseKey]}
+          </p>
+          <ConjugationInsightTable rows={insightRows} />
+        </div>
       )}
 
       <WindingPathSeparator />
 
-      {/* ── SRS Status ── */}
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <p className="text-foreground text-sm font-medium">Próxima revisión</p>
-          <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>{srsStatus}</p>
+      {/* ── CTA zone ── */}
+      <Link
+        href={`/study?practice=true&concept=${id}`}
+        className="senda-cta w-full"
+      >
+        Practicar este concepto →
+      </Link>
+
+      {/* Exercise type chips — compact, no eyebrow */}
+      {availableTypes.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {availableTypes.map(({ type, label }) => (
+            <Link
+              key={type}
+              href={`/study?concept=${id}&types=${type}&practice=true`}
+              className="inline-flex items-center justify-center text-xs px-2.5 py-1 rounded-full transition-colors duration-150"
+              style={{
+                background: 'rgba(196, 82, 46, 0.08)',
+                color: 'var(--d5-terracotta)',
+              }}
+            >
+              {label}
+            </Link>
+          ))}
         </div>
-        {progress && (
-          <div className="text-right">
-            <p className="text-foreground text-xl font-bold leading-none">{progress.repetitions}</p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>
-              {progress.repetitions === 1 ? 'sesión' : 'sesiones'}
-            </p>
-          </div>
-        )}
+      )}
+
+      {/* Secondary links — inline row */}
+      <div className="flex items-center gap-4 mt-3">
+        <Link
+          href={`/write?suggested=${id}`}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--d5-warm)] hover:text-[var(--d5-terracotta)] transition-colors duration-200"
+        >
+          <Pencil className="h-3 w-3" />
+          Escritura libre
+        </Link>
+        <Link
+          href={`/tutor?concept=${id}`}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--d5-warm)] hover:text-[var(--d5-terracotta)] transition-colors duration-200"
+        >
+          <Bot className="h-3 w-3" />
+          Consultar tutor
+        </Link>
       </div>
 
-      {/* ── Mastery Progress (only for learning state) ── */}
-      {masteryState === 'learning' && (
-        <>
-          <div
-            className="rounded-2xl mb-4"
-            style={{
-              background: 'rgba(140,106,63,0.07)',
-              padding: '1rem 1.25rem',
-            }}
-          >
-            <span className="senda-eyebrow block mb-3">Progreso hacia dominio</span>
+      <WindingPathSeparator />
 
-            {/* SRS milestone */}
-            <div className="flex items-center gap-2.5 mb-2.5">
-              {masteryProgress.srsReady ? (
-                <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
-              ) : (
-                <Circle size={16} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
-              )}
-              <div className="flex-1">
-                <p className="text-sm text-foreground font-medium">Retención SRS</p>
-                <p className="text-xs" style={{ color: 'var(--d5-warm)' }}>
-                  {progress ? Math.min(progress.interval_days, MASTERY_THRESHOLD) : 0} / {MASTERY_THRESHOLD} días de intervalo
+      {/* ── Tu progreso — unified progress card ── */}
+      <div
+        className="rounded-2xl"
+        style={{
+          background: 'rgba(140,106,63,0.07)',
+          padding: '1rem 1.25rem',
+        }}
+      >
+        <span className="senda-eyebrow block mb-3">Tu progreso</span>
+
+        {/* SRS status + attempt count row */}
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-sm text-foreground font-medium">Próxima revisión</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>{srsStatus}</p>
+          </div>
+          <div className="text-right">
+            {progress ? (
+              <>
+                <p className="text-foreground text-xl font-bold leading-none">{progress.repetitions}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>
+                  {progress.repetitions === 1 ? 'sesión' : 'sesiones'}
                 </p>
-              </div>
+              </>
+            ) : attemptCount > 0 ? (
+              <>
+                <p className="text-foreground text-xl font-bold leading-none">{attemptCount}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>
+                  {attemptCount === 1 ? 'ejercicio' : 'ejercicios'}
+                </p>
+              </>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Mastery milestones (only for learning state) */}
+        {masteryState === 'learning' && (
+          <div className="flex flex-col gap-1.5 pt-2" style={{ borderTop: '1px solid rgba(140,106,63,0.12)' }}>
+            {/* SRS milestone */}
+            <div className="flex items-center gap-2">
+              {masteryProgress.srsReady ? (
+                <CheckCircle2 size={14} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
+              ) : (
+                <Circle size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
+              )}
+              <p className="text-xs text-foreground">
+                Retención SRS
+                <span className="ml-1.5" style={{ color: 'var(--d5-warm)' }}>
+                  {progress ? Math.min(progress.interval_days, MASTERY_THRESHOLD) : 0}/{MASTERY_THRESHOLD} días
+                </span>
+              </p>
             </div>
 
             {/* Production breadth — correct attempts */}
-            <div className="flex items-center gap-2.5 mb-2.5">
+            <div className="flex items-center gap-2">
               {masteryProgress.correctNonGapFill >= PRODUCTION_CORRECT_REQUIRED ? (
-                <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
+                <CheckCircle2 size={14} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
               ) : (
-                <Circle size={16} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
+                <Circle size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
               )}
-              <div className="flex-1">
-                <p className="text-sm text-foreground font-medium">Respuestas de producción</p>
-                <p className="text-xs" style={{ color: 'var(--d5-warm)' }}>
-                  {masteryProgress.correctNonGapFill} / {PRODUCTION_CORRECT_REQUIRED} correctas (sin completar espacios)
-                </p>
-              </div>
+              <p className="text-xs text-foreground">
+                Producción
+                <span className="ml-1.5" style={{ color: 'var(--d5-warm)' }}>
+                  {masteryProgress.correctNonGapFill}/{PRODUCTION_CORRECT_REQUIRED} correctas
+                </span>
+              </p>
             </div>
 
             {/* Production breadth — unique types */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               {masteryProgress.uniqueTypes >= PRODUCTION_TYPES_REQUIRED ? (
-                <CheckCircle2 size={16} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
+                <CheckCircle2 size={14} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
               ) : (
-                <Circle size={16} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
+                <Circle size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
               )}
               <div className="flex-1">
-                <p className="text-sm text-foreground font-medium">Variedad de ejercicios</p>
-                <p className="text-xs" style={{ color: 'var(--d5-warm)' }}>
-                  {masteryProgress.uniqueTypes} / {PRODUCTION_TYPES_REQUIRED} tipos distintos
+                <p className="text-xs text-foreground">
+                  Variedad
+                  <span className="ml-1.5" style={{ color: 'var(--d5-warm)' }}>
+                    {masteryProgress.uniqueTypes}/{PRODUCTION_TYPES_REQUIRED} tipos
+                  </span>
                 </p>
-                {/* Show which types the user has correct attempts in */}
                 {correctProductionTypes.size > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1.5">
+                  <div className="flex flex-wrap gap-1 mt-1">
                     {Array.from(correctProductionTypes).map(type => {
                       const label = EXERCISE_TYPES.find(t => t.type === type)?.label ?? type
                       return (
@@ -399,51 +434,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
               </div>
             </div>
           </div>
-        </>
-      )}
-
-      {/* ── Tier 1: Primary CTA ── */}
-      <Link
-        href={`/study?practice=true&concept=${id}`}
-        className="senda-cta w-full"
-      >
-        Practicar este concepto →
-      </Link>
-
-      {/* ── Tier 2: Exercise type chips ── */}
-      {availableTypes.length > 0 && (
-        <div className="mt-4">
-          <p className="senda-eyebrow mb-2">Por tipo</p>
-          <div className="flex flex-wrap gap-2">
-            {availableTypes.map(({ type, label }) => (
-              <Link
-                key={type}
-                href={`/study?concept=${id}&types=${type}&practice=true`}
-                className="senda-cta-ghost"
-              >
-                {label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Tier 3: Secondary navigation links ── */}
-      <div className="flex flex-col gap-2 mt-4">
-        <Link
-          href={`/write?suggested=${id}`}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--d5-warm)] hover:text-[var(--d5-terracotta)] transition-colors duration-200"
-        >
-          <Pencil className="h-3.5 w-3.5" />
-          Escritura libre →
-        </Link>
-        <Link
-          href={`/tutor?concept=${id}`}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--d5-warm)] hover:text-[var(--d5-terracotta)] transition-colors duration-200"
-        >
-          <Bot className="h-3.5 w-3.5" />
-          Consultar tutor →
-        </Link>
+        )}
       </div>
     </main>
   )
