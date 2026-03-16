@@ -48,7 +48,7 @@ export function FreeWritePrompt({
   }
 
   const barPct = Math.min((wordCount / 200) * 100, 100)
-  const barColor = overLimit ? 'bg-red-500' : wordCount >= 150 ? 'bg-amber-400' : 'bg-primary'
+  const barColor = overLimit ? 'bg-[var(--d5-error)]' : wordCount >= 150 ? 'bg-[var(--d5-warning)]' : 'bg-primary'
 
   return (
     <div className="space-y-4">
@@ -99,7 +99,7 @@ export function FreeWritePrompt({
           />
         </div>
         <div className="flex justify-end">
-          <span className={`text-xs ${overLimit ? 'text-red-500 dark:text-red-400' : wordCount >= 150 ? 'text-amber-500 dark:text-amber-400' : 'text-muted-foreground'}`}>
+          <span className={`text-xs ${overLimit ? 'text-[var(--d5-error)]' : wordCount >= 150 ? 'text-[var(--d5-warning)]' : 'text-muted-foreground'}`}>
             {wordCount} / 200 palabras
           </span>
         </div>

@@ -585,7 +585,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             {backLabel}
           </button>
           {generateError && (
-            <p className="text-sm text-red-600 dark:text-red-400">{generateError}</p>
+            <p className="text-sm text-[var(--d5-error)]">{generateError}</p>
           )}
         </div>
       </div>
@@ -690,7 +690,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           )}
           <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
           {sprintConfig?.limitType === 'time' ? (
-            <span className={`font-mono font-semibold flex items-center gap-0.5 ${isTimeLow ? 'text-amber-500 dark:text-amber-400' : 'text-[var(--d5-muted)]'}`}>
+            <span className={`font-mono font-semibold flex items-center gap-0.5 ${isTimeLow ? 'text-[var(--d5-warning)]' : 'text-[var(--d5-muted)]'}`}>
               <Timer className="h-3 w-3" />
               {formatTime(secondsLeft)}
             </span>
