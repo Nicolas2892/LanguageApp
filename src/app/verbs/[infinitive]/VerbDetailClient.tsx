@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Palette, Bot } from 'lucide-react'
 import { VerbFavoriteButton } from '@/components/verbs/VerbFavoriteButton'
@@ -97,17 +97,16 @@ function ColouredForm({ form, stem }: { form: string; stem: string }) {
 }
 
 export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favorited, tenseData }: Props) {
-  const [colourEndings, setColourEndings] = useState(true)
-  const [selectedTense, setSelectedTense] = useState<VerbTense>('present_indicative')
-
-  useEffect(() => {
+  const [colourEndings, setColourEndings] = useState(() => {
+    if (typeof window === 'undefined') return true
     try {
       const stored = localStorage.getItem(COLOUR_ENDINGS_KEY)
-      if (stored !== null) setColourEndings(stored === 'true')
+      return stored !== null ? stored === 'true' : true
     } catch {
-      // localStorage unavailable
+      return true
     }
-  }, [])
+  })
+  const [selectedTense, setSelectedTense] = useState<VerbTense>('present_indicative')
 
   function toggleColourEndings() {
     const next = !colourEndings

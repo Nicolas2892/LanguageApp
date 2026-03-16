@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, startTransition } from 'react'
 import { X } from 'lucide-react'
 
 interface Props {
@@ -35,7 +35,7 @@ export function StreakFreezeNotification({ freezeUsedDate, streak }: Props) {
     const key = `streak_freeze_used_${freezeUsedDate}`
     try {
       if (localStorage.getItem(key)) return
-      setVisible(true)
+      startTransition(() => setVisible(true))
     } catch {
       // localStorage unavailable
     }

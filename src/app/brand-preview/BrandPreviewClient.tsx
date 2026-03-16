@@ -1121,25 +1121,27 @@ function D5VerbDetailPage({ data }: { data?: D5VerbData | null }) {
 
 // ─── D5 Exercise Full Screen (two frames: answering + feedback) ────────────────
 
-function D5ExerciseFullScreen() {
-  const grot  = 'var(--font-dm-sans), system-ui, sans-serif'
-  const serif = 'var(--font-lora), serif'
+const EXERCISE_GROT = 'var(--font-dm-sans), system-ui, sans-serif'
+const EXERCISE_SERIF = 'var(--font-lora), serif'
 
-  const Tilde = () => (
+function ExerciseTilde() {
+  return (
     <svg viewBox="0 0 48 20" width={48} height={20}>
       <path d="M 3 14 C 10 4, 18 18, 24 12 C 30 6, 38 16, 45 10"
         stroke={D5.terracotta} strokeWidth={2.5} strokeLinecap="round" fill="none" />
     </svg>
   )
+}
 
-  const SharedHeader = ({ dotsComplete }: { dotsComplete: boolean }) => (
+function ExerciseSharedHeader({ dotsComplete }: { dotsComplete: boolean }) {
+  return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px 8px' }}>
         <svg viewBox="0 0 24 24" width={22} height={22}>
           <path d="M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2"
             stroke={D5.terracotta} strokeWidth={3.5} strokeLinecap="round" fill="none" />
         </svg>
-        <div style={{ fontSize: 11, color: D5.muted, fontFamily: grot }}>10 / 10</div>
+        <div style={{ fontSize: 11, color: D5.muted, fontFamily: EXERCISE_GROT }}>10 / 10</div>
       </div>
       <div style={{ padding: '2px 18px 8px', display: 'flex', gap: 4 }}>
         {Array.from({ length: 10 }, (_, i) => (
@@ -1148,13 +1150,18 @@ function D5ExerciseFullScreen() {
       </div>
     </>
   )
+}
+
+function D5ExerciseFullScreen() {
+  const grot  = EXERCISE_GROT
+  const serif = EXERCISE_SERIF
 
   return (
     <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
       {/* Frame A — Answering */}
       <PhoneFrame bg={D5.paper} bottomNav={<div style={{ height: 0 }} />}>
         <div style={{ padding: 0, background: D5.paper, minHeight: '100%', fontFamily: grot }}>
-          <SharedHeader dotsComplete={false} />
+          <ExerciseSharedHeader dotsComplete={false} />
           <WindingPathSeparator />
           <div style={{ margin: '8px 18px', background: '#fff', border: `1px solid ${D5.muted}30`, borderRadius: 20, padding: '16px 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
@@ -1184,11 +1191,11 @@ function D5ExerciseFullScreen() {
       {/* Frame B — Feedback */}
       <PhoneFrame bg={D5.paper} bottomNav={<div style={{ height: 0 }} />}>
         <div style={{ padding: 0, background: D5.paper, minHeight: '100%', fontFamily: grot }}>
-          <SharedHeader dotsComplete={true} />
+          <ExerciseSharedHeader dotsComplete={true} />
           <WindingPathSeparator />
           <div style={{ margin: '8px 18px', background: 'rgba(196,82,46,0.06)', borderRadius: 20, padding: '20px 16px', textAlign: 'center' }}>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
-              <Tilde />
+              <ExerciseTilde />
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: D5.terracotta, color: D5.paper, borderRadius: 99, padding: '4px 14px', fontSize: 11, fontWeight: 700, fontFamily: grot, marginBottom: 14 }}>
               3 / 3 · Correcto
