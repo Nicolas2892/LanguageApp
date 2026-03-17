@@ -254,7 +254,7 @@ export default async function StudyPage({
           <p className="text-muted-foreground mt-1.5 text-sm">No hay conceptos pendientes hoy. ¡Buen trabajo!</p>
         </div>
         <Link href="/study/configure?mode=practice" className="senda-cta">
-          Practicar de Todos Modos →
+          Practica de Todos Modos →
         </Link>
       </main>
     )

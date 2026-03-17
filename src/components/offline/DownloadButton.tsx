@@ -78,7 +78,7 @@ export function DownloadButton({ moduleId }: Props) {
           ? 'var(--d5-terracotta)'
           : 'var(--d5-warm)',
       }}
-      aria-label={downloaded ? 'Disponible offline — toca para eliminar' : 'Descargar para offline'}
+      aria-label={downloaded ? 'Disponible offline — toca para eliminar' : 'Descarga para offline'}
     >
       {isDownloading ? (
         <>
@@ -93,7 +93,7 @@ export function DownloadButton({ moduleId }: Props) {
       ) : (
         <>
           <CloudDownload size={12} strokeWidth={2} />
-          Descargar
+          Descarga
         </>
       )}
     </button>

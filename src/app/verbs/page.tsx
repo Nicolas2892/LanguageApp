@@ -78,7 +78,7 @@ export default async function VerbsPage() {
           href="/verbs/configure"
           className="shrink-0 rounded-xl bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors"
         >
-          Practicar →
+          Practica →
         </Link>
       </div>
 

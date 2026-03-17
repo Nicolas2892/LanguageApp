@@ -307,7 +307,7 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
         href={`/verbs/session?tenses=present_indicative,preterite,imperfect,future,conditional,present_subjunctive,imperfect_subjunctive,imperative_affirmative,imperative_negative&verbSet=single&verb=${infinitive}&length=10`}
         className="senda-cta w-full"
       >
-        Practicar este verbo →
+        Practica este verbo →
       </Link>
     </main>
   )

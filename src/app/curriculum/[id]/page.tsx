@@ -285,7 +285,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         href={`/study?practice=true&concept=${id}`}
         className="senda-cta w-full"
       >
-        Practicar este concepto →
+        Practica este concepto →
       </Link>
 
       {/* Exercise type chips — compact, no eyebrow */}

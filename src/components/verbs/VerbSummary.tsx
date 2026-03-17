@@ -124,7 +124,7 @@ export function VerbSummary({ correct, total, tenseStats, onPracticeAgain }: Pro
           onClick={onPracticeAgain}
           className="senda-cta w-full active:scale-95 transition-transform"
         >
-          Practicar de nuevo
+          Practica de nuevo
         </button>
         <Link href="/verbs" className="senda-cta-outline">
           Ver verbos

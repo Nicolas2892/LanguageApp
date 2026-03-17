@@ -259,7 +259,7 @@ describe('ConceptDetailPage', () => {
       searchParams: Promise.resolve({}),
     })
     render(el)
-    expect(screen.getByText('Practicar este concepto →')).toBeInTheDocument()
+    expect(screen.getByText('Practica este concepto →')).toBeInTheDocument()
     expect(screen.getByText('Escritura libre')).toBeInTheDocument()
     expect(screen.getByText('Consultar tutor')).toBeInTheDocument()
   })

@@ -125,10 +125,10 @@ describe('CurriculumClient', () => {
     expect(conceptText.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true')
   })
 
-  it('renders "Practicar →" module links', () => {
+  it('renders "Practica →" module links', () => {
     render(<CurriculumClient {...defaultProps} />)
-    const links = screen.getAllByText('Practicar →')
-    // One "Practicar →" link per module (concept rows no longer have practice links)
+    const links = screen.getAllByText('Practica →')
+    // One "Practica →" link per module (concept rows no longer have practice links)
     expect(links.length).toBe(2)
   })
 

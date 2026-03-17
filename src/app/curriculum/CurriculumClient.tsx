@@ -363,7 +363,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                         zIndex: 10,
                       }}
                     >
-                      Practicar →
+                      Practica →
                     </Link>
                     <ChevronDown
                       size={16}

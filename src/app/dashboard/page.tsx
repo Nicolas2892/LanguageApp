@@ -114,7 +114,7 @@ export default async function DashboardPage() {
               Perfecto — vuelve mañana o explora a tu ritmo.
             </p>
             <Link href="/study/configure?mode=practice" className="senda-cta-outline w-full">
-              Practicar De Todos Modos
+              Practica De Todos Modos
             </Link>
           </>
         )}

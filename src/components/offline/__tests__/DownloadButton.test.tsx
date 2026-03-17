@@ -34,7 +34,7 @@ beforeEach(() => {
 describe('DownloadButton', () => {
   it('renders download state when not downloaded', async () => {
     render(<DownloadButton moduleId="mod-1" />)
-    expect(await screen.findByText('Descargar')).toBeInTheDocument()
+    expect(await screen.findByText('Descarga')).toBeInTheDocument()
   })
 
   it('renders offline state when downloaded', async () => {
@@ -46,7 +46,7 @@ describe('DownloadButton', () => {
   it('calls downloadModule on click when not downloaded', async () => {
     const user = userEvent.setup()
     render(<DownloadButton moduleId="mod-1" />)
-    const btn = await screen.findByText('Descargar')
+    const btn = await screen.findByText('Descarga')
     await user.click(btn)
     expect(mockDownloadModule).toHaveBeenCalledWith('mod-1')
   })

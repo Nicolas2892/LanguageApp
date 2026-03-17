@@ -979,7 +979,7 @@ function D5ConceptDetailPage({ data }: { data?: D5ConceptData | null }) {
       {/* Buttons */}
       <div style={{ padding: '0 18px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <button style={{ background: D5.terracotta, color: D5.paper, border: 'none', borderRadius: 99, padding: '12px 0', width: '100%', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: grot }}>
-          Practicar este concepto →
+          Practica este concepto →
         </button>
         <button style={{ background: 'transparent', color: D5.terracotta, border: `1.5px solid ${D5.terracotta}`, borderRadius: 99, padding: '11px 0', width: '100%', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: grot }}>
           Escritura libre →
@@ -1112,7 +1112,7 @@ function D5VerbDetailPage({ data }: { data?: D5VerbData | null }) {
       {/* CTA */}
       <div style={{ padding: '0 18px 20px' }}>
         <button style={{ background: D5.terracotta, color: D5.paper, border: 'none', borderRadius: 99, padding: '12px 0', width: '100%', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: grot }}>
-          Practicar {infinitive} →
+          Practica {infinitive} →
         </button>
       </div>
     </div>

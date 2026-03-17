@@ -172,7 +172,7 @@ describe('VerbDetailClient', () => {
 
   it('CTA link points directly to verb session with all tenses', () => {
     render(<VerbDetailClient {...defaultProps} />)
-    const cta = screen.getByRole('link', { name: /Practicar este verbo/ })
+    const cta = screen.getByRole('link', { name: /Practica este verbo/ })
     expect(cta).toHaveAttribute(
       'href',
       '/verbs/session?tenses=present_indicative,preterite,imperfect,future,conditional,present_subjunctive,imperfect_subjunctive,imperative_affirmative,imperative_negative&verbSet=single&verb=hablar&length=10',

@@ -155,7 +155,7 @@ describe('VerbSession', () => {
     await user.click(screen.getByRole('button', { name: /Finalizar sesión/ }))
 
     expect(screen.getByText('0%')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Practicar de nuevo/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Practica de nuevo/ })).toBeInTheDocument()
   })
 
   it('shows segmented progress dots', () => {
