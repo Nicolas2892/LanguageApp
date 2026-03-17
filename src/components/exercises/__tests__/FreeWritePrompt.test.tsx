@@ -92,8 +92,8 @@ describe('FreeWritePrompt', () => {
     fireEvent.change(textarea, { target: { value: words(50) } })
     const counter = screen.getByText('50 / 200 palabras')
     expect(counter.className).toContain('text-muted-foreground')
-    expect(counter.className).not.toContain('text-amber-500')
-    expect(counter.className).not.toContain('text-red-500')
+    expect(counter.className).not.toContain('text-[var(--d5-warning)]')
+    expect(counter.className).not.toContain('text-[var(--d5-error)]')
   })
 
   it('counter turns amber at 150 words', () => {
@@ -101,7 +101,7 @@ describe('FreeWritePrompt', () => {
     const textarea = screen.getByPlaceholderText('Escribe tu respuesta en español…')
     fireEvent.change(textarea, { target: { value: words(150) } })
     const counter = screen.getByText('150 / 200 palabras')
-    expect(counter.className).toContain('text-amber-500')
+    expect(counter.className).toContain('text-[var(--d5-warning)]')
   })
 
   it('counter turns red above 200 words', () => {
@@ -109,7 +109,7 @@ describe('FreeWritePrompt', () => {
     const textarea = screen.getByPlaceholderText('Escribe tu respuesta en español…')
     fireEvent.change(textarea, { target: { value: words(201) } })
     const counter = screen.getByText('201 / 200 palabras')
-    expect(counter.className).toContain('text-red-500')
+    expect(counter.className).toContain('text-[var(--d5-error)]')
   })
 
   // --- Submit button disabled states ---
