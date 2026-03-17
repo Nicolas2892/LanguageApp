@@ -87,24 +87,49 @@ export default async function VerbSessionPage({ searchParams }: Props) {
   const hasInfinitive = selectedTenses.includes('infinitive')
 
   // Fetch verb data + sentences in parallel
-  const sentenceQuery = conjugationTenses.length > 0
-    ? supabase
-        .from('verb_sentences')
-        .select('id, verb_id, tense, pronoun, sentence, correct_form, tense_rule, english')
-        .in('verb_id', verbIds)
-        .in('tense', conjugationTenses)
-    : null
+  type SentenceRow = Pick<VerbSentence, 'id' | 'verb_id' | 'tense' | 'pronoun' | 'sentence' | 'correct_form' | 'tense_rule'> & { english?: string | null }
+
+  let sentenceResult: { data: unknown[] | null; error: unknown } = { data: [], error: null }
+  if (conjugationTenses.length > 0) {
+    const res = await supabase
+      .from('verb_sentences')
+      .select('id, verb_id, tense, pronoun, sentence, correct_form, tense_rule, english')
+      .in('verb_id', verbIds)
+      .in('tense', conjugationTenses)
+    if (res.error) {
+      // Graceful degradation: if 'english' column doesn't exist (migration 023 not applied), retry without it
+      const isColumnError = typeof res.error.message === 'string' && res.error.message.includes('english')
+      if (isColumnError) {
+        console.warn('verb_sentences.english column not found — falling back to query without english')
+        const fallback = await supabase
+          .from('verb_sentences')
+          .select('id, verb_id, tense, pronoun, sentence, correct_form, tense_rule')
+          .in('verb_id', verbIds)
+          .in('tense', conjugationTenses)
+        if (fallback.error) {
+          console.error('Verb sentences query failed:', fallback.error)
+          throw new Error(`Failed to load verb sentences: ${fallback.error.message}`)
+        }
+        sentenceResult = { data: fallback.data, error: null }
+      } else {
+        console.error('Verb sentences query failed:', res.error)
+        throw new Error(`Failed to load verb sentences: ${res.error.message}`)
+      }
+    } else {
+      sentenceResult = res
+    }
+  }
+
   const verbQuery = supabase
     .from('verbs')
     .select('id, infinitive, english')
     .in('id', verbIds)
+  const verbResult = await verbQuery
+  if (verbResult.error) {
+    console.error('Verbs query failed:', verbResult.error)
+    throw new Error(`Failed to load verbs: ${verbResult.error.message}`)
+  }
 
-  const [sentenceResult, verbResult] = await Promise.all([
-    sentenceQuery ?? Promise.resolve({ data: [] as unknown[] }),
-    verbQuery,
-  ])
-
-  type SentenceRow = Pick<VerbSentence, 'id' | 'verb_id' | 'tense' | 'pronoun' | 'sentence' | 'correct_form' | 'tense_rule' | 'english'>
   const sentences = sentenceResult.data as SentenceRow[] ?? []
 
   type VerbRow = Pick<Verb, 'id' | 'infinitive' | 'english'>
@@ -140,7 +165,12 @@ export default async function VerbSessionPage({ searchParams }: Props) {
     : []
 
   const allItems = [...conjugationItems, ...infinitiveItems]
-  if (allItems.length === 0) redirect('/verbs/configure')
+  if (allItems.length === 0) {
+    console.warn('Verb session: 0 items after building session — redirecting to configure', {
+      conjugationTenses, hasInfinitive, sentenceCount: sentences.length, verbCount: verbs.length,
+    })
+    redirect('/verbs/configure')
+  }
 
   // Shuffle and take up to sessionLength
   const items: SessionItem[] = shuffle(allItems).slice(0, sessionLength)

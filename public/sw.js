@@ -94,7 +94,7 @@ self.addEventListener('fetch', (e) => {
         cache.match(request).then((cached) => {
           const networkFetch = fetch(request)
             .then((res) => {
-              if (res.ok) cache.put(request, res.clone())
+              if (res.ok && !res.redirected) cache.put(request, res.clone())
               return res
             })
             .catch(() =>
