@@ -1,24 +1,14 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, ClipboardCheck, BookMarked, BarChart2 } from 'lucide-react'
-
-/* Brand-preview SVG icon for Study (match senda-master-specs) */
-function StudyIcon({ className, strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 19.5A2.5 2.5 0 016.5 17H20V2H6.5A2.5 2.5 0 004 4.5v15z" />
-    </svg>
-  )
-}
+import { Home, Pencil, Route, Book, BarChart2 } from 'lucide-react'
 
 const TABS = [
-  { href: '/dashboard',       label: 'Inicio',     Icon: Home            },
-  { href: '/study/configure', label: 'Estudio',    Icon: StudyIcon       },
-  { href: '/curriculum',      label: 'Currículo',  Icon: ClipboardCheck  },
-  { href: '/verbs',           label: 'Verbos',     Icon: BookMarked      },
-  { href: '/progress',        label: 'Progreso',   Icon: BarChart2       },
+  { href: '/dashboard',       label: 'Inicio',     Icon: Home      },
+  { href: '/study/configure', label: 'Estudio',    Icon: Pencil    },
+  { href: '/curriculum',      label: 'Currículo',  Icon: Route     },
+  { href: '/verbs',           label: 'Verbos',     Icon: Book      },
+  { href: '/progress',        label: 'Progreso',   Icon: BarChart2 },
 ]
 const HIDDEN_ROUTES = ['/auth', '/onboarding', '/write', '/brand-preview', '/verbs/session', '/admin']
 
