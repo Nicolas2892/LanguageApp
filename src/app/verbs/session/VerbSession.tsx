@@ -19,6 +19,7 @@ import { VerbFeedbackPanel } from '@/components/verbs/VerbFeedbackPanel'
 import { VerbSummary } from '@/components/verbs/VerbSummary'
 import { SpeakButton } from '@/components/SpeakButton'
 import { useHaptics } from '@/lib/hooks/useHaptics'
+import { focusWithoutScroll } from '@/lib/hooks/useAutoFocus'
 import { queueVerbAttempt } from '@/lib/offline/db'
 import { trackVerbDrillStarted, trackVerbDrillCompleted } from '@/lib/analytics'
 
@@ -100,7 +101,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
   // Focus input when entering answering phase
   useEffect(() => {
     if (phase.kind === 'answering') {
-      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 50)
+      setTimeout(() => focusWithoutScroll(inputRef.current), 50)
     }
   }, [phase, index])
 

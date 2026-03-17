@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { focusWithoutScroll } from '@/lib/hooks/useAutoFocus'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { SpeakButton } from '@/components/SpeakButton'
@@ -66,7 +67,7 @@ export function TextAnswer({ exercise, onSubmit, disabled }: Props) {
 
   // Focus without triggering iOS scroll
   useEffect(() => {
-    textareaRef.current?.focus({ preventScroll: true })
+    focusWithoutScroll(textareaRef.current)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, Fragment } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { SpeakButton } from '@/components/SpeakButton'
+import { focusWithoutScroll } from '@/lib/hooks/useAutoFocus'
 import { AnnotatedText } from '@/components/AnnotatedText'
 import type { Exercise, AnnotationSpan } from '@/lib/supabase/types'
 import { splitPromptOnBlanks, countBlanks, encodeAnswers, parseExpectedAnswers } from '@/lib/exercises/gapFill'
@@ -79,7 +80,7 @@ export function GapFill({ exercise, onSubmit, disabled }: Props) {
   // Focus first input without triggering iOS scroll
   useEffect(() => {
     const el = hasInlineBlanks ? inputRefs.current[0] : singleInputRef.current
-    el?.focus({ preventScroll: true })
+    focusWithoutScroll(el)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
