@@ -3,10 +3,10 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { VerbDirectory } from '../VerbDirectory'
 
-// Mock VerbCard to inspect props
-vi.mock('@/components/verbs/VerbCard', () => ({
-  VerbCard: ({ infinitive, verbGroup, favorited, style }: { infinitive: string; verbGroup: string; favorited: boolean; style?: React.CSSProperties }) => (
-    <div data-testid={`card-${infinitive}`} data-group={verbGroup} data-fav={String(favorited)} style={style}>
+// Mock VerbRow to inspect props
+vi.mock('@/components/verbs/VerbRow', () => ({
+  VerbRow: ({ infinitive, verbGroup, favorited, style }: { infinitive: string; verbGroup: string; favorited: boolean; style?: React.CSSProperties }) => (
+    <div data-testid={`row-${infinitive}`} data-group={verbGroup} data-fav={String(favorited)} style={style}>
       {infinitive}
     </div>
   ),
@@ -23,10 +23,10 @@ const makeVerbs = () => [
 describe('VerbDirectory', () => {
   it('renders all verbs by default', () => {
     render(<VerbDirectory verbs={makeVerbs()} />)
-    expect(screen.getByTestId('card-hablar')).toBeInTheDocument()
-    expect(screen.getByTestId('card-hacer')).toBeInTheDocument()
-    expect(screen.getByTestId('card-comer')).toBeInTheDocument()
-    expect(screen.getByTestId('card-vivir')).toBeInTheDocument()
+    expect(screen.getByTestId('row-hablar')).toBeInTheDocument()
+    expect(screen.getByTestId('row-hacer')).toBeInTheDocument()
+    expect(screen.getByTestId('row-comer')).toBeInTheDocument()
+    expect(screen.getByTestId('row-vivir')).toBeInTheDocument()
   })
 
   it('groups verbs by first letter with senda-eyebrow headers', () => {
@@ -41,53 +41,53 @@ describe('VerbDirectory', () => {
     const user = userEvent.setup()
     render(<VerbDirectory verbs={makeVerbs()} />)
     await user.type(screen.getByPlaceholderText('Buscar Verbos...'), 'hab')
-    expect(screen.getByTestId('card-hablar')).toBeInTheDocument()
-    expect(screen.queryByTestId('card-comer')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-hablar')).toBeInTheDocument()
+    expect(screen.queryByTestId('row-comer')).not.toBeInTheDocument()
   })
 
   it('filters by search query (english)', async () => {
     const user = userEvent.setup()
     render(<VerbDirectory verbs={makeVerbs()} />)
     await user.type(screen.getByPlaceholderText('Buscar Verbos...'), 'eat')
-    expect(screen.getByTestId('card-comer')).toBeInTheDocument()
-    expect(screen.queryByTestId('card-hablar')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-comer')).toBeInTheDocument()
+    expect(screen.queryByTestId('row-hablar')).not.toBeInTheDocument()
   })
 
   it('filters by -AR group', async () => {
     const user = userEvent.setup()
     render(<VerbDirectory verbs={makeVerbs()} />)
     await user.click(screen.getByText('-AR'))
-    expect(screen.getByTestId('card-hablar')).toBeInTheDocument()
-    expect(screen.queryByTestId('card-comer')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('card-hacer')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-hablar')).toBeInTheDocument()
+    expect(screen.queryByTestId('row-comer')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('row-hacer')).not.toBeInTheDocument()
   })
 
   it('filters by Irregulares group', async () => {
     const user = userEvent.setup()
     render(<VerbDirectory verbs={makeVerbs()} />)
     await user.click(screen.getByText('Irregulares'))
-    expect(screen.getByTestId('card-hacer')).toBeInTheDocument()
-    expect(screen.queryByTestId('card-hablar')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-hacer')).toBeInTheDocument()
+    expect(screen.queryByTestId('row-hablar')).not.toBeInTheDocument()
   })
 
   it('toggles group filter off when clicking same chip', async () => {
     const user = userEvent.setup()
     render(<VerbDirectory verbs={makeVerbs()} />)
     await user.click(screen.getByText('-AR'))
-    expect(screen.queryByTestId('card-comer')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('row-comer')).not.toBeInTheDocument()
     // Click again to deselect
     await user.click(screen.getByText('-AR'))
-    expect(screen.getByTestId('card-comer')).toBeInTheDocument()
+    expect(screen.getByTestId('row-comer')).toBeInTheDocument()
   })
 
   it('filters by Favoritos', async () => {
     const user = userEvent.setup()
     render(<VerbDirectory verbs={makeVerbs()} />)
     await user.click(screen.getByText('Favoritos'))
-    expect(screen.getByTestId('card-hablar')).toBeInTheDocument()
-    expect(screen.getByTestId('card-vivir')).toBeInTheDocument()
-    expect(screen.queryByTestId('card-comer')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('card-hacer')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-hablar')).toBeInTheDocument()
+    expect(screen.getByTestId('row-vivir')).toBeInTheDocument()
+    expect(screen.queryByTestId('row-comer')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('row-hacer')).not.toBeInTheDocument()
   })
 
   it('combines group filter with Favoritos', async () => {
@@ -95,8 +95,8 @@ describe('VerbDirectory', () => {
     render(<VerbDirectory verbs={makeVerbs()} />)
     await user.click(screen.getByText('-AR'))
     await user.click(screen.getByText('Favoritos'))
-    expect(screen.getByTestId('card-hablar')).toBeInTheDocument()
-    expect(screen.queryByTestId('card-vivir')).not.toBeInTheDocument()
+    expect(screen.getByTestId('row-hablar')).toBeInTheDocument()
+    expect(screen.queryByTestId('row-vivir')).not.toBeInTheDocument()
   })
 
   it('shows empty state in Spanish when no matches', async () => {
@@ -117,13 +117,13 @@ describe('VerbDirectory', () => {
     expect(screen.getByText('Favoritos')).toBeInTheDocument()
   })
 
-  it('applies staggered animation delay to cards', () => {
+  it('applies staggered animation delay to rows', () => {
     render(<VerbDirectory verbs={makeVerbs()} />)
-    const hablar = screen.getByTestId('card-hablar')
-    const hacer = screen.getByTestId('card-hacer')
+    const hablar = screen.getByTestId('row-hablar')
+    const hacer = screen.getByTestId('row-hacer')
     // hablar is first in H group (index 0)
     expect(hablar.style.animationDelay).toBe('0ms')
     // hacer is second in H group (index 1)
-    expect(hacer.style.animationDelay).toBe('30ms')
+    expect(hacer.style.animationDelay).toBe('20ms')
   })
 })

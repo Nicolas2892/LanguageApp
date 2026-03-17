@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Search } from 'lucide-react'
-import { VerbCard, type VerbMasteryState } from '@/components/verbs/VerbCard'
+import { VerbRow, type VerbMasteryState } from '@/components/verbs/VerbRow'
 import { CONJUGATION_TENSES } from '@/lib/verbs/constants'
 
 interface VerbItem {
@@ -112,7 +112,7 @@ export function VerbDirectory({ verbs }: Props) {
             .map(([letter, group]) => (
               <div key={letter}>
                 <p className="senda-eyebrow mb-2">{letter}</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
                   {group.map((v, i) => {
                     const tenseEntries = CONJUGATION_TENSES.map((tense) => v.masteryByTense[tense])
                     const practiced = tenseEntries.filter((m) => m && m.attempts > 0)
@@ -125,7 +125,7 @@ export function VerbDirectory({ verbs }: Props) {
                       masteryState = allMastered ? 'mastered' : 'in_progress'
                     }
                     return (
-                      <VerbCard
+                      <VerbRow
                         key={v.id}
                         id={v.id}
                         infinitive={v.infinitive}
@@ -133,7 +133,8 @@ export function VerbDirectory({ verbs }: Props) {
                         verbGroup={v.verb_group}
                         favorited={v.favorited}
                         masteryState={masteryState}
-                        style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}
+                        isLast={i === group.length - 1}
+                        style={{ animationDelay: `${Math.min(i, 12) * 20}ms` }}
                       />
                     )
                   })}
