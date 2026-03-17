@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { Search } from 'lucide-react'
-import { VerbCard } from '@/components/verbs/VerbCard'
-import { TENSES } from '@/lib/verbs/constants'
+import { VerbCard, type VerbMasteryState } from '@/components/verbs/VerbCard'
+import { CONJUGATION_TENSES } from '@/lib/verbs/constants'
 
 interface VerbItem {
   id: string
@@ -114,11 +114,16 @@ export function VerbDirectory({ verbs }: Props) {
                 <p className="senda-eyebrow mb-2">{letter}</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {group.map((v, i) => {
-                    const masteryDots = TENSES.map((tense) => {
-                      const m = v.masteryByTense[tense]
-                      const pct = m && m.attempts > 0 ? Math.round((m.correct / m.attempts) * 100) : 0
-                      return { tense, pct }
-                    })
+                    const tenseEntries = CONJUGATION_TENSES.map((tense) => v.masteryByTense[tense])
+                    const practiced = tenseEntries.filter((m) => m && m.attempts > 0)
+                    let masteryState: VerbMasteryState = 'none'
+                    if (practiced.length > 0) {
+                      const allMastered = CONJUGATION_TENSES.every((tense) => {
+                        const m = v.masteryByTense[tense]
+                        return m && m.attempts > 0 && Math.round((m.correct / m.attempts) * 100) >= 70
+                      })
+                      masteryState = allMastered ? 'mastered' : 'in_progress'
+                    }
                     return (
                       <VerbCard
                         key={v.id}
@@ -127,7 +132,7 @@ export function VerbDirectory({ verbs }: Props) {
                         english={v.english}
                         verbGroup={v.verb_group}
                         favorited={v.favorited}
-                        masteryDots={masteryDots}
+                        masteryState={masteryState}
                         style={{ animationDelay: `${Math.min(i, 12) * 30}ms` }}
                       />
                     )

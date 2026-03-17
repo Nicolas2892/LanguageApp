@@ -61,6 +61,14 @@ export default async function VerbSessionPage({ searchParams }: Props) {
       .single()
     if (verbRow) verbIds = [(verbRow as Pick<Verb, 'id'>).id]
     if (verbIds.length === 0) redirect('/verbs/configure')
+  } else if (verbSet === 'irregular') {
+    const { data: verbRows } = await supabase
+      .from('verbs')
+      .select('id')
+      .eq('verb_group', 'irregular')
+      .order('frequency_rank')
+    verbIds = (verbRows as Pick<Verb, 'id'>[] ?? []).map((v) => v.id)
+    if (verbIds.length === 0) redirect('/verbs/configure')
   } else {
     // top25, top50, top100, or top250
     const limit = verbSet === 'top250' ? 250 : verbSet === 'top100' ? 100 : verbSet === 'top50' ? 50 : 25

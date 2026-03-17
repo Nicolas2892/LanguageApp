@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { X } from 'lucide-react'
+import { X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -341,25 +341,24 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
               )}
             </div>
 
-            {/* Input */}
-            <div className="space-y-3">
-              <div className="senda-dashed-input">
-                <input
-                  ref={inputRef}
-                  type="text"
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && phase.kind === 'answering') handleCheck() }}
-                  disabled={phase.kind === 'feedback'}
-                  placeholder={isInfinitiveDrill ? 'Escribe el infinitivo…' : 'Escribe la forma conjugada…'}
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  className="w-full text-base border-0 bg-transparent focus:outline-none focus-visible:ring-0 disabled:opacity-50"
-                />
-              </div>
+            {/* Input area — hidden during feedback (swap pattern) */}
+            {phase.kind === 'answering' && (
+              <div className="space-y-3">
+                <div className="senda-dashed-input">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleCheck() }}
+                    placeholder={isInfinitiveDrill ? 'Escribe el infinitivo…' : 'Escribe la forma conjugada…'}
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className="w-full text-base border-0 bg-transparent focus:outline-none focus-visible:ring-0"
+                  />
+                </div>
 
-              {phase.kind === 'answering' && (
                 <Button
                   onClick={handleCheck}
                   disabled={!answer.trim()}
@@ -367,18 +366,35 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
                 >
                   Comprobar →
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Feedback */}
-            {phase.kind === 'feedback' && (
-              <VerbFeedbackPanel
-                result={phase.result}
-                onNext={handleNext}
-                onTryAgain={handleTryAgain}
-                isLast={isLast}
-                completedSentence={isInfinitiveDrill ? current.correctForm : current.sentence.replace('_____', current.correctForm)}
-              />
+            {/* Correct answer — inline success display (no full feedback card) */}
+            {phase.kind === 'feedback' && phase.result.outcome === 'correct' && (
+              <div className="space-y-3">
+                <div className="senda-dashed-input flex items-center gap-2">
+                  <Check className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" aria-hidden />
+                  <span className="text-base font-medium text-green-700 dark:text-green-400">
+                    {phase.result.correctForm}
+                  </span>
+                </div>
+                {phase.result.tenseRule && (
+                  <p className="text-sm text-[var(--d5-muted)] italic">{phase.result.tenseRule}</p>
+                )}
+              </div>
+            )}
+
+            {/* Incorrect / accent_error — full feedback card replaces input */}
+            {phase.kind === 'feedback' && phase.result.outcome !== 'correct' && (
+              <div className="animate-in fade-in slide-in-from-bottom-3 duration-200">
+                <VerbFeedbackPanel
+                  result={phase.result}
+                  onNext={handleNext}
+                  onTryAgain={handleTryAgain}
+                  isLast={isLast}
+                  completedSentence={isInfinitiveDrill ? current.correctForm : current.sentence.replace('_____', current.correctForm)}
+                />
+              </div>
             )}
           </div>
         </div>

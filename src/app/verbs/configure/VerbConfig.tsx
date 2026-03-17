@@ -16,7 +16,7 @@ const IMPERATIVE_TENSES = ['imperative_affirmative', 'imperative_negative'] as c
 const VOCABULARY_TENSES = ['infinitive'] as const
 const LENGTHS = [10, 20, 30] as const
 
-type VerbSet = 'favorites' | 'top25' | 'top50' | 'top100' | 'top250' | 'single'
+type VerbSet = 'favorites' | 'top25' | 'top50' | 'top100' | 'top250' | 'irregular' | 'single'
 
 // Shared eyebrow style — uses adaptive --d5-eyebrow token
 const EYEBROW: React.CSSProperties = {
@@ -34,13 +34,14 @@ const pillBase: React.CSSProperties = {
   transition: 'background 200ms ease-out, color 200ms ease-out',
 }
 
-const VERB_SET_OPTIONS: Array<{ id: VerbSet; title: string; subtitle: string; requiresFavorites?: boolean; requiresSingle?: boolean }> = [
-  { id: 'favorites', title: 'Mis Favoritos', subtitle: '', requiresFavorites: true },
-  { id: 'top25',  title: 'Top 25',  subtitle: 'más comunes' },
-  { id: 'top50',  title: 'Top 50',  subtitle: 'más comunes' },
-  { id: 'top100', title: 'Top 100', subtitle: 'más comunes' },
-  { id: 'top250', title: 'Top 250', subtitle: 'más comunes' },
-  { id: 'single', title: 'Solo', subtitle: '', requiresSingle: true },
+const VERB_SET_OPTIONS: Array<{ id: VerbSet; label: string; requiresFavorites?: boolean; requiresSingle?: boolean }> = [
+  { id: 'favorites', label: 'Favoritos', requiresFavorites: true },
+  { id: 'top25',  label: 'Top 25' },
+  { id: 'top50',  label: 'Top 50' },
+  { id: 'top100', label: 'Top 100' },
+  { id: 'top250', label: 'Top 250' },
+  { id: 'irregular', label: 'Irregulares' },
+  { id: 'single', label: '', requiresSingle: true },
 ]
 
 export function VerbConfig({ favoriteCount, singleVerb }: Props) {
@@ -154,52 +155,28 @@ export function VerbConfig({ favoriteCount, singleVerb }: Props) {
       {/* ── Verb set ───────────────────────────────────────────────── */}
       <div className="px-4">
         <p style={EYEBROW}>Verbos</p>
-        <div className="flex flex-col gap-2">
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {visibleOptions.map((opt) => {
             const active = verbSet === opt.id
-            const displayTitle = opt.id === 'favorites'
-              ? `${opt.title} (${favoriteCount})`
+            const displayLabel = opt.id === 'favorites'
+              ? `${opt.label} (${favoriteCount})`
               : opt.id === 'single'
-                ? `${opt.title}: ${singleVerb}`
-                : opt.title
+                ? singleVerb ?? ''
+                : opt.label
             return (
               <button
                 key={opt.id}
                 onClick={() => setVerbSet(opt.id)}
                 className="senda-focus-ring"
                 style={{
-                  position: 'relative', textAlign: 'left',
-                  borderRadius: '0.75rem', padding: '12px 16px', border: 'none', cursor: 'pointer',
+                  ...pillBase,
+                  padding: '0 16px',
                   background: active ? 'var(--d5-terracotta)' : 'var(--d5-pill-bg)',
-                  transition: 'background 200ms ease-out, color 200ms ease-out',
+                  color: active ? 'var(--d5-paper)' : 'var(--d5-pill-text)',
+                  fontSize: '0.75rem', fontWeight: active ? 700 : 500,
                 }}
               >
-                {active && (
-                  <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                    <svg viewBox="0 0 18 8" width={13} height={6}>
-                      <path
-                        d="M 1 5 C 4 2, 7 6, 11 4 C 14 2, 17 4, 17 4"
-                        stroke="var(--d5-paper)" strokeWidth={2} strokeLinecap="round" fill="none"
-                      />
-                    </svg>
-                  </div>
-                )}
-                <div style={{
-                  fontFamily: 'var(--font-lora), serif', fontWeight: 600, fontStyle: 'italic', fontSize: 14,
-                  color: active ? 'var(--d5-paper)' : 'var(--d5-heading)',
-                  marginBottom: opt.subtitle ? '0.125rem' : 0,
-                }}>
-                  {displayTitle}
-                </div>
-                {opt.subtitle && (
-                  <div style={{
-                    fontSize: '0.625rem',
-                    color: active ? 'var(--d5-paper-75)' : 'var(--d5-muted)',
-                    fontFamily: 'var(--font-dm-sans), system-ui, sans-serif',
-                  }}>
-                    {opt.subtitle}
-                  </div>
-                )}
+                {displayLabel}
               </button>
             )
           })}

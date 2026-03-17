@@ -15,11 +15,7 @@ const makeProps = (overrides: Partial<Parameters<typeof VerbCard>[0]> = {}) => (
   english: 'to speak',
   verbGroup: 'ar',
   favorited: false,
-  masteryDots: [
-    { tense: 'presente', pct: 80 },
-    { tense: 'preterito', pct: 40 },
-    { tense: 'imperfecto', pct: 0 },
-  ],
+  masteryState: 'none' as const,
   ...overrides,
 })
 
@@ -52,16 +48,24 @@ describe('VerbCard', () => {
     expect(link.className).toContain('senda-card')
   })
 
-  it('uses bg-primary for mastered dots (>=70%)', () => {
-    render(<VerbCard {...makeProps()} />)
-    const dots = document.querySelectorAll('.bg-primary')
-    expect(dots.length).toBe(1) // 80% dot
+  it('shows primary dot when mastered', () => {
+    render(<VerbCard {...makeProps({ masteryState: 'mastered' })} />)
+    const dot = document.querySelector('.bg-primary')
+    expect(dot).toBeInTheDocument()
+    expect(dot).toHaveAttribute('title', 'Dominado')
   })
 
-  it('uses bg-amber-400 for in-progress dots (>0% <70%)', () => {
-    render(<VerbCard {...makeProps()} />)
-    const dots = document.querySelectorAll('.bg-amber-400')
-    expect(dots.length).toBe(1) // 40% dot
+  it('shows amber dot when in progress', () => {
+    render(<VerbCard {...makeProps({ masteryState: 'in_progress' })} />)
+    const dot = document.querySelector('.bg-amber-400')
+    expect(dot).toBeInTheDocument()
+    expect(dot).toHaveAttribute('title', 'En progreso')
+  })
+
+  it('shows no dot when mastery state is none', () => {
+    render(<VerbCard {...makeProps({ masteryState: 'none' })} />)
+    expect(document.querySelector('.bg-primary')).not.toBeInTheDocument()
+    expect(document.querySelector('.bg-amber-400')).not.toBeInTheDocument()
   })
 
   it('passes style prop to link', () => {

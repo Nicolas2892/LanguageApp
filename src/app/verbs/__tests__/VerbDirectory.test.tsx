@@ -10,6 +10,7 @@ vi.mock('@/components/verbs/VerbCard', () => ({
       {infinitive}
     </div>
   ),
+  VerbMasteryState: {},
 }))
 
 const makeVerbs = () => [

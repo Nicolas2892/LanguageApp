@@ -2,10 +2,7 @@ import Link from 'next/link'
 import { VerbFavoriteButton } from './VerbFavoriteButton'
 import { VerbGroupChip } from './VerbGroupChip'
 
-interface MasteryDot {
-  tense: string
-  pct: number
-}
+export type VerbMasteryState = 'mastered' | 'in_progress' | 'none'
 
 interface Props {
   id: string
@@ -13,32 +10,11 @@ interface Props {
   english: string
   verbGroup: string
   favorited: boolean
-  masteryDots: MasteryDot[]
+  masteryState: VerbMasteryState
   style?: React.CSSProperties
 }
 
-/** A single dot per tense; filled (green) when accuracy ≥ 70%. */
-function MasteryDots({ dots }: { dots: MasteryDot[] }) {
-  return (
-    <div className="flex gap-1 flex-wrap">
-      {dots.map((d) => (
-        <span
-          key={d.tense}
-          title={`${d.tense.replace(/_/g, ' ')}: ${d.pct}%`}
-          className={`inline-block h-2 w-2 rounded-full ${
-            d.pct >= 70
-              ? 'bg-primary'
-              : d.pct > 0
-              ? 'bg-amber-400'
-              : 'bg-muted-foreground/25'
-          }`}
-        />
-      ))}
-    </div>
-  )
-}
-
-export function VerbCard({ id, infinitive, english, verbGroup, favorited, masteryDots, style }: Props) {
+export function VerbCard({ id, infinitive, english, verbGroup, favorited, masteryState, style }: Props) {
   return (
     <Link
       href={`/verbs/${infinitive}`}
@@ -53,7 +29,16 @@ export function VerbCard({ id, infinitive, english, verbGroup, favorited, master
         <VerbGroupChip group={verbGroup} />
       </div>
       <div className="flex items-center justify-between mt-auto">
-        <MasteryDots dots={masteryDots} />
+        {masteryState !== 'none' ? (
+          <span
+            title={masteryState === 'mastered' ? 'Dominado' : 'En progreso'}
+            className={`inline-block h-2.5 w-2.5 rounded-full ${
+              masteryState === 'mastered' ? 'bg-primary' : 'bg-amber-400'
+            }`}
+          />
+        ) : (
+          <span />
+        )}
         <VerbFavoriteButton verbId={id} initialFavorited={favorited} />
       </div>
     </Link>

@@ -49,21 +49,31 @@ describe('VerbConfig', () => {
     expect(checkbox).not.toBeDisabled()
   })
 
-  it('renders all verb set options (top25, top50, top100, top250)', () => {
+  it('renders all verb set options including Irregulares', () => {
     render(<VerbConfig favoriteCount={0} singleVerb={null} />)
     expect(screen.getByText('Top 25')).toBeInTheDocument()
     expect(screen.getByText('Top 50')).toBeInTheDocument()
     expect(screen.getByText('Top 100')).toBeInTheDocument()
     expect(screen.getByText('Top 250')).toBeInTheDocument()
+    expect(screen.getByText('Irregulares')).toBeInTheDocument()
   })
 
-  it('shows Mis Favoritos when favoriteCount > 0', () => {
+  it('shows Favoritos when favoriteCount > 0', () => {
     render(<VerbConfig favoriteCount={5} singleVerb={null} />)
-    expect(screen.getByText('Mis Favoritos (5)')).toBeInTheDocument()
+    expect(screen.getByText('Favoritos (5)')).toBeInTheDocument()
   })
 
-  it('hides Mis Favoritos when favoriteCount is 0', () => {
+  it('hides Favoritos when favoriteCount is 0', () => {
     render(<VerbConfig favoriteCount={0} singleVerb={null} />)
-    expect(screen.queryByText(/Mis Favoritos/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Favoritos/)).not.toBeInTheDocument()
+  })
+
+  it('can select Irregulares verb set', async () => {
+    const user = userEvent.setup()
+    render(<VerbConfig favoriteCount={0} singleVerb={null} />)
+    const btn = screen.getByText('Irregulares')
+    await user.click(btn)
+    // Active pill gets bold weight (700)
+    expect(btn).toHaveStyle({ fontWeight: 700 })
   })
 })

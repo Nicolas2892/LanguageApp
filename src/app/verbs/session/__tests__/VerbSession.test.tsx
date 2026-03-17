@@ -57,7 +57,7 @@ describe('VerbSession', () => {
     expect(screen.getByRole('button', { name: /Comprobar/ })).toBeDisabled()
   })
 
-  it('shows correct feedback on right answer', async () => {
+  it('shows inline success display on correct answer', async () => {
     const user = userEvent.setup()
 
     render(
@@ -71,10 +71,14 @@ describe('VerbSession', () => {
     await user.type(screen.getByPlaceholderText(/Escribe la forma conjugada/), 'hablo')
     await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
-    expect(screen.getByText('¡Correcto!')).toBeInTheDocument()
+    // Input is hidden, correct form shown inline with checkmark
+    expect(screen.queryByPlaceholderText(/Escribe la forma conjugada/)).not.toBeInTheDocument()
+    expect(screen.getByText('hablo')).toBeInTheDocument()
+    // Comprobar button is hidden
+    expect(screen.queryByRole('button', { name: /Comprobar/ })).not.toBeInTheDocument()
   })
 
-  it('shows accent_error feedback for missing accent', async () => {
+  it('shows accent_error feedback and hides input', async () => {
     const user = userEvent.setup()
 
     render(
@@ -89,9 +93,11 @@ describe('VerbSession', () => {
     await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
     expect(screen.getByText(/Casi — revisa los acentos/)).toBeInTheDocument()
+    // Input is swapped out, not just disabled
+    expect(screen.queryByPlaceholderText(/Escribe la forma conjugada/)).not.toBeInTheDocument()
   })
 
-  it('shows incorrect feedback on wrong answer', async () => {
+  it('shows incorrect feedback, hides input, and shows try again', async () => {
     const user = userEvent.setup()
 
     render(
@@ -107,6 +113,8 @@ describe('VerbSession', () => {
 
     expect(screen.getByText('Incorrecto')).toBeInTheDocument()
     expect(screen.getByTestId('try-again-btn')).toBeInTheDocument()
+    // Input is swapped out, not just disabled
+    expect(screen.queryByPlaceholderText(/Escribe la forma conjugada/)).not.toBeInTheDocument()
   })
 
   it('Try Again clears input and returns to answering phase', async () => {
@@ -307,7 +315,7 @@ describe('VerbSession', () => {
     expect(screen.getByPlaceholderText('Escribe el infinitivo…')).toBeInTheDocument()
   })
 
-  it('grades infinitive drill correctly', async () => {
+  it('grades infinitive drill correctly and shows inline success', async () => {
     const user = userEvent.setup()
 
     render(
@@ -321,7 +329,9 @@ describe('VerbSession', () => {
     await user.type(screen.getByPlaceholderText('Escribe el infinitivo…'), 'hablar')
     await user.click(screen.getByRole('button', { name: /Comprobar/ }))
 
-    expect(screen.getByText('¡Correcto!')).toBeInTheDocument()
+    // Input swapped for inline success display
+    expect(screen.queryByPlaceholderText('Escribe el infinitivo…')).not.toBeInTheDocument()
+    expect(screen.getByText('hablar')).toBeInTheDocument()
   })
 
   it('does not show infinitive verb name in eyebrow for infinitive drill', () => {
