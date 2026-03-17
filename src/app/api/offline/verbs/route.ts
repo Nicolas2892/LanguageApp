@@ -76,6 +76,8 @@ export async function GET(request: Request) {
       user_favorites: userFavorites,
       user_progress: userProgress,
       version: serverVersion,
+    }, {
+      headers: { 'Cache-Control': 'private, max-age=3600' },
     })
   } catch (err) {
     Sentry.captureException(err)

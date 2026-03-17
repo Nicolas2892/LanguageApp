@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { computeUnlockedLevels } from '@/lib/curriculum/prerequisites'
+import { getCached } from '@/lib/cache'
 import { CurriculumClient } from './CurriculumClient'
 
 type ModuleRow  = { id: string; title: string; order_index: number }
@@ -13,19 +14,28 @@ export default async function CurriculumPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [modulesRes, unitsRes, conceptsRes, progressRes, unlockedLevels] = await Promise.all([
-    supabase.from('modules').select('id, title, order_index').order('order_index'),
-    supabase.from('units').select('id, module_id, title, order_index').order('order_index'),
-    supabase.from('concepts').select('id, unit_id, title, difficulty, level, grammar_focus').order('difficulty'),
+  const [modules, units, concepts, progressRes, unlockedLevels] = await Promise.all([
+    getCached('curriculum:modules', async () => {
+      const { data } = await supabase.from('modules').select('id, title, order_index').order('order_index')
+      return (data ?? []) as ModuleRow[]
+    }),
+    getCached('curriculum:units', async () => {
+      const { data } = await supabase.from('units').select('id, module_id, title, order_index').order('order_index')
+      return (data ?? []) as UnitRow[]
+    }),
+    getCached('curriculum:concepts', async () => {
+      const { data } = await supabase.from('concepts').select('id, unit_id, title, difficulty, level, grammar_focus').order('difficulty')
+      return (data ?? []) as ConceptRow[]
+    }),
     supabase.from('user_progress').select('concept_id, interval_days, is_hard, production_mastered').eq('user_id', user.id),
     computeUnlockedLevels(supabase, user.id),
   ])
 
   return (
     <CurriculumClient
-      modules={(modulesRes.data ?? []) as ModuleRow[]}
-      units={(unitsRes.data ?? []) as UnitRow[]}
-      concepts={(conceptsRes.data ?? []) as ConceptRow[]}
+      modules={modules}
+      units={units}
+      concepts={concepts}
       progressEntries={((progressRes.data ?? []) as ProgressRow[])}
       unlockedLevelsList={Array.from(unlockedLevels)}
     />

@@ -95,6 +95,8 @@ export async function GET(
       user_progress: userProgress,
       free_write_prompts: freeWritePrompts,
       version: Date.now(),
+    }, {
+      headers: { 'Cache-Control': 'private, max-age=1800' },
     })
   } catch (err) {
     Sentry.captureException(err)

@@ -421,6 +421,9 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/lib/mastery/badge.ts` — `getMasteryState(intervalDays, productionMastered?)`, `getMasteryProgress(intervalDays, correctNonGapFill, uniqueTypes)`, `MASTERY_DOT`, `MASTERY_BADGE`; constants `PRODUCTION_CORRECT_REQUIRED=3`, `PRODUCTION_TYPES_REQUIRED=2`
 - `src/lib/mastery/computeLevel.ts` — `computeLevel(masteredByLevel, totalByLevel)` + `PRODUCTION_TYPES` array
 - `src/lib/api-utils.ts` — `updateStreakIfNeeded` + `updateComputedLevel` shared by submit + grade
+- `src/lib/cache.ts` — `getCached(key, fetcher, ttlMs?)` in-memory cache with 5-min TTL; used by `/curriculum`, `/dashboard`, `/study/configure` for static curriculum queries (modules, units, concepts); `invalidateCache(prefix)` + `clearCache()` for tests
+- `src/components/ServiceWorkerRegistration.tsx` — registers `/sw.js`; listens for `controllerchange` → auto-reloads page (loop-guarded via sessionStorage); registers Background Sync tag `sync-offline-attempts` (Chrome/Edge)
+- `src/lib/offline/db.ts` — `requestBackgroundSync()` helper; called fire-and-forget from `queueAttempt()` and `queueVerbAttempt()` to trigger sync even after app is closed
 - `src/components/verbs/VerbCard.tsx` — verb grid card with mastery dots + favorite button
 - `src/components/verbs/VerbFavoriteButton.tsx` — optimistic heart toggle → `POST /api/verbs/favorite`
 - `src/components/verbs/VerbFeedbackPanel.tsx` — correct / accent_error / incorrect feedback UI
@@ -486,7 +489,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2027 tests across 114 files — all passing.**
+**Test suite: 2033 tests across 115 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 

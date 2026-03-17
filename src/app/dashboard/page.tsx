@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { getCached } from '@/lib/cache'
 import { OnboardingTour } from '@/components/OnboardingTour'
 import { DashboardDeferredSection, DashboardDeferredSkeleton } from '@/components/DashboardDeferredSection'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
@@ -20,15 +21,16 @@ export default async function DashboardPage() {
   if (!user) redirect('/auth/login')
 
   // Item 10: Parallelise profile fetch with timezone-independent queries
-  const [{ data: profileRaw }, totalConceptsRes, studiedRes] = await Promise.all([
+  const [{ data: profileRaw }, totalConcepts, studiedRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('computed_level, display_name, streak, timezone, streak_freeze_remaining, streak_freeze_used_date')
       .eq('id', user.id)
       .single(),
-    supabase
-      .from('concepts')
-      .select('id', { count: 'exact', head: true }),
+    getCached('curriculum:concept-count', async () => {
+      const { count } = await supabase.from('concepts').select('id', { count: 'exact', head: true })
+      return count ?? 0
+    }),
     supabase
       .from('user_progress')
       .select('id', { count: 'exact', head: true })
@@ -45,7 +47,6 @@ export default async function DashboardPage() {
     .lte('due_date', today)
 
   const dueCount = dueRes.count ?? 0
-  const totalConcepts = totalConceptsRes.count ?? 0
   const studiedCount = studiedRes.count ?? 0
   const newConceptsCount = totalConcepts - studiedCount
   const isNewUser = studiedCount === 0

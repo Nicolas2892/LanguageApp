@@ -4,6 +4,68 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## PWA Update Fix + Caching & Offline Improvements ✓ (2026-03-17)
+
+2033 tests across 115 files, all passing.
+
+### Problem
+
+The PWA broke on every deploy: `sw.js` calls `skipWaiting()` + `clients.claim()` and deletes old caches, but the running page still referenced old `/_next/static/hash/` chunk URLs that no longer exist. Users saw errors/blank screens and had to restart or reinstall. Additionally, several caching and offline sync opportunities were unused.
+
+### Changes
+
+**1. PWA Auto-Reload on Controller Change**
+
+**`src/components/ServiceWorkerRegistration.tsx`** — Fixed deploy-breaking PWA updates:
+- Added `controllerchange` listener on `navigator.serviceWorker` — auto-reloads page when new SW takes control
+- Loop guard via `sessionStorage('sw-reload')` — at most 1 reload per tab session; cleared on fresh mount
+- Cleans up listener on unmount
+
+**2. HTTP Cache Headers on Read-Only API Routes**
+
+- `GET /api/offline/verbs` (`route.ts`) — `Cache-Control: private, max-age=3600` (1h; data only changes on seed runs)
+- `GET /api/offline/module/[id]` (`route.ts`) — `Cache-Control: private, max-age=1800` (30min; expensive Claude prompt gen)
+- `GET /api/streak/calendar` (`route.ts`) — `Cache-Control: private, max-age=300` (5min; changes at most once per day)
+
+All use `private` (auth-required, no CDN caching).
+
+**3. Background Sync Registration**
+
+**`src/components/ServiceWorkerRegistration.tsx`**:
+- After `register()` resolves, calls `registration.sync.register('sync-offline-attempts')` (Chrome/Edge only; no-ops on Safari via optional chaining)
+
+**`src/lib/offline/db.ts`**:
+- Added `requestBackgroundSync()` helper — gets `navigator.serviceWorker.ready`, calls `sync.register(...)`, fully guarded
+- Called fire-and-forget from `queueAttempt()` and `queueVerbAttempt()` — Chrome/Edge will auto-sync queued attempts even after app is closed
+
+**4. Server-Side Curriculum Cache**
+
+Uses existing `src/lib/cache.ts` (`getCached()` with 5-min in-memory TTL) for static curriculum data:
+- `src/app/curriculum/page.tsx` — wrapped modules, units, concepts queries (user progress stays uncached)
+- `src/app/dashboard/page.tsx` — wrapped concept count query
+- `src/app/study/configure/page.tsx` — wrapped modules query
+
+**5. Route Prefetch on Done Screens**
+
+**`src/components/verbs/VerbSummary.tsx`**:
+- Added `useRouter()` + `useEffect` that prefetches `/verbs` and `/dashboard` on mount
+- Next.js preloads these routes while user reads session results — faster navigation
+
+### Tests added
+
+**New: `src/components/__tests__/ServiceWorkerRegistration.test.tsx`** (6 tests):
+- Does not register SW in non-production (test env)
+- Registers SW and controllerchange listener in production
+- Reloads on controllerchange and sets sessionStorage guard
+- Does NOT reload if guard is already set (prevents loop)
+- Cleans up listener on unmount
+- Registers background sync after SW registration
+
+**Updated: `src/app/verbs/session/__tests__/VerbSession.test.tsx`**:
+- Added `prefetch: vi.fn()` to `useRouter` mock (required by VerbSummary prefetch)
+
+---
+
 ## Verb Session UX Improvements + English Translations ✓ (2026-03-16)
 
 1952 tests across 110 files, all passing.

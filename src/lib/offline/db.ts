@@ -341,7 +341,9 @@ export async function getFreeWritePrompt(conceptId: string): Promise<OfflineFree
 
 export async function queueAttempt(attempt: Omit<QueuedAttempt, 'id'>): Promise<number> {
   const db = await getDB()
-  return db.add(STORES.queuedAttempts, attempt) as Promise<number>
+  const id = await db.add(STORES.queuedAttempts, attempt) as number
+  requestBackgroundSync()
+  return id
 }
 
 export async function getUnsyncedAttempts(): Promise<QueuedAttempt[]> {
@@ -371,7 +373,9 @@ export async function getAttemptsBySession(sessionId: string): Promise<QueuedAtt
 
 export async function queueVerbAttempt(attempt: Omit<QueuedVerbAttempt, 'id'>): Promise<number> {
   const db = await getDB()
-  return db.add(STORES.queuedVerbAttempts, attempt) as Promise<number>
+  const id = await db.add(STORES.queuedVerbAttempts, attempt) as number
+  requestBackgroundSync()
+  return id
 }
 
 export async function getUnsyncedVerbAttempts(): Promise<QueuedVerbAttempt[]> {
@@ -530,6 +534,23 @@ export async function isVerbCacheFresh(maxAgeMs: number = 24 * 60 * 60 * 1000): 
   const version = await getVerbCacheMeta('version')
   if (!version) return false
   return Date.now() - Number(version) < maxAgeMs
+}
+
+// ── Background sync request ───────────────────────────────────────
+
+/** Request a one-shot background sync (Chrome/Edge). No-ops silently on Safari. */
+export function requestBackgroundSync(): void {
+  try {
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
+    navigator.serviceWorker.ready
+      .then((reg) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ;(reg as any).sync?.register('sync-offline-attempts').catch(() => {})
+      })
+      .catch(() => {})
+  } catch {
+    // guard against any unexpected error
+  }
 }
 
 // ── Storage stats ─────────────────────────────────────────────────────

@@ -82,5 +82,7 @@ export async function GET(request: Request) {
     freezeRemaining: p?.streak_freeze_remaining ?? 0,
     freezeUsedDate: p?.streak_freeze_used_date ?? null,
     lastStudiedDate: p?.last_studied_date ?? null,
+  }, {
+    headers: { 'Cache-Control': 'private, max-age=300' },
   })
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PartyPopper, CheckCircle2, XCircle } from 'lucide-react'
 import { TENSE_LABELS } from '@/lib/verbs/constants'
@@ -20,8 +21,15 @@ interface Props {
 }
 
 export function VerbSummary({ correct, total, tenseStats, onPracticeAgain }: Props) {
+  const router = useRouter()
   const pct = total > 0 ? Math.round((correct / total) * 100) : 0
   const confettiFired = useRef(false)
+
+  // Prefetch likely next routes while user reads results
+  useEffect(() => {
+    router.prefetch('/verbs')
+    router.prefetch('/dashboard')
+  }, [router])
 
   useEffect(() => {
     if (pct >= 70 && !confettiFired.current) {

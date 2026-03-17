@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getCached } from '@/lib/cache'
 import { SessionConfig } from './SessionConfig'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
@@ -20,8 +21,11 @@ export default async function ConfigurePage() {
     .single()
   const today = userLocalToday((profileTz as { timezone: string | null } | null)?.timezone)
 
-  const [{ data: modules }, { data: concepts }, { data: progress }, { data: mistakeAttempts }, { count: rawDueCount }] = await Promise.all([
-    supabase.from('modules').select('id, title').order('order_index'),
+  const [modules, { data: concepts }, { data: progress }, { data: mistakeAttempts }, { count: rawDueCount }] = await Promise.all([
+    getCached('curriculum:modules-slim', async () => {
+      const { data } = await supabase.from('modules').select('id, title').order('order_index')
+      return (data ?? []) as Array<{ id: string; title: string }>
+    }),
     supabase.from('concepts').select('id, unit_id, units(module_id)'),
     supabase.from('user_progress').select('concept_id, interval_days').eq('user_id', user.id),
     supabase
@@ -43,7 +47,7 @@ export default async function ConfigurePage() {
   type ConceptRow = { id: string; unit_id: string; units: { module_id: string } | null }
   type ProgressRow = { concept_id: string; interval_days: number }
 
-  const typedModules = (modules ?? []) as Array<{ id: string; title: string }>
+  const typedModules = modules
   const typedConcepts = (concepts ?? []) as ConceptRow[]
   const typedProgress = (progress ?? []) as ProgressRow[]
 

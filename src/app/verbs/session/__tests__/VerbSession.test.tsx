@@ -6,7 +6,7 @@ import type { SessionItem } from '../VerbSession'
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: vi.fn(), prefetch: vi.fn() }),
 }))
 
 const makeItem = (overrides: Partial<SessionItem> = {}): SessionItem => ({
