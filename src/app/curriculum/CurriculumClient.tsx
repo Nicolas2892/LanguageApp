@@ -305,47 +305,45 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
               >
                 <BackgroundMagicS opacity={0.05} />
 
-                {/* Title + status + practice row */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span
-                        className="senda-heading"
-                        style={{ fontSize: titleFontSize }}
-                      >
-                        {mod.title}
-                      </span>
-                      <span style={statusChip.style}>{statusChip.label}</span>
-                    </div>
-                    {/* Meta chip with terracotta dot */}
-                    <div style={{ marginTop: '0.375rem' }}>
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: 4,
-                          padding: '2px 7px',
-                          borderRadius: 9999,
-                          border: '1px solid var(--d5-border-subtle)',
-                          fontSize: '0.625rem',
-                          color: 'var(--d5-body)',
-                          fontWeight: 400,
-                        }}
-                      >
-                        <span
-                          style={{
-                            width: 4,
-                            height: 4,
-                            borderRadius: '50%',
-                            background: 'var(--d5-terracotta)',
-                            display: 'inline-block',
-                            flexShrink: 0,
-                          }}
-                        />
-                        {masteredCount}/{allModConcepts.length} Dominados
-                      </span>
-                    </div>
-                  </div>
+                {/* Title + status */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span
+                    className="senda-heading"
+                    style={{ fontSize: titleFontSize }}
+                  >
+                    {mod.title}
+                  </span>
+                  <span style={statusChip.style}>{statusChip.label}</span>
+                </div>
+
+                {/* Meta chip + actions row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.375rem' }}>
+                  <span
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      padding: '2px 7px',
+                      borderRadius: 9999,
+                      border: '1px solid var(--d5-border-subtle)',
+                      fontSize: '0.625rem',
+                      color: 'var(--d5-body)',
+                      fontWeight: 400,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 4,
+                        height: 4,
+                        borderRadius: '50%',
+                        background: 'var(--d5-terracotta)',
+                        display: 'inline-block',
+                        flexShrink: 0,
+                      }}
+                    />
+                    {masteredCount}/{allModConcepts.length} Dominados
+                  </span>
                   {/* Module actions: download + practice */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                     <div onClick={e => e.stopPropagation()}>
@@ -465,25 +463,21 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                   }}
                                 >
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
-                                    {locked && (
-                                      <Lock
-                                        size={12}
-                                        strokeWidth={1.5}
-                                        style={{ flexShrink: 0, color: 'var(--d5-subtle)' }}
-                                      />
-                                    )}
                                     <LevelChip level={concept.level} />
                                     <span
                                       className="text-foreground"
                                       style={{
                                         fontSize: 13,
                                         fontWeight: 400,
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
                                       }}
                                     >
                                       {concept.title}
                                     </span>
                                   </div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
                                     <span title={dot.title} style={dot.style} />
                                     <div
                                       onClick={e => e.stopPropagation()}
@@ -491,6 +485,13 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                     >
                                       <HardFlagButton conceptId={concept.id} initialIsHard={isHard} />
                                     </div>
+                                    {locked && (
+                                      <Lock
+                                        size={12}
+                                        strokeWidth={1.5}
+                                        style={{ flexShrink: 0, color: 'var(--d5-subtle)' }}
+                                      />
+                                    )}
                                     <ChevronRight
                                       size={14}
                                       strokeWidth={1.5}

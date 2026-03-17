@@ -24,6 +24,7 @@ export function SyncBanner() {
         style={{
           padding: '0.625rem 0.875rem',
           boxShadow: '0 4px 20px rgba(26,17,8,0.12)',
+          background: 'var(--background)',
         }}
       >
         <SyncIcon state={syncState} />
