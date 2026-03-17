@@ -110,7 +110,7 @@ describe('GET /api/streak/calendar — unauthenticated', () => {
         getUser: vi.fn().mockResolvedValue({ data: { user: null } }),
       },
       from: vi.fn(),
-    } as any)
+    } as unknown as Awaited<ReturnType<typeof createClient>>)
 
     const request = new Request('http://localhost:3000/api/streak/calendar')
     const response = await GET(request)
