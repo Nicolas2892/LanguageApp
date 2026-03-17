@@ -486,7 +486,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2025 tests across 116 files — all passing (2 pre-existing FreeWritePrompt failures unrelated to recent changes).**
+**Test suite: 2027 tests across 114 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
