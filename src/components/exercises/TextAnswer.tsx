@@ -64,6 +64,12 @@ export function TextAnswer({ exercise, onSubmit, disabled }: Props) {
     autoResize()
   }, [answer])
 
+  // Focus without triggering iOS scroll
+  useEffect(() => {
+    textareaRef.current?.focus({ preventScroll: true })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!answer.trim()) return
@@ -108,7 +114,6 @@ export function TextAnswer({ exercise, onSubmit, disabled }: Props) {
           onChange={(e) => setAnswer(e.target.value)}
           placeholder="Escribe tu respuesta en español…"
           disabled={disabled}
-          autoFocus
           className="text-base min-h-[6rem] overflow-hidden border-0 shadow-none bg-transparent focus-visible:ring-0 px-0"
           style={{ resize: 'none' }}
         />

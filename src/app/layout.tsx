@@ -70,6 +70,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
+  interactiveWidget: 'resizes-content',
 };
 
 // Injected before paint for 'system' theme to prevent FOUC

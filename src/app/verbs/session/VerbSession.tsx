@@ -100,7 +100,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
   // Focus input when entering answering phase
   useEffect(() => {
     if (phase.kind === 'answering') {
-      setTimeout(() => inputRef.current?.focus(), 50)
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 50)
     }
   }, [phase, index])
 

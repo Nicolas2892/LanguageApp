@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { useAutoFocus } from '@/lib/hooks/useAutoFocus'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { AnnotatedText } from '@/components/AnnotatedText'
@@ -55,6 +56,8 @@ interface Props {
 export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
   const erroneous = extractSentence(exercise.prompt)
   const [value, setValue] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  useAutoFocus(textareaRef)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -85,11 +88,11 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
         <p className="text-xs text-[var(--d5-muted)]">Escribe la frase corregida:</p>
         <div className="senda-dashed-input">
           <Textarea
+            ref={textareaRef}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             placeholder="Escribe la frase corregida…"
             disabled={disabled}
-            autoFocus
             rows={3}
             className="text-base resize-none border-0 shadow-none bg-transparent focus-visible:ring-0 px-0"
           />

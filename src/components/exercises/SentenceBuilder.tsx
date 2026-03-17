@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { useAutoFocus } from '@/lib/hooks/useAutoFocus'
 import { Button } from '@/components/ui/button'
 import { SpeakButton } from '@/components/SpeakButton'
 import type { Exercise } from '@/lib/supabase/types'
@@ -28,6 +29,8 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
   const [remaining, setRemaining] = useState<string[]>(words)
   // Fallback state for when no bracket notation is found (must be declared unconditionally)
   const [fallbackValue, setFallbackValue] = useState('')
+  const fallbackInputRef = useRef<HTMLInputElement>(null)
+  useAutoFocus(fallbackInputRef, words.length === 0)
 
   const sentence = selected.join(' ')
 
@@ -58,12 +61,12 @@ export function SentenceBuilder({ exercise, onSubmit, disabled }: Props) {
         </div>
         <div className="senda-dashed-input">
           <input
+            ref={fallbackInputRef}
             className="w-full border-0 bg-transparent text-base outline-none focus-visible:ring-2 focus-visible:ring-[var(--d5-terracotta)]"
             value={fallbackValue}
             onChange={(e) => setFallbackValue(e.target.value)}
             placeholder="Construye tu frase…"
             disabled={disabled}
-            autoFocus
           />
         </div>
         <Button type="submit" disabled={disabled || !fallbackValue.trim()} className="w-full rounded-full">Confirmar →</Button>

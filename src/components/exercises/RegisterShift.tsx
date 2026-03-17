@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { useAutoFocus } from '@/lib/hooks/useAutoFocus'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { SpeakButton } from '@/components/SpeakButton'
@@ -72,6 +73,8 @@ interface Props {
 export function RegisterShift({ exercise, onSubmit, disabled }: Props) {
   const { sourceRegister, targetRegister, context, text } = parseRegisterPrompt(exercise.prompt)
   const [answer, setAnswer] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  useAutoFocus(textareaRef)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -106,11 +109,11 @@ export function RegisterShift({ exercise, onSubmit, disabled }: Props) {
       {/* Answer textarea */}
       <div className="senda-dashed-input">
         <Textarea
+          ref={textareaRef}
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
           placeholder="Escribe tu respuesta en el nuevo registro…"
           disabled={disabled}
-          autoFocus
           rows={4}
           className="text-base resize-none border-0 shadow-none bg-transparent focus-visible:ring-0 px-0"
         />
