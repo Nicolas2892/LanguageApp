@@ -489,7 +489,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2033 tests across 115 files — all passing.**
+**Test suite: 2034 tests across 115 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -614,11 +614,48 @@ Items are ordered by priority within each group. Full details of completed work 
 - Requires tracking `onboarding_completed = false` users and a transactional email provider.
 - **Do not implement without Feat-K vendor decision (shared email infrastructure).**
 
+**Feat-P: Pronunciation / accent training** *(P3 — new modality)*
+
+- Azure Speech Services Pronunciation Assessment API for phoneme-level scoring + L1 interference maps (German, English).
+- Dedicated `/pronunciation` route with minimal pair drills, record+assess loop, native speaker shadowing comparison.
+- Full plan: `docs/accent-training-plan.md`
+- **Do not implement until core learning loop is stable and PM decision on pricing tier (free vs. premium).**
+
+**Feat-Q: Mastery progress chip on concept + verb detail pages** *(P2 — learner motivation)*
+
+- Neither the concept detail page (`/curriculum/[id]`) nor the verb detail page (`/verbs/[infinitive]`) currently shows a mastery percentage or progress indicator outside the conjugation tables.
+- Add a clickable/hoverable chip that shows: current mastery %, what's needed to reach mastery (e.g. "3 more non-gap_fill exercises across 2 types" for concepts, "≥70% accuracy across all 9 tenses" for verbs), and specific weak areas (e.g. "Practica más subjuntivo imperfecto").
+- Concept chip: derives from `getMasteryProgress()` (SRS interval + production breadth gate). Verb chip: derives from `verb_progress` per-tense accuracy.
+- Should feel like a progress milestone card, not a wall of stats. Expandable on tap.
+
+**Feat-R: Capacitor native shell** *(P3 — App Store distribution + offline)*
+
+- Wrap PWA in Capacitor (Mode A: remote URL pointing at Vercel deployment) for App Store / Play Store listing.
+- Phase 1: Basic shell + signing + store submission.
+- Phase 2: Swap web push → `@capacitor/push-notifications` (APNs/FCM), add `@capacitor/keyboard` (fixes iOS scroll issues natively), `@capacitor/haptics`, biometric auth.
+- Full analysis: see conversation history from 2026-03-17.
+- **Do not implement until public launch readiness and PM decision on monetisation model (Apple's 30% cut implications).**
+
 ### Bugs / Layout Fixes
 
 **Fix-J: STT — replace Web Speech API with OpenAI Whisper** *(DONE — see completed-features.md)*
 
 **Fix-L: Verify push notifications on iOS PWA** *(DONE — see completed-features.md)*
+
+**Fix-M: Offline mode stability audit** *(P1 — broken user experience)*
+
+- Multiple pages throw "Algo salió mal" error boundaries when offline or during poor connectivity. The offline module download feature (Feat-F) works for exercise sessions, but navigation to other pages (dashboard, curriculum, progress, verbs) fails because Server Components make Supabase queries that reject without network.
+- Audit scope: (1) identify all routes that crash offline, (2) add graceful fallbacks or cached data for non-session pages, (3) ensure SW caches app shell + static assets so navigation works, (4) review `next.config.ts` caching headers.
+- Goal: everything should work offline (menus, navigation, verbs, downloaded exercises, progress display) — only AI grading of exercises should require connectivity.
+- Related: Feat-R (Capacitor) would further improve offline via native caching layer.
+
+**Fix-N: Analytics implementation** *(P1 — no visibility into user behaviour)*
+
+- PostHog is integrated (Infra-A) but event coverage is minimal. Need comprehensive tracking to understand retention, feature usage, and drop-off points.
+- Required events: page views (already via PostHog autocapture), session start/complete (with duration, accuracy, exercise count), exercise submit (type, score, concept), verb drill start/complete, tutor conversations, onboarding funnel steps, offline download/sync, streak milestones, feature discovery (first use of write mode, verb drills, tutor).
+- Add PostHog `identify()` with user properties: computed_level, streak, mastered_count, days_since_signup.
+- Dashboard: create PostHog dashboards for DAU/WAU, session frequency, exercise accuracy trends, feature adoption, onboarding completion rate.
+- **Should be implemented before any growth/marketing push — we need data to measure impact.**
 
 ### Technical Debt
 
@@ -647,19 +684,18 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 
 | Priority | Item | Gate |
 | -------- | ---- | ---- |
-| **P1** | **Audit-E1** — Timezone-aware streak RPC | **DONE** |
-| **P1** | **Fix-J** — STT replacement for iOS Safari | **DONE** |
-| **P1** | **Fix-L** — Verify push notifications on iOS PWA | **DONE** |
-| **P2** | **Feat-G** — Streak freeze | **DONE** |
-| **P2** | **Feat-H** — Listening + proofreading + register shift | **DONE** |
+| **P1** | **Fix-M** — Offline mode stability audit | Broken UX — pages crash offline |
+| **P1** | **Fix-N** — Analytics implementation | No user behaviour visibility |
+| **P2** | **Feat-Q** — Mastery progress chip (concept + verb detail) | — |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
+| **P2** | **Infra-E** — Custom domain for Supabase Auth (Google OAuth branding) | Supabase Pro plan + DNS setup |
 | **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |
 | **P3** | **Feat-J** — Verb SRS integration | PM decision on SRS model |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
-| **P2** | **Infra-E** — Custom domain for Supabase Auth (Google OAuth branding) | Supabase Pro plan + DNS setup |
+| **P3** | **Feat-P** — Pronunciation / accent training | PM decision on pricing tier |
+| **P3** | **Feat-R** — Capacitor native shell | Public launch readiness |
 | **P4** | **Infra-D** — A/B testing / feature flags | Needed before adaptive grading |
-| **P2** | **Feat-F** — Offline exercise packs | **DONE** (migration 022 applied) |
 | **P4** | **Feat-L** — Reading comprehension | Content strategy needed |
 | **P4** | **Feat-M** — Vocabulary feature | PM scope decision |
 | **P4** | **Feat-N** — Social / accountability | PM research needed |
