@@ -17,7 +17,7 @@ const VALID_EXERCISE_TYPES: ExerciseType[] = [
 
 describe('CURRICULUM_PLAN', () => {
   it('contains exactly 103 concepts', () => {
-    expect(CURRICULUM_PLAN).toHaveLength(103)
+    expect(CURRICULUM_PLAN).toHaveLength(105)
   })
 
   describe('each concept has required fields', () => {
@@ -63,8 +63,11 @@ describe('CURRICULUM_PLAN', () => {
 
         it('has exerciseTypes with valid values and correct length for its level', () => {
           expect(Array.isArray(concept.exerciseTypes)).toBe(true)
-          const expectedLengths: Record<string, number> = { B1: 3, B2: 5, C1: 6 }
-          expect(concept.exerciseTypes.length).toBe(expectedLengths[concept.level])
+          // B1 concepts that skip gap_fill have 2 types instead of 3
+          const minLengths: Record<string, number> = { B1: 2, B2: 5, C1: 6 }
+          const maxLengths: Record<string, number> = { B1: 3, B2: 5, C1: 6 }
+          expect(concept.exerciseTypes.length).toBeGreaterThanOrEqual(minLengths[concept.level])
+          expect(concept.exerciseTypes.length).toBeLessThanOrEqual(maxLengths[concept.level])
           for (const t of concept.exerciseTypes) {
             expect(VALID_EXERCISE_TYPES).toContain(t)
           }
@@ -120,9 +123,9 @@ describe('CURRICULUM_PLAN', () => {
       expect(count).toBe(23)
     })
 
-    it('has The Subjunctive: Core with 5 concepts', () => {
+    it('has The Subjunctive: Core with 7 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'The Subjunctive: Core').length
-      expect(count).toBe(5)
+      expect(count).toBe(7)
     })
 
     it('has The Subjunctive: Advanced with 8 concepts', () => {

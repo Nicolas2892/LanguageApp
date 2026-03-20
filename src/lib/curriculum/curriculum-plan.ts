@@ -1,5 +1,5 @@
 /**
- * Curriculum plan — single source of truth for all 100 concepts across 8 modules.
+ * Curriculum plan — single source of truth for all 105 concepts across 8 modules.
  *
  * - Existing concepts (21 in DB) are included so the plan is complete.
  *   The seed:ai script skips them during concept creation but uses them for exercise top-up.
@@ -300,6 +300,28 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     difficulty: 2,
     type: 'subjunctive_trigger',
     exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+  },
+  {
+    module: 'The Subjunctive: Core',
+    unit: 'Present Subjunctive Triggers',
+    title: 'Verbos de influencia (recomendar, pedir, prohibir)',
+    description: 'verbs of influence and command (recomendar que, sugerir que, pedir que, aconsejar que, permitir que, prohibir que, ordenar que, exigir que) that trigger subjunctive when one person influences another\'s actions — structurally similar to desire verbs but expressing authority, advice, or permission rather than personal wishes',
+    level: 'B1',
+    grammar_focus: 'subjunctive',
+    difficulty: 2,
+    type: 'subjunctive_trigger',
+    exerciseTypes: ['transformation', 'translation'],
+  },
+  {
+    module: 'The Subjunctive: Core',
+    unit: 'Present Subjunctive Triggers',
+    title: 'Expresiones impersonales + subjuntivo (es importante que, es posible que)',
+    description: 'impersonal expressions (es importante que, es necesario que, es posible que, es mejor que, es bueno/malo que, es una lástima que, es increíble que, es difícil que) that always trigger subjunctive because the impersonal main clause lacks a specific subject, requiring the subordinate clause to express the action in subjunctive',
+    level: 'B1',
+    grammar_focus: 'subjunctive',
+    difficulty: 2,
+    type: 'subjunctive_trigger',
+    exerciseTypes: ['transformation', 'translation'],
   },
   {
     module: 'The Subjunctive: Core',

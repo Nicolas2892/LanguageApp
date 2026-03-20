@@ -36,7 +36,7 @@ pnpm seed:verbs           # Generate verb sentences via Claude Haiku → docs/ve
 pnpm seed:verbs:apply     # Insert verb_sentences rows from review JSON
 pnpm validate:grading     # ARCH-02 offline validation: grade 50 attempts with Haiku vs Sonnet baseline
 pnpm push:keygen          # Generate VAPID key pair for push notifications
-pnpm backfill:translations # Backfill verb_sentences.english via Claude Haiku (~11250 rows)
+pnpm backfill:translations # Backfill verb_sentences.english via Claude Haiku (resume-safe)
 ```
 
 Post-deploy API smoke check (requires env vars):
@@ -342,10 +342,10 @@ Migrations (run once in Supabase SQL editor):
 
 ### Curriculum Seed Content
 
-**Currently in DB** (103 concepts, 969 exercises):
+**Currently in DB** (113 concepts, 1417 exercises):
 
 - Module 1: Connectors — 4 units, 23 concepts
-- Module 2a: The Subjunctive: Core — 1 unit, 5 concepts
+- Module 2a: The Subjunctive: Core — 1 unit, 7 concepts
 - Module 2b: The Subjunctive: Advanced — 2 units, 8 concepts
 - Module 3: Past Tenses — 3 units, 11 concepts
 - Module 4: Core Spanish Contrasts — 4 units, 15 concepts
@@ -354,7 +354,7 @@ Migrations (run once in Supabase SQL editor):
 - Module 8: Conversational Spanish — 4 units, 15 concepts
 - B1: 9 exercises per concept (3 types × 3); B2: 15 (5 types × 3); C1: 18 (6 types × 3)
 - 56/61 null-annotation exercises annotated
-- Full plan: `src/lib/curriculum/curriculum-plan.ts` (103 concepts); design reference: `docs/curriculum-design.md`
+- Full plan: `src/lib/curriculum/curriculum-plan.ts` (105 concepts); design reference: `docs/curriculum-design.md`
 - `pnpm seed:ai:apply` is now idempotent — skips concepts/exercises that already exist. Safe to re-run.
 
 ### Verb Seed Content
@@ -362,9 +362,9 @@ Migrations (run once in Supabase SQL editor):
 **Status: LIVE — migrations 014 + 015 applied, all seed data in DB**
 
 - 250 verbs hard-coded in `src/lib/curriculum/run-seed-verbs.ts` (ranks 1–250)
-- 9 tenses × 250 verbs × 5 sentences = 11,250 `verb_sentences` rows in DB
-- 9 tenses × 250 verbs = 2,250 `verb_conjugations` rows in DB
-- `verb_sentences.english` — nullable English translation column; backfilled via `pnpm backfill:translations` (Claude Haiku, batches of 20, resume-safe)
+- 18,845 `verb_sentences` rows in DB (all with English translations)
+- 2,496 `verb_conjugations` rows in DB (full coverage for all 250 verbs × 10 tenses)
+- `verb_sentences.english` — English translation column; fully backfilled via `pnpm backfill:translations` (Claude Haiku, batches of 20, resume-safe)
 - `pnpm seed:conjugations` — generates full 6-pronoun paradigm + stem per verb × tense via Claude Haiku → `docs/verb-conjugations-YYYY-MM-DD.json`; resume-safe
 - `pnpm seed:conjugations:apply <file>` — upserts `verb_conjugations` rows; idempotent (ON CONFLICT DO UPDATE)
 
