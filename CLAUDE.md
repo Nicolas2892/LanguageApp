@@ -628,12 +628,11 @@ Items are ordered by priority within each group. Full details of completed work 
 - Full plan: `docs/accent-training-plan.md`
 - **Do not implement until core learning loop is stable and PM decision on pricing tier (free vs. premium).**
 
-**Feat-Q: Mastery progress chip on concept + verb detail pages** *(P2 — learner motivation)*
+**Feat-Q: Mastery progress chip on concept + verb detail pages** *(DONE)*
 
-- Neither the concept detail page (`/curriculum/[id]`) nor the verb detail page (`/verbs/[infinitive]`) currently shows a mastery percentage or progress indicator outside the conjugation tables.
-- Add a clickable/hoverable chip that shows: current mastery %, what's needed to reach mastery (e.g. "3 more non-gap_fill exercises across 2 types" for concepts, "≥70% accuracy across all 9 tenses" for verbs), and specific weak areas (e.g. "Practica más subjuntivo imperfecto").
-- Concept chip: derives from `getMasteryProgress()` (SRS interval + production breadth gate). Verb chip: derives from `verb_progress` per-tense accuracy.
-- Should feel like a progress milestone card, not a wall of stats. Expandable on tap.
+- `MasteryChip` client component in concept detail header: tappable badge + nudge text + expandable milestones (SRS, production, variety gates). Replaces old "Tu progreso" card at page bottom.
+- `computeNudgeText()` provides state-based actionable hints (days remaining, missing exercise type, or "start practising").
+- Verb detail page: cross-tense accuracy nudge with "Reforzar [weakest tense] →" drill link; only shows when ≥2 tenses have progress.
 
 **Feat-R: Capacitor native shell** *(P3 — App Store distribution + offline)*
 
@@ -693,7 +692,6 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 | -------- | ---- | ---- |
 | **P1** | **Fix-M** — Offline mode stability audit | Broken UX — pages crash offline |
 | **P1** | **Fix-N** — Analytics implementation | No user behaviour visibility |
-| **P2** | **Feat-Q** — Mastery progress chip (concept + verb detail) | — |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
 | **P2** | **Infra-E** — Custom domain for Supabase Auth (Google OAuth branding) | Supabase Pro plan + DNS setup |
 | **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |
