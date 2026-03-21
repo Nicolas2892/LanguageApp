@@ -1,0 +1,403 @@
+[
+  {
+    "title": "Cuanto más...más/menos (comparaciones progresivas)",
+    "module": "Core Spanish Contrasts",
+    "unit": "Comparaciones",
+    "level": "B2",
+    "grammar_focus": "indicative",
+    "difficulty": 3,
+    "type": "comparison",
+    "explanation": "Las comparaciones progresivas con 'cuanto más/menos...más/menos' expresan relaciones proporcionales donde un cambio en una variable causa un cambio correspondiente en otra. Se usan para indicar que el aumento o disminución de algo provoca el aumento o disminución de otra cosa. Esta estructura es común en registros formales y académicos.",
+    "examples": [
+      {
+        "es": "Cuanto más practica el piano, mejor toca las sonatas de Chopin.",
+        "en": "The more she practices piano, the better she plays Chopin's sonatas."
+      },
+      {
+        "es": "Cuantas más responsabilidades tiene en el trabajo, menos tiempo dedica a su familia.",
+        "en": "The more responsibilities he has at work, the less time he devotes to his family."
+      },
+      {
+        "es": "Cuanto menos duermes, más difícil te resulta concentrarte en los estudios.",
+        "en": "The less you sleep, the harder it becomes for you to concentrate on your studies."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "___ más te esfuerces en perfeccionar tu técnica de pintura, mejores resultados obtendrás en la exposición.",
+        "expected_answer": "Cuanto",
+        "hint_1": "Necesitas la palabra que inicia una comparación progresiva",
+        "hint_2": "Esta palabra concuerda en género y número con 'más'",
+        "annotations": [
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " más te esfuerces en perfeccionar tu técnica de pintura, mejores resultados obtendrás en la exposición.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Cuantos menos libros leas durante el verano, ___ vocabulario perderás para el próximo semestre.",
+        "expected_answer": "más",
+        "hint_1": "Completa la segunda parte de la comparación progresiva",
+        "hint_2": "Si disminuye lo primero, ¿qué pasa con lo segundo?",
+        "annotations": [
+          {
+            "text": "Cuantos menos libros leas durante el verano, ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " vocabulario perderás para el próximo semestre.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "___ más experiencia internacional tengas en tu currículum, mayores oportunidades laborales se te presentarán.",
+        "expected_answer": "Cuanta",
+        "hint_1": "La palabra debe concordar con 'experiencia'",
+        "hint_2": "Recuerda la concordancia de género en estas estructuras",
+        "annotations": [
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " más experiencia internacional tengas en tu currículum, mayores oportunidades laborales se te presentarán.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Si aumentas las horas de entrenamiento, tu resistencia física mejorará proporcionalmente. → Rewrite using cuanto más...más",
+        "expected_answer": "Cuantas más horas de entrenamiento tengas, mejor será tu resistencia física.",
+        "hint_1": "Identifica las dos variables que cambian proporcionalmente",
+        "hint_2": "La concordancia debe ser con 'horas'",
+        "annotations": [
+          {
+            "text": "Base: Si aumentas las horas de entrenamiento, tu resistencia física mejorará proporcionalmente. → Rewrite using cuanto más...más",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Cuando reduces el tiempo de descanso, aumenta tu nivel de estrés. → Rewrite using cuanto menos...más",
+        "expected_answer": "Cuanto menos tiempo de descanso tengas, más estrés experimentarás.",
+        "hint_1": "Identifica la relación inversa entre las dos variables",
+        "hint_2": "Una disminución causa un aumento",
+        "annotations": [
+          {
+            "text": "Base: Cuando reduces el tiempo de descanso, aumenta tu nivel de estrés. → Rewrite using cuanto menos...más",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Al incrementar tus conocimientos de historia, comprenderás mejor los eventos actuales. → Rewrite using cuantos más...mejor",
+        "expected_answer": "Cuantos más conocimientos de historia tengas, mejor comprenderás los eventos actuales.",
+        "hint_1": "La concordancia debe ser con 'conocimientos'",
+        "hint_2": "Usa 'mejor' como adverbio en la segunda parte",
+        "annotations": [
+          {
+            "text": "Base: Al incrementar tus conocimientos de historia, comprenderás mejor los eventos actuales. → Rewrite using cuantos más...mejor",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The more responsibilities you accept at work, the less free time you will have for hobbies.",
+        "expected_answer": "Cuantas más responsabilidades aceptes en el trabajo, menos tiempo libre tendrás para los pasatiempos.",
+        "hint_1": "Identifica las dos variables que cambian en direcciones opuestas",
+        "hint_2": "Recuerda la concordancia con 'responsabilidades'",
+        "annotations": [
+          {
+            "text": "The more responsibilities you accept at work, the less free time you will have for hobbies.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The fewer mistakes you make in the presentation, the better impression you will leave on the clients.",
+        "expected_answer": "Cuantos menos errores cometas en la presentación, mejor impresión causarás a los clientes.",
+        "hint_1": "Una disminución en lo primero mejora lo segundo",
+        "hint_2": "La concordancia es con 'errores'",
+        "annotations": [
+          {
+            "text": "The fewer mistakes you make in the presentation, the better impression you will leave on the clients.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The more languages she speaks fluently, the more job opportunities she will have abroad.",
+        "expected_answer": "Cuantos más idiomas hable con fluidez, más oportunidades laborales tendrá en el extranjero.",
+        "hint_1": "Ambas variables aumentan proporcionalmente",
+        "hint_2": "La concordancia es con 'idiomas'",
+        "annotations": [
+          {
+            "text": "The more languages she speaks fluently, the more job opportunities she will have abroad.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: Los psicólogos han observado que cuanto más tiempo pasan los adolescentes en las redes sociales, menor es su autoestima y satisfacción personal. Cuantas más comparaciones hacen con otros usuarios, peor se sienten consigo mismos. Sin embargo, cuando reducen el uso de estas plataformas, mejora significativamente su bienestar emocional. Cuanto menos se exponen a la presión social virtual, más desarrollan su identidad auténtica. Los estudios confirman que cuantas más actividades realizan fuera del mundo digital, mayor es su felicidad general.\nQUESTION: Según el texto, ¿qué relación existe entre el uso de redes sociales y el desarrollo de la identidad en los adolescentes?",
+        "expected_answer": "Existe una relación inversa: cuanto menos se exponen a la presión social virtual, más desarrollan su identidad auténtica y mejora su bienestar emocional.",
+        "hint_1": "Busca la información sobre identidad auténtica en el texto",
+        "hint_2": "Considera el efecto de reducir la exposición virtual",
+        "annotations": [
+          {
+            "text": "PASSAGE: Los psicólogos han observado que cuanto más tiempo pasan los adolescentes en las redes sociales, menor es su autoestima y satisfacción personal. Cuantas más comparaciones hacen con otros usuarios, peor se sienten consigo mismos. Sin embargo, cuando reducen el uso de estas plataformas, mejora significativamente su bienestar emocional. Cuanto menos se exponen a la presión social virtual, más desarrollan su identidad auténtica. Los estudios confirman que cuantas más actividades realizan fuera del mundo digital, mayor es su felicidad general.\nQUESTION: Según el texto, ¿qué relación existe entre el uso de redes sociales y el desarrollo de la identidad en los adolescentes?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: En el ámbito empresarial, cuanto más invierte una compañía en la formación de sus empleados, mayores son los beneficios a largo plazo. Cuantas más habilidades desarrollan los trabajadores, más productiva se vuelve la organización. Los directivos han descubierto que cuanto menos rotan los empleados capacitados, menor es el costo de reclutamiento y entrenamiento. Además, cuanta más confianza depositan en sus equipos, mejor es el ambiente laboral y la creatividad flourece.\nQUESTION: ¿Cómo afecta la rotación de empleados capacitados a los costos empresariales según el texto?",
+        "expected_answer": "Cuanto menos rotan los empleados capacitados, menor es el costo de reclutamiento y entrenamiento para la empresa.",
+        "hint_1": "Busca la información específica sobre rotación y costos",
+        "hint_2": "Se trata de una relación donde ambas variables disminuyen",
+        "annotations": [
+          {
+            "text": "PASSAGE: En el ámbito empresarial, cuanto más invierte una compañía en la formación de sus empleados, mayores son los beneficios a largo plazo. Cuantas más habilidades desarrollan los trabajadores, más productiva se vuelve la organización. Los directivos han descubierto que cuanto menos rotan los empleados capacitados, menor es el costo de reclutamiento y entrenamiento. Además, cuanta más confianza depositan en sus equipos, mejor es el ambiente laboral y la creatividad flourece.\nQUESTION: ¿Cómo afecta la rotación de empleados capacitados a los costos empresariales según el texto?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: Los nutricionistas explican que cuanto más procesados sean los alimentos que consumimos, menor es su valor nutricional. Cuantas más frutas y verduras frescas incluimos en nuestra dieta, mejor funciona nuestro sistema inmunológico. Han comprobado que cuanto menos azúcar refinado consumimos, más estable se mantiene nuestro nivel de energía durante el día. Cuantas más comidas caseras preparamos, mayor control tenemos sobre los ingredientes y la calidad de nuestra alimentación.\nQUESTION: Según los nutricionistas, ¿qué beneficios se obtienen al preparar más comidas caseras?",
+        "expected_answer": "Al preparar más comidas caseras, se obtiene mayor control sobre los ingredientes y la calidad de la alimentación.",
+        "hint_1": "Busca la información sobre comidas caseras al final del texto",
+        "hint_2": "Se relaciona con el control y la calidad",
+        "annotations": [
+          {
+            "text": "PASSAGE: Los nutricionistas explican que cuanto más procesados sean los alimentos que consumimos, menor es su valor nutricional. Cuantas más frutas y verduras frescas incluimos en nuestra dieta, mejor funciona nuestro sistema inmunológico. Han comprobado que cuanto menos azúcar refinado consumimos, más estable se mantiene nuestro nivel de energía durante el día. Cuantas más comidas caseras preparamos, mayor control tenemos sobre los ingredientes y la calidad de nuestra alimentación.\nQUESTION: Según los nutricionistas, ¿qué beneficios se obtienen al preparar más comidas caseras?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: Los investigadores han demostrado que cuanto más ejercicio físico realizamos regularmente, mejor es nuestra salud cardiovascular. Cuanta más actividades sedentarias practiquemos, peor será nuestra condición física general. Sin embargo, cuanto menos tiempo dedicamos al deporte, más probabilidades tenemos de desarrollar enfermedades crónicas. Cuanto más horas pasamos frente al televisor, mayor es el riesgo de obesidad. Los médicos recomiendan que cuanta más variedad tengamos en nuestros entrenamientos, más completo será el beneficio para todo el cuerpo. Cuanto menos motivación sentimos para hacer ejercicio, más difícil resulta mantener un estilo de vida saludable.\nERRORS: 2",
+        "expected_answer": "Los investigadores han demostrado que cuanto más ejercicio físico realizamos regularmente, mejor es nuestra salud cardiovascular. Cuantas más actividades sedentarias practiquemos, peor será nuestra condición física general. Sin embargo, cuanto menos tiempo dedicamos al deporte, más probabilidades tenemos de desarrollar enfermedades crónicas. Cuantas más horas pasamos frente al televisor, mayor es el riesgo de obesidad. Los médicos recomiendan que cuanta más variedad tengamos en nuestros entrenamientos, más completo será el beneficio para todo el cuerpo. Cuanta menos motivación sentimos para hacer ejercicio, más difícil resulta mantener un estilo de vida saludable.",
+        "hint_1": "Revisa la concordancia de género entre 'cuanto/cuanta' y los sustantivos",
+        "hint_2": "Busca errores en las concordancias con sustantivos femeninos plurales",
+        "annotations": [
+          {
+            "text": "TEXT: Los investigadores han demostrado que cuanto más ejercicio físico realizamos regularmente, mejor es nuestra salud cardiovascular. Cuanta más actividades sedentarias practiquemos, peor será nuestra condición física general. Sin embargo, cuanto menos tiempo dedicamos al deporte, más probabilidades tenemos de desarrollar enfermedades crónicas. Cuanto más horas pasamos frente al televisor, mayor es el riesgo de obesidad. Los médicos recomiendan que cuanta más variedad tengamos en nuestros entrenamientos, más completo será el beneficio para todo el cuerpo. Cuanto menos motivación sentimos para hacer ejercicio, más difícil resulta mantener un estilo de vida saludable.\nERRORS: 2",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: En el mundo académico, cuanto más tiempo dedican los estudiantes a la investigación, mejores resultados obtienen en sus tesis. Cuanto más fuentes bibliográficas consultan, más sólida será la base teórica de sus trabajos. Los profesores observan que cuanta menos planificación tienen los alumnos, peor organizan sus proyectos finales. Cuanto más colaboración existe entre compañeros de clase, mayor es el aprendizaje colectivo. Sin embargo, cuanta menos disciplina muestran en sus estudios, más difícil les resulta completar el programa académico. Cuanto más feedback reciben de sus tutores, mejor desarrollan sus habilidades de escritura científica.\nERRORS: 3",
+        "expected_answer": "En el mundo académico, cuanto más tiempo dedican los estudiantes a la investigación, mejores resultados obtienen en sus tesis. Cuantas más fuentes bibliográficas consultan, más sólida será la base teórica de sus trabajos. Los profesores observan que cuanta menos planificación tienen los alumnos, peor organizan sus proyectos finales. Cuanta más colaboración existe entre compañeros de clase, mayor es el aprendizaje colectivo. Sin embargo, cuanta menos disciplina muestran en sus estudios, más difícil les resulta completar el programa académico. Cuanto más feedback reciben de sus tutores, mejor desarrollan sus habilidades de escritura científica.",
+        "hint_1": "Revisa la concordancia con sustantivos femeninos como 'fuentes' y 'colaboración'",
+        "hint_2": "Algunos sustantivos que parecen masculinos pueden ser femeninos",
+        "annotations": [
+          {
+            "text": "TEXT: En el mundo académico, cuanto más tiempo dedican los estudiantes a la investigación, mejores resultados obtienen en sus tesis. Cuanto más fuentes bibliográficas consultan, más sólida será la base teórica de sus trabajos. Los profesores observan que cuanta menos planificación tienen los alumnos, peor organizan sus proyectos finales. Cuanto más colaboración existe entre compañeros de clase, mayor es el aprendizaje colectivo. Sin embargo, cuanta menos disciplina muestran en sus estudios, más difícil les resulta completar el programa académico. Cuanto más feedback reciben de sus tutores, mejor desarrollan sus habilidades de escritura científica.\nERRORS: 3",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: Los psicólogos han estudiado cómo cuanta más presión laboral experimentan los trabajadores, menor es su satisfacción personal. Cuanto más equilibrio consiguen entre vida profesional y personal, más felices se sienten. Cuanta más comunicación existe en los equipos de trabajo, mejor es el rendimiento grupal. Los estudios revelan que cuanto menos estrés sufren los empleados, más creativos son en la resolución de problemas. Cuanto más apoyo reciben de sus superiores, mayor es su compromiso con la empresa. Sin embargo, cuanto más conflictos interpersonales hay en la oficina, peor es el ambiente laboral general.\nERRORS: 2",
+        "expected_answer": "Los psicólogos han estudiado cómo cuanta más presión laboral experimentan los trabajadores, menor es su satisfacción personal. Cuanto más equilibrio consiguen entre vida profesional y personal, más felices se sienten. Cuanta más comunicación existe en los equipos de trabajo, mejor es el rendimiento grupal. Los estudios revelan que cuanto menos estrés sufren los empleados, más creativos son en la resolución de problemas. Cuanto más apoyo reciben de sus superiores, mayor es su compromiso con la empresa. Sin embargo, cuantos más conflictos interpersonales hay en la oficina, peor es el ambiente laboral general.",
+        "hint_1": "Verifica la concordancia de género con sustantivos como 'presión' y 'conflictos'",
+        "hint_2": "Algunos sustantivos masculinos plurales necesitan concordancia específica",
+        "annotations": [
+          {
+            "text": "TEXT: Los psicólogos han estudiado cómo cuanta más presión laboral experimentan los trabajadores, menor es su satisfacción personal. Cuanto más equilibrio consiguen entre vida profesional y personal, más felices se sienten. Cuanta más comunicación existe en los equipos de trabajo, mejor es el rendimiento grupal. Los estudios revelan que cuanto menos estrés sufren los empleados, más creativos son en la resolución de problemas. Cuanto más apoyo reciben de sus superiores, mayor es su compromiso con la empresa. Sin embargo, cuanto más conflictos interpersonales hay en la oficina, peor es el ambiente laboral general.\nERRORS: 2",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-21T07:09:12.533Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "Verbos de percepción + infinitivo/gerundio (ver, oír, escuchar)",
+    "module": "Verbal Periphrases",
+    "unit": "Aspectual Periphrases",
+    "level": "B2",
+    "grammar_focus": "indicative",
+    "difficulty": 3,
+    "type": "periphrasis",
+    "explanation": "Los verbos de percepción (ver, oír, escuchar, sentir) pueden ir seguidos de infinitivo o gerundio según queramos expresar una acción completa o en desarrollo. Con infinitivo expresamos una acción completa que percibimos desde el inicio hasta el final ('Vi salir al ladrón' = lo vi durante toda la acción de salir). Con gerundio expresamos una acción en desarrollo, de la cual percibimos solo una parte ('Vi al ladrón saliendo' = lo vi durante el proceso, pero no necesariamente desde el principio). Con pronombres de objeto directo/indirecto, estos van antes del verbo de percepción ('La vi cantando') o después del infinitivo/gerundio ('Vi cantarla/cantándola').",
+    "examples": [
+      {
+        "es": "Escuché cerrar la puerta con fuerza.",
+        "en": "I heard the door slam shut."
+      },
+      {
+        "es": "Los vimos jugando en el parque toda la tarde.",
+        "en": "We saw them playing in the park all afternoon."
+      },
+      {
+        "es": "Sentí a alguien caminando por el pasillo.",
+        "en": "I felt someone walking down the hallway."
+      },
+      {
+        "es": "Oí tocar el piano desde la ventana.",
+        "en": "I heard the piano being played from the window."
+      },
+      {
+        "es": "La escuchamos hablando por teléfono.",
+        "en": "We heard her talking on the phone."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "Durante la tormenta, escuchamos ___ varios árboles en el bosque cercano.",
+        "expected_answer": "caer",
+        "hint_1": "¿Percibiste la acción completa o solo una parte de ella?",
+        "hint_2": "Piensa si fue una acción completa que escuchaste desde el inicio hasta el final.",
+        "annotations": null
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Desde mi ventana puedo ver a los niños ___ en el patio del colegio.",
+        "expected_answer": "jugando",
+        "hint_1": "¿Es una acción que continúa en el tiempo?",
+        "hint_2": "Considera si observas el proceso en desarrollo, no una acción completa.",
+        "annotations": null
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Anoche sentí ___ a alguien por las escaleras del edificio muy tarde.",
+        "expected_answer": "subir",
+        "hint_1": "¿Percibiste toda la acción o solo parte de ella?",
+        "hint_2": "Piensa si la percepción fue de una acción completa desde abajo hasta arriba.",
+        "annotations": null
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: María cantaba en su habitación y yo la escuchaba. → Rewrite using a perception verb + infinitive/gerund structure",
+        "expected_answer": "Escuchaba a María cantando en su habitación.",
+        "hint_1": "Usa el verbo de percepción seguido directamente del complemento.",
+        "hint_2": "¿La acción era completa o en desarrollo?",
+        "annotations": null
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: El gato saltó del tejado y nosotros lo observamos. → Rewrite using a perception verb + infinitive/gerund structure",
+        "expected_answer": "Vimos saltar al gato del tejado.",
+        "hint_1": "Combina ambas acciones en una sola oración.",
+        "hint_2": "Considera si la acción fue completa o parcial.",
+        "annotations": null
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Los músicos tocaban en la calle y los turistas los escuchaban. → Rewrite using a perception verb + infinitive/gerund structure",
+        "expected_answer": "Los turistas escuchaban a los músicos tocando en la calle.",
+        "hint_1": "Enfoca la oración desde la perspectiva de quien percibe.",
+        "hint_2": "¿Era una acción continua o puntual?",
+        "annotations": null
+      },
+      {
+        "type": "translation",
+        "prompt": "I heard the baby crying in the next room all night long.",
+        "expected_answer": "Oí al bebé llorando en la habitación de al lado toda la noche.",
+        "hint_1": "¿Fue una acción continua o completa?",
+        "hint_2": "Usa el gerundio para acciones en desarrollo.",
+        "annotations": null
+      },
+      {
+        "type": "translation",
+        "prompt": "We saw the plane take off from the airport runway.",
+        "expected_answer": "Vimos despegar al avión de la pista del aeropuerto.",
+        "hint_1": "¿Observaron toda la acción de despegue?",
+        "hint_2": "Para acciones completas usa el infinitivo.",
+        "annotations": null
+      },
+      {
+        "type": "translation",
+        "prompt": "She felt someone watching her from across the street.",
+        "expected_answer": "Sintió a alguien observándola desde el otro lado de la calle.",
+        "hint_1": "¿Era una sensación continua?",
+        "hint_2": "Piensa en la posición del pronombre objeto.",
+        "annotations": null
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: El detective observó cuidadosamente la escena del crimen. Desde su posición, pudo ver entrar al sospechoso por la puerta principal exactamente a las diez. También escuchó a dos personas discutiendo en voz alta en el piso superior durante varios minutos. Más tarde, oyó cerrarse una ventana bruscamente. Los testigos confirmaron haber visto correr a un hombre joven por la calle poco después. Toda esta información fue crucial para resolver el caso.\nQUESTION: ¿Qué diferencias hay entre las percepciones del detective que fueron acciones completas versus acciones en desarrollo?",
+        "expected_answer": "El detective presenció acciones completas como la entrada del sospechoso y el cierre de la ventana, mientras que percibió acciones en desarrollo como la discusión continua de dos personas.",
+        "hint_1": "Fíjate en el uso del infinitivo versus gerundio después de los verbos de percepción.",
+        "hint_2": "Considera qué acciones tuvieron principio y fin claros versus cuáles fueron procesos continuos.",
+        "annotations": null
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: La profesora de música dirigía el ensayo final antes del concierto. Podía escuchar a los violines tocando la melodía principal mientras los contrabajos mantenían el ritmo de fondo. De repente, oyó desafinar a uno de los clarinetes en una nota aguda. Vio levantarse al director de orquesta para corregir el tempo. Los cantantes del coro permanecían en silencio, esperando su turno. Cuando finalmente escuchó terminar la pieza musical, todos aplaudieron satisfechos con el resultado.\nQUESTION: ¿Cómo se diferencia la percepción de la profesora entre los procesos musicales continuos y los eventos puntuales?",
+        "expected_answer": "La profesora percibió procesos continuos como los violines tocando y acciones puntuales como el director levantándose y la pieza terminando completamente.",
+        "hint_1": "Observa cómo se describen las acciones musicales en desarrollo versus los momentos específicos.",
+        "hint_2": "Nota la diferencia entre actividades sostenidas y acciones con inicio y fin definidos.",
+        "annotations": null
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: Desde la terraza del café, Marina observaba la vida nocturna de la ciudad. Podía ver a las parejas caminando tomadas de la mano por la plaza iluminada. A lo lejos, escuchaba sonar las campanas de la catedral marcando las once de la noche. Un grupo de músicos callejeros tocaba jazz en la esquina, y ella los oía improvisando melodías nostálgicas. De pronto, vio pararse abruptamente a un taxi frente al café. La noche estaba llena de pequeños momentos que componían la sinfonía urbana.\nQUESTION: ¿Qué revela sobre el ambiente nocturno la forma en que Marina percibe los diferentes sonidos y movimientos?",
+        "expected_answer": "Marina percibe un ambiente nocturno dinámico donde coexisten actividades continuas como parejas paseando y músicos improvisando, junto con eventos puntuales como las campanas sonando y el taxi parándose.",
+        "hint_1": "Analiza cómo las diferentes percepciones crean una imagen completa del ambiente.",
+        "hint_2": "Considera cómo los verbos de percepción ayudan a construir la atmósfera nocturna.",
+        "annotations": null
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: El guía turístico nos llevó al mirador más alto de la montaña. Desde allí pudimos ver el sol poniendo detrás de las colinas distantes, creando un espectáculo magnífico de colores. También escuchamos a los pájaros cantar en los árboles cercanos mientras se preparaban para la noche. De repente, oímos gritar a alguien pidiendo ayuda desde el sendero inferior. Vimos a un excursionista corriendo hacia nosotros con expresión preocupada. El guía inmediatamente escuchó bajar por el sendero para investigar la situación. Finalmente, todos pudimos ver regresar al grupo con el excursionista perdido que habían encontrado sano y salvo.\nERRORS: 3",
+        "expected_answer": "El guía turístico nos llevó al mirador más alto de la montaña. Desde allí pudimos ver ponerse el sol detrás de las colinas distantes, creando un espectáculo magnífico de colores. También escuchamos a los pájaros cantar en los árboles cercanos mientras se preparaban para la noche. De repente, oímos a alguien gritando pidiendo ayuda desde el sendero inferior. Vimos a un excursionista corriendo hacia nosotros con expresión preocupada. El guía inmediatamente vimos bajar por el sendero para investigar la situación. Finalmente, todos pudimos ver regresar al grupo con el excursionista perdido que habían encontrado sano y salvo.",
+        "hint_1": "Revisa el orden de palabras con verbos de percepción y sus complementos.",
+        "hint_2": "Verifica si las acciones son completas (infinitivo) o en desarrollo (gerundio).",
+        "annotations": null
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: La familia se reunió en el patio para la celebración del cumpleaños de la abuela. Podíamos escuchar a los niños riendo y jugando en el jardín mientras los adultos preparaban la mesa. El abuelo estaba sentado en su silla favorita, y lo vimos sonreír recordando viejos tiempos. Cuando llegó el momento del brindis, oímos chocar las copas en un tintineo armonioso. Después escuchamos la abuela hablando sobre sus memorias más queridas. De pronto, sentimos empezar a llover suavemente, pero nadie quiso entrar a la casa. La música continuaba sonando, y todos seguimos cantando las canciones tradicionales hasta muy tarde.\nERRORS: 2",
+        "expected_answer": "La familia se reunió en el patio para la celebración del cumpleaños de la abuela. Podíamos escuchar a los niños riendo y jugando en el jardín mientras los adultos preparaban la mesa. El abuelo estaba sentado en su silla favorita, y lo vimos sonreír recordando viejos tiempos. Cuando llegó el momento del brindis, oímos chocar las copas en un tintineo armonioso. Después escuchamos a la abuela hablando sobre sus memorias más queridas. De pronto, sentimos empezar a llover suavemente, pero nadie quiso entrar a la casa. La música continuaba sonando, y todos seguimos cantando las canciones tradicionales hasta muy tarde.",
+        "hint_1": "Algunos verbos de percepción necesitan la preposición 'a' antes del complemento de persona.",
+        "hint_2": "Revisa si falta algún elemento entre el verbo de percepción y el infinitivo/gerundio.",
+        "annotations": null
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: Durante mi estancia en el campo, me despertaba temprano cada mañana con los sonidos naturales. Escuchaba cantando a los gallos anunciando el amanecer, seguidos por el coro de otros pájaros. Desde la ventana de mi habitación, podía ver las vacas pastando tranquilamente en el prado verde. Ocasionalmente oía a los perros ladrando a lo lejos cuando algún extraño se acercaba a las casas vecinas. Por las tardes, veía a los agricultores trabajar en sus campos hasta que el sol se ponía. Una noche, sentí moverse algo en el techo y descubrí que era una familia de ardillas. Estos momentos me hicieron apreciar la vida rural y sus ritmos naturales.\nERRORS: 2",
+        "expected_answer": "Durante mi estancia en el campo, me despertaba temprano cada mañana con los sonidos naturales. Escuchaba a los gallos cantando anunciando el amanecer, seguidos por el coro de otros pájaros. Desde la ventana de mi habitación, podía ver las vacas pastando tranquilamente en el prado verde. Ocasionalmente oía ladrar a los perros a lo lejos cuando algún extraño se acercaba a las casas vecinas. Por las tardes, veía a los agricultores trabajando en sus campos hasta que el sol se ponía. Una noche, sentí moverse algo en el techo y descubrí que era una familia de ardillas. Estos momentos me hicieron apreciar la vida rural y sus ritmos naturales.",
+        "hint_1": "Revisa el orden correcto: verbo de percepción + complemento + infinitivo/gerundio.",
+        "hint_2": "Algunos casos requieren 'a' antes del complemento de persona y infinitivo para la acción completa.",
+        "annotations": null
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-21T07:13:37.780Z",
+    "_approved": true,
+    "_notes": "annotations null — run pnpm annotate",
+    "_annotationsValid": false
+  }
+]

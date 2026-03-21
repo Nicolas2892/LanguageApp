@@ -346,15 +346,15 @@ Migrations (run once in Supabase SQL editor):
 
 - Module 1: Connectors — 4 units, 23 concepts
 - Module 2a: The Subjunctive: Core — 1 unit, 7 concepts
-- Module 2b: The Subjunctive: Advanced — 2 units, 8 concepts
-- Module 3: Past Tenses — 3 units, 11 concepts
-- Module 4: Core Spanish Contrasts — 4 units, 15 concepts
-- Module 5: Verbal Periphrases — 3 units, 13 concepts
-- Module 6: Advanced Clauses — 3 units, 13 concepts
+- Module 2b: The Subjunctive: Advanced — 2 units, 9 concepts
+- Module 3: Past Tenses — 3 units, 12 concepts
+- Module 4: Core Spanish Contrasts — 5 units, 19 concepts (incl. new "Comparaciones" unit)
+- Module 5: Verbal Periphrases — 3 units, 14 concepts
+- Module 6: Advanced Clauses — 3 units, 16 concepts
 - Module 8: Conversational Spanish — 4 units, 15 concepts
 - B1: 9 exercises per concept (3 types × 3); B2: 15 (5 types × 3); C1: 18 (6 types × 3)
 - 56/61 null-annotation exercises annotated
-- Full plan: `src/lib/curriculum/curriculum-plan.ts` (105 concepts); design reference: `docs/curriculum-design.md`
+- Full plan: `src/lib/curriculum/curriculum-plan.ts` (115 concepts); design reference: `docs/curriculum-design.md`
 - `pnpm seed:ai:apply` is now idempotent — skips concepts/exercises that already exist. Safe to re-run.
 
 ### Verb Seed Content
@@ -489,7 +489,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2034 tests across 115 files — all passing.**
+**Test suite: 2142 tests across 115 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 

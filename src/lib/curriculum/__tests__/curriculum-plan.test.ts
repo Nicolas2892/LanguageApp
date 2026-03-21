@@ -16,8 +16,8 @@ const VALID_EXERCISE_TYPES: ExerciseType[] = [
 ]
 
 describe('CURRICULUM_PLAN', () => {
-  it('contains exactly 103 concepts', () => {
-    expect(CURRICULUM_PLAN).toHaveLength(105)
+  it('contains exactly 115 concepts', () => {
+    expect(CURRICULUM_PLAN).toHaveLength(115)
   })
 
   describe('each concept has required fields', () => {
@@ -128,29 +128,29 @@ describe('CURRICULUM_PLAN', () => {
       expect(count).toBe(7)
     })
 
-    it('has The Subjunctive: Advanced with 8 concepts', () => {
+    it('has The Subjunctive: Advanced with 9 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'The Subjunctive: Advanced').length
-      expect(count).toBe(8)
+      expect(count).toBe(9)
     })
 
-    it('has Module 3 with 11 concepts', () => {
+    it('has Module 3 with 12 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'Past Tenses').length
-      expect(count).toBe(11)
+      expect(count).toBe(12)
     })
 
-    it('has Module 4 with 15 concepts', () => {
+    it('has Module 4 with 19 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'Core Spanish Contrasts').length
-      expect(count).toBe(15)
+      expect(count).toBe(19)
     })
 
-    it('has Module 5 with 13 concepts', () => {
+    it('has Module 5 with 14 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'Verbal Periphrases').length
-      expect(count).toBe(13)
+      expect(count).toBe(14)
     })
 
-    it('has Module 6 with 13 concepts', () => {
+    it('has Module 6 with 16 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'Advanced Clauses').length
-      expect(count).toBe(13)
+      expect(count).toBe(16)
     })
 
     it('has Module 8 with 15 concepts', () => {

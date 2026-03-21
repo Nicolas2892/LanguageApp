@@ -1,5 +1,5 @@
 /**
- * Curriculum plan — single source of truth for all 105 concepts across 8 modules.
+ * Curriculum plan — single source of truth for all 115 concepts across 8 modules.
  *
  * - Existing concepts (21 in DB) are included so the plan is complete.
  *   The seed:ai script skips them during concept creation but uses them for exercise top-up.
@@ -372,6 +372,17 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
   {
     module: 'The Subjunctive: Advanced',
     unit: 'Imperfect Subjunctive & Hypotheticals',
+    title: 'Condicional tipo 1: Si + presente de indicativo',
+    description: 'type 1 conditional: si + presente de indicativo (si tienes tiempo…) + presente/futuro/imperativo to express real, possible conditions — the scaffolding for type 2 and type 3 conditionals',
+    level: 'B1',
+    grammar_focus: 'indicative',
+    difficulty: 2,
+    type: 'conditional',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+  },
+  {
+    module: 'The Subjunctive: Advanced',
+    unit: 'Imperfect Subjunctive & Hypotheticals',
     title: 'Condicional tipo 2: Si + imperfecto de subjuntivo',
     description: 'type 2 conditional: si + imperfecto de subjuntivo (si tuviera…) + condicional simple (tendría) to express hypothetical or contrary-to-fact present/future situations',
     level: 'B2',
@@ -506,6 +517,17 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     difficulty: 3,
     type: 'past_tense',
     exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
+  },
+  {
+    module: 'Past Tenses',
+    unit: 'Preterite vs. Imperfect',
+    title: 'Hace/Desde hace + tiempo (expresiones de duración)',
+    description: 'expressions of time duration: hace + time (ago — "hace tres años viví en Madrid"), desde hace + time (for — "estudio español desde hace dos años"), and llevar + time + gerundio as an alternative; distinguishing elapsed time from ongoing duration',
+    level: 'B1',
+    grammar_focus: 'indicative',
+    difficulty: 2,
+    type: 'time_expression',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
 
   // Unit 3.2 — Perfect & Pluperfect
@@ -720,6 +742,17 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
   {
     module: 'Core Spanish Contrasts',
     unit: 'Reflexive Verbs & Verbs of Change',
+    title: 'Se accidental: se me olvidó, se le rompió',
+    description: 'accidental/involuntary se construction: se + indirect object pronoun + verb (third person) to express unintentional events — "Se me olvidó la cita" (I forgot the appointment), "Se le rompió el vaso" (The glass broke on him); shifts blame from the subject to the event itself',
+    level: 'B2',
+    grammar_focus: 'indicative',
+    difficulty: 3,
+    type: 'reflexive',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
+  },
+  {
+    module: 'Core Spanish Contrasts',
+    unit: 'Reflexive Verbs & Verbs of Change',
     title: 'Verbos pseudocopulativos avanzados (resultar, parecer, seguir + adj)',
     description: 'pseudo-copulative verbs that link subject to an attribute: resultar + adj (to turn out to be), parecer + adj (to seem), seguir + adj/gerundio (to continue being/doing), llegar a ser (to eventually become) — common in formal analysis',
     level: 'C1',
@@ -762,6 +795,41 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     difficulty: 4,
     type: 'adverbial',
     exerciseTypes: ['gap_fill', 'translation', 'error_correction', 'listening', 'proofreading'],
+  },
+
+  // Unit 4.5 — Comparaciones
+  {
+    module: 'Core Spanish Contrasts',
+    unit: 'Comparaciones',
+    title: 'Comparativos: más/menos...que, tan/tanto...como',
+    description: 'comparative structures: más/menos + adj/adv/noun + que (inequality — "Es más alto que yo"), tan + adj/adv + como and tanto/a/os/as + noun + como (equality — "Es tan inteligente como tú"); irregular comparatives (mejor, peor, mayor, menor)',
+    level: 'B1',
+    grammar_focus: 'indicative',
+    difficulty: 2,
+    type: 'comparison',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+  },
+  {
+    module: 'Core Spanish Contrasts',
+    unit: 'Comparaciones',
+    title: 'Superlativos: el/la más...de, -ísimo',
+    description: 'superlative structures: relative superlative with el/la/los/las + más/menos + adj + de ("Es la más alta de la clase"), absolute superlative with -ísimo/a/os/as ("altísimo"), and irregular forms (óptimo, pésimo, máximo, mínimo)',
+    level: 'B1',
+    grammar_focus: 'indicative',
+    difficulty: 2,
+    type: 'comparison',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+  },
+  {
+    module: 'Core Spanish Contrasts',
+    unit: 'Comparaciones',
+    title: 'Cuanto más...más/menos (comparaciones progresivas)',
+    description: 'progressive comparison: cuanto más/menos...más/menos to express proportional relationships — "Cuanto más estudias, más aprendes" (The more you study, the more you learn); position of cuanto, agreement with nouns, use in formal registers',
+    level: 'B2',
+    grammar_focus: 'indicative',
+    difficulty: 3,
+    type: 'comparison',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
   // ─── Module 5: Verbal Periphrases ─────────────────────────────────────────
@@ -857,6 +925,17 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     type: 'periphrasis',
     exerciseTypes: ['transformation', 'translation', 'error_correction', 'listening', 'proofreading', 'register_shift'],
   },
+  {
+    module: 'Verbal Periphrases',
+    unit: 'Aspectual Periphrases',
+    title: 'Verbos de percepción + infinitivo/gerundio (ver, oír, escuchar)',
+    description: 'perception verbs (ver, oír, escuchar, sentir) followed by infinitive (completed action — "Vi caer la hoja") or gerundio (ongoing action — "Oí a alguien cantando"); word order with pronoun objects, contrasts with English "see/hear someone doing/do"',
+    level: 'B2',
+    grammar_focus: 'indicative',
+    difficulty: 3,
+    type: 'periphrasis',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
+  },
 
   // Unit 5.3 — Advanced Periphrases
   {
@@ -943,6 +1022,17 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
   {
     module: 'Advanced Clauses',
     unit: 'Relative Clauses',
+    title: 'Oraciones de relativo con infinitivo (algo que hacer, un lugar donde ir)',
+    description: 'relative clauses with infinitive: noun + que + infinitive ("No tengo nada que decir"), noun + donde/en que + infinitive ("Busco un lugar donde dormir"); common in spoken Spanish as a lighter alternative to subjunctive relative clauses',
+    level: 'B2',
+    grammar_focus: 'indicative',
+    difficulty: 3,
+    type: 'relative_clause',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
+  },
+  {
+    module: 'Advanced Clauses',
+    unit: 'Relative Clauses',
     title: 'el cual / la cual / lo cual: relativas formales y explicativas',
     description: 'el cual/la cual/los cuales/las cuales and lo cual in non-restrictive (explanatory) relative clauses, especially after prepositions — more formal than que, used to add information rather than restrict the antecedent',
     level: 'B2',
@@ -1020,6 +1110,28 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     difficulty: 4,
     type: 'adverbial_clause',
     exerciseTypes: ['gap_fill', 'transformation', 'error_correction', 'listening', 'proofreading'],
+  },
+  {
+    module: 'Advanced Clauses',
+    unit: 'Advanced Adverbial Clauses',
+    title: 'Al + infinitivo (acción simultánea o inmediata)',
+    description: 'al + infinitivo to express simultaneous or immediately preceding action — "Al llegar a casa, encendí la luz" (Upon arriving home, I turned on the light); equivalent to "upon/on doing", very common in narrative and formal registers',
+    level: 'B1',
+    grammar_focus: 'indicative',
+    difficulty: 2,
+    type: 'adverbial_clause',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
+  },
+  {
+    module: 'Advanced Clauses',
+    unit: 'Advanced Adverbial Clauses',
+    title: 'Antes de (que) / Después de (que): contraste modal',
+    description: 'temporal clauses with antes de/después de: + infinitive when same subject ("Antes de salir, cerré la puerta"), + que + subjunctive when different subjects ("Antes de que llegues, limpio la casa"); después de que + indicative (past) vs. subjunctive (future)',
+    level: 'B2',
+    grammar_focus: 'both',
+    difficulty: 3,
+    type: 'adverbial_clause',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
   {
     module: 'Advanced Clauses',
