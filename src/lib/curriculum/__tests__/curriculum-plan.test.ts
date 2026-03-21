@@ -16,8 +16,8 @@ const VALID_EXERCISE_TYPES: ExerciseType[] = [
 ]
 
 describe('CURRICULUM_PLAN', () => {
-  it('contains exactly 115 concepts', () => {
-    expect(CURRICULUM_PLAN).toHaveLength(115)
+  it('contains exactly 120 concepts', () => {
+    expect(CURRICULUM_PLAN).toHaveLength(120)
   })
 
   describe('each concept has required fields', () => {
@@ -123,14 +123,14 @@ describe('CURRICULUM_PLAN', () => {
       expect(count).toBe(23)
     })
 
-    it('has The Subjunctive: Core with 7 concepts', () => {
+    it('has The Subjunctive: Core with 8 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'The Subjunctive: Core').length
-      expect(count).toBe(7)
+      expect(count).toBe(8)
     })
 
-    it('has The Subjunctive: Advanced with 9 concepts', () => {
+    it('has The Subjunctive: Advanced with 10 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'The Subjunctive: Advanced').length
-      expect(count).toBe(9)
+      expect(count).toBe(10)
     })
 
     it('has Module 3 with 12 concepts', () => {
@@ -138,9 +138,9 @@ describe('CURRICULUM_PLAN', () => {
       expect(count).toBe(12)
     })
 
-    it('has Module 4 with 19 concepts', () => {
+    it('has Module 4 with 20 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'Core Spanish Contrasts').length
-      expect(count).toBe(19)
+      expect(count).toBe(20)
     })
 
     it('has Module 5 with 14 concepts', () => {
@@ -148,14 +148,14 @@ describe('CURRICULUM_PLAN', () => {
       expect(count).toBe(14)
     })
 
-    it('has Module 6 with 16 concepts', () => {
+    it('has Module 6 with 17 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'Advanced Clauses').length
-      expect(count).toBe(16)
+      expect(count).toBe(17)
     })
 
-    it('has Module 8 with 15 concepts', () => {
+    it('has Module 8 with 16 concepts', () => {
       const count = CURRICULUM_PLAN.filter((c) => c.module === 'Conversational Spanish').length
-      expect(count).toBe(15)
+      expect(count).toBe(16)
     })
 
     it('has Module 1 Unit 1.2 with 7 concepts (including por eso and así que)', () => {

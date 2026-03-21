@@ -1,0 +1,2090 @@
+[
+  {
+    "title": "Concesivas universales: diga lo que diga, sea como sea, pase lo que pase",
+    "module": "The Subjunctive: Advanced",
+    "unit": "Complex Subjunctive Structures",
+    "level": "B2",
+    "grammar_focus": "subjunctive",
+    "difficulty": 3,
+    "type": "subjunctive_structure",
+    "explanation": "Las concesivas universales expresan indiferencia o determinación usando la estructura: subjuntivo + pronombre relativo + subjuntivo del mismo verbo (diga lo que diga, sea como sea, pase lo que pase). Se usan para indicar que algo ocurrirá independientemente de las circunstancias. Son muy frecuentes en español avanzado para expresar firmeza en las decisiones.",
+    "examples": [
+      {
+        "es": "Cueste lo que cueste, compraremos esa casa para nuestra familia.",
+        "en": "Whatever it costs, we'll buy that house for our family."
+      },
+      {
+        "es": "Diga lo que diga la prensa, el alcalde mantendrá su posición.",
+        "en": "Whatever the press says, the mayor will maintain his position."
+      },
+      {
+        "es": "Sea como sea, tenemos que terminar el proyecto antes del viernes.",
+        "en": "However it may be, we have to finish the project before Friday."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "El equipo médico operará al paciente ___, porque su vida está en peligro.",
+        "expected_answer": "pase lo que pase",
+        "hint_1": "Usa una concesiva universal con el verbo 'pasar'",
+        "hint_2": "La estructura es: subjuntivo + lo que + mismo subjuntivo",
+        "annotations": [
+          {
+            "text": "El equipo médico operará al paciente ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": ", porque su vida está en peligro.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "María se mudará a París ___, aunque sus padres se opongan.",
+        "expected_answer": "cueste lo que cueste",
+        "hint_1": "Necesitas una expresión que indique 'sin importar el precio'",
+        "hint_2": "Usa el verbo 'costar' en subjuntivo repetido",
+        "annotations": [
+          {
+            "text": "María se mudará a París ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": ", aunque sus padres se opongan.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los manifestantes continuarán protestando ___ el gobierno, exigiendo mejores condiciones laborales.",
+        "expected_answer": "diga lo que diga",
+        "hint_1": "Usa una concesiva universal relacionada con 'decir'",
+        "hint_2": "La expresión indica indiferencia hacia las declaraciones oficiales",
+        "annotations": [
+          {
+            "text": "Los manifestantes continuarán protestando ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " el gobierno, exigiendo mejores condiciones laborales.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Aunque el examen sea muy difícil, lo aprobaré. → Rewrite using concesivas universales",
+        "expected_answer": "Sea como sea el examen, lo aprobaré.",
+        "hint_1": "Cambia 'aunque' por una estructura de concesiva universal",
+        "hint_2": "Usa 'sea como sea' para expresar indiferencia hacia la dificultad",
+        "annotations": [
+          {
+            "text": "Base: Aunque el examen ",
+            "form": null
+          },
+          {
+            "text": "sea",
+            "form": "subjunctive"
+          },
+          {
+            "text": " muy difícil, lo aprobaré. → Rewrite using concesivas universales",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: No importa lo que opinen los críticos, seguiré pintando. → Rewrite using concesivas universales",
+        "expected_answer": "Opinen lo que opinen los críticos, seguiré pintando.",
+        "hint_1": "Sustituye 'no importa lo que' por una concesiva universal",
+        "hint_2": "Usa el verbo 'opinar' en la estructura repetida",
+        "annotations": [
+          {
+            "text": "Base: No importa lo que ",
+            "form": null
+          },
+          {
+            "text": "opinen",
+            "form": "subjunctive"
+          },
+          {
+            "text": " los críticos, seguiré pintando. → Rewrite using concesivas universales",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Independientemente del tiempo que haga, iremos de excursión. → Rewrite using concesivas universales",
+        "expected_answer": "Haga el tiempo que haga, iremos de excursión.",
+        "hint_1": "Cambia 'independientemente del tiempo que haga' por una concesiva universal",
+        "hint_2": "Usa 'hacer' referido al tiempo meteorológico",
+        "annotations": [
+          {
+            "text": "Base: Independientemente del tiempo que ",
+            "form": null
+          },
+          {
+            "text": "haga",
+            "form": "subjunctive"
+          },
+          {
+            "text": ", iremos de excursión. → Rewrite using concesivas universales",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "Whatever they decide in the meeting, I will support the final resolution.",
+        "expected_answer": "Decidan lo que decidan en la reunión, apoyaré la resolución final.",
+        "hint_1": "Usa una concesiva universal con el verbo 'decidir'",
+        "hint_2": "La estructura es: subjuntivo + lo que + mismo subjuntivo",
+        "annotations": [
+          {
+            "text": "Whatever they decide in the meeting, I will support the final resolution.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "However difficult the situation may be, we will find a solution together.",
+        "expected_answer": "Sea como sea de difícil la situación, encontraremos una solución juntos.",
+        "hint_1": "Usa 'sea como sea' para expresar indiferencia hacia la dificultad",
+        "hint_2": "Recuerda que 'however' + adjetivo se traduce con esta estructura",
+        "annotations": [
+          {
+            "text": "However difficult the situation may be, we will find a solution together.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "Whatever it takes, we will finish this project before the deadline.",
+        "expected_answer": "Cueste lo que cueste, terminaremos este proyecto antes de la fecha límite.",
+        "hint_1": "La expresión 'whatever it takes' se traduce con 'cueste lo que cueste'",
+        "hint_2": "Esta expresión implica estar dispuesto a cualquier sacrificio",
+        "annotations": [
+          {
+            "text": "Whatever it takes, we will finish this project before the deadline.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: La empresa tecnológica anunció que lanzará su nuevo producto en marzo. Cueste lo que cueste, invertirán en la mejor campaña publicitaria posible. Los competidores han expresado dudas sobre el éxito del producto, pero digan lo que digan, la compañía mantiene su confianza. Sea como sea el resultado, este lanzamiento marcará un hito en la historia de la empresa. Los accionistas apoyan la decisión unánimemente.\nQUESTION: ¿Qué actitud muestra la empresa hacia las opiniones externas y los posibles obstáculos?",
+        "expected_answer": "La empresa muestra una actitud de determinación absoluta, ignorando las críticas y dispuesta a superar cualquier obstáculo económico para lograr sus objetivos.",
+        "hint_1": "Analiza las expresiones concesivas universales del texto",
+        "hint_2": "Considera cómo estas expresiones reflejan la mentalidad empresarial",
+        "annotations": [
+          {
+            "text": "PASSAGE: La empresa tecnológica anunció que lanzará su nuevo producto en marzo. ",
+            "form": null
+          },
+          {
+            "text": "Cueste",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que ",
+            "form": null
+          },
+          {
+            "text": "cueste",
+            "form": "subjunctive"
+          },
+          {
+            "text": ", invertirán en la mejor campaña publicitaria posible. Los competidores han expresado dudas sobre el éxito del producto, pero ",
+            "form": null
+          },
+          {
+            "text": "digan",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que ",
+            "form": null
+          },
+          {
+            "text": "digan",
+            "form": "subjunctive"
+          },
+          {
+            "text": ", la compañía mantiene su confianza. ",
+            "form": null
+          },
+          {
+            "text": "Sea",
+            "form": "subjunctive"
+          },
+          {
+            "text": " como ",
+            "form": null
+          },
+          {
+            "text": "sea",
+            "form": "subjunctive"
+          },
+          {
+            "text": " el resultado, este lanzamiento marcará un hito en la historia de la empresa. Los accionistas apoyan la decisión unánimemente.\nQUESTION: ¿Qué actitud muestra la empresa hacia las opiniones externas y los posibles obstáculos?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: El alpinista veterano preparaba su última expedición al Everest. Sus familiares le pedían que reconsiderara la decisión debido a su edad, pero él respondía que subiría esa montaña dijeron lo que dijeron. Haga el tiempo que haga, partiría en mayo según sus planes. Los médicos también expresaron preocupación por su estado físico, aunque él mantenía que sea como sea su condición, tenía experiencia suficiente. Esta sería su quinta tentativa de alcanzar la cumbre.\nQUESTION: ¿Cómo demuestra el texto la determinación inflexible del alpinista?",
+        "expected_answer": "El texto muestra su determinación a través de las concesivas universales que indican que ninguna opinión, condición climática o física lo hará cambiar de opinión sobre su expedición.",
+        "hint_1": "Observa las diferentes concesivas universales y qué obstáculos desafían",
+        "hint_2": "Relaciona estas expresiones con la personalidad del protagonista",
+        "annotations": [
+          {
+            "text": "PASSAGE: El alpinista veterano preparaba su última expedición al Everest. Sus familiares le pedían que reconsiderara la decisión debido a su edad, pero él respondía que subiría esa montaña ",
+            "form": null
+          },
+          {
+            "text": "dijeron",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que ",
+            "form": null
+          },
+          {
+            "text": "dijeron",
+            "form": "subjunctive"
+          },
+          {
+            "text": ". ",
+            "form": null
+          },
+          {
+            "text": "Haga",
+            "form": "subjunctive"
+          },
+          {
+            "text": " el tiempo que ",
+            "form": null
+          },
+          {
+            "text": "haga",
+            "form": "subjunctive"
+          },
+          {
+            "text": ", partiría en mayo según sus planes. Los médicos también expresaron preocupación por su estado físico, aunque él mantenía que ",
+            "form": null
+          },
+          {
+            "text": "sea",
+            "form": "subjunctive"
+          },
+          {
+            "text": " como ",
+            "form": null
+          },
+          {
+            "text": "sea",
+            "form": "subjunctive"
+          },
+          {
+            "text": " su condición, tenía experiencia suficiente. Esta sería su quinta tentativa de alcanzar la cumbre.\nQUESTION: ¿Cómo demuestra el texto la determinación inflexible del alpinista?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: La directora del hospital enfrentaba una crisis presupuestaria sin precedentes. Los políticos amenazaban con recortar fondos, pero ella declaró que mantendría los servicios esenciales cueste lo que cueste. El personal médico expresaba inquietudes sobre las condiciones laborales, sin embargo, dijeran lo que dijeran, ella seguiría priorizando la atención a los pacientes. Venga quien venga a inspeccionar las instalaciones, todo estaría en orden. Su compromiso con la salud pública era inquebrantable después de treinta años de carrera.\nQUESTION: ¿Qué principios guían las decisiones de la directora ante la crisis?",
+        "expected_answer": "La directora se guía por el compromiso absoluto con la salud pública y la atención a pacientes, manteniéndose firme ante presiones políticas y preocupaciones del personal.",
+        "hint_1": "Analiza qué valores mantiene firmes a pesar de las presiones externas",
+        "hint_2": "Considera el significado de las concesivas universales en su contexto profesional",
+        "annotations": [
+          {
+            "text": "PASSAGE: La directora del hospital enfrentaba una crisis presupuestaria sin precedentes. Los políticos amenazaban con recortar fondos, pero ella declaró que mantendría los servicios esenciales ",
+            "form": null
+          },
+          {
+            "text": "cueste",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que ",
+            "form": null
+          },
+          {
+            "text": "cueste",
+            "form": "subjunctive"
+          },
+          {
+            "text": ". El personal médico expresaba inquietudes sobre las condiciones laborales, sin embargo, ",
+            "form": null
+          },
+          {
+            "text": "dijeran",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que ",
+            "form": null
+          },
+          {
+            "text": "dijeran",
+            "form": "subjunctive"
+          },
+          {
+            "text": ", ella seguiría priorizando la atención a los pacientes. ",
+            "form": null
+          },
+          {
+            "text": "Venga",
+            "form": "subjunctive"
+          },
+          {
+            "text": " quien ",
+            "form": null
+          },
+          {
+            "text": "venga",
+            "form": "subjunctive"
+          },
+          {
+            "text": " a inspeccionar las instalaciones, todo estaría en orden. Su compromiso con la salud pública era inquebrantable después de treinta años de carrera.\nQUESTION: ¿Qué principios guían las decisiones de la directora ante la crisis?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: El nuevo gobierno prometió reformas educativas cueste lo que cuesta, pero los sindicatos mantienen su oposición. Digan lo que digan los expertos en economía, las medidas se implementarán gradualmente. Los padres de familia expresan preocupación por los cambios, aunque sea como sea el proceso, la administración confía en los resultados. Pasa lo que pasa, los estudiantes seguirán siendo la prioridad principal. Los directores escolares apoyan las iniciativas sin reservas. Hagan lo que hacen los opositores, el plan continuará según lo establecido. La inversión en infraestructura educativa representará el treinta por ciento del presupuesto nacional.\nERRORS: 3",
+        "expected_answer": "El nuevo gobierno prometió reformas educativas cueste lo que cueste, pero los sindicatos mantienen su oposición. Digan lo que digan los expertos en economía, las medidas se implementarán gradualmente. Los padres de familia expresan preocupación por los cambios, aunque sea como sea el proceso, la administración confía en los resultados. Pase lo que pase, los estudiantes seguirán siendo la prioridad principal. Los directores escolares apoyan las iniciativas sin reservas. Hagan lo que hagan los opositores, el plan continuará según lo establecido. La inversión en infraestructura educativa representará el treinta por ciento del presupuesto nacional.",
+        "hint_1": "Revisa las concesivas universales para verificar la concordancia de tiempos",
+        "hint_2": "Asegúrate de que ambas formas verbales en cada expresión sean idénticas",
+        "annotations": [
+          {
+            "text": "TEXT: El nuevo gobierno prometió reformas educativas ",
+            "form": null
+          },
+          {
+            "text": "cueste",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que cuesta, pero los sindicatos mantienen su oposición. ",
+            "form": null
+          },
+          {
+            "text": "Digan",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que ",
+            "form": null
+          },
+          {
+            "text": "digan",
+            "form": "subjunctive"
+          },
+          {
+            "text": " los expertos en economía, las medidas se implementarán gradualmente. Los padres de familia expresan preocupación por los cambios, aunque ",
+            "form": null
+          },
+          {
+            "text": "sea",
+            "form": "subjunctive"
+          },
+          {
+            "text": " como ",
+            "form": null
+          },
+          {
+            "text": "sea",
+            "form": "subjunctive"
+          },
+          {
+            "text": " el proceso, la administración confía en los resultados. Pasa lo que pasa, los estudiantes seguirán siendo la prioridad principal. Los directores escolares apoyan las iniciativas sin reservas. ",
+            "form": null
+          },
+          {
+            "text": "Hagan",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que hacen los opositores, el plan continuará según lo establecido. La inversión en infraestructura educativa representará el treinta por ciento del presupuesto nacional.\nERRORS: 3",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: La compañía teatral estrenaría su nueva obra sea como es la recepción del público. Los actores han ensayado durante meses y están preparados para cualquier reacción. Critiquen lo que critiquen los periodistas especializados, el director mantiene su visión artística original. Venga quien viene a la función de estreno, ofrecerán el mejor espectáculo posible. El equipo técnico ha perfeccionado todos los detalles escenográficos. Cueste lo que cueste, utilizarán efectos especiales de última generación para sorprender a la audiencia. Los productores confían en el éxito comercial de la propuesta teatral.\nERRORS: 3",
+        "expected_answer": "La compañía teatral estrenaría su nueva obra sea como sea la recepción del público. Los actores han ensayado durante meses y están preparados para cualquier reacción. Critiquen lo que critiquen los periodistas especializados, el director mantiene su visión artística original. Venga quien venga a la función de estreno, ofrecerán el mejor espectáculo posible. El equipo técnico ha perfeccionado todos los detalles escenográficos. Cueste lo que cueste, utilizarán efectos especiales de última generación para sorprender a la audiencia. Los productores confían en el éxito comercial de la propuesta teatral.",
+        "hint_1": "Busca errores en las estructuras de concesivas universales",
+        "hint_2": "Verifica que ambas formas verbales en cada expresión coincidan en modo y tiempo",
+        "annotations": [
+          {
+            "text": "TEXT: La compañía teatral estrenaría su nueva obra ",
+            "form": null
+          },
+          {
+            "text": "sea",
+            "form": "subjunctive"
+          },
+          {
+            "text": " como es la recepción del público. Los actores han ensayado durante meses y están preparados para cualquier reacción. ",
+            "form": null
+          },
+          {
+            "text": "Critiquen",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que ",
+            "form": null
+          },
+          {
+            "text": "critiquen",
+            "form": "subjunctive"
+          },
+          {
+            "text": " los periodistas especializados, el director mantiene su visión artística original. Venga quien viene a la función de estreno, ofrecerán el mejor espectáculo posible. El equipo técnico ha perfeccionado todos los detalles escenográficos. ",
+            "form": null
+          },
+          {
+            "text": "Cueste",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que ",
+            "form": null
+          },
+          {
+            "text": "cueste",
+            "form": "subjunctive"
+          },
+          {
+            "text": ", utilizarán efectos especiales de última generación para sorprender a la audiencia. Los productores confían en el éxito comercial de la propuesta teatral.\nERRORS: 3",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: El equipo de investigación continuará sus experimentos digan lo que dicen sus colegas escépticos. La universidad ha aprobado el presupuesto necesario para el proyecto innovador. Pase lo que pase durante las pruebas, documentarán todos los resultados meticulosamente. Los científicos están convencidos de la importancia de su trabajo para la medicina moderna. Opinen lo que opine la comunidad científica internacional, publicarán sus hallazgos en las mejores revistas especializadas. Cueste lo que cuesta, instalarán el equipo más avanzado disponible en el mercado. La investigación podría revolucionar el tratamiento de enfermedades degenerativas.\nERRORS: 3",
+        "expected_answer": "El equipo de investigación continuará sus experimentos digan lo que digan sus colegas escépticos. La universidad ha aprobado el presupuesto necesario para el proyecto innovador. Pase lo que pase durante las pruebas, documentarán todos los resultados meticulosamente. Los científicos están convencidos de la importancia de su trabajo para la medicina moderna. Opinen lo que opinen la comunidad científica internacional, publicarán sus hallazgos en las mejores revistas especializadas. Cueste lo que cueste, instalarán el equipo más avanzado disponible en el mercado. La investigación podría revolucionar el tratamiento de enfermedades degenerativas.",
+        "hint_1": "Identifica las concesivas universales mal formadas",
+        "hint_2": "Recuerda que ambas formas verbales deben estar en subjuntivo",
+        "annotations": [
+          {
+            "text": "TEXT: El equipo de investigación continuará sus experimentos ",
+            "form": null
+          },
+          {
+            "text": "digan",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que dicen sus colegas escépticos. La universidad ha aprobado el presupuesto necesario para el proyecto innovador. ",
+            "form": null
+          },
+          {
+            "text": "Pase",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que ",
+            "form": null
+          },
+          {
+            "text": "pase",
+            "form": "subjunctive"
+          },
+          {
+            "text": " durante las pruebas, documentarán todos los resultados meticulosamente. Los científicos están convencidos de la importancia de su trabajo para la medicina moderna. Opinen lo que opine la comunidad científica internacional, publicarán sus hallazgos en las mejores revistas especializadas. ",
+            "form": null
+          },
+          {
+            "text": "Cueste",
+            "form": "subjunctive"
+          },
+          {
+            "text": " lo que cuesta, instalarán el equipo más avanzado disponible en el mercado. La investigación podría revolucionar el tratamiento de enfermedades degenerativas.\nERRORS: 3",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-21T07:59:21.840Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "Preposiciones compuestas: a base de, a cambio de, a partir de, a falta de",
+    "module": "Core Spanish Contrasts",
+    "unit": "Preposiciones compuestas",
+    "level": "B2",
+    "grammar_focus": "indicative",
+    "difficulty": 3,
+    "type": "preposition",
+    "explanation": "Las preposiciones compuestas a base de, a cambio de, a partir de y a falta de se forman con la estructura 'a + sustantivo + de' y rigen sustantivos o infinitivos. Cada una tiene un significado específico: a base de (por medio de), a cambio de (a trueque de), a partir de (desde), a falta de (por ausencia de). Son frecuentes en registros formales y semiformales, y no deben confundirse con preposiciones simples.",
+    "examples": [
+      {
+        "es": "La empresa creció a base de trabajo constante y dedicación.",
+        "en": "The company grew by means of constant work and dedication."
+      },
+      {
+        "es": "Te doy mi bicicleta a cambio de tu patinete eléctrico.",
+        "en": "I'll give you my bicycle in exchange for your electric scooter."
+      },
+      {
+        "es": "A partir de enero implementaremos el nuevo sistema informático.",
+        "en": "Starting from January we will implement the new computer system."
+      },
+      {
+        "es": "A falta de evidencias concretas, el caso quedó archivado.",
+        "en": "In the absence of concrete evidence, the case was filed away."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "El chef consiguió su fama internacional ___ crear platos innovadores que combinaban tradición y modernidad.",
+        "expected_answer": "a base de",
+        "hint_1": "Esta preposición compuesta indica el medio por el cual se consigue algo",
+        "hint_2": "La estructura es 'a + sustantivo + de' y significa 'por medio de'",
+        "annotations": [
+          {
+            "text": "El chef consiguió su fama internacional ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " crear platos innovadores que combinaban tradición y modernidad.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los investigadores podrán acceder a los archivos históricos ___ firmar un acuerdo de confidencialidad con la universidad.",
+        "expected_answer": "a cambio de",
+        "hint_1": "Esta preposición compuesta expresa una condición o intercambio",
+        "hint_2": "Indica que algo se obtiene dando otra cosa a cambio",
+        "annotations": [
+          {
+            "text": "Los investigadores podrán acceder a los archivos históricos ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " firmar un acuerdo de confidencialidad con la universidad.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "La biblioteca municipal ampliará su horario de atención ___ septiembre para satisfacer la demanda estudiantil.",
+        "expected_answer": "a partir de",
+        "hint_1": "Esta preposición compuesta marca el momento inicial de algo",
+        "hint_2": "Indica el punto temporal desde el cual comienza una acción",
+        "annotations": [
+          {
+            "text": "La biblioteca municipal ampliará su horario de atención ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " septiembre para satisfacer la demanda estudiantil.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Como no tenían herramientas adecuadas, improvisaron con los materiales disponibles. → Rewrite using 'a falta de'",
+        "expected_answer": "A falta de herramientas adecuadas, improvisaron con los materiales disponibles.",
+        "hint_1": "La preposición compuesta 'a falta de' expresa ausencia o carencia",
+        "hint_2": "Coloca 'a falta de' al inicio seguido de lo que falta",
+        "annotations": [
+          {
+            "text": "Base: Como no tenían herramientas adecuadas, improvisaron con los materiales disponibles. → Rewrite using 'a falta de'",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Desde el próximo lunes, todos los empleados trabajarán bajo el nuevo protocolo. → Rewrite using 'a partir de'",
+        "expected_answer": "A partir del próximo lunes, todos los empleados trabajarán bajo el nuevo protocolo.",
+        "hint_1": "'A partir de' marca el momento inicial de una acción o proceso",
+        "hint_2": "Sustituye 'desde' por 'a partir de' manteniendo el sentido temporal",
+        "annotations": [
+          {
+            "text": "Base: Desde el próximo lunes, todos los empleados trabajarán bajo el nuevo protocolo. → Rewrite using 'a partir de'",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Si me prestas tu coche, te ayudo con la mudanza. → Rewrite using 'a cambio de'",
+        "expected_answer": "A cambio de que me prestes tu coche, te ayudo con la mudanza.",
+        "hint_1": "'A cambio de' expresa intercambio o condición",
+        "hint_2": "Puede ir seguido de 'que + subjuntivo' cuando introduce una oración subordinada",
+        "annotations": [
+          {
+            "text": "Base: Si me prestas tu coche, te ayudo con la mudanza. → Rewrite using 'a cambio de'",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "Starting next month, the company will implement flexible working hours for all departments.",
+        "expected_answer": "A partir del próximo mes, la empresa implementará horarios flexibles para todos los departamentos.",
+        "hint_1": "'Starting' se traduce con una preposición compuesta específica",
+        "hint_2": "La estructura es 'a + sustantivo + de' para expresar inicio temporal",
+        "annotations": [
+          {
+            "text": "Starting next month, the company will implement flexible working hours for all departments.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "In the absence of official confirmation, the media published unverified information.",
+        "expected_answer": "A falta de confirmación oficial, los medios publicaron información sin verificar.",
+        "hint_1": "'In the absence of' requiere una preposición compuesta específica en español",
+        "hint_2": "Esta estructura expresa carencia o ausencia de algo",
+        "annotations": [
+          {
+            "text": "In the absence of official confirmation, the media published unverified information.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The athlete achieved success by means of rigorous training and mental discipline.",
+        "expected_answer": "El atleta logró el éxito a base de entrenamiento riguroso y disciplina mental.",
+        "hint_1": "'By means of' se expresa con una preposición compuesta que indica método",
+        "hint_2": "Esta estructura muestra cómo se consigue o realiza algo",
+        "annotations": [
+          {
+            "text": "The athlete achieved success by means of rigorous training and mental discipline.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: La startup tecnológica había crecido a base de innovación constante y reinversión de beneficios. A partir de su quinto año, decidieron expandirse internacionalmente. A falta de experiencia en mercados extranjeros, contrataron consultores especializados. El CEO ofreció acciones de la empresa a cambio de asesoramiento estratégico de expertos reconocidos. Esta combinación de factores les permitió establecerse exitosamente en tres continentes diferentes, manteniendo su filosofía empresarial original.\nQUESTION: ¿Qué estrategias utilizó la empresa para superar sus limitaciones durante la expansión internacional?",
+        "expected_answer": "La empresa contrató consultores especializados para compensar su falta de experiencia en mercados extranjeros y ofreció acciones a cambio del asesoramiento de expertos reconocidos.",
+        "hint_1": "Busca en el texto las soluciones que adoptaron ante sus carencias",
+        "hint_2": "Identifica qué intercambios o compensaciones realizaron",
+        "annotations": [
+          {
+            "text": "PASSAGE: La startup tecnológica había crecido a base de innovación constante y reinversión de beneficios. A partir de su quinto año, decidieron expandirse internacionalmente. A falta de experiencia en mercados extranjeros, contrataron consultores especializados. El CEO ofreció acciones de la empresa a cambio de asesoramiento estratégico de expertos reconocidos. Esta combinación de factores les permitió establecerse exitosamente en tres continentes diferentes, manteniendo su filosofía empresarial original.\nQUESTION: ¿Qué estrategias utilizó la empresa para superar sus limitaciones durante la expansión internacional?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: El proyecto de restauración del edificio histórico enfrentó múltiples desafíos. A falta de documentación original, los arquitectos trabajaron en base de fotografías antiguas y testimonios de vecinos. A partir de marzo, implementaron técnicas modernas de conservación. Los propietarios acordaron financiar las obras a cambio de recibir subvenciones gubernamentales. El equipo logró mantener la autenticidad arquitectónica mientras mejoraba la funcionalidad del edificio. El resultado final superó todas las expectativas de la comunidad local.\nQUESTION: ¿Cómo resolvieron la ausencia de documentación técnica original del edificio?",
+        "expected_answer": "Los arquitectos compensaron la falta de documentación original utilizando fotografías antiguas y recopilando testimonios de los vecinos de la zona.",
+        "hint_1": "Fíjate en los recursos alternativos que mencionan en el texto",
+        "hint_2": "La respuesta está relacionada con fuentes de información no oficiales",
+        "annotations": [
+          {
+            "text": "PASSAGE: El proyecto de restauración del edificio histórico enfrentó múltiples desafíos. A falta de documentación original, los arquitectos trabajaron en base de fotografías antiguas y testimonios de vecinos. A partir de marzo, implementaron técnicas modernas de conservación. Los propietarios acordaron financiar las obras a cambio de recibir subvenciones gubernamentales. El equipo logró mantener la autenticidad arquitectónica mientras mejoraba la funcionalidad del edificio. El resultado final superó todas las expectativas de la comunidad local.\nQUESTION: ¿Cómo resolvieron la ausencia de documentación técnica original del edificio?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: La chef María Fernández revolucionó la gastronomía local a base de fusionar técnicas tradicionales con ingredientes modernos. A partir de 2020, su restaurante comenzó a ofrecer menús sostenibles. A falta de proveedores locales de productos orgánicos, estableció su propio huerto urbano. Los clientes pueden participar en talleres culinarios a cambio de colaborar en las labores de cultivo. Esta iniciativa no solo redujo los costes del restaurante, sino que también creó una comunidad gastronómica comprometida con el medio ambiente.\nQUESTION: ¿Qué beneficios obtuvo el restaurante más allá de la reducción de costes?",
+        "expected_answer": "El restaurante logró crear una comunidad gastronómica comprometida con el medio ambiente gracias a la participación de los clientes en los talleres y labores de cultivo.",
+        "hint_1": "Busca los efectos secundarios positivos que se mencionan al final",
+        "hint_2": "La respuesta se relaciona con la formación de vínculos sociales",
+        "annotations": [
+          {
+            "text": "PASSAGE: La chef María Fernández revolucionó la gastronomía local a base de fusionar técnicas tradicionales con ingredientes modernos. A partir de 2020, su restaurante comenzó a ofrecer menús sostenibles. A falta de proveedores locales de productos orgánicos, estableció su propio huerto urbano. Los clientes pueden participar en talleres culinarios a cambio de colaborar en las labores de cultivo. Esta iniciativa no solo redujo los costes del restaurante, sino que también creó una comunidad gastronómica comprometida con el medio ambiente.\nQUESTION: ¿Qué beneficios obtuvo el restaurante más allá de la reducción de costes?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: El nuevo programa educativo se implementará desde enero en todas las escuelas públicas. Los docentes han logrado excelentes resultados a base de metodologías innovadoras y dedicación personal. A partir el próximo trimestre, se introducirán tablets para cada estudiante. A falta de presupuesto suficiente, algunas escuelas rurales recibirán equipos reacondicionados en cambio de participar en proyectos piloto. Los padres podrán acceder a las calificaciones de sus hijos a base del nuevo sistema digital. A partir de septiembre, también habrá talleres de formación continua para los profesores. En falta de aulas adicionales, algunas clases se realizarán en espacios comunitarios cercanos.\nERRORS: 4",
+        "expected_answer": "El nuevo programa educativo se implementará a partir de enero en todas las escuelas públicas. Los docentes han logrado excelentes resultados a base de metodologías innovadoras y dedicación personal. A partir del próximo trimestre, se introducirán tablets para cada estudiante. A falta de presupuesto suficiente, algunas escuelas rurales recibirán equipos reacondicionados a cambio de participar en proyectos piloto. Los padres podrán acceder a las calificaciones de sus hijos a través del nuevo sistema digital. A partir de septiembre, también habrá talleres de formación continua para los profesores. A falta de aulas adicionales, algunas clases se realizarán en espacios comunitarios cercanos.",
+        "hint_1": "Revisa el uso correcto de las preposiciones compuestas con 'a + sustantivo + de'",
+        "hint_2": "Presta atención a las contracciones y a cuándo no es apropiado usar estas preposiciones",
+        "annotations": [
+          {
+            "text": "TEXT: El nuevo programa educativo se implementará desde enero en todas las escuelas públicas. Los docentes han logrado excelentes resultados a base de metodologías innovadoras y dedicación personal. A partir el próximo trimestre, se introducirán tablets para cada estudiante. A falta de presupuesto suficiente, algunas escuelas rurales recibirán equipos reacondicionados en cambio de participar en proyectos piloto. Los padres podrán acceder a las calificaciones de sus hijos a base del nuevo sistema digital. A partir de septiembre, también habrá talleres de formación continua para los profesores. En falta de aulas adicionales, algunas clases se realizarán en espacios comunitarios cercanos.\nERRORS: 4",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: La empresa de biotecnología ha crecido a base de investigación constante y alianzas estratégicas con universidades. A partir de este año, expandirán sus operaciones a mercados internacionales. En falta de laboratorios propios en el extranjero, establecerán colaboraciones con centros de investigación locales. Los científicos extranjeros pueden unirse al equipo a cambio de compartir sus patentes con la empresa. A base de estas colaboraciones, esperan desarrollar nuevos tratamientos médicos. A partir del segundo semestre, implementarán un programa de intercambio académico. Los investigadores junior tendrán acceso a tecnología avanzada en cambio de comprometerse a trabajar tres años en la empresa.\nERRORS: 3",
+        "expected_answer": "La empresa de biotecnología ha crecido a base de investigación constante y alianzas estratégicas con universidades. A partir de este año, expandirán sus operaciones a mercados internacionales. A falta de laboratorios propios en el extranjero, establecerán colaboraciones con centros de investigación locales. Los científicos extranjeros pueden unirse al equipo a cambio de compartir sus patentes con la empresa. A través de estas colaboraciones, esperan desarrollar nuevos tratamientos médicos. A partir del segundo semestre, implementarán un programa de intercambio académico. Los investigadores junior tendrán acceso a tecnología avanzada a cambio de comprometerse a trabajar tres años en la empresa.",
+        "hint_1": "Identifica cuándo usar 'a falta de' versus 'en falta de'",
+        "hint_2": "No todas las frases requieren preposiciones compuestas con 'a + sustantivo + de'",
+        "annotations": [
+          {
+            "text": "TEXT: La empresa de biotecnología ha crecido a base de investigación constante y alianzas estratégicas con universidades. A partir de este año, expandirán sus operaciones a mercados internacionales. En falta de laboratorios propios en el extranjero, establecerán colaboraciones con centros de investigación locales. Los científicos extranjeros pueden unirse al equipo a cambio de compartir sus patentes con la empresa. A base de estas colaboraciones, esperan desarrollar nuevos tratamientos médicos. A partir del segundo semestre, implementarán un programa de intercambio académico. Los investigadores junior tendrán acceso a tecnología avanzada en cambio de comprometerse a trabajar tres años en la empresa.\nERRORS: 3",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: El festival de música independiente ha logrado reconocimiento internacional a base de programar artistas emergentes y crear experiencias únicas. Desde el próximo año, se realizará en una nueva sede con mayor capacidad. A falta de patrocinadores tradicionales, los organizadores han desarrollado un modelo de financiación colaborativa. Los asistentes pueden obtener entradas gratuitas en cambio de realizar trabajo voluntario durante el evento. A partir de la próxima edición, incluirán talleres educativos sobre producción musical. A base de estas iniciativas pedagógicas, esperan formar nuevos talentos locales. Los músicos participantes recibirán grabaciones profesionales de sus actuaciones a cambio de ceder los derechos de transmisión online.\nERRORS: 2",
+        "expected_answer": "El festival de música independiente ha logrado reconocimiento internacional a base de programar artistas emergentes y crear experiencias únicas. A partir del próximo año, se realizará en una nueva sede con mayor capacidad. A falta de patrocinadores tradicionales, los organizadores han desarrollado un modelo de financiación colaborativa. Los asistentes pueden obtener entradas gratuitas a cambio de realizar trabajo voluntario durante el evento. A partir de la próxima edición, incluirán talleres educativos sobre producción musical. A través de estas iniciativas pedagógicas, esperan formar nuevos talentos locales. Los músicos participantes recibirán grabaciones profesionales de sus actuaciones a cambio de ceder los derechos de transmisión online.",
+        "hint_1": "Considera cuándo 'desde' es más apropiado que 'a partir de'",
+        "hint_2": "Evalúa si 'a base de' es siempre la preposición correcta para expresar medio o método",
+        "annotations": [
+          {
+            "text": "TEXT: El festival de música independiente ha logrado reconocimiento internacional a base de programar artistas emergentes y crear experiencias únicas. Desde el próximo año, se realizará en una nueva sede con mayor capacidad. A falta de patrocinadores tradicionales, los organizadores han desarrollado un modelo de financiación colaborativa. Los asistentes pueden obtener entradas gratuitas en cambio de realizar trabajo voluntario durante el evento. A partir de la próxima edición, incluirán talleres educativos sobre producción musical. A base de estas iniciativas pedagógicas, esperan formar nuevos talentos locales. Los músicos participantes recibirán grabaciones profesionales de sus actuaciones a cambio de ceder los derechos de transmisión online.\nERRORS: 2",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-21T08:00:31.803Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "Sugerencias: ¿Y si + imp. subj.? / ¿Qué tal si…? / ¿Por qué no…?",
+    "module": "Conversational Spanish",
+    "unit": "Attention-Getters & Reaction Markers",
+    "level": "B1",
+    "grammar_focus": "both",
+    "difficulty": 2,
+    "type": "pragmatic_marker",
+    "explanation": "En español usamos diferentes fórmulas para hacer sugerencias: '¿Y si + imperfecto de subjuntivo?' es más hipotética (¿Y si fuéramos al cine?), '¿Qué tal si...?' acepta indicativo o subjuntivo y es casual (¿Qué tal si probamos otro restaurante?), y '¿Por qué no...?' usa presente de indicativo y es directa (¿Por qué no descansas un poco?). Cada fórmula tiene un registro diferente, desde casual hasta semiformal.",
+    "examples": [
+      {
+        "es": "¿Y si hiciéramos una barbacoa este fin de semana?",
+        "en": "What if we had a barbecue this weekend?"
+      },
+      {
+        "es": "¿Qué tal si visitamos el museo de arte moderno?",
+        "en": "How about we visit the modern art museum?"
+      },
+      {
+        "es": "¿Por qué no llamas a tu hermana para invitarla?",
+        "en": "Why don't you call your sister to invite her?"
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "Hace mucho calor aquí dentro. ___ abriéramos las ventanas para que entre aire fresco?",
+        "expected_answer": "¿Y si",
+        "hint_1": "Necesitas una fórmula de sugerencia que requiera imperfecto de subjuntivo",
+        "hint_2": "Esta fórmula es más hipotética y empieza con una conjunción condicional",
+        "annotations": [
+          {
+            "text": "Hace",
+            "form": "indicative"
+          },
+          {
+            "text": " mucho calor aquí dentro. ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "abriéramos",
+            "form": "subjunctive"
+          },
+          {
+            "text": " las ventanas para que ",
+            "form": null
+          },
+          {
+            "text": "entre",
+            "form": "subjunctive"
+          },
+          {
+            "text": " aire fresco?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "¿___ si organizamos una cena en casa para celebrar tu cumpleaños?",
+        "expected_answer": "Qué tal",
+        "hint_1": "Esta fórmula de sugerencia es casual y acepta presente de indicativo",
+        "hint_2": "Es una expresión que pregunta sobre la opinión de hacer algo",
+        "annotations": [
+          {
+            "text": "¿",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " si ",
+            "form": null
+          },
+          {
+            "text": "organizamos",
+            "form": "indicative"
+          },
+          {
+            "text": " una cena en casa para ",
+            "form": null
+          },
+          {
+            "text": "celebrar",
+            "form": null
+          },
+          {
+            "text": " tu cumpleaños?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Llevas trabajando toda la mañana sin parar. ¿Por qué no ___ un descanso de quince minutos?",
+        "expected_answer": "tomas",
+        "hint_1": "Esta fórmula de sugerencia usa presente de indicativo",
+        "hint_2": "El verbo significa 'coger' o 'hacer' cuando hablamos de descansos",
+        "annotations": [
+          {
+            "text": "Llevas",
+            "form": "indicative"
+          },
+          {
+            "text": " trabajando toda la mañana sin parar. ¿Por qué no ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " un descanso de quince minutos?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Podríamos ir al teatro el sábado por la noche. → Rewrite using '¿Y si...?'",
+        "expected_answer": "¿Y si fuéramos al teatro el sábado por la noche?",
+        "hint_1": "Esta fórmula requiere imperfecto de subjuntivo",
+        "hint_2": "Transforma 'podríamos ir' usando la estructura '¿Y si + subjuntivo?'",
+        "annotations": [
+          {
+            "text": "Base: ",
+            "form": null
+          },
+          {
+            "text": "Podríamos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "ir",
+            "form": null
+          },
+          {
+            "text": " al teatro el sábado por la noche. → Rewrite using '¿Y si...?'",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Deberías pedirle ayuda a tu profesor de matemáticas. → Rewrite using '¿Por qué no...?'",
+        "expected_answer": "¿Por qué no le pides ayuda a tu profesor de matemáticas?",
+        "hint_1": "Esta fórmula usa presente de indicativo en segunda persona",
+        "hint_2": "Cambia 'deberías pedir' por la forma correspondiente con '¿Por qué no...?'",
+        "annotations": [
+          {
+            "text": "Base: ",
+            "form": null
+          },
+          {
+            "text": "Deberías",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "pedirle",
+            "form": null
+          },
+          {
+            "text": " ayuda a tu profesor de matemáticas. → Rewrite using '¿Por qué no...?'",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Sería buena idea que probaran el nuevo restaurante japonés. → Rewrite using '¿Qué tal si...?'",
+        "expected_answer": "¿Qué tal si prueban el nuevo restaurante japonés?",
+        "hint_1": "Esta fórmula puede usar presente de indicativo",
+        "hint_2": "Transforma 'sería buena idea que probaran' usando '¿Qué tal si...?'",
+        "annotations": [
+          {
+            "text": "Base: ",
+            "form": null
+          },
+          {
+            "text": "Sería",
+            "form": "indicative"
+          },
+          {
+            "text": " buena idea que ",
+            "form": null
+          },
+          {
+            "text": "probaran",
+            "form": "subjunctive"
+          },
+          {
+            "text": " el nuevo restaurante japonés. → Rewrite using '¿Qué tal si...?'",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "What if we left a bit earlier to avoid traffic?",
+        "expected_answer": "¿Y si saliéramos un poco antes para evitar el tráfico?",
+        "hint_1": "Esta sugerencia hipotética requiere '¿Y si + imperfecto de subjuntivo?'",
+        "hint_2": "El verbo 'left' se traduce como 'saliéramos' en imperfecto de subjuntivo",
+        "annotations": [
+          {
+            "text": "What if we left a bit earlier to avoid traffic?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "Why don't you ask for a raise at work?",
+        "expected_answer": "¿Por qué no pides un aumento en el trabajo?",
+        "hint_1": "Esta sugerencia directa usa '¿Por qué no + presente de indicativo?'",
+        "hint_2": "Un 'raise' se dice 'aumento' en español",
+        "annotations": [
+          {
+            "text": "Why don't you ask for a raise at work?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "How about we meet at the park instead of the café?",
+        "expected_answer": "¿Qué tal si nos encontramos en el parque en lugar del café?",
+        "hint_1": "Esta sugerencia casual usa '¿Qué tal si...?' con presente de indicativo",
+        "hint_2": "'Meet' en este contexto se traduce como 'nos encontramos'",
+        "annotations": [
+          {
+            "text": "How about we meet at the park instead of the café?",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-21T08:02:17.659Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": true
+  },
+  {
+    "title": "Pronombres relativos con preposición: en el que, del que, por el cual",
+    "module": "Advanced Clauses",
+    "unit": "Relative Clauses",
+    "level": "B2",
+    "grammar_focus": "indicative",
+    "difficulty": 3,
+    "type": "relative_clause",
+    "explanation": "Los pronombres relativos con preposición (en el/la que, del/de la que, por el/la cual) se usan cuando el verbo o contexto requiere una preposición específica. El artículo concuerda en género y número con el antecedente. Las formas con 'cual' son más formales que las formas con 'que'.",
+    "examples": [
+      {
+        "es": "El proyecto en el que trabajo requiere mucha dedicación.",
+        "en": "The project I work on requires a lot of dedication."
+      },
+      {
+        "es": "La empresa de la cual me despidieron cerró el año pasado.",
+        "en": "The company I was fired from closed last year."
+      },
+      {
+        "es": "El método por el cual resolvimos el problema fue innovador.",
+        "en": "The method by which we solved the problem was innovative."
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "La conferencia ___ participé ayer trataba sobre inteligencia artificial y sus aplicaciones en la medicina moderna.",
+        "expected_answer": "en la que",
+        "hint_1": "Piensa en qué preposición necesita el verbo 'participar'",
+        "hint_2": "El antecedente es femenino singular",
+        "annotations": [
+          {
+            "text": "La conferencia ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "participé",
+            "form": "indicative"
+          },
+          {
+            "text": " ayer ",
+            "form": null
+          },
+          {
+            "text": "trataba",
+            "form": "indicative"
+          },
+          {
+            "text": " sobre inteligencia artificial y sus aplicaciones en la medicina moderna.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los argumentos ___ se basa tu teoría necesitan más evidencia científica para ser completamente convincentes.",
+        "expected_answer": "en los que",
+        "hint_1": "El verbo 'basarse' requiere la preposición 'en'",
+        "hint_2": "El antecedente es masculino plural",
+        "annotations": [
+          {
+            "text": "Los argumentos ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " se ",
+            "form": null
+          },
+          {
+            "text": "basa",
+            "form": "indicative"
+          },
+          {
+            "text": " tu teoría ",
+            "form": null
+          },
+          {
+            "text": "necesitan",
+            "form": "indicative"
+          },
+          {
+            "text": " más evidencia científica para ser completamente convincentes.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "La razón ___ decidimos cambiar de estrategia fue el fracaso de nuestros intentos anteriores en el mercado internacional.",
+        "expected_answer": "por la cual",
+        "hint_1": "Considera qué preposición expresa causa o motivo",
+        "hint_2": "El antecedente es femenino singular y el registro es formal",
+        "annotations": [
+          {
+            "text": "La razón ",
+            "form": null
+          },
+          {
+            "text": "___",
+            "form": null
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "decidimos",
+            "form": "indicative"
+          },
+          {
+            "text": " cambiar de estrategia ",
+            "form": null
+          },
+          {
+            "text": "fue",
+            "form": "indicative"
+          },
+          {
+            "text": " el fracaso de nuestros intentos anteriores en el mercado internacional.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: El documento contiene información confidencial. Necesito el documento para mi investigación. → Rewrite using pronombres relativos con preposición",
+        "expected_answer": "El documento del que necesito información para mi investigación contiene datos confidenciales.",
+        "hint_1": "Combina las dos oraciones usando un pronombre relativo con preposición",
+        "hint_2": "Piensa en qué preposición conecta 'necesitar' con 'documento'",
+        "annotations": [
+          {
+            "text": "Base: El documento ",
+            "form": null
+          },
+          {
+            "text": "contiene",
+            "form": "indicative"
+          },
+          {
+            "text": " información confidencial. ",
+            "form": null
+          },
+          {
+            "text": "Necesito",
+            "form": "indicative"
+          },
+          {
+            "text": " el documento para mi investigación. → Rewrite using pronombres relativos con preposición",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: La plataforma digital es muy innovadora. Trabajamos con esta plataforma todos los días. → Rewrite using pronombres relativos con preposición",
+        "expected_answer": "La plataforma digital con la que trabajamos todos los días es muy innovadora.",
+        "hint_1": "Identifica qué preposición necesita el verbo 'trabajar' en este contexto",
+        "hint_2": "El antecedente es femenino singular",
+        "annotations": [
+          {
+            "text": "Base: La plataforma digital ",
+            "form": null
+          },
+          {
+            "text": "es",
+            "form": "indicative"
+          },
+          {
+            "text": " muy innovadora. ",
+            "form": null
+          },
+          {
+            "text": "Trabajamos",
+            "form": "indicative"
+          },
+          {
+            "text": " con esta plataforma todos los días. → Rewrite using pronombres relativos con preposición",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Los criterios son muy estrictos. El comité evalúa las propuestas según estos criterios. → Rewrite using pronombres relativos con preposición",
+        "expected_answer": "Los criterios según los cuales el comité evalúa las propuestas son muy estrictos.",
+        "hint_1": "La preposición 'según' debe mantenerse en la oración relativa",
+        "hint_2": "Usa la forma con 'cuales' para un registro más formal",
+        "annotations": [
+          {
+            "text": "Base: Los criterios ",
+            "form": null
+          },
+          {
+            "text": "son",
+            "form": "indicative"
+          },
+          {
+            "text": " muy estrictos. El comité ",
+            "form": null
+          },
+          {
+            "text": "evalúa",
+            "form": "indicative"
+          },
+          {
+            "text": " las propuestas según estos criterios. → Rewrite using pronombres relativos con preposición",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The building in which we hold our monthly meetings has excellent acoustics and modern technology.",
+        "expected_answer": "El edificio en el que celebramos nuestras reuniones mensuales tiene una acústica excelente y tecnología moderna.",
+        "hint_1": "El verbo 'hold meetings' se traduce como 'celebrar reuniones'",
+        "hint_2": "Usa la preposición 'en' con el pronombre relativo",
+        "annotations": [
+          {
+            "text": "The building in which we hold our monthly meetings has excellent acoustics and modern technology.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The methodology through which we analyzed the data revealed surprising patterns in consumer behavior.",
+        "expected_answer": "La metodología por la cual analizamos los datos reveló patrones sorprendentes en el comportamiento del consumidor.",
+        "hint_1": "'Through which' indica medio o instrumento, usa 'por'",
+        "hint_2": "Usa la forma formal 'la cual' para registro académico",
+        "annotations": [
+          {
+            "text": "The methodology through which we analyzed the data revealed surprising patterns in consumer behavior.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "translation",
+        "prompt": "The colleagues with whom I collaborated on this research are experts in environmental science.",
+        "expected_answer": "Los colegas con los que colaboré en esta investigación son expertos en ciencias ambientales.",
+        "hint_1": "'Collaborate with' requiere la preposición 'con'",
+        "hint_2": "El antecedente es masculino plural",
+        "annotations": [
+          {
+            "text": "The colleagues with whom I collaborated on this research are experts in environmental science.",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: La empresa tecnológica en la que trabajo desde hace cinco años ha implementado un nuevo sistema de gestión. Los procedimientos por los cuales ahora procesamos las solicitudes son mucho más eficientes que los anteriores. El software del que dependemos para nuestras operaciones diarias se actualiza automáticamente cada semana. Las reuniones con las que coordinamos los proyectos se realizan virtualmente, lo que nos permite colaborar con equipos internacionales. Los resultados que hemos obtenido con estos cambios han superado nuestras expectativas iniciales.\nQUESTION: ¿Qué aspectos del nuevo sistema de trabajo han contribuido más al éxito de la empresa?",
+        "expected_answer": "Los procedimientos más eficientes, el software que se actualiza automáticamente y las reuniones virtuales que permiten colaboración internacional han contribuido al éxito.",
+        "hint_1": "Identifica los elementos específicos que se mencionan como mejoras",
+        "hint_2": "Piensa en cómo cada cambio ha impactado positivamente el trabajo",
+        "annotations": null
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: El museo de arte contemporáneo del que te hablé ayer abrirá una nueva exposición el próximo mes. Las obras por las cuales el museo es famoso incluyen pinturas y esculturas de artistas internacionales. El edificio en el cual se encuentra ubicado es un ejemplo perfecto de arquitectura moderna del siglo XXI. Los visitantes con los que hablé durante mi última visita quedaron impresionados por la calidad de las instalaciones. La fundación de la que recibe financiamiento el museo apoya especialmente proyectos educativos innovadores.\nQUESTION: ¿Qué elementos hacen especial a este museo según la descripción?",
+        "expected_answer": "Su fama por obras de artistas internacionales, su edificio de arquitectura moderna del siglo XXI y el apoyo a proyectos educativos innovadores lo hacen especial.",
+        "hint_1": "Considera tanto los aspectos artísticos como arquitectónicos y educativos",
+        "hint_2": "Piensa en qué características se destacan específicamente",
+        "annotations": [
+          {
+            "text": "PASSAGE: El museo de arte contemporáneo del que te ",
+            "form": null
+          },
+          {
+            "text": "hablé",
+            "form": "indicative"
+          },
+          {
+            "text": " ayer ",
+            "form": null
+          },
+          {
+            "text": "abrirá",
+            "form": "indicative"
+          },
+          {
+            "text": " una nueva exposición el próximo mes. Las obras por las cuales el museo ",
+            "form": null
+          },
+          {
+            "text": "es",
+            "form": "indicative"
+          },
+          {
+            "text": " famoso ",
+            "form": null
+          },
+          {
+            "text": "incluyen",
+            "form": "indicative"
+          },
+          {
+            "text": " pinturas y esculturas de artistas internacionales. El edificio en el cual se ",
+            "form": null
+          },
+          {
+            "text": "encuentra",
+            "form": "indicative"
+          },
+          {
+            "text": " ubicado ",
+            "form": null
+          },
+          {
+            "text": "es",
+            "form": "indicative"
+          },
+          {
+            "text": " un ejemplo perfecto de arquitectura moderna del siglo XXI. Los visitantes con los que ",
+            "form": null
+          },
+          {
+            "text": "hablé",
+            "form": "indicative"
+          },
+          {
+            "text": " durante mi última visita ",
+            "form": null
+          },
+          {
+            "text": "quedaron",
+            "form": "indicative"
+          },
+          {
+            "text": " impresionados por la calidad de las instalaciones. La fundación de la que ",
+            "form": null
+          },
+          {
+            "text": "recibe",
+            "form": "indicative"
+          },
+          {
+            "text": " financiamiento el museo ",
+            "form": null
+          },
+          {
+            "text": "apoya",
+            "form": "indicative"
+          },
+          {
+            "text": " especialmente proyectos educativos innovadores.\nQUESTION: ¿Qué elementos ",
+            "form": null
+          },
+          {
+            "text": "hacen",
+            "form": "indicative"
+          },
+          {
+            "text": " especial a este museo según la descripción?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: La investigación científica de la que formo parte desde el año pasado se centra en energías renovables. Los experimentos por los cuales hemos obtenido datos preliminares sugieren resultados prometedores. El laboratorio en el que trabajamos cuenta con equipos de última generación importados de Alemania y Japón. Los colegas con los que colaboro diariamente provienen de diferentes países y aportan perspectivas únicas. El proyecto del que esperamos obtener una patente podría revolucionar la industria energética en los próximos cinco años.\nQUESTION: ¿Qué aspectos de esta investigación indican su potencial de éxito?",
+        "expected_answer": "Los experimentos con resultados prometedores, el laboratorio con equipos de última generación, la colaboración internacional y la posibilidad de obtener una patente revolucionaria indican el potencial de éxito.",
+        "hint_1": "Identifica los elementos que sugieren calidad y potencial innovador",
+        "hint_2": "Considera tanto los recursos como los resultados mencionados",
+        "annotations": [
+          {
+            "text": "PASSAGE: La investigación científica de la que ",
+            "form": null
+          },
+          {
+            "text": "formo",
+            "form": "indicative"
+          },
+          {
+            "text": " parte desde el año pasado se ",
+            "form": null
+          },
+          {
+            "text": "centra",
+            "form": "indicative"
+          },
+          {
+            "text": " en energías renovables. Los experimentos por los cuales ",
+            "form": null
+          },
+          {
+            "text": "hemos obtenido",
+            "form": "indicative"
+          },
+          {
+            "text": " datos preliminares ",
+            "form": null
+          },
+          {
+            "text": "sugieren",
+            "form": "indicative"
+          },
+          {
+            "text": " resultados prometedores. El laboratorio en el que ",
+            "form": null
+          },
+          {
+            "text": "trabajamos",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "cuenta",
+            "form": "indicative"
+          },
+          {
+            "text": " con equipos de última generación importados de Alemania y Japón. Los colegas con los que ",
+            "form": null
+          },
+          {
+            "text": "colaboro",
+            "form": "indicative"
+          },
+          {
+            "text": " diariamente ",
+            "form": null
+          },
+          {
+            "text": "provienen",
+            "form": "indicative"
+          },
+          {
+            "text": " de diferentes países y ",
+            "form": null
+          },
+          {
+            "text": "aportan",
+            "form": "indicative"
+          },
+          {
+            "text": " perspectivas únicas. El proyecto del que ",
+            "form": null
+          },
+          {
+            "text": "esperamos",
+            "form": "indicative"
+          },
+          {
+            "text": " obtener una patente ",
+            "form": null
+          },
+          {
+            "text": "podría",
+            "form": "indicative"
+          },
+          {
+            "text": " revolucionar la industria energética en los próximos cinco años.\nQUESTION: ¿Qué aspectos de esta investigación ",
+            "form": null
+          },
+          {
+            "text": "indican",
+            "form": "indicative"
+          },
+          {
+            "text": " su potencial de éxito?",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: La universidad que estudio tiene una biblioteca excelente con recursos digitales modernos. Los profesores con que trabajo en mi tesis doctoral son reconocidos internacionalmente por sus investigaciones. El departamento del que pertenezco organiza conferencias mensuales sobre temas relevantes. Los estudiantes en los que colaboro provienen de diferentes países y culturas diversas. La metodología que utilizo para mi investigación ha demostrado ser efectiva en estudios anteriores. El laboratorio en la que realizamos experimentos cuenta con equipos de última generación. Los resultados por los que hemos trabajado tanto tiempo finalmente están mostrando patrones interesantes y prometedores.\nERRORS: 4",
+        "expected_answer": "La universidad en la que estudio tiene una biblioteca excelente con recursos digitales modernos. Los profesores con los que trabajo en mi tesis doctoral son reconocidos internacionalmente por sus investigaciones. El departamento al que pertenezco organiza conferencias mensuales sobre temas relevantes. Los estudiantes con los que colaboro provienen de diferentes países y culturas diversas. La metodología que utilizo para mi investigación ha demostrado ser efectiva en estudios anteriores. El laboratorio en el que realizamos experimentos cuenta con equipos de última generación. Los resultados por los que hemos trabajado tanto tiempo finalmente están mostrando patrones interesantes y prometedores.",
+        "hint_1": "Revisa si faltan preposiciones necesarias con los pronombres relativos",
+        "hint_2": "Verifica la concordancia de género entre el artículo y el antecedente",
+        "annotations": [
+          {
+            "text": "TEXT: La universidad que ",
+            "form": null
+          },
+          {
+            "text": "estudio",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "tiene",
+            "form": "indicative"
+          },
+          {
+            "text": " una biblioteca excelente con recursos digitales modernos. Los profesores con que ",
+            "form": null
+          },
+          {
+            "text": "trabajo",
+            "form": "indicative"
+          },
+          {
+            "text": " en mi tesis doctoral ",
+            "form": null
+          },
+          {
+            "text": "son",
+            "form": "indicative"
+          },
+          {
+            "text": " reconocidos internacionalmente por sus investigaciones. El departamento del que ",
+            "form": null
+          },
+          {
+            "text": "pertenezco",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "organiza",
+            "form": "indicative"
+          },
+          {
+            "text": " conferencias mensuales sobre temas relevantes. Los estudiantes en los que ",
+            "form": null
+          },
+          {
+            "text": "colaboro",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "provienen",
+            "form": "indicative"
+          },
+          {
+            "text": " de diferentes países y culturas diversas. La metodología que ",
+            "form": null
+          },
+          {
+            "text": "utilizo",
+            "form": "indicative"
+          },
+          {
+            "text": " para mi investigación ",
+            "form": null
+          },
+          {
+            "text": "ha demostrado",
+            "form": "indicative"
+          },
+          {
+            "text": " ser efectiva en estudios anteriores. El laboratorio en la que ",
+            "form": null
+          },
+          {
+            "text": "realizamos",
+            "form": "indicative"
+          },
+          {
+            "text": " experimentos ",
+            "form": null
+          },
+          {
+            "text": "cuenta",
+            "form": "indicative"
+          },
+          {
+            "text": " con equipos de última generación. Los resultados por los que ",
+            "form": null
+          },
+          {
+            "text": "hemos trabajado",
+            "form": "indicative"
+          },
+          {
+            "text": " tanto tiempo finalmente ",
+            "form": null
+          },
+          {
+            "text": "están",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "mostrando",
+            "form": "indicative"
+          },
+          {
+            "text": " patrones interesantes y prometedores.\nERRORS: 4",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: El proyecto que participamos el año pasado recibió reconocimiento internacional por su innovación. Las técnicas por las cuales analizamos los datos fueron desarrolladas específicamente para este estudio. La empresa con la cual colaboramos nos proporcionó recursos valiosos y apoyo técnico constante. Los resultados del que estamos más orgullosos demuestran la efectividad de nuestro enfoque metodológico. El equipo en la que trabajé incluía especialistas de diferentes disciplinas académicas. Los instrumentos que utilizamos para medir las variables principales habían sido calibrados cuidadosamente antes del experimento. La revista científica de la cual esperamos publicación es una de las más prestigiosas en nuestro campo de investigación.\nERRORS: 3",
+        "expected_answer": "El proyecto en el que participamos el año pasado recibió reconocimiento internacional por su innovación. Las técnicas por las cuales analizamos los datos fueron desarrolladas específicamente para este estudio. La empresa con la cual colaboramos nos proporcionó recursos valiosos y apoyo técnico constante. Los resultados de los que estamos más orgullosos demuestran la efectividad de nuestro enfoque metodológico. El equipo en el que trabajé incluía especialistas de diferentes disciplinas académicas. Los instrumentos que utilizamos para medir las variables principales habían sido calibrados cuidadosamente antes del experimento. La revista científica en la cual esperamos publicación es una de las más prestigiosas en nuestro campo de investigación.",
+        "hint_1": "Algunos verbos requieren preposiciones específicas (participar EN, estar orgulloso DE)",
+        "hint_2": "Revisa la concordancia de género en los pronombres relativos",
+        "annotations": [
+          {
+            "text": "TEXT: El proyecto que ",
+            "form": null
+          },
+          {
+            "text": "participamos",
+            "form": "indicative"
+          },
+          {
+            "text": " el año pasado ",
+            "form": null
+          },
+          {
+            "text": "recibió",
+            "form": "indicative"
+          },
+          {
+            "text": " reconocimiento internacional por su innovación. Las técnicas por las cuales ",
+            "form": null
+          },
+          {
+            "text": "analizamos",
+            "form": "indicative"
+          },
+          {
+            "text": " los datos ",
+            "form": null
+          },
+          {
+            "text": "fueron",
+            "form": "indicative"
+          },
+          {
+            "text": " desarrolladas específicamente para este estudio. La empresa con la cual ",
+            "form": null
+          },
+          {
+            "text": "colaboramos",
+            "form": "indicative"
+          },
+          {
+            "text": " nos ",
+            "form": null
+          },
+          {
+            "text": "proporcionó",
+            "form": "indicative"
+          },
+          {
+            "text": " recursos valiosos y apoyo técnico constante. Los resultados del que ",
+            "form": null
+          },
+          {
+            "text": "estamos",
+            "form": "indicative"
+          },
+          {
+            "text": " más orgullosos ",
+            "form": null
+          },
+          {
+            "text": "demuestran",
+            "form": "indicative"
+          },
+          {
+            "text": " la efectividad de nuestro enfoque metodológico. El equipo en la que ",
+            "form": null
+          },
+          {
+            "text": "trabajé",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "incluía",
+            "form": "indicative"
+          },
+          {
+            "text": " especialistas de diferentes disciplinas académicas. Los instrumentos que ",
+            "form": null
+          },
+          {
+            "text": "utilizamos",
+            "form": "indicative"
+          },
+          {
+            "text": " para medir las variables principales ",
+            "form": null
+          },
+          {
+            "text": "habían sido",
+            "form": "indicative"
+          },
+          {
+            "text": " calibrados cuidadosamente antes del experimento. La revista científica de la cual ",
+            "form": null
+          },
+          {
+            "text": "esperamos",
+            "form": "indicative"
+          },
+          {
+            "text": " publicación ",
+            "form": null
+          },
+          {
+            "text": "es",
+            "form": "indicative"
+          },
+          {
+            "text": " una de las más prestigiosas en nuestro campo de investigación.\nERRORS: 3",
+            "form": null
+          }
+        ]
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: La conferencia internacional de la que te hablé ayer reunirá a expertos de todo el mundo. Los temas que se discutirán incluyen inteligencia artificial, robótica avanzada y biotecnología. Las presentaciones por las cuales más expectativa tengo se enfocan en aplicaciones médicas innovadoras. El auditorio en la cual se realizará el evento principal tiene capacidad para mil quinientas personas. Los investigadores con que tendré oportunidad de conversar han publicado artículos importantes recientemente. Las tecnologías del que hablarán los ponentes podrían transformar completamente nuestra industria. El networking con los que participaremos después de cada sesión será invaluable para establecer colaboraciones futuras. La organización por la cual fue coordinado este evento tiene experiencia en congresos científicos internacionales.\nERRORS: 4",
+        "expected_answer": "La conferencia internacional de la que te hablé ayer reunirá a expertos de todo el mundo. Los temas que se discutirán incluyen inteligencia artificial, robótica avanzada y biotecnología. Las presentaciones por las cuales más expectativa tengo se enfocan en aplicaciones médicas innovadoras. El auditorio en el cual se realizará el evento principal tiene capacidad para mil quinientas personas. Los investigadores con los que tendré oportunidad de conversar han publicado artículos importantes recientemente. Las tecnologías de las que hablarán los ponentes podrían transformar completamente nuestra industria. El networking en el que participaremos después de cada sesión será invaluable para establecer colaboraciones futuras. La organización por la cual fue coordinado este evento tiene experiencia en congresos científicos internacionales.",
+        "hint_1": "Verifica que los artículos concuerden en género con sus antecedentes",
+        "hint_2": "Algunos verbos requieren preposiciones específicas que deben mantenerse",
+        "annotations": [
+          {
+            "text": "TEXT: La conferencia internacional de la que te ",
+            "form": null
+          },
+          {
+            "text": "hablé",
+            "form": "indicative"
+          },
+          {
+            "text": " ayer ",
+            "form": null
+          },
+          {
+            "text": "reunirá",
+            "form": "indicative"
+          },
+          {
+            "text": " a expertos de todo el mundo. Los temas que se ",
+            "form": null
+          },
+          {
+            "text": "discutirán",
+            "form": "indicative"
+          },
+          {
+            "text": " ",
+            "form": null
+          },
+          {
+            "text": "incluyen",
+            "form": "indicative"
+          },
+          {
+            "text": " inteligencia artificial, robótica avanzada y biotecnología. Las presentaciones por las cuales más expectativa ",
+            "form": null
+          },
+          {
+            "text": "tengo",
+            "form": "indicative"
+          },
+          {
+            "text": " se ",
+            "form": null
+          },
+          {
+            "text": "enfocan",
+            "form": "indicative"
+          },
+          {
+            "text": " en aplicaciones médicas innovadoras. El auditorio en la cual se ",
+            "form": null
+          },
+          {
+            "text": "realizará",
+            "form": "indicative"
+          },
+          {
+            "text": " el evento principal ",
+            "form": null
+          },
+          {
+            "text": "tiene",
+            "form": "indicative"
+          },
+          {
+            "text": " capacidad para mil quinientas personas. Los investigadores con que ",
+            "form": null
+          },
+          {
+            "text": "tendré",
+            "form": "indicative"
+          },
+          {
+            "text": " oportunidad de conversar ",
+            "form": null
+          },
+          {
+            "text": "han publicado",
+            "form": "indicative"
+          },
+          {
+            "text": " artículos importantes recientemente. Las tecnologías del que ",
+            "form": null
+          },
+          {
+            "text": "hablarán",
+            "form": "indicative"
+          },
+          {
+            "text": " los ponentes ",
+            "form": null
+          },
+          {
+            "text": "podrían",
+            "form": "indicative"
+          },
+          {
+            "text": " transformar completamente nuestra industria. El networking con los que ",
+            "form": null
+          },
+          {
+            "text": "participaremos",
+            "form": "indicative"
+          },
+          {
+            "text": " después de cada sesión ",
+            "form": null
+          },
+          {
+            "text": "será",
+            "form": "indicative"
+          },
+          {
+            "text": " invaluable para establecer colaboraciones futuras. La organización por la cual ",
+            "form": null
+          },
+          {
+            "text": "fue",
+            "form": "indicative"
+          },
+          {
+            "text": " coordinado este evento ",
+            "form": null
+          },
+          {
+            "text": "tiene",
+            "form": "indicative"
+          },
+          {
+            "text": " experiencia en congresos científicos internacionales.\nERRORS: 4",
+            "form": null
+          }
+        ]
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-21T08:07:01.329Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": false
+  },
+  {
+    "title": "Quizás / tal vez / acaso + indicativo vs. subjuntivo",
+    "module": "The Subjunctive: Core",
+    "unit": "Present Subjunctive Triggers",
+    "level": "B2",
+    "grammar_focus": "both",
+    "difficulty": 3,
+    "type": "subjunctive_trigger",
+    "explanation": "Los adverbios quizás, tal vez y acaso expresan duda, pero el modo verbal depende del grado de certeza del hablante. Cuando van al inicio de la oración, favorecen el subjuntivo (mayor incertidumbre); cuando van después del verbo, favorecen el indicativo (mayor certeza). Acaso es más literario y formal que quizás/tal vez.",
+    "examples": [
+      {
+        "es": "Quizás llueva mañana (muy incierto) vs. Llueve quizás (más probable)",
+        "en": "Maybe it will rain tomorrow (very uncertain) vs. It's raining perhaps (more likely)"
+      },
+      {
+        "es": "Tal vez venga Elena a la fiesta vs. Elena viene tal vez a la fiesta",
+        "en": "Maybe Elena will come to the party vs. Elena is perhaps coming to the party"
+      },
+      {
+        "es": "¿Acaso creas que es fácil? (literario/formal)",
+        "en": "Do you perhaps believe it's easy? (literary/formal)"
+      }
+    ],
+    "exercises": [
+      {
+        "type": "gap_fill",
+        "prompt": "Quizás el director ___ la decisión durante la reunión de mañana, pero no estoy seguro.",
+        "expected_answer": "tome",
+        "hint_1": "Quizás al inicio de oración sugiere incertidumbre.",
+        "hint_2": "La incertidumbre requiere subjuntivo.",
+        "annotations": null
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "Los estudiantes ___ tal vez el examen sin dificultades porque se prepararon bien.",
+        "expected_answer": "aprobaron",
+        "hint_1": "Tal vez después del verbo indica mayor certeza.",
+        "hint_2": "La certeza permite usar indicativo.",
+        "annotations": null
+      },
+      {
+        "type": "gap_fill",
+        "prompt": "¿Acaso no ___ ustedes que el proyecto requiere más tiempo del previsto?",
+        "expected_answer": "comprenden",
+        "hint_1": "Acaso en pregunta retórica sugiere que algo es evidente.",
+        "hint_2": "La evidencia se expresa en indicativo.",
+        "annotations": null
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Probablemente María llegará tarde a la cita. → Rewrite using 'quizás' to express greater uncertainty.",
+        "expected_answer": "Quizás María llegue tarde a la cita.",
+        "hint_1": "Mayor incertidumbre requiere subjuntivo.",
+        "hint_2": "Coloca 'quizás' al inicio para enfatizar la duda.",
+        "annotations": null
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Es posible que encontremos la solución pronto. → Rewrite using 'tal vez' to express moderate certainty.",
+        "expected_answer": "Encontraremos tal vez la solución pronto.",
+        "hint_1": "Coloca 'tal vez' después del verbo para mayor certeza.",
+        "hint_2": "La certeza moderada permite indicativo.",
+        "annotations": null
+      },
+      {
+        "type": "transformation",
+        "prompt": "Base: Me pregunto si comprende la gravedad del asunto. → Rewrite using 'acaso' in a rhetorical question.",
+        "expected_answer": "¿Acaso comprende la gravedad del asunto?",
+        "hint_1": "Acaso forma preguntas retóricas elegantes.",
+        "hint_2": "En preguntas retóricas se usa indicativo.",
+        "annotations": null
+      },
+      {
+        "type": "translation",
+        "prompt": "Maybe the company will change its policy next year, though I doubt it.",
+        "expected_answer": "Quizás la empresa cambie su política el año próximo, aunque lo dudo.",
+        "hint_1": "La expresión de duda fuerte requiere subjuntivo.",
+        "hint_2": "Usa 'quizás' al inicio para enfatizar incertidumbre.",
+        "annotations": null
+      },
+      {
+        "type": "translation",
+        "prompt": "The results are perhaps ready, but nobody has confirmed it yet.",
+        "expected_answer": "Los resultados están tal vez listos, pero nadie lo ha confirmado aún.",
+        "hint_1": "Posición post-verbal sugiere mayor probabilidad.",
+        "hint_2": "La probabilidad permite usar indicativo.",
+        "annotations": null
+      },
+      {
+        "type": "translation",
+        "prompt": "Do you perhaps think this is the right moment to make the announcement?",
+        "expected_answer": "¿Acaso piensas que este es el momento adecuado para hacer el anuncio?",
+        "hint_1": "Usa 'acaso' para preguntas formales o retóricas.",
+        "hint_2": "En preguntas directas se mantiene indicativo.",
+        "annotations": null
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: El meteorólogo anunció que tal vez llueva este fin de semana, pero las probabilidades son bajas. Quizás tengamos que cancelar el picnic si las condiciones empeoran. Sin embargo, el clima cambia constantemente y es probable que finalmente haga sol. Los organizadores del evento están considerando alternativas cubiertas. Acaso sea mejor esperar hasta el viernes para tomar la decisión final, cuando tengamos pronósticos más precisos.\nQUESTION: ¿Qué actitud muestran los organizadores ante la incertidumbre del clima?",
+        "expected_answer": "Los organizadores muestran una actitud prudente y flexible, considerando alternativas y esperando más información antes de decidir.",
+        "hint_1": "Analiza las acciones que toman los organizadores.",
+        "hint_2": "Fíjate en su estrategia para manejar la incertidumbre.",
+        "annotations": null
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: La investigación médica avanza constantemente, pero quizás necesitemos décadas para encontrar curas definitivas. Los científicos trabajan tal vez con limitaciones presupuestarias, aunque su dedicación es admirable. ¿Acaso no merecen mayor apoyo las investigaciones que pueden salvar vidas? La sociedad debe reflexionar sobre sus prioridades. Tal vez invertimos demasiado en áreas menos esenciales mientras descuidamos la salud pública.\nQUESTION: ¿Cuál es el mensaje principal del texto sobre las prioridades sociales?",
+        "expected_answer": "El texto critica que la sociedad no invierte lo suficiente en investigación médica vital y sugiere replantear las prioridades de inversión.",
+        "hint_1": "Identifica la crítica implícita en el texto.",
+        "hint_2": "Considera qué cambio propone el autor.",
+        "annotations": null
+      },
+      {
+        "type": "listening",
+        "prompt": "PASSAGE: El nuevo restaurante ha tenido tal vez más éxito del esperado desde su apertura. Los clientes hacen cola constantemente y quizás necesiten ampliar el personal pronto. La calidad de la comida es excepcional y el servicio, aunque a veces lento, mantiene estándares altos. ¿Acaso no es natural que un negocio exitoso enfrente estos desafíos de crecimiento? Los propietarios estudian opciones para mejorar la eficiencia sin comprometer la calidad.\nQUESTION: ¿Qué problema principal enfrenta el restaurante debido a su éxito?",
+        "expected_answer": "El restaurante enfrenta el desafío de mantener la calidad del servicio ante la alta demanda de clientes.",
+        "hint_1": "Identifica la consecuencia del éxito mencionada.",
+        "hint_2": "¿Qué aspecto específico se ve afectado por la popularidad?",
+        "annotations": null
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: El nuevo proyecto de la empresa quizás genera controversia entre los empleados, pero la dirección mantiene su postura. Tal vez algunos trabajadores no comprenden completamente los beneficios a largo plazo. ¿Acaso no merezcan una explicación más detallada? Los gerentes están tal vez demasiado ocupados para organizar reuniones informativas. Quizás la comunicación mejora si dedican más tiempo a escuchar las preocupaciones del personal. La falta de diálogo acaso es el verdadero problema aquí.\nERRORS: 3",
+        "expected_answer": "El nuevo proyecto de la empresa quizás genere controversia entre los empleados, pero la dirección mantiene su postura. Tal vez algunos trabajadores no comprenden completamente los beneficios a largo plazo. ¿Acaso no merecen una explicación más detallada? Los gerentes están tal vez demasiado ocupados para organizar reuniones informativas. Quizás la comunicación mejore si dedican más tiempo a escuchar las preocupaciones del personal. La falta de diálogo acaso es el verdadero problema aquí.",
+        "hint_1": "Revisa el uso del subjuntivo después de 'quizás' al inicio de oración.",
+        "hint_2": "Verifica la concordancia en las preguntas con 'acaso'.",
+        "annotations": null
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: Los científicos anunciaron que tal vez descubren una nueva especie en el océano profundo. Quizás estos hallazgos cambian nuestra comprensión de la biodiversidad marina. La expedición tuvo tal vez resultados inesperados, pero los investigadores necesitan más tiempo para confirmar los datos. ¿Acaso no sea fascinante explorar territorios inexplorados? Las muestras recolectadas quizás contengan información valiosa sobre la evolución de las especies. El equipo trabaja tal vez día y noche para procesar toda la información.\nERRORS: 4",
+        "expected_answer": "Los científicos anunciaron que tal vez descubrieron una nueva especie en el océano profundo. Quizás estos hallazgos cambien nuestra comprensión de la biodiversidad marina. La expedición tuvo tal vez resultados inesperados, pero los investigadores necesitan más tiempo para confirmar los datos. ¿Acaso no es fascinante explorar territorios inexplorados? Las muestras recolectadas quizás contengan información valiosa sobre la evolución de las especies. El equipo trabaja tal vez día y noche para procesar toda la información.",
+        "hint_1": "Considera si 'tal vez' en posición post-verbal indica certeza o incertidumbre.",
+        "hint_2": "Revisa el tiempo verbal en preguntas retóricas con 'acaso'.",
+        "annotations": null
+      },
+      {
+        "type": "proofreading",
+        "prompt": "TEXT: La temporada turística quizás comienza antes de lo previsto este año debido al clima favorable. Los hoteles reciben tal vez más reservaciones de las esperadas para marzo. ¿Acaso no tengan que contratar personal adicional para satisfacer la demanda? Algunos establecimientos están tal vez mejor preparados que otros para este crecimiento inesperado. Quizás la industria turística se recuperó completamente de las crisis anteriores. Los empresarios del sector celebran tal vez estos resultados positivos con optimismo cauteloso.\nERRORS: 2",
+        "expected_answer": "La temporada turística quizás comience antes de lo previsto este año debido al clima favorable. Los hoteles reciben tal vez más reservaciones de las esperadas para marzo. ¿Acaso no tienen que contratar personal adicional para satisfacer la demanda? Algunos establecimientos están tal vez mejor preparados que otros para este crecimiento inesperado. Quizás la industria turística se recuperó completamente de las crisis anteriores. Los empresarios del sector celebran tal vez estos resultados positivos con optimismo cauteloso.",
+        "hint_1": "Examina las preguntas con 'acaso' y su modo verbal.",
+        "hint_2": "Verifica si 'quizás' al inicio requiere subjuntivo.",
+        "annotations": null
+      }
+    ],
+    "_mode": "new",
+    "_generatedAt": "2026-03-21T08:08:35.281Z",
+    "_approved": true,
+    "_notes": "",
+    "_annotationsValid": false
+  }
+]

@@ -1,5 +1,5 @@
 /**
- * Curriculum plan — single source of truth for all 115 concepts across 8 modules.
+ * Curriculum plan — single source of truth for all 120 concepts across 8 modules.
  *
  * - Existing concepts (21 in DB) are included so the plan is complete.
  *   The seed:ai script skips them during concept creation but uses them for exercise top-up.
@@ -367,6 +367,17 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     type: 'subjunctive_trigger',
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
+  {
+    module: 'The Subjunctive: Core',
+    unit: 'Present Subjunctive Triggers',
+    title: 'Quizás / tal vez / acaso + indicativo vs. subjuntivo',
+    description: 'adverbs of doubt (quizás, tal vez, acaso) trigger subjunctive when the speaker feels uncertain, but allow indicative when the speaker leans toward certainty. Placement matters: sentence-initial quizás/tal vez strongly favours subjunctive; post-verbal position favours indicative. Acaso is literary/formal. Contrasts with a lo mejor (always + indicative).',
+    level: 'B2',
+    grammar_focus: 'both',
+    difficulty: 3,
+    type: 'subjunctive_trigger',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
+  },
 
   // Unit 2.2 — Imperfect Subjunctive & Hypotheticals
   {
@@ -469,6 +480,17 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     difficulty: 5,
     type: 'subjunctive_structure',
     exerciseTypes: ['transformation', 'translation', 'free_write', 'listening', 'proofreading', 'register_shift'],
+  },
+  {
+    module: 'The Subjunctive: Advanced',
+    unit: 'Complex Subjunctive Structures',
+    title: 'Concesivas universales: diga lo que diga, sea como sea, pase lo que pase',
+    description: 'universal concessive clauses using reduplicated subjunctive: diga lo que diga (whatever he says), sea como sea (however it may be), pase lo que pase (whatever happens), cueste lo que cueste (whatever it costs). Pattern: present subjunctive + relative pronoun + present subjunctive of same verb. Express indifference or determination regardless of outcome. High-frequency in spoken and written B2+ Spanish.',
+    level: 'B2',
+    grammar_focus: 'subjunctive',
+    difficulty: 3,
+    type: 'subjunctive_structure',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
   // ─── Module 3: Past Tenses ────────────────────────────────────────────────
@@ -832,6 +854,19 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
+  // Unit 4.6 — Preposiciones compuestas
+  {
+    module: 'Core Spanish Contrasts',
+    unit: 'Preposiciones compuestas',
+    title: 'Preposiciones compuestas: a base de, a cambio de, a partir de, a falta de',
+    description: 'compound prepositions formed with "a + noun + de": a base de (by means of, based on), a cambio de (in exchange for), a partir de (from…onwards, starting from), a falta de (in the absence of, for lack of). Each governs a noun or infinitive. Learners confuse them with simple prepositions or misuse the internal article. Frequent in formal and semi-formal registers.',
+    level: 'B2',
+    grammar_focus: 'indicative',
+    difficulty: 3,
+    type: 'preposition',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
+  },
+
   // ─── Module 5: Verbal Periphrases ─────────────────────────────────────────
 
   // Unit 5.1 — Modal Periphrases
@@ -1051,6 +1086,17 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     difficulty: 4,
     type: 'relative_clause',
     exerciseTypes: ['gap_fill', 'transformation', 'free_write', 'listening', 'proofreading', 'register_shift'],
+  },
+  {
+    module: 'Advanced Clauses',
+    unit: 'Relative Clauses',
+    title: 'Pronombres relativos con preposición: en el que, del que, por el cual',
+    description: 'relative pronouns preceded by prepositions: en el que / en la que (in which), del que / de la que (of/from which), por el cual / por la cual (for/through which), con el que / con la que (with which). The article agrees with the antecedent in gender and number. Contrast informal "que" vs. formal "el cual" variants. Essential for complex subordination in written B2+ Spanish.',
+    level: 'B2',
+    grammar_focus: 'indicative',
+    difficulty: 3,
+    type: 'relative_clause',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
   },
 
   // Unit 6.2 — Passive Voice
@@ -1281,6 +1327,17 @@ export const CURRICULUM_PLAN: ConceptPlan[] = [
     difficulty: 2,
     type: 'pragmatic_marker',
     exerciseTypes: ['gap_fill', 'transformation', 'translation', 'listening', 'proofreading'],
+  },
+  {
+    module: 'Conversational Spanish',
+    unit: 'Attention-Getters & Reaction Markers',
+    title: 'Sugerencias: ¿Y si + imp. subj.? / ¿Qué tal si…? / ¿Por qué no…?',
+    description: 'suggestion formulas in spoken Spanish: ¿Y si + imperfect subjunctive? (¿Y si fuéramos al cine?), ¿Qué tal si…? (¿Qué tal si probamos otro restaurante?), ¿Por qué no…? (¿Por qué no descansas un poco?). Register: casual to semi-formal. ¿Y si…? requires imperfect subjunctive; ¿Qué tal si…? accepts indicative or subjunctive; ¿Por qué no…? takes present indicative.',
+    level: 'B1',
+    grammar_focus: 'both',
+    difficulty: 2,
+    type: 'pragmatic_marker',
+    exerciseTypes: ['gap_fill', 'transformation', 'translation'],
   },
 
   // Unit 8.3 — Hedges, Justifiers & Emphatic Markers (Atenuadores y enfatizadores)

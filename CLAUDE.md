@@ -342,19 +342,19 @@ Migrations (run once in Supabase SQL editor):
 
 ### Curriculum Seed Content
 
-**Currently in DB** (113 concepts, 1417 exercises):
+**Currently in DB** (118 concepts, 1486 exercises):
 
 - Module 1: Connectors — 4 units, 23 concepts
-- Module 2a: The Subjunctive: Core — 1 unit, 7 concepts
-- Module 2b: The Subjunctive: Advanced — 2 units, 9 concepts
+- Module 2a: The Subjunctive: Core — 1 unit, 8 concepts
+- Module 2b: The Subjunctive: Advanced — 2 units, 10 concepts
 - Module 3: Past Tenses — 3 units, 12 concepts
-- Module 4: Core Spanish Contrasts — 5 units, 19 concepts (incl. new "Comparaciones" unit)
+- Module 4: Core Spanish Contrasts — 6 units, 20 concepts (incl. new "Comparaciones" + "Preposiciones compuestas" units)
 - Module 5: Verbal Periphrases — 3 units, 14 concepts
-- Module 6: Advanced Clauses — 3 units, 16 concepts
-- Module 8: Conversational Spanish — 4 units, 15 concepts
+- Module 6: Advanced Clauses — 3 units, 17 concepts
+- Module 8: Conversational Spanish — 4 units, 16 concepts
 - B1: 9 exercises per concept (3 types × 3); B2: 15 (5 types × 3); C1: 18 (6 types × 3)
 - 56/61 null-annotation exercises annotated
-- Full plan: `src/lib/curriculum/curriculum-plan.ts` (115 concepts); design reference: `docs/curriculum-design.md`
+- Full plan: `src/lib/curriculum/curriculum-plan.ts` (120 concepts); design reference: `docs/curriculum-design.md`
 - `pnpm seed:ai:apply` is now idempotent — skips concepts/exercises that already exist. Safe to re-run.
 
 ### Verb Seed Content
@@ -489,7 +489,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2142 tests across 115 files — all passing.**
+**Test suite: 2187 tests across 115 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -599,6 +599,13 @@ Items are ordered by priority within each group. Full details of completed work 
 
 - Dedicated vocabulary building beyond grammar concepts. Show words in context sentences, track mastery, and integrate with SRS.
 - Could leverage existing `verb_sentences` pattern for vocabulary sentences.
+- **Seed content identified (2026-03-21):** Gap analysis of an idiomatic expressions reference sheet identified the following vocabulary-heavy categories that are NOT grammar-testable but should be included when Feat-M is built:
+  - **Adverbs of place** (aquí, allí, cerca, lejos, arriba, abajo, etc.) — A1–A2 vocabulary
+  - **Frequency adjectives** (siempre, a menudo, a veces, nunca, etc.) — A2 vocabulary
+  - **Interpersonal expressions** (entre tú y yo, según tú, etc.) — prepositional pronoun usage
+  - **Por/Para fixed phrases beyond grammar** (por favor, por ejemplo, por cierto, para siempre, para colmo, etc.) — phrasebook items
+  - **Idiomatic expressions** (dale, ya vale, en serio, etc.) — memorize-and-use phrases
+  - **Basic time adverbs** (siempre, ahora, nunca — beyond the todavía/ya contrast already in grammar curriculum)
 - **Future consideration — requires PM decision on scope and differentiation from grammar exercises.**
 
 **Feat-N: Social / accountability features** *(P4 — retention)*
