@@ -80,6 +80,14 @@ vi.mock('../ConceptDetailClient', () => ({
   ExpandableExplanation: ({ text }: { text: string }) => <p>{text}</p>,
 }))
 
+vi.mock('../MasteryChip', () => ({
+  MasteryChip: (props: { masteryState: string; nudgeText: string | null }) => (
+    <div data-testid="mastery-chip" data-state={props.masteryState}>
+      {props.nudgeText && <span data-testid="nudge-text">{props.nudgeText}</span>}
+    </div>
+  ),
+}))
+
 // Concept fixture
 const CONCEPT_BASE = {
   id: 'con-1',
@@ -189,15 +197,32 @@ describe('ConceptDetailPage', () => {
     expect(screen.getByText('Sin embargo, no pudo.')).toBeInTheDocument()
   })
 
-  it('renders SRS status section', async () => {
+  it('renders MasteryChip with new state when no progress', async () => {
     vi.mocked(createClient).mockResolvedValue(makeMockSupabase() as never)
     const el = await ConceptDetailPage({
       params: Promise.resolve({ id: 'con-1' }),
       searchParams: Promise.resolve({}),
     })
     render(el)
-    expect(screen.getByText('Próxima revisión')).toBeInTheDocument()
-    expect(screen.getByText('No comenzado')).toBeInTheDocument()
+    const chip = screen.getByTestId('mastery-chip')
+    expect(chip).toHaveAttribute('data-state', 'new')
+    expect(screen.getByTestId('nudge-text')).toHaveTextContent('Empieza con una sesión de práctica')
+  })
+
+  it('renders MasteryChip with learning state when progress exists', async () => {
+    vi.mocked(createClient).mockResolvedValue(
+      makeMockSupabase({
+        progressData: { interval_days: 5, is_hard: false, production_mastered: false },
+      }) as never
+    )
+    const el = await ConceptDetailPage({
+      params: Promise.resolve({ id: 'con-1' }),
+      searchParams: Promise.resolve({}),
+    })
+    render(el)
+    const chip = screen.getByTestId('mastery-chip')
+    expect(chip).toHaveAttribute('data-state', 'learning')
+    expect(screen.getByTestId('nudge-text')).toHaveTextContent('16 días más de repaso para dominar')
   })
 
   it('renders conjugation insight section when concept is tense-mapped and hablar found', async () => {
@@ -262,5 +287,16 @@ describe('ConceptDetailPage', () => {
     expect(screen.getByText('Practica este concepto →')).toBeInTheDocument()
     expect(screen.getByText('Escritura libre')).toBeInTheDocument()
     expect(screen.getByText('Consultar tutor')).toBeInTheDocument()
+  })
+
+  it('does not render Tu progreso card (removed)', async () => {
+    vi.mocked(createClient).mockResolvedValue(makeMockSupabase() as never)
+    const el = await ConceptDetailPage({
+      params: Promise.resolve({ id: 'con-1' }),
+      searchParams: Promise.resolve({}),
+    })
+    render(el)
+    expect(screen.queryByText('Tu progreso')).not.toBeInTheDocument()
+    expect(screen.queryByText('Próxima revisión')).not.toBeInTheDocument()
   })
 })

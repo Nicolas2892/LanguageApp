@@ -183,4 +183,52 @@ describe('VerbDetailClient', () => {
     render(<VerbDetailClient {...defaultProps} />)
     expect(screen.getByTestId('winding-path-separator')).toBeInTheDocument()
   })
+
+  describe('verb nudge', () => {
+    it('shows nudge when ≥2 tenses have progress', () => {
+      const propsWithProgress = {
+        ...defaultProps,
+        tenseData: defaultProps.tenseData.map((d) => {
+          if (d.tense === 'present_indicative') return { ...d, masteryPct: 80, attempts: 20 }
+          if (d.tense === 'preterite') return { ...d, masteryPct: 50, attempts: 10 }
+          return d
+        }),
+      }
+      render(<VerbDetailClient {...propsWithProgress} />)
+      expect(screen.getByTestId('verb-nudge')).toBeInTheDocument()
+      // Overall: (16 + 5) / (20 + 10) = 70%
+      expect(screen.getByText('70%')).toBeInTheDocument()
+    })
+
+    it('hides nudge when <2 tenses have progress', () => {
+      const propsOneTense = {
+        ...defaultProps,
+        tenseData: defaultProps.tenseData.map((d) =>
+          d.tense === 'present_indicative'
+            ? { ...d, masteryPct: 80, attempts: 20 }
+            : d
+        ),
+      }
+      render(<VerbDetailClient {...propsOneTense} />)
+      expect(screen.queryByTestId('verb-nudge')).not.toBeInTheDocument()
+    })
+
+    it('weakest tense link points to correct session URL', () => {
+      const propsWithProgress = {
+        ...defaultProps,
+        tenseData: defaultProps.tenseData.map((d) => {
+          if (d.tense === 'present_indicative') return { ...d, masteryPct: 80, attempts: 20 }
+          if (d.tense === 'preterite') return { ...d, masteryPct: 40, attempts: 10 }
+          return d
+        }),
+      }
+      render(<VerbDetailClient {...propsWithProgress} />)
+      const link = screen.getByTestId('verb-nudge-link')
+      expect(link).toHaveAttribute(
+        'href',
+        '/verbs/session?tenses=preterite&verbSet=single&verb=hablar&length=10'
+      )
+      expect(link).toHaveTextContent(/Reforzar.*Indefinido/)
+    })
+  })
 })

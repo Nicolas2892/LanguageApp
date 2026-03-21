@@ -163,6 +163,31 @@ export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favor
         <WindingPathSeparator />
       </div>
 
+      {/* Cross-tense nudge (only when ≥2 tenses have progress) */}
+      {(() => {
+        const tensesWithProgress = tenseData.filter((d) => d.attempts > 0 && d.masteryPct !== null)
+        if (tensesWithProgress.length < 2) return null
+        const totalCorrect = tensesWithProgress.reduce((sum, d) => sum + Math.round((d.masteryPct! / 100) * d.attempts), 0)
+        const totalAttempts = tensesWithProgress.reduce((sum, d) => sum + d.attempts, 0)
+        const overallPct = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0
+        const weakest = tensesWithProgress.reduce((a, b) => (a.masteryPct! <= b.masteryPct! ? a : b))
+        return (
+          <div className="flex items-center justify-between" data-testid="verb-nudge">
+            <p className="text-xs" style={{ color: 'var(--d5-warm)' }}>
+              Precisión global: <span className="font-semibold text-foreground">{overallPct}%</span>
+            </p>
+            <Link
+              href={`/verbs/session?tenses=${weakest.tense}&verbSet=single&verb=${infinitive}&length=10`}
+              className="text-xs font-medium"
+              style={{ color: 'var(--d5-terracotta)' }}
+              data-testid="verb-nudge-link"
+            >
+              Reforzar {TENSE_LABELS[weakest.tense as VerbTense]} →
+            </Link>
+          </div>
+        )
+      })()}
+
       {/* Mood-grouped tense selector */}
       <div role="tablist" aria-label="Tense selector" className="flex flex-col gap-3">
         {MOOD_GROUPS.map((group) => (

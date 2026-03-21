@@ -2,8 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { SpeakButton } from '@/components/SpeakButton'
-import { getMasteryState, getMasteryProgress, MASTERY_BADGE, PRODUCTION_CORRECT_REQUIRED, PRODUCTION_TYPES_REQUIRED } from '@/lib/mastery/badge'
-import { ChevronLeft, CheckCircle2, Pencil, Bot, Circle } from 'lucide-react'
+import { getMasteryState, getMasteryProgress, MASTERY_BADGE } from '@/lib/mastery/badge'
+import { ChevronLeft, Pencil, Bot } from 'lucide-react'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
 import { LevelChip } from '@/components/LevelChip'
@@ -11,11 +11,11 @@ import { HardFlagButton } from '@/components/HardFlagButton'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import type { Concept } from '@/lib/supabase/types'
-import { userLocalToday } from '@/lib/timezone'
 import type { VerbTense } from '@/lib/verbs/constants'
 import { TENSE_LABELS } from '@/lib/verbs/constants'
 import { ConjugationInsightTable, type ConjugationRow } from './ConjugationInsightTable'
 import { ExpandableExplanation } from './ConceptDetailClient'
+import { MasteryChip } from './MasteryChip'
 
 type Example = { es: string; en: string }
 
@@ -47,6 +47,31 @@ const CONCEPT_TENSE_MAP: Partial<Record<string, VerbTense>> = {
   'Imperfecto de subjuntivo en estilo indirecto':        'imperfect_subjunctive',
 }
 
+function computeNudgeText(
+  state: 'new' | 'learning' | 'mastered',
+  intervalDays: number | undefined,
+  masteryProgress: { srsReady: boolean; productionReady: boolean },
+  correctProductionTypes: Set<string | undefined>,
+): string | null {
+  if (state === 'new') return 'Empieza con una sesión de práctica'
+  if (state === 'mastered') return null
+  // learning
+  if (!masteryProgress.srsReady) {
+    const remaining = MASTERY_THRESHOLD - (intervalDays ?? 0)
+    return `${remaining} día${remaining !== 1 ? 's' : ''} más de repaso para dominar`
+  }
+  if (!masteryProgress.productionReady) {
+    // Find first non-gap_fill type NOT yet completed
+    const completedTypes = new Set(Array.from(correctProductionTypes).filter(Boolean))
+    const missing = EXERCISE_TYPES.find(
+      ({ type }) => type !== 'gap_fill' && !completedTypes.has(type)
+    )
+    if (missing) return `Practica ${missing.label.toLowerCase()} para avanzar`
+    return 'Practica más tipos de ejercicio para avanzar'
+  }
+  return null
+}
+
 interface Props {
   params: Promise<{ id: string }>
   searchParams: Promise<{ filter?: string }>
@@ -73,23 +98,22 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
   const tenseKey = CONCEPT_TENSE_MAP[concept.title] ?? null
 
   // Fetch unit, exercises, progress, timezone (+ hablar verb id if tense-mapped) in parallel
-  const [unitRes, exercisesRes, progressRes, hablarRes, profileTzRes] = await Promise.all([
+  const [unitRes, exercisesRes, progressRes, hablarRes] = await Promise.all([
     supabase.from('units').select('id, title, module_id').eq('id', concept.unit_id).single(),
     supabase.from('exercises').select('id, type').eq('concept_id', id),
     supabase
       .from('user_progress')
-      .select('interval_days, due_date, repetitions, is_hard, production_mastered')
+      .select('interval_days, is_hard, production_mastered')
       .eq('user_id', user.id)
       .eq('concept_id', id)
       .maybeSingle(),
     tenseKey
       ? supabase.from('verbs').select('id').eq('infinitive', 'hablar').single()
       : Promise.resolve({ data: null }),
-    supabase.from('profiles').select('timezone').eq('id', user.id).single(),
   ])
 
   type UnitRow     = { id: string; title: string; module_id: string }
-  type ProgressRow = { interval_days: number; due_date: string; repetitions: number; is_hard: boolean; production_mastered: boolean }
+  type ProgressRow = { interval_days: number; is_hard: boolean; production_mastered: boolean }
   type ExerciseRow = { id: string; type: string }
 
   const unit     = unitRes.data     as UnitRow     | null
@@ -118,37 +142,21 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
       ]
     }
   }
-  const exerciseIds = typedExercises.map((e) => e.id)
   const exerciseTypes = new Set(typedExercises.map((e) => e.type))
   const exerciseTypeMap = new Map(typedExercises.map((e) => [e.id, e.type]))
 
   // Non-gap_fill exercise IDs for production breadth query
   const nonGapFillIds = typedExercises.filter(e => e.type !== 'gap_fill').map(e => e.id)
 
-  // Fetch attempt count, correct non-gap_fill attempts, and module name in parallel
-  const [attemptCountResult, correctProductionResult, moduleResult] = await Promise.all([
-    exerciseIds.length > 0
-      ? supabase
-          .from('exercise_attempts')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .in('exercise_id', exerciseIds)
-      : Promise.resolve({ count: 0 }),
-    nonGapFillIds.length > 0
-      ? supabase
-          .from('exercise_attempts')
-          .select('exercise_id')
-          .eq('user_id', user.id)
-          .in('exercise_id', nonGapFillIds)
-          .eq('is_correct', true)
-      : Promise.resolve({ data: [] }),
-    unit
-      ? supabase.from('modules').select('title').eq('id', unit.module_id).single()
-      : Promise.resolve({ data: null }),
-  ])
-
-  const attemptCount = attemptCountResult.count ?? 0
-  const moduleName = (moduleResult.data as { title: string } | null)?.title ?? null
+  // Fetch correct non-gap_fill attempts for production breadth
+  const correctProductionResult = nonGapFillIds.length > 0
+    ? await supabase
+        .from('exercise_attempts')
+        .select('exercise_id')
+        .eq('user_id', user.id)
+        .in('exercise_id', nonGapFillIds)
+        .eq('is_correct', true)
+    : { data: [] }
 
   // Compute production breadth
   const correctProductionAttempts = (correctProductionResult.data ?? []) as { exercise_id: string }[]
@@ -173,18 +181,8 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
       )
     : []
 
-  // SRS status
-  const userTz = (profileTzRes.data as { timezone: string | null } | null)?.timezone ?? null
-  const srsStatus = (() => {
-    if (!progress) return 'No comenzado'
-    const today     = userLocalToday(userTz)
-    const daysUntil = Math.ceil(
-      (new Date(progress.due_date).getTime() - new Date(today).getTime()) / (1000 * 60 * 60 * 24)
-    )
-    if (daysUntil <= 0) return 'Pendiente ahora'
-    if (daysUntil === 1) return 'Pendiente mañana'
-    return `En ${daysUntil} días`
-  })()
+  // Nudge text for MasteryChip
+  const nudgeText = computeNudgeText(masteryState, progress?.interval_days, masteryProgress, correctProductionTypes)
 
   // Back link preserves filter param
   const backHref = filter && ['new', 'learning', 'mastered'].includes(filter)
@@ -225,7 +223,24 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         <div className="flex items-center gap-2 flex-wrap mt-2">
           <LevelChip level={concept.level} />
           <GrammarFocusChip focus={concept.grammar_focus} />
-          <span style={badge.style}>{badge.label}</span>
+        </div>
+
+        {/* Mastery chip with nudge + expandable milestones */}
+        <div className="mt-2">
+          <MasteryChip
+            masteryState={masteryState}
+            badge={badge}
+            nudgeText={nudgeText}
+            milestones={masteryState === 'learning' ? {
+              srsReady: masteryProgress.srsReady,
+              intervalDays: progress?.interval_days ?? 0,
+              correctNonGapFill: masteryProgress.correctNonGapFill,
+              uniqueTypes: masteryProgress.uniqueTypes,
+              correctProductionTypeLabels: Array.from(correctProductionTypes)
+                .filter(Boolean)
+                .map(type => EXERCISE_TYPES.find(t => t.type === type)?.label ?? type!),
+            } : null}
+          />
         </div>
       </div>
 
@@ -325,117 +340,6 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         </Link>
       </div>
 
-      <WindingPathSeparator />
-
-      {/* ── Tu progreso — unified progress card ── */}
-      <div
-        className="rounded-2xl"
-        style={{
-          background: 'rgba(140,106,63,0.07)',
-          padding: '1rem 1.25rem',
-        }}
-      >
-        <span className="senda-eyebrow block mb-3">Tu progreso</span>
-
-        {/* SRS status + attempt count row */}
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <p className="text-sm text-foreground font-medium">Próxima revisión</p>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>{srsStatus}</p>
-          </div>
-          <div className="text-right">
-            {progress ? (
-              <>
-                <p className="text-foreground text-xl font-bold leading-none">{progress.repetitions}</p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>
-                  {progress.repetitions === 1 ? 'sesión' : 'sesiones'}
-                </p>
-              </>
-            ) : attemptCount > 0 ? (
-              <>
-                <p className="text-foreground text-xl font-bold leading-none">{attemptCount}</p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--d5-warm)' }}>
-                  {attemptCount === 1 ? 'ejercicio' : 'ejercicios'}
-                </p>
-              </>
-            ) : null}
-          </div>
-        </div>
-
-        {/* Mastery milestones (only for learning state) */}
-        {masteryState === 'learning' && (
-          <div className="flex flex-col gap-1.5 pt-2" style={{ borderTop: '1px solid rgba(140,106,63,0.12)' }}>
-            {/* SRS milestone */}
-            <div className="flex items-center gap-2">
-              {masteryProgress.srsReady ? (
-                <CheckCircle2 size={14} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
-              ) : (
-                <Circle size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
-              )}
-              <p className="text-xs text-foreground">
-                Retención SRS
-                <span className="ml-1.5" style={{ color: 'var(--d5-warm)' }}>
-                  {progress ? Math.min(progress.interval_days, MASTERY_THRESHOLD) : 0}/{MASTERY_THRESHOLD} días
-                </span>
-              </p>
-            </div>
-
-            {/* Production breadth — correct attempts */}
-            <div className="flex items-center gap-2">
-              {masteryProgress.correctNonGapFill >= PRODUCTION_CORRECT_REQUIRED ? (
-                <CheckCircle2 size={14} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
-              ) : (
-                <Circle size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
-              )}
-              <p className="text-xs text-foreground">
-                Producción
-                <span className="ml-1.5" style={{ color: 'var(--d5-warm)' }}>
-                  {masteryProgress.correctNonGapFill}/{PRODUCTION_CORRECT_REQUIRED} correctas
-                </span>
-              </p>
-            </div>
-
-            {/* Production breadth — unique types */}
-            <div className="flex items-center gap-2">
-              {masteryProgress.uniqueTypes >= PRODUCTION_TYPES_REQUIRED ? (
-                <CheckCircle2 size={14} strokeWidth={1.5} style={{ color: 'var(--d5-terracotta)', flexShrink: 0 }} />
-              ) : (
-                <Circle size={14} strokeWidth={1.5} style={{ color: 'var(--d5-muted)', flexShrink: 0 }} />
-              )}
-              <div className="flex-1">
-                <p className="text-xs text-foreground">
-                  Variedad
-                  <span className="ml-1.5" style={{ color: 'var(--d5-warm)' }}>
-                    {masteryProgress.uniqueTypes}/{PRODUCTION_TYPES_REQUIRED} tipos
-                  </span>
-                </p>
-                {correctProductionTypes.size > 0 && (
-                  <div className="flex flex-wrap gap-1 mt-1">
-                    {Array.from(correctProductionTypes).map(type => {
-                      const label = EXERCISE_TYPES.find(t => t.type === type)?.label ?? type
-                      return (
-                        <span
-                          key={type}
-                          style={{
-                            fontSize: 10,
-                            padding: '1px 6px',
-                            borderRadius: 9999,
-                            background: 'rgba(196,82,46,0.1)',
-                            color: 'var(--d5-terracotta)',
-                            fontWeight: 500,
-                          }}
-                        >
-                          {label}
-                        </span>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
     </main>
   )
 }
