@@ -37,6 +37,8 @@ pnpm seed:verbs:apply     # Insert verb_sentences rows from review JSON
 pnpm validate:grading     # ARCH-02 offline validation: grade 50 attempts with Haiku vs Sonnet baseline
 pnpm push:keygen          # Generate VAPID key pair for push notifications
 pnpm backfill:translations # Backfill verb_sentences.english via Claude Haiku (resume-safe)
+pnpm seed:vocab           # Generate vocab sentences via Claude Haiku → docs/vocab-sentences-YYYY-MM-DD.json
+pnpm seed:vocab:apply     # Insert vocab_sentences rows from review JSON (idempotent)
 ```
 
 Post-deploy API smoke check (requires env vars):
@@ -168,9 +170,9 @@ KV_REST_API_TOKEN               # Upstash Redis token (@vercel/kv)
 | `/study`                        | Server + Client | Study session — queue fetched server-side, state machine client-side                      |
 | `/study/configure`              | Server + Client | Session config — pick module + exercise types before starting                             |
 | `/curriculum`                   | Server          | Full concept tree with mastery badges; all concepts/units/modules are clickable           |
-| `/progress`                     | Server          | 4-card stats, CEFR level progress bars, AccuracyChart, WeeklyActivityChart, VerbTenseMastery |
+| `/progress`                     | Server          | 4-card stats, CEFR level progress bars, AccuracyChart, WeeklyActivityChart, VerbTenseMastery, VocabCategoryMastery |
 | `/tutor`                        | Server + Client | Streaming AI chat; accepts `?concept=<id>` for context                                    |
-| `/verbs`                        | Server + Client | Verb directory — 250 verbs, search, mastery dots, favorite toggle                         |
+| `/verbs`                        | Server + Client | Verb + vocab directory — segmented toggle (Verbos/Vocabulario), search, mastery dots, category cards |
 | `/verbs/[infinitive]`           | Server + Client | Conjugation tables per tense + mastery bars + favorite toggle                             |
 | `/verbs/configure`              | Server + Client | Verb drill config — tenses, verb set, length, hint toggle                                 |
 | `/verbs/session`                | Server + Client | In-sentence conjugation session; local grading; no Claude cost                            |
@@ -185,6 +187,11 @@ KV_REST_API_TOKEN               # Upstash Redis token (@vercel/kv)
 | `POST /api/concepts/[id]/hard`  | Route handler   | Toggle `is_hard` flag on `user_progress`; update-then-insert pattern                      |
 | `POST /api/verbs/grade`         | Route handler   | Record verb conjugation attempt → `increment_verb_progress` RPC; Zod + rate-limit         |
 | `POST /api/verbs/favorite`      | Route handler   | Toggle `user_verb_favorites` row; returns `{ favorited: boolean }`                        |
+| `/vocab/configure`              | Server + Client | Vocab drill config — categories, levels, length, hint toggle                              |
+| `/vocab/session`                | Server + Client | In-context vocab drill session; local grading; no Claude cost (Feat-M)                    |
+| `POST /api/vocab/grade`         | Route handler   | Record vocab attempt → `increment_vocab_progress` RPC; Zod + rate-limit 120/10min (Feat-M) |
+| `GET /api/offline/vocab`        | Route handler   | Full vocab data bundle (items + sentences + progress); `?version=` for 304 (Feat-M)      |
+| `POST /api/offline/vocab-sync`  | Route handler   | Batch sync queued vocab attempts via `increment_vocab_progress` RPC (Feat-M)              |
 | `POST /api/push/test`           | Route handler   | Admin-only: send self-test push notification via webpush (Fix-L)                          |
 | `POST /api/push/subscribe`      | Route handler   | Save/delete push subscription to `profiles.push_subscription`                             |
 | `POST /api/push/send`           | Route handler   | Cron-triggered: batch push notifications to subscribers with due exercises                 |
@@ -252,6 +259,17 @@ Session configure page (`/study/configure`) builds these params via a UI before 
 | `hint`    | `1`                                        | Show `[infinitive]` hint next to blank |
 
 
+### Vocab Session Query Params (`/vocab/session`)
+
+
+| Param        | Values                                  | Effect                                    |
+| ------------ | --------------------------------------- | ----------------------------------------- |
+| `categories` | comma-separated category keys           | Which vocab categories to drill           |
+| `levels`     | comma-separated `B1`, `B2`, `C1`        | Filter by CEFR level (optional, all if omitted) |
+| `length`     | `10` | `20` | `30`                      | Max sentences per session                 |
+| `hint`       | `1`                                     | Show English gloss of blank expression    |
+
+
 ### Exercise Types & Components
 
 
@@ -304,6 +322,19 @@ Concept mastery requires **both** conditions:
 9. `VerbFeedbackPanel` shows `completedSentence` (full sentence with answer) + `tenseRule` on all outcomes (not just incorrect)
 10. **Infinitive drill mode**: tense `'infinitive'` shows English meaning as prompt, user types Spanish infinitive. No `verb_sentences` needed — uses `verbs.english` directly. Eyebrow shows "Infinitivo" instead of "Conjugación". Hint toggle disabled when only infinitive selected.
 
+### Vocab Drill Loop
+
+1. `VocabSession.tsx` state: `answering → feedback → [try again | next] → done`
+2. Grading is **local** — `gradeVocab()` in `src/lib/vocab/grader.ts`; zero Claude cost
+3. Three outcomes: `correct` (auto-advance 1.5s, green flash) · `accent_error` (orange flash, manual Next) · `incorrect` (red flash, Try Again or Next)
+4. Fire-and-forget `POST /api/vocab/grade` records attempt in `vocab_progress` via `increment_vocab_progress` RPC
+5. Session done screen shows overall % + per-category breakdown sorted worst-first
+6. Entry via segmented "Verbos | Vocabulario" toggle on `/verbs` page → category cards view
+7. 8 categories: `discourse_markers`, `fixed_phrases`, `collocations`, `register_phrases`, `idiomatic`, `prepositional`, `adverbial`, `pragmatic`
+8. No SRS — pure practice mode (same pattern as verb drills); accuracy tracking per item
+9. Offline: queued attempts in IDB `queued_vocab_attempts` store; synced via `POST /api/offline/vocab-sync`
+10. `SpeakButton` on sentence (speaks completed sentence with correct form inserted)
+
 ### Streak Logic
 
 - Updated in `POST /api/submit` on the **first submission of each calendar day**
@@ -348,6 +379,9 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | `user_verb_favorites`                    | User ↔ verb many-to-many favorites; unique (user_id, verb_id)                                                            |
 | `verb_progress`                          | Per-user accuracy per verb × tense; `attempt_count`, `correct_count`; upserted via RPC                                   |
 | `verb_conjugations`                      | Full 6-pronoun paradigm per verb × tense; `stem` = invariant prefix ('' = fully irregular); PK (verb_id, tense)          |
+| `vocab_items`                            | ~200 multi-word expressions; `expression`, `english`, `category`, `level`, `frequency_rank` (Feat-M)                     |
+| `vocab_sentences`                        | 5 sentences per vocab item; `sentence` contains `_____` blank; `correct_form`, `answer_variants`, `english`, `hint`      |
+| `vocab_progress`                         | Per-user accuracy per vocab item; `attempt_count`, `correct_count`; upserted via `increment_vocab_progress` RPC          |
 | `offline_reports`                        | Aggregated results from offline batch grading; `reviewed` flag for report-out UI (Feat-F)                                |
 | `offline_report_attempts`                | Per-attempt results within an offline report: score, feedback, corrected_version, explanation (Feat-F)                    |
 
@@ -370,6 +404,7 @@ Migrations (run once in Supabase SQL editor):
 - `supabase/migrations/022_offline_reports.sql` — `offline_reports` + `offline_report_attempts` tables with indexes (Feat-F; applied 2026-03-16)
 - `supabase/migrations/023_verb_sentence_english.sql` — `verb_sentences.english text DEFAULT NULL` (UX-Verb; ⚠️ pending — run in Supabase SQL editor)
 - `supabase/migrations/024_rename_modules.sql` — Rename 3 module titles: Connectors, Advanced Clauses, Conversational Spanish (⚠️ pending — run in Supabase SQL editor)
+- `supabase/migrations/025_vocab_drill.sql` — `vocab_items`, `vocab_sentences`, `vocab_progress` tables + `increment_vocab_progress` RPC with RLS + indexes (Feat-M; ⚠️ pending — run in Supabase SQL editor)
 
 ### Dashboard Stats
 
@@ -407,6 +442,15 @@ Migrations (run once in Supabase SQL editor):
 - `verb_sentences.english` — English translation column; fully backfilled via `pnpm backfill:translations` (Claude Haiku, batches of 20, resume-safe)
 - `pnpm seed:conjugations` — generates full 6-pronoun paradigm + stem per verb × tense via Claude Haiku → `docs/verb-conjugations-YYYY-MM-DD.json`; resume-safe
 - `pnpm seed:conjugations:apply <file>` — upserts `verb_conjugations` rows; idempotent (ON CONFLICT DO UPDATE)
+
+### Vocab Seed Content
+
+**Status: CODE READY — migration 025 pending, seed data pending**
+
+- 200 vocab items hard-coded in `src/lib/curriculum/run-seed-vocab.ts` across 8 categories
+- Categories: discourse_markers (30), fixed_phrases (30), collocations (25), register_phrases (25), idiomatic (25), prepositional (25), adverbial (20), pragmatic (20)
+- `pnpm seed:vocab` — inserts items into `vocab_items`, generates 5 sentences per item via Claude Haiku → `docs/vocab-sentences-YYYY-MM-DD.json`; resume-safe
+- `pnpm seed:vocab:apply <file>` — inserts `vocab_sentences` rows; idempotent (skips existing vocab_ids)
 
 ### D5 Design System
 
@@ -469,11 +513,19 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/components/verbs/VerbFeedbackPanel.tsx` — correct / accent_error / incorrect feedback UI
 - `src/components/verbs/VerbSummary.tsx` — session done screen with per-tense breakdown
 - `src/components/verbs/VerbTenseMastery.tsx` — progress page section; accuracy bars per tense sorted worst-first
+- `src/lib/vocab/constants.ts` — `VOCAB_CATEGORIES` (8), `CATEGORY_LABELS`, `CATEGORY_DESCRIPTIONS`, `CATEGORY_LEVELS`, `VocabCategory` type
+- `src/lib/vocab/grader.ts` — `gradeVocab(userAnswer, correctForm, answerVariants, hint)` → `VocabGradeResult`; reuses `normalizeSpanish()` from verb grader
+- `src/lib/vocab/types.ts` — `VocabSessionItem`, `VocabCategoryStat` interfaces
+- `src/components/vocab/VocabFeedbackPanel.tsx` — correct / accent_error / incorrect feedback UI (mirrors VerbFeedbackPanel)
+- `src/components/vocab/VocabSummary.tsx` — session done screen with per-category breakdown sorted worst-first
+- `src/components/vocab/VocabCategoryMastery.tsx` — progress page section; accuracy bars per category sorted worst-first
+- `src/app/verbs/VerbsVocabToggle.tsx` — client segmented control ("Verbos | Vocabulario") on `/verbs` page
+- `src/app/verbs/VocabCategoryView.tsx` — category card list with accuracy bars + CTA → `/vocab/configure`
 
 ### Navigation
 
 - **SideNav** (`src/components/SideNav.tsx`) — desktop sidebar (`hidden lg:flex`); D5 design: `SvgSendaPath` + DM Serif italic wordmark, left 3px terracotta accent bar per active item (no icons), `--d5-nav-inactive` for inactive items; 6 items: Dashboard → Study → Curriculum → Verbs → Progress → Tutor; hidden on `/auth`, `/onboarding`, `/brand-preview`, `/admin`; `StreakBadge` (md) in bottom section above account link
-- **BottomNav** (`src/components/BottomNav.tsx`) — mobile 5-tab bar (`lg:hidden`); Dashboard → Study → Curriculum → Verbs → Progress (Tutor removed — surfaced via AppHeader icon + FeedbackPanel link instead); active pill uses inline `rgba(184,170,153,0.28)` bg; `HIDDEN_ROUTES` includes `/verbs/session`; label font `text-[0.625rem]` (10px, WCAG compliant)
+- **BottomNav** (`src/components/BottomNav.tsx`) — mobile 5-tab bar (`lg:hidden`); Dashboard → Study → Curriculum → Verbs → Progress (Tutor removed — surfaced via AppHeader icon + FeedbackPanel link instead); active pill uses inline `rgba(184,170,153,0.28)` bg; `HIDDEN_ROUTES` includes `/verbs/session`, `/vocab/session`; label font `text-[0.625rem]` (10px, WCAG compliant)
 - **AppHeader** (`src/components/AppHeader.tsx`) — sticky mobile header (`lg:hidden`); `SvgSendaPath size={26}`; right side: tutor Bot icon (on `/dashboard`, `/curriculum`, `/verbs` + sub-routes only) + `StreakBadge` (sm) + avatar; hidden on `/auth`, `/study`, `/tutor`, `/onboarding`, `/brand-preview`
 
 ### Tutor Entry Points
@@ -515,6 +567,8 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 - `tutor/loading.tsx` — full-height flex: real `SvgSendaPath` in header, empty state with logo + starter button bones, input bar at bottom
 - `study/loading.tsx` — progress bar, exercise card with input area + submit button
 - `verbs/loading.tsx` — header, search bar, 2×6 / 3×4 verb card grid with mastery dot bones
+- `vocab/configure/loading.tsx` — header, 8 category pill skeletons, 3 length pills, CTA button
+- `vocab/session/loading.tsx` — progress bar, eyebrow + category, sentence card, input + submit button
 
 **Rules:** Use `senda-skeleton-fill animate-senda-pulse` for all bone elements (not `bg-foreground/5`). Use `senda-card` / `senda-card-sm` for card containers. Import `WindingPathSeparator` and `SvgSendaPath` freely — they are static SVGs with no data dependencies.
 
@@ -535,7 +589,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2287 tests across 126 files — all passing.**
+**Test suite: 2342 tests across 130 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -641,18 +695,16 @@ Items are ordered by priority within each group. Full details of completed work 
 - Could be AI-generated or curated. Exercises would be tied to passages rather than individual concepts.
 - **Future consideration — requires content strategy and new DB schema for passages.**
 
-**Feat-M: Vocabulary feature (word-in-context)** *(P4 — new modality)*
+**Feat-M: Vocabulary drill mode** *(DONE — migration 025 pending)*
 
-- Dedicated vocabulary building beyond grammar concepts. Show words in context sentences, track mastery, and integrate with SRS.
-- Could leverage existing `verb_sentences` pattern for vocabulary sentences.
-- **Seed content identified (2026-03-21):** Gap analysis of an idiomatic expressions reference sheet identified the following vocabulary-heavy categories that are NOT grammar-testable but should be included when Feat-M is built:
-  - **Adverbs of place** (aquí, allí, cerca, lejos, arriba, abajo, etc.) — A1–A2 vocabulary
-  - **Frequency adjectives** (siempre, a menudo, a veces, nunca, etc.) — A2 vocabulary
-  - **Interpersonal expressions** (entre tú y yo, según tú, etc.) — prepositional pronoun usage
-  - **Por/Para fixed phrases beyond grammar** (por favor, por ejemplo, por cierto, para siempre, para colmo, etc.) — phrasebook items
-  - **Idiomatic expressions** (dale, ya vale, en serio, etc.) — memorize-and-use phrases
-  - **Basic time adverbs** (siempre, ahora, nunca — beyond the todavía/ya contrast already in grammar curriculum)
-- **Future consideration — requires PM decision on scope and differentiation from grammar exercises.**
+- 8-category vocab drill: discourse markers, fixed phrases, collocations, register phrases, idiomatic, prepositional, adverbial, pragmatic (~200 items, ~1000 sentences when seeded)
+- Entry via segmented "Verbos | Vocabulario" toggle on `/verbs` page → category cards → `/vocab/configure` → `/vocab/session`
+- Local grading (`gradeVocab()`) — zero Claude cost; same correct/accent_error/incorrect pattern as verb drills
+- No SRS — pure practice mode; accuracy tracking per item via `vocab_progress` + `increment_vocab_progress` RPC
+- Offline: IDB v3 `queued_vocab_attempts` store + `POST /api/offline/vocab-sync` batch sync
+- Progress page: `VocabCategoryMastery` section with per-category accuracy bars
+- Migration 025: `vocab_items`, `vocab_sentences`, `vocab_progress` tables + RPC (⚠️ pending — run in Supabase SQL editor)
+- Seed: `pnpm seed:vocab` → generate sentences via Haiku; `pnpm seed:vocab:apply` → insert rows (pending after migration)
 
 **Feat-N: Social / accountability features** *(P4 — retention)*
 
@@ -697,7 +749,7 @@ Items are ordered by priority within each group. Full details of completed work 
 **Fix-M: Offline mode stability audit** *(DONE)*
 
 - **Middleware resilience**: `src/lib/supabase/middleware.ts` — `getUser()` wrapped in try/catch; when Supabase is unreachable, checks for `sb-*-auth-token` cookies → allows through if present (offline mode). Onboarding DB query also catches failures gracefully.
-- **IDB schema v2**: `src/lib/offline/db.ts` — DB_VERSION bumped to 2. Three new stores: `profile_cache` (single-row profile snapshot), `modules_cache` (full module list), `dashboard_cache` (due/studied/total stats).
+- **IDB schema v3**: `src/lib/offline/db.ts` — DB_VERSION bumped to 3 (v2: cache stores; v3: `queued_vocab_attempts` for Feat-M). Stores: `profile_cache`, `modules_cache`, `dashboard_cache` + vocab attempt queue.
 - **Write-through cache writers**: `ProfileCacheWriter` (layout), `DashboardCacheWriter` (dashboard), `CurriculumCacheWriter` (curriculum), `ProgressCacheWriter` (progress) — silent client components that write page data to IDB on every successful load.
 - **error.tsx offline shells**: 7 route-level error boundaries detect `!navigator.onLine` → read from IDB → render cached view with `OfflineIndicator` banner:
   - `dashboard/error.tsx` — cached greeting + stats + offline study/verb practice links
@@ -758,6 +810,5 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 | **P3** | **Feat-R** — Capacitor native shell | Public launch readiness |
 | **P4** | **Infra-D** — A/B testing / feature flags | Needed before adaptive grading |
 | **P4** | **Feat-L** — Reading comprehension | Content strategy needed |
-| **P4** | **Feat-M** — Vocabulary feature | PM scope decision |
 | **P4** | **Feat-N** — Social / accountability | PM research needed |
 

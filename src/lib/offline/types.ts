@@ -158,6 +158,16 @@ export interface VerbCacheMeta {
   value: string
 }
 
+// ── Queued vocab attempts ────────────────────────────────────────────
+
+export interface QueuedVocabAttempt {
+  id?: number
+  vocab_id: string
+  correct: boolean
+  attempted_at: string
+  synced: 0 | 1
+}
+
 // ── Write-through cache types (Fix-M) ────────────────────────────────
 
 export interface CachedProfile {

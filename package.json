@@ -23,7 +23,9 @@
     "test:e2e:ui": "dotenv -e .env.e2e -- playwright test --ui",
     "test:e2e:headed": "dotenv -e .env.e2e -- playwright test --headed",
     "push:keygen": "tsx scripts/generate-vapid-keys.ts",
-    "backfill:translations": "tsx scripts/backfill-verb-translations.ts"
+    "backfill:translations": "tsx scripts/backfill-verb-translations.ts",
+    "seed:vocab": "tsx src/lib/curriculum/run-seed-vocab.ts",
+    "seed:vocab:apply": "tsx src/lib/curriculum/run-seed-vocab-apply.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",

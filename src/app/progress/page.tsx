@@ -10,7 +10,11 @@ import { userLocalToday, utcToLocalDate } from '@/lib/timezone'
 import { EmptyState } from '@/components/EmptyState'
 import { ProgressCacheWriter } from '@/components/offline/ProgressCacheWriter'
 import type { WeekData } from './WeeklyActivityChart'
+import { VocabCategoryMastery } from '@/components/vocab/VocabCategoryMastery'
 import type { TenseSummary } from '@/components/verbs/VerbTenseMastery'
+import type { VocabItem, VocabProgress } from '@/lib/supabase/types'
+import { VOCAB_CATEGORIES } from '@/lib/vocab/constants'
+import type { VocabCategory } from '@/lib/vocab/constants'
 
 const CEFR_COLORS: Record<string, { barStyle: React.CSSProperties }> = {
   B1: { barStyle: { background: 'var(--d5-muted)' } },
@@ -50,6 +54,8 @@ export default async function ProgressPage() {
     { data: activityRows },
     { data: sessionRows },
     { data: verbProgressRows },
+    { data: vocabItemRows },
+    { data: vocabProgressRows },
   ] = await Promise.all([
     supabase.from('concepts').select('id, level'),
     supabase.from('user_progress')
@@ -69,6 +75,11 @@ export default async function ProgressPage() {
     supabase
       .from('verb_progress')
       .select('tense, attempt_count, correct_count')
+      .eq('user_id', user.id)
+      .gt('attempt_count', 0),
+    supabase.from('vocab_items').select('id, category'),
+    supabase.from('vocab_progress')
+      .select('vocab_id, attempt_count, correct_count')
       .eq('user_id', user.id)
       .gt('attempt_count', 0),
   ])
@@ -175,6 +186,29 @@ export default async function ProgressPage() {
     }))
     .sort((a, b) => a.pct - b.pct)  // worst first
 
+  // ── Vocab category mastery ────────────────────────────────────────────────
+  type VocabCatSummary = { category: string; correct: number; attempts: number; pct: number }
+  const vocabItemCatMap = new Map(
+    (vocabItemRows as Pick<VocabItem, 'id' | 'category'>[] ?? []).map((i) => [i.id, i.category])
+  )
+  const vocabCatAccumulator = new Map<string, { correct: number; attempts: number }>()
+  for (const row of (vocabProgressRows as Pick<VocabProgress, 'vocab_id' | 'attempt_count' | 'correct_count'>[] ?? [])) {
+    const cat = vocabItemCatMap.get(row.vocab_id)
+    if (!cat) continue
+    const entry = vocabCatAccumulator.get(cat) ?? { correct: 0, attempts: 0 }
+    entry.attempts += row.attempt_count
+    entry.correct  += row.correct_count
+    vocabCatAccumulator.set(cat, entry)
+  }
+  const vocabCategorySummaries: VocabCatSummary[] = Array.from(vocabCatAccumulator.entries())
+    .map(([category, { correct, attempts }]) => ({
+      category,
+      correct,
+      attempts,
+      pct: attempts > 0 ? Math.round((correct / attempts) * 100) : 0,
+    }))
+    .sort((a, b) => a.pct - b.pct)  // worst first
+
   const hasAnyData = totalAttempts > 0
 
   return (
@@ -267,6 +301,14 @@ export default async function ProgressPage() {
 
             {/* Verb conjugation mastery */}
             <VerbTenseMastery summaries={verbTenseSummaries} />
+
+            {/* Vocab category mastery */}
+            {vocabCategorySummaries.length > 0 && (
+              <>
+                <WindingPathSeparator />
+                <VocabCategoryMastery summaries={vocabCategorySummaries} />
+              </>
+            )}
 
             <WindingPathSeparator />
 

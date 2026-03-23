@@ -10,7 +10,7 @@ const TABS = [
   { href: '/verbs',           label: 'Verbos',     Icon: Book      },
   { href: '/progress',        label: 'Progreso',   Icon: BarChart2 },
 ]
-const HIDDEN_ROUTES = ['/auth', '/onboarding', '/write', '/brand-preview', '/verbs/session', '/admin']
+const HIDDEN_ROUTES = ['/auth', '/onboarding', '/write', '/brand-preview', '/verbs/session', '/vocab/session', '/admin']
 
 export function BottomNav() {
   const pathname = usePathname()

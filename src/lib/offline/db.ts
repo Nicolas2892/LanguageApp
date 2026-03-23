@@ -8,6 +8,7 @@ import type {
   OfflineFreeWritePrompt,
   QueuedAttempt,
   QueuedVerbAttempt,
+  QueuedVocabAttempt,
   OfflineSession,
   CachedVerb,
   CachedVerbSentence,
@@ -23,7 +24,7 @@ import type {
 // ── DB name & version ─────────────────────────────────────────────────
 
 const DB_NAME = 'senda-offline'
-const DB_VERSION = 2
+const DB_VERSION = 3
 
 // ── Store names ───────────────────────────────────────────────────────
 
@@ -47,6 +48,8 @@ const STORES = {
   profileCache: 'profile_cache',
   modulesCache: 'modules_cache',
   dashboardCache: 'dashboard_cache',
+  // v3 stores (Feat-M: vocab drills)
+  queuedVocabAttempts: 'queued_vocab_attempts',
 } as const
 
 // ── Open / create DB ──────────────────────────────────────────────────
@@ -167,6 +170,15 @@ export function getDB(): Promise<OfflineDB> {
         }
         if (!db.objectStoreNames.contains(STORES.dashboardCache)) {
           db.createObjectStore(STORES.dashboardCache, { keyPath: 'key' })
+        }
+
+        // ── v3 stores (Feat-M: vocab drills) ──
+        if (!db.objectStoreNames.contains(STORES.queuedVocabAttempts)) {
+          const store = db.createObjectStore(STORES.queuedVocabAttempts, {
+            keyPath: 'id',
+            autoIncrement: true,
+          })
+          store.createIndex('synced', 'synced', { unique: false })
         }
       },
     })
@@ -635,6 +647,33 @@ export async function putDashboardCache(stats: CachedDashboardStats): Promise<vo
 export async function getDashboardCache(): Promise<CachedDashboardStats | undefined> {
   const db = await getDB()
   return db.get(STORES.dashboardCache, 'current')
+}
+
+// ── Queued vocab attempts ─────────────────────────────────────────────
+
+export async function queueVocabAttempt(attempt: Omit<QueuedVocabAttempt, 'id'>): Promise<number> {
+  const db = await getDB()
+  const id = await db.add(STORES.queuedVocabAttempts, attempt) as number
+  requestBackgroundSync()
+  return id
+}
+
+export async function getUnsyncedVocabAttempts(): Promise<QueuedVocabAttempt[]> {
+  const db = await getDB()
+  return db.getAllFromIndex(STORES.queuedVocabAttempts, 'synced', 0)
+}
+
+export async function markVocabAttemptsSynced(ids: number[]): Promise<void> {
+  const db = await getDB()
+  const tx = db.transaction(STORES.queuedVocabAttempts, 'readwrite')
+  for (const id of ids) {
+    const attempt = await tx.store.get(id) as QueuedVocabAttempt | undefined
+    if (attempt) {
+      attempt.synced = 1
+      await tx.store.put(attempt)
+    }
+  }
+  await tx.done
 }
 
 // ── Clear all data ────────────────────────────────────────────────────

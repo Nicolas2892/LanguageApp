@@ -4,6 +4,40 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Feat-M: Vocabulary Drill Mode ✓ (2026-03-23)
+
+Full vocabulary drill feature for multi-word expressions, collocations, discourse markers, and idiomatic phrases. 8 categories (~200 items when seeded), contextual gap-fill exercises with local grading (zero Claude cost).
+
+**Key files created:**
+- `supabase/migrations/025_vocab_drill.sql` — `vocab_items`, `vocab_sentences`, `vocab_progress` tables + `increment_vocab_progress` RPC
+- `src/lib/vocab/constants.ts` — 8 categories with labels, descriptions, level ranges
+- `src/lib/vocab/grader.ts` — `gradeVocab()` (exact/accent_error/incorrect outcomes), reuses `normalizeSpanish()`
+- `src/lib/vocab/types.ts` — `VocabSessionItem`, `VocabCategoryStat`
+- `src/app/vocab/configure/` — config page (categories, levels, length, hint toggle)
+- `src/app/vocab/session/` — session state machine (answering → feedback → done), auto-advance on correct
+- `src/app/api/vocab/grade/route.ts` — POST route (auth, CSRF, rate-limit 120/10min, Zod, RPC)
+- `src/app/api/offline/vocab/route.ts` — GET full vocab bundle with `?version=` for 304
+- `src/app/api/offline/vocab-sync/route.ts` — POST batch sync queued attempts
+- `src/components/vocab/` — `VocabFeedbackPanel`, `VocabSummary`, `VocabCategoryMastery`, `VocabCategoryCard`
+- `src/app/verbs/VerbsVocabToggle.tsx` — segmented "Verbos | Vocabulario" toggle
+- `src/app/verbs/VocabCategoryView.tsx` — category card list with accuracy bars
+- `src/lib/curriculum/run-seed-vocab.ts` + `run-seed-vocab-apply.ts` — seed scripts
+
+**Key files modified:**
+- `src/app/verbs/page.tsx` — fetches vocab data, renders segmented toggle
+- `src/app/progress/page.tsx` — added VocabCategoryMastery section
+- `src/components/BottomNav.tsx` — added `/vocab/session` to HIDDEN_ROUTES
+- `src/lib/offline/db.ts` — IDB v3 with `queued_vocab_attempts` store
+- `src/lib/offline/types.ts` — `QueuedVocabAttempt` interface
+- `src/lib/supabase/types.ts` — added 3 table types + RPC type + convenience types
+- `src/lib/analytics.ts` — `trackVocabDrillStarted`, `trackVocabDrillCompleted`
+
+**Tests:** 55 new tests (24 VocabSession, 7 route, 16 grader, 5 constants, 3 VocabCategoryView). 2342 total, all passing.
+
+**Not included (deferred):** SRS integration, user-created lists, dictionary/browse. Migration 025 + seed data pending manual application.
+
+---
+
 ## Audit Phase 3: P1 Test Coverage ✓ (2026-03-23)
 
 2287 tests across 126 files, all passing. Added 60 tests across 4 new test files covering the highest-risk untested code identified in the full project audit.

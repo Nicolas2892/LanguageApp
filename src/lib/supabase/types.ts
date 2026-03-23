@@ -571,6 +571,96 @@ export interface Database {
         }
         Relationships: []
       }
+      vocab_items: {
+        Row: {
+          id: string
+          expression: string
+          english: string
+          category: string
+          level: string
+          frequency_rank: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          expression: string
+          english: string
+          category: string
+          level?: string
+          frequency_rank: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          expression?: string
+          english?: string
+          category?: string
+          level?: string
+          frequency_rank?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      vocab_sentences: {
+        Row: {
+          id: string
+          vocab_id: string
+          sentence: string
+          correct_form: string
+          answer_variants: string[] | null
+          english: string
+          hint: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          vocab_id: string
+          sentence: string
+          correct_form: string
+          answer_variants?: string[] | null
+          english: string
+          hint?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          vocab_id?: string
+          sentence?: string
+          correct_form?: string
+          answer_variants?: string[] | null
+          english?: string
+          hint?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      vocab_progress: {
+        Row: {
+          id: string
+          user_id: string
+          vocab_id: string
+          attempt_count: number
+          correct_count: number
+          last_practiced: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          vocab_id: string
+          attempt_count?: number
+          correct_count?: number
+          last_practiced?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          vocab_id?: string
+          attempt_count?: number
+          correct_count?: number
+          last_practiced?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -599,6 +689,10 @@ export interface Database {
           correct_count: number
         }>
       }
+      increment_vocab_progress: {
+        Args: { p_user_id: string; p_vocab_id: string; p_correct: boolean }
+        Returns: void
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
@@ -621,3 +715,6 @@ export type VerbProgress = Database['public']['Tables']['verb_progress']['Row']
 export type VerbConjugation = Database['public']['Tables']['verb_conjugations']['Row']
 export type OfflineReport = Database['public']['Tables']['offline_reports']['Row']
 export type OfflineReportAttempt = Database['public']['Tables']['offline_report_attempts']['Row']
+export type VocabItem = Database['public']['Tables']['vocab_items']['Row']
+export type VocabSentence = Database['public']['Tables']['vocab_sentences']['Row']
+export type VocabProgress = Database['public']['Tables']['vocab_progress']['Row']

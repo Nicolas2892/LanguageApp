@@ -110,6 +110,24 @@ export function trackFreeWriteSubmitted(conceptId: string) {
   posthog.capture('free_write_submitted', { conceptId })
 }
 
+// ── Vocab drills ──────────────────────────────────────────────────────────────
+
+export function trackVocabDrillStarted(props: {
+  categories: string[]
+  length: number
+}) {
+  if (typeof window === 'undefined') return
+  posthog.capture('vocab_drill_started', props)
+}
+
+export function trackVocabDrillCompleted(props: {
+  correct: number
+  total: number
+}) {
+  if (typeof window === 'undefined') return
+  posthog.capture('vocab_drill_completed', props)
+}
+
 // ── Streak ───────────────────────────────────────────────────────────────────
 
 export function trackStreakMilestone(streak: number) {
