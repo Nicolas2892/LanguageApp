@@ -535,7 +535,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2227 tests across 122 files — all passing.**
+**Test suite: 2287 tests across 126 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 

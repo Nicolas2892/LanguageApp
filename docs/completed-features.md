@@ -4,6 +4,52 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Audit Phase 3: P1 Test Coverage ✓ (2026-03-23)
+
+2287 tests across 126 files, all passing. Added 60 tests across 4 new test files covering the highest-risk untested code identified in the full project audit.
+
+### New Test Files
+
+**1. `src/lib/claude/__tests__/grader.test.ts` (12 tests)**
+- Non-streaming `gradeAnswer()` function
+- Happy path, default/custom model, score clamping (>3→3, <0→0), `is_correct` recalculation from clamped score
+- Markdown fence stripping before JSON parse, malformed JSON fallback (score=0), fallback `corrected_version` (expectedAnswer or empty string)
+- Input truncation (userAnswer capped at 1000 chars), API throw propagation
+
+**2. `src/app/api/grade/__tests__/route.test.ts` (16 tests)**
+- Free-write grading route (`POST /api/grade`)
+- Auth gate (401), CSRF validation (403), rate limiting (429), Zod validation (400 — empty arrays, non-UUID)
+- Happy path with `gradeResult + next_review_in_days`, multi-concept fetch, joined titles/explanations passed to Claude
+- `sm2` called once per concept_id, timezone passed through, `DEFAULT_PROGRESS` for new concepts
+- Production mastery gate: `production_mastered=true` when score≥2, skipped when score<2
+- 404 when concepts not found, 500 + Sentry capture on gradeAnswer throw, response contract test
+
+**3. `src/app/api/offline/grade-batch/__tests__/route.test.ts` (20 tests)**
+- Offline batch grading route (`POST /api/offline/grade-batch`)
+- Auth gate, CSRF, rate limiting, Zod validation (empty attempts, invalid exercise_type enum, >50 cap)
+- Happy path with `report_id`, `results`, `summary`; results array length matches attempts; correct summary stats
+- `gradeAnswer` called once per attempt; fallback to `concept_title` from attempt when concept not in DB
+- Chronological sorting before SRS; sequential conflict resolution (second sm2 uses updated progress from first)
+- Insert vs update path for new/existing `user_progress`; exercise_attempts batch insert
+- Offline report + report_attempts creation; push notification sent when subscription exists
+- Non-critical push: returns 200 even when push throws
+
+**4. `src/app/onboarding/__tests__/DiagnosticSession.test.tsx` (12 tests)**
+- Onboarding diagnostic session state machine
+- Empty items edge case (error message + dashboard link); initial render (ExerciseRenderer + concept explanation)
+- Progress bars matching item count; "Evaluando…" loading state during submit
+- Feedback transition showing score label + feedback text; corrected_version shown/hidden based on correctness
+- "Siguiente →" advances to next exercise; last item button says "Finalizar diagnóstico"
+- Completion flow: calls `/api/onboarding/complete` + `router.push('/dashboard')`
+- Error recovery: completion failure reverts to answering with error; submit failure shows "Algo salió mal"
+
+### Documentation Updated
+- `docs/audit-2026-03-23.md` — Phase 3 P1 items marked ✅ TESTED
+- `CLAUDE.md` — test count updated to 2287/126
+- `MEMORY.md` — test count synchronized
+
+---
+
 ## PWA Update Fix + Caching & Offline Improvements ✓ (2026-03-17)
 
 2033 tests across 115 files, all passing.
