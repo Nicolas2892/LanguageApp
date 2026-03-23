@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Flame, X } from 'lucide-react'
+import { trackStreakMilestone } from '@/lib/analytics'
 
 const MILESTONES = [7, 14, 30, 60, 100] as const
 
@@ -23,6 +24,7 @@ export function StreakMilestone({ streak }: Props) {
       if (localStorage.getItem(key)) return
       setMilestone(highest)
       setVisible(true)
+      trackStreakMilestone(highest)
 
       if (highest >= 30) {
         import('canvas-confetti')

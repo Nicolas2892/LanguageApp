@@ -2245,3 +2245,64 @@ All 6 main pages had `loading.tsx` skeletons, but they didn't match the actual p
 - All skeleton bone elements must use `senda-skeleton-fill animate-senda-pulse` (never `bg-foreground/5`)
 - Card containers in skeletons should use `senda-card` / `senda-card-sm`
 - `WindingPathSeparator` and `SvgSendaPath` are safe to import in skeletons — static SVGs with no data dependencies
+
+---
+
+## Fix-N: Comprehensive PostHog Analytics (2026-03-23)
+
+Full analytics coverage across all user journeys + enriched user identification for cohort analysis.
+
+### What was built
+
+**`src/lib/analytics.ts`** — 8 new tracking functions + `UserTraits` typed interface:
+- `trackOnboardingStarted()` — fires on DiagnosticSession mount
+- `trackSessionStarted(props)` — fires on StudySession mount with practiceMode, mode, conceptId
+- `trackHintRequested(props)` — fires when user requests Claude hint (exerciseType, conceptId, wrongAttempts)
+- `trackExerciseGenerated(props)` — fires per AI-generated exercise (conceptId, exerciseType)
+- `trackHardFlagToggled(props)` — fires on hard flag toggle (conceptId, isHard)
+- `trackOfflineModuleDownloaded(props)` — fires after successful module download (moduleId, exerciseCount, conceptCount)
+- `trackOfflineSyncCompleted(props)` — fires after sync completes (grammarCount, verbCount, reportId)
+- `trackFeatureFirstUse(feature)` — localStorage-deduped, fires once per feature (tutor, free_write, verb_drill, vocab_drill)
+
+**`src/components/PostHogProvider.tsx`** — Now accepts 6 trait props (`computedLevel`, `streak`, `timezone`, `streakFreezeRemaining`, `masteredCount`, `daysSinceSignup`) and passes them to `identifyUser()`.
+
+**`src/app/layout.tsx`** — Added `user_progress` HEAD count query (mastered concepts) to existing `Promise.all`; computes `daysSinceSignup` from `profiles.created_at`. Passes all traits to PostHogProvider.
+
+### Wired existing dead-code functions
+- `trackOnboardingComplete('diagnostic')` — DiagnosticSession after successful `/api/onboarding/complete`
+- `trackTutorMessageSent(conceptId)` — TutorChat.handleSend()
+- `trackFreeWriteSubmitted(conceptIds[0])` — WriteSession after successful grade
+- `trackStreakMilestone(highest)` — StreakMilestone on first display
+
+### Event catalog (20 events total)
+| Event | Source |
+|-------|--------|
+| `signup` | auth/signup |
+| `login` | auth/login |
+| `onboarding_started` | DiagnosticSession |
+| `onboarding_complete` | DiagnosticSession |
+| `session_started` | StudySession |
+| `exercise_submitted` | StudySession |
+| `session_completed` | StudySession |
+| `hint_requested` | StudySession |
+| `exercise_generated` | StudySession |
+| `verb_drill_started` | VerbSession |
+| `verb_drill_completed` | VerbSession |
+| `vocab_drill_started` | VocabSession |
+| `vocab_drill_completed` | VocabSession |
+| `tutor_message_sent` | TutorChat |
+| `free_write_submitted` | WriteSession |
+| `streak_milestone` | StreakMilestone |
+| `hard_flag_toggled` | HardFlagButton |
+| `offline_module_downloaded` | useDownloadManager |
+| `offline_sync_completed` | useSyncManager |
+| `feature_first_use` | WriteSession, TutorChat, VerbSession, VocabSession |
+
+### Tests added
+- 11 new analytics unit tests (8 new functions + 2 for trackFeatureFirstUse dedup + 1 updated identifyUser)
+- Analytics mocks added to 6 component test files
+- Total: 2353 tests across 130 files (up from 2342)
+
+### Not included
+- PostHog dashboards (DAU/WAU, funnels, feature adoption) — must be created manually in PostHog UI
+- Server-side event tracking — all events are client-side via posthog-js

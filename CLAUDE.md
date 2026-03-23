@@ -589,7 +589,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2342 tests across 130 files — all passing.**
+**Test suite: 2353 tests across 130 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -764,13 +764,14 @@ Items are ordered by priority within each group. Full details of completed work 
 - **SW improvements**: `public/sw.js` — added stale-while-revalidate for `/_next/data/` (RSC payloads), cache-first for Google Fonts woff2
 - **Offline hooks**: `src/lib/offline/hooks.ts` — `useOfflineProfile()`, `useOfflineDashboard()`, `useOfflineCurriculum()`, `useOfflineVerbs()`, `useOfflineVerbDetail()`, `useOfflineProgress()`
 
-**Fix-N: Analytics implementation** *(P1 — no visibility into user behaviour)*
+**Fix-N: Comprehensive PostHog analytics** *(DONE)*
 
-- PostHog is integrated (Infra-A) but event coverage is minimal. Need comprehensive tracking to understand retention, feature usage, and drop-off points.
-- Required events: page views (already via PostHog autocapture), session start/complete (with duration, accuracy, exercise count), exercise submit (type, score, concept), verb drill start/complete, tutor conversations, onboarding funnel steps, offline download/sync, streak milestones, feature discovery (first use of write mode, verb drills, tutor).
-- Add PostHog `identify()` with user properties: computed_level, streak, mastered_count, days_since_signup.
-- Dashboard: create PostHog dashboards for DAU/WAU, session frequency, exercise accuracy trends, feature adoption, onboarding completion rate.
-- **Should be implemented before any growth/marketing push — we need data to measure impact.**
+- 20 events tracked across all user journeys (see event catalog in `src/lib/analytics.ts`)
+- `identifyUser()` sends 6 person properties: `computed_level`, `streak`, `timezone`, `streak_freeze_remaining`, `mastered_count`, `days_since_signup`
+- `trackFeatureFirstUse()` fires once per feature via localStorage dedup (tutor, free_write, verb_drill, vocab_drill)
+- All 4 previously-dead tracking functions now wired (onboarding, tutor, free-write, streak milestone)
+- 8 new tracking functions: `trackOnboardingStarted`, `trackSessionStarted`, `trackHintRequested`, `trackExerciseGenerated`, `trackHardFlagToggled`, `trackOfflineModuleDownloaded`, `trackOfflineSyncCompleted`, `trackFeatureFirstUse`
+- PostHog dashboards for DAU/WAU, funnels, feature adoption still need to be created manually in PostHog UI
 
 ### Technical Debt
 
@@ -799,7 +800,6 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 
 | Priority | Item | Gate |
 | -------- | ---- | ---- |
-| **P1** | **Fix-N** — Analytics implementation | No user behaviour visibility |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
 | **P2** | **Infra-E** — Custom domain for Supabase Auth (Google OAuth branding) | Supabase Pro plan + DNS setup |
 | **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |

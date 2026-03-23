@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { trackOfflineSyncCompleted } from '@/lib/analytics'
 import {
   getUnsyncedAttempts,
   markAttemptsSynced,
@@ -115,6 +116,7 @@ export function useSyncManager() {
       setSyncProgress(100)
       setSyncResult({ reportId, grammarCount, verbCount })
       setSyncState('done')
+      trackOfflineSyncCompleted({ grammarCount, verbCount, reportId })
 
       // Auto-dismiss after 5s
       if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)

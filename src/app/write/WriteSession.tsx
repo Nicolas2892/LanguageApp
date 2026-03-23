@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { FreeWritePrompt } from '@/components/exercises/FreeWritePrompt'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
+import { trackFreeWriteSubmitted, trackFeatureFirstUse } from '@/lib/analytics'
 import type { GradeResult } from '@/lib/claude/grader'
 
 interface ConceptInfo {
@@ -45,6 +46,10 @@ export function WriteSession({ conceptIds, conceptInfos }: Props) {
   }, [conceptIds])
 
   useEffect(() => {
+    trackFeatureFirstUse('free_write')
+  }, [])
+
+  useEffect(() => {
     fetchPrompt()
   }, [fetchPrompt])
 
@@ -65,6 +70,7 @@ export function WriteSession({ conceptIds, conceptInfos }: Props) {
       })
       if (!res.ok) throw new Error('Failed to grade answer')
       const result = await res.json() as GradeResult & { next_review_in_days: number }
+      trackFreeWriteSubmitted(conceptIds[0])
       setState({ phase: 'feedback', prompt, answer, result })
     } catch {
       setError('No se pudo enviar tu respuesta. Inténtalo de nuevo.')

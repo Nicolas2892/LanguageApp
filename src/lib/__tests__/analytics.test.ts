@@ -30,6 +30,14 @@ import {
   trackTutorMessageSent,
   trackFreeWriteSubmitted,
   trackStreakMilestone,
+  trackOnboardingStarted,
+  trackSessionStarted,
+  trackHintRequested,
+  trackExerciseGenerated,
+  trackHardFlagToggled,
+  trackOfflineModuleDownloaded,
+  trackOfflineSyncCompleted,
+  trackFeatureFirstUse,
 } from '../analytics'
 
 describe('analytics', () => {
@@ -125,9 +133,9 @@ describe('analytics', () => {
   })
 
   describe('identifyUser', () => {
-    it('calls posthog.identify', () => {
-      identifyUser('user-123', { level: 'B2' })
-      expect(mockIdentify).toHaveBeenCalledWith('user-123', { level: 'B2' })
+    it('calls posthog.identify with typed traits', () => {
+      identifyUser('user-123', { computed_level: 'B2', streak: 5, mastered_count: 10 })
+      expect(mockIdentify).toHaveBeenCalledWith('user-123', { computed_level: 'B2', streak: 5, mastered_count: 10 })
     })
   })
 
@@ -135,6 +143,84 @@ describe('analytics', () => {
     it('calls posthog.reset', () => {
       resetAnalytics()
       expect(mockReset).toHaveBeenCalled()
+    })
+  })
+
+  describe('trackOnboardingStarted', () => {
+    it('captures onboarding_started', () => {
+      trackOnboardingStarted()
+      expect(mockCapture).toHaveBeenCalledWith('onboarding_started')
+    })
+  })
+
+  describe('trackSessionStarted', () => {
+    it('captures session_started with props', () => {
+      const props = { practiceMode: true, mode: 'sprint', conceptId: 'c1' }
+      trackSessionStarted(props)
+      expect(mockCapture).toHaveBeenCalledWith('session_started', props)
+    })
+  })
+
+  describe('trackHintRequested', () => {
+    it('captures hint_requested with props', () => {
+      const props = { exerciseType: 'gap_fill', conceptId: 'c1', wrongAttempts: 2 }
+      trackHintRequested(props)
+      expect(mockCapture).toHaveBeenCalledWith('hint_requested', props)
+    })
+  })
+
+  describe('trackExerciseGenerated', () => {
+    it('captures exercise_generated', () => {
+      trackExerciseGenerated({ conceptId: 'c1', exerciseType: 'translation' })
+      expect(mockCapture).toHaveBeenCalledWith('exercise_generated', { conceptId: 'c1', exerciseType: 'translation' })
+    })
+  })
+
+  describe('trackHardFlagToggled', () => {
+    it('captures hard_flag_toggled', () => {
+      trackHardFlagToggled({ conceptId: 'c1', isHard: true })
+      expect(mockCapture).toHaveBeenCalledWith('hard_flag_toggled', { conceptId: 'c1', isHard: true })
+    })
+  })
+
+  describe('trackOfflineModuleDownloaded', () => {
+    it('captures offline_module_downloaded', () => {
+      const props = { moduleId: 'm1', exerciseCount: 10, conceptCount: 5 }
+      trackOfflineModuleDownloaded(props)
+      expect(mockCapture).toHaveBeenCalledWith('offline_module_downloaded', props)
+    })
+  })
+
+  describe('trackOfflineSyncCompleted', () => {
+    it('captures offline_sync_completed', () => {
+      trackOfflineSyncCompleted({ grammarCount: 3, verbCount: 2, reportId: 'r1' })
+      expect(mockCapture).toHaveBeenCalledWith('offline_sync_completed', { grammarCount: 3, verbCount: 2, reportId: 'r1' })
+    })
+  })
+
+  describe('trackFeatureFirstUse', () => {
+    it('captures feature_first_use and stores in localStorage', () => {
+      const mockStorage = new Map<string, string>()
+      vi.stubGlobal('localStorage', {
+        getItem: (key: string) => mockStorage.get(key) ?? null,
+        setItem: (key: string, value: string) => mockStorage.set(key, value),
+      })
+      trackFeatureFirstUse('tutor')
+      expect(mockCapture).toHaveBeenCalledWith('feature_first_use', { feature: 'tutor' })
+      expect(mockStorage.get('posthog_first_use_tutor')).toBe('1')
+      vi.unstubAllGlobals()
+    })
+
+    it('does not fire twice for same feature', () => {
+      const mockStorage = new Map<string, string>()
+      mockStorage.set('posthog_first_use_tutor', '1')
+      vi.stubGlobal('localStorage', {
+        getItem: (key: string) => mockStorage.get(key) ?? null,
+        setItem: (key: string, value: string) => mockStorage.set(key, value),
+      })
+      trackFeatureFirstUse('tutor')
+      expect(mockCapture).not.toHaveBeenCalled()
+      vi.unstubAllGlobals()
     })
   })
 })

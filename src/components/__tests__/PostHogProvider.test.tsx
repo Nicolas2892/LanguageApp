@@ -32,13 +32,28 @@ describe('PostHogProvider', () => {
     expect(initAnalytics).toHaveBeenCalled()
   })
 
-  it('calls identifyUser when userId is provided', () => {
+  it('calls identifyUser with traits when userId is provided', () => {
     render(
-      <PostHogProvider userId="user-abc">
+      <PostHogProvider
+        userId="user-abc"
+        computedLevel="B2"
+        streak={5}
+        timezone="Europe/Berlin"
+        streakFreezeRemaining={1}
+        masteredCount={10}
+        daysSinceSignup={30}
+      >
         <div>child</div>
       </PostHogProvider>,
     )
-    expect(identifyUser).toHaveBeenCalledWith('user-abc')
+    expect(identifyUser).toHaveBeenCalledWith('user-abc', {
+      computed_level: 'B2',
+      streak: 5,
+      timezone: 'Europe/Berlin',
+      streak_freeze_remaining: 1,
+      mastered_count: 10,
+      days_since_signup: 30,
+    })
   })
 
   it('does not call identifyUser when userId is undefined', () => {

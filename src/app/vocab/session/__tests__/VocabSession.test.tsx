@@ -27,6 +27,7 @@ vi.mock('@/lib/hooks/useAutoFocus', () => ({
 vi.mock('@/lib/analytics', () => ({
   trackVocabDrillStarted: vi.fn(),
   trackVocabDrillCompleted: vi.fn(),
+  trackFeatureFirstUse: vi.fn(),
 }))
 
 const mockItems: VocabSessionItem[] = [

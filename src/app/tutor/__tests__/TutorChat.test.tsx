@@ -3,6 +3,13 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TutorChat, type Message } from '../TutorChat'
 
+const mockTrackTutorMessageSent = vi.fn()
+const mockTrackFeatureFirstUse = vi.fn()
+vi.mock('@/lib/analytics', () => ({
+  trackTutorMessageSent: (...args: unknown[]) => mockTrackTutorMessageSent(...args),
+  trackFeatureFirstUse: (...args: unknown[]) => mockTrackFeatureFirstUse(...args),
+}))
+
 // ─── jsdom stubs ────────────────────────────────────────────────────────────
 
 // scrollIntoView is not implemented in jsdom
@@ -29,10 +36,31 @@ function makeStream(chunks: string[]) {
 describe('TutorChat', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockTrackTutorMessageSent.mockClear()
+    mockTrackFeatureFirstUse.mockClear()
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
+  })
+
+  // ── Analytics ──────────────────────────────────────────────────────────
+
+  describe('analytics', () => {
+    it('tracks feature_first_use on mount', () => {
+      render(<TutorChat />)
+      expect(mockTrackFeatureFirstUse).toHaveBeenCalledWith('tutor')
+    })
+
+    it('tracks tutor_message_sent on send', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(makeStream(['Respuesta']), { status: 200 })
+      )
+      const user = userEvent.setup()
+      render(<TutorChat conceptId="c1" />)
+      await user.type(screen.getByPlaceholderText('Pregunta a tu tutor…'), 'Hola{Enter}')
+      expect(mockTrackTutorMessageSent).toHaveBeenCalledWith('c1')
+    })
   })
 
   // ── Empty state ─────────────────────────────────────────────────────────

@@ -2,10 +2,16 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { HardFlagButton } from '../HardFlagButton'
 
+const mockTrackHardFlagToggled = vi.fn()
+vi.mock('@/lib/analytics', () => ({
+  trackHardFlagToggled: (...args: unknown[]) => mockTrackHardFlagToggled(...args),
+}))
+
 const CONCEPT_ID = 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
 
 afterEach(() => {
   vi.restoreAllMocks()
+  mockTrackHardFlagToggled.mockClear()
 })
 
 describe('HardFlagButton', () => {
@@ -38,7 +44,7 @@ describe('HardFlagButton', () => {
   })
 
   describe('optimistic toggle', () => {
-    it('toggles aria-label immediately on click (not hard → hard)', async () => {
+    it('toggles aria-label immediately on click (not hard → hard) and tracks event', async () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ is_hard: true }) }))
 
       render(<HardFlagButton conceptId={CONCEPT_ID} initialIsHard={false} />)
@@ -49,6 +55,7 @@ describe('HardFlagButton', () => {
       await waitFor(() => {
         expect(screen.getByRole('button', { name: 'Quitar marca de difícil' })).toBeDefined()
       })
+      expect(mockTrackHardFlagToggled).toHaveBeenCalledWith({ conceptId: CONCEPT_ID, isHard: true })
     })
 
     it('toggles aria-label immediately on click (hard → not hard)', async () => {

@@ -21,7 +21,7 @@ import { SpeakButton } from '@/components/SpeakButton'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import { focusWithoutScroll } from '@/lib/hooks/useAutoFocus'
 import { queueVerbAttempt } from '@/lib/offline/db'
-import { trackVerbDrillStarted, trackVerbDrillCompleted } from '@/lib/analytics'
+import { trackVerbDrillStarted, trackVerbDrillCompleted, trackFeatureFirstUse } from '@/lib/analytics'
 
 const PRONOUN_LABELS: Record<string, string> = {
   yo:       'yo',
@@ -95,6 +95,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
   useEffect(() => {
     const tenses = [...new Set(items.map((i) => i.tense))]
     trackVerbDrillStarted({ tenses, verbSet: 'session', length: items.length })
+    trackFeatureFirstUse('verb_drill')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

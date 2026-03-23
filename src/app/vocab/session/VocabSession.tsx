@@ -21,7 +21,7 @@ import { VocabSummary } from '@/components/vocab/VocabSummary'
 import { SpeakButton } from '@/components/SpeakButton'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import { focusWithoutScroll } from '@/lib/hooks/useAutoFocus'
-import { trackVocabDrillStarted, trackVocabDrillCompleted } from '@/lib/analytics'
+import { trackVocabDrillStarted, trackVocabDrillCompleted, trackFeatureFirstUse } from '@/lib/analytics'
 
 type Phase =
   | { kind: 'answering' }
@@ -67,6 +67,7 @@ export function VocabSession({ items, showHint, sessionUrl }: Props) {
   useEffect(() => {
     const categories = [...new Set(items.map((i) => i.category))]
     trackVocabDrillStarted({ categories, length: items.length })
+    trackFeatureFirstUse('vocab_drill')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

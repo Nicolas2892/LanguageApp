@@ -25,7 +25,16 @@ export function initAnalytics() {
 
 // ── Identity ─────────────────────────────────────────────────────────────────
 
-export function identifyUser(userId: string, traits?: Record<string, unknown>) {
+export interface UserTraits {
+  computed_level?: string | null
+  streak?: number
+  timezone?: string | null
+  streak_freeze_remaining?: number
+  mastered_count?: number
+  days_since_signup?: number
+}
+
+export function identifyUser(userId: string, traits?: UserTraits) {
   if (typeof window === 'undefined') return
   posthog.identify(userId, traits)
 }
@@ -133,4 +142,90 @@ export function trackVocabDrillCompleted(props: {
 export function trackStreakMilestone(streak: number) {
   if (typeof window === 'undefined') return
   posthog.capture('streak_milestone', { streak })
+}
+
+// ── Onboarding ──────────────────────────────────────────────────────────────
+
+export function trackOnboardingStarted() {
+  if (typeof window === 'undefined') return
+  posthog.capture('onboarding_started')
+}
+
+// ── Session lifecycle ───────────────────────────────────────────────────────
+
+export function trackSessionStarted(props: {
+  practiceMode: boolean
+  mode?: string
+  conceptId?: string
+  unitId?: string
+  moduleId?: string
+  exerciseTypes?: string[]
+}) {
+  if (typeof window === 'undefined') return
+  posthog.capture('session_started', props)
+}
+
+// ── Hints ───────────────────────────────────────────────────────────────────
+
+export function trackHintRequested(props: {
+  exerciseType: string
+  conceptId: string
+  wrongAttempts: number
+}) {
+  if (typeof window === 'undefined') return
+  posthog.capture('hint_requested', props)
+}
+
+// ── Exercise generation ─────────────────────────────────────────────────────
+
+export function trackExerciseGenerated(props: {
+  conceptId: string
+  exerciseType: string
+}) {
+  if (typeof window === 'undefined') return
+  posthog.capture('exercise_generated', props)
+}
+
+// ── Hard flag ───────────────────────────────────────────────────────────────
+
+export function trackHardFlagToggled(props: {
+  conceptId: string
+  isHard: boolean
+}) {
+  if (typeof window === 'undefined') return
+  posthog.capture('hard_flag_toggled', props)
+}
+
+// ── Offline ─────────────────────────────────────────────────────────────────
+
+export function trackOfflineModuleDownloaded(props: {
+  moduleId: string
+  exerciseCount: number
+  conceptCount: number
+}) {
+  if (typeof window === 'undefined') return
+  posthog.capture('offline_module_downloaded', props)
+}
+
+export function trackOfflineSyncCompleted(props: {
+  grammarCount: number
+  verbCount: number
+  reportId?: string
+}) {
+  if (typeof window === 'undefined') return
+  posthog.capture('offline_sync_completed', props)
+}
+
+// ── Feature discovery ───────────────────────────────────────────────────────
+
+export function trackFeatureFirstUse(feature: string) {
+  if (typeof window === 'undefined') return
+  const key = `posthog_first_use_${feature}`
+  try {
+    if (localStorage.getItem(key)) return
+    posthog.capture('feature_first_use', { feature })
+    localStorage.setItem(key, '1')
+  } catch {
+    // localStorage unavailable
+  }
 }

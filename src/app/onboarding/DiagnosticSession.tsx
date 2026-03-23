@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { SvgTilde } from '@/components/SvgTilde'
 import { SCORE_CONFIG } from '@/lib/scoring'
+import { trackOnboardingStarted, trackOnboardingComplete } from '@/lib/analytics'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
 
@@ -38,6 +39,10 @@ export function DiagnosticSession({ items }: Props) {
   const [completing, setCompleting] = useState(false)
   const [results, setResults] = useState<DiagnosticResult[]>([])
   const [submitError, setSubmitError] = useState<string | null>(null)
+
+  useEffect(() => {
+    trackOnboardingStarted()
+  }, [])
 
   const current = items[index]
 
@@ -105,6 +110,7 @@ export function DiagnosticSession({ items }: Props) {
           body: JSON.stringify({ results }),
         })
         if (!res.ok) throw new Error(`Onboarding complete failed: ${res.status}`)
+        trackOnboardingComplete('diagnostic')
         router.push('/dashboard')
       } catch {
         // If completion fails, user would be stuck in redirect loop — retry

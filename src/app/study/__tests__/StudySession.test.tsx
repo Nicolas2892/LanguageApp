@@ -42,6 +42,17 @@ vi.mock('@/components/PushPermissionPrompt', () => ({
 
 vi.mock('canvas-confetti', () => ({ default: vi.fn() }))
 
+const mockTrackSessionStarted = vi.fn()
+const mockTrackHintRequested = vi.fn()
+const mockTrackExerciseGenerated = vi.fn()
+vi.mock('@/lib/analytics', () => ({
+  trackExerciseSubmitted: vi.fn(),
+  trackSessionCompleted: vi.fn(),
+  trackSessionStarted: (...args: unknown[]) => mockTrackSessionStarted(...args),
+  trackHintRequested: (...args: unknown[]) => mockTrackHintRequested(...args),
+  trackExerciseGenerated: (...args: unknown[]) => mockTrackExerciseGenerated(...args),
+}))
+
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 const mockConcept: Concept = {
   id: 'concept-1',

@@ -24,7 +24,13 @@ import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
-import { trackExerciseSubmitted, trackSessionCompleted } from '@/lib/analytics'
+import {
+  trackExerciseSubmitted,
+  trackSessionCompleted,
+  trackSessionStarted,
+  trackHintRequested,
+  trackExerciseGenerated,
+} from '@/lib/analytics'
 
 export interface StudyItem {
   concept: Concept
@@ -115,6 +121,16 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   // Sprint: time mode countdown
   const totalSeconds = sprintConfig?.limitType === 'time' ? sprintConfig.limit * 60 : 0
   const [secondsLeft, setSecondsLeft] = useState(totalSeconds)
+
+  // Track session start
+  useEffect(() => {
+    trackSessionStarted({
+      practiceMode: !!practiceMode,
+      mode: sprintConfig ? 'sprint' : undefined,
+      conceptId: generateConfig?.conceptId,
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Countdown interval
   useEffect(() => {
@@ -417,6 +433,11 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   }
 
   async function handleRequestClaudeHint() {
+    trackHintRequested({
+      exerciseType: current!.exercise.type,
+      conceptId: current!.concept.id,
+      wrongAttempts,
+    })
     setLoadingHint(true)
     try {
       const res = await fetch('/api/hint', {
@@ -460,6 +481,9 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         setGenerateError('No hay más ejercicios únicos disponibles.')
         return
       }
+      exercises.forEach(() => {
+        trackExerciseGenerated({ conceptId: generateConfig.conceptId, exerciseType: generateConfig.exerciseType })
+      })
       const newItems: StudyItem[] = exercises.map((ex) => ({
         concept: generateConfig.concept,
         exercise: ex as Exercise,

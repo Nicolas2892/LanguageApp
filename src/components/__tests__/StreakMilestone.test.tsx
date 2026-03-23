@@ -7,6 +7,11 @@ vi.mock('canvas-confetti', () => ({
   default: vi.fn(),
 }))
 
+const mockTrackStreakMilestone = vi.fn()
+vi.mock('@/lib/analytics', () => ({
+  trackStreakMilestone: (...args: unknown[]) => mockTrackStreakMilestone(...args),
+}))
+
 const mockStorage = new Map<string, string>()
 const mockLocalStorage = {
   getItem: (key: string) => mockStorage.get(key) ?? null,
@@ -21,6 +26,7 @@ describe('StreakMilestone', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     mockStorage.clear()
+    mockTrackStreakMilestone.mockClear()
     vi.stubGlobal('localStorage', mockLocalStorage)
   })
 
@@ -29,9 +35,10 @@ describe('StreakMilestone', () => {
     vi.unstubAllGlobals()
   })
 
-  it('shows toast for streak milestone of 7', () => {
+  it('shows toast for streak milestone of 7 and tracks event', () => {
     render(<StreakMilestone streak={7} />)
     expect(screen.getByText('¡Racha de 7 días!')).toBeInTheDocument()
+    expect(mockTrackStreakMilestone).toHaveBeenCalledWith(7)
   })
 
   it('shows toast for streak milestone of 14', () => {

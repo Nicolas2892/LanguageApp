@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef, useEffect } from 'react'
 import { Flag } from 'lucide-react'
+import { trackHardFlagToggled } from '@/lib/analytics'
 
 interface Props {
   conceptId: string
@@ -24,6 +25,7 @@ export function HardFlagButton({ conceptId, initialIsHard }: Props) {
     const next = !isHard
     setIsHard(next)
     setError(false)
+    trackHardFlagToggled({ conceptId, isHard: next })
     if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
 
     startTransition(async () => {

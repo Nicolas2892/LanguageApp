@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
+import { trackTutorMessageSent, trackFeatureFirstUse } from '@/lib/analytics'
 
 export interface Message {
   role: 'user' | 'assistant'
@@ -35,6 +36,10 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  useEffect(() => {
+    trackFeatureFirstUse('tutor')
+  }, [])
+
   const STARTERS = [
     '¿Cómo uso el subjuntivo?',
     'Explícame ser vs estar',
@@ -45,6 +50,7 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
   async function handleSend(directText?: string) {
     const text = (directText ?? input).trim()
     if (!text || streaming) return
+    trackTutorMessageSent(conceptId)
 
     const userMessage: Message = { role: 'user', content: text }
     const next = [...messages, userMessage]

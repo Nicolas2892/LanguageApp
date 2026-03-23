@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { trackOfflineModuleDownloaded } from '@/lib/analytics'
 import {
   putDownloadedModule,
   putExercises,
@@ -117,6 +118,11 @@ export function useDownloadManager() {
 
       setDownloadProgress(100)
       setDownloadState('complete')
+      trackOfflineModuleDownloaded({
+        moduleId: mod.id,
+        exerciseCount: exercises.length,
+        conceptCount: concepts.length,
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Download failed')
       setDownloadState('error')

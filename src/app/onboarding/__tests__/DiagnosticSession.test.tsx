@@ -26,6 +26,13 @@ vi.mock('@/components/SvgTilde', () => ({
   SvgTilde: () => <div data-testid="svg-tilde" />,
 }))
 
+const mockTrackOnboardingStarted = vi.fn()
+const mockTrackOnboardingComplete = vi.fn()
+vi.mock('@/lib/analytics', () => ({
+  trackOnboardingStarted: (...args: unknown[]) => mockTrackOnboardingStarted(...args),
+  trackOnboardingComplete: (...args: unknown[]) => mockTrackOnboardingComplete(...args),
+}))
+
 function makeExercise(id: string) {
   return {
     id,

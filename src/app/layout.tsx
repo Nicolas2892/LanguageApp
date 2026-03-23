@@ -98,6 +98,8 @@ export default async function RootLayout({
   let streak = 0
   let streakFreezeRemaining = 0
   let unreadReportCount = 0
+  let masteredCount = 0
+  let daysSinceSignup = 0
   let themePreference: 'light' | 'dark' | 'system' = 'system'
   let userTimezone: string | null = null
   let displayName: string | null = null
@@ -107,10 +109,10 @@ export default async function RootLayout({
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       userId = user.id
-      const [{ data: profile }, { count: reportCount }] = await Promise.all([
+      const [{ data: profile }, { count: reportCount }, { count: masteredCountResult }] = await Promise.all([
         supabase
           .from('profiles')
-          .select('display_name, theme_preference, streak, timezone, streak_freeze_remaining, computed_level')
+          .select('display_name, theme_preference, streak, timezone, streak_freeze_remaining, computed_level, created_at')
           .eq('id', user.id)
           .single(),
         supabase
@@ -118,8 +120,14 @@ export default async function RootLayout({
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id)
           .eq('reviewed', false),
+        supabase
+          .from('user_progress')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('interval_days', 21)
+          .eq('production_mastered', true),
       ])
-      const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null; timezone: string | null; streak_freeze_remaining: number | null; computed_level: string | null } | null
+      const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null; timezone: string | null; streak_freeze_remaining: number | null; computed_level: string | null; created_at: string | null } | null
       displayName = p?.display_name ?? null
       userInitials = getInitials(displayName, user.email!)
       streak = p?.streak ?? 0
@@ -127,6 +135,10 @@ export default async function RootLayout({
       unreadReportCount = reportCount ?? 0
       userTimezone = p?.timezone ?? null
       computedLevel = p?.computed_level ?? null
+      masteredCount = masteredCountResult ?? 0
+      daysSinceSignup = p?.created_at
+        ? Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000)
+        : 0
       if (p?.theme_preference === 'light' || p?.theme_preference === 'dark' || p?.theme_preference === 'system') {
         themePreference = p.theme_preference
       }
@@ -150,7 +162,7 @@ export default async function RootLayout({
         className={`${dmSans.variable} ${lora.variable} antialiased`}
       >
         <ThemeProvider initialTheme={themePreference}>
-          <PostHogProvider userId={userId}>
+          <PostHogProvider userId={userId} computedLevel={computedLevel} streak={streak} timezone={userTimezone} streakFreezeRemaining={streakFreezeRemaining} masteredCount={masteredCount} daysSinceSignup={daysSinceSignup}>
             <SideNav userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} unreadReportCount={unreadReportCount} timezone={userTimezone} />
             <div className="lg:ml-[220px]">
               <AppHeader userInitials={userInitials} streak={streak} streakFreezeRemaining={streakFreezeRemaining} unreadReportCount={unreadReportCount} timezone={userTimezone} />
