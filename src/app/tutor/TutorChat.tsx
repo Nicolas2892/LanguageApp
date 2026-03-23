@@ -22,6 +22,14 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const abortRef = useRef<AbortController | null>(null)
+
+  // Abort in-flight stream on unmount
+  useEffect(() => {
+    return () => {
+      abortRef.current?.abort()
+    }
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -48,6 +56,10 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
     setMessages((m) => [...m, { role: 'assistant', content: '' }])
 
     try {
+      abortRef.current?.abort()
+      const controller = new AbortController()
+      abortRef.current = controller
+
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -55,6 +67,7 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
           messages: next,
           conceptId,
         }),
+        signal: controller.signal,
       })
 
       if (!res.body) throw new Error('No stream')
@@ -74,6 +87,7 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
         })
       }
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return
       const isNetworkError = err instanceof TypeError
       setMessages((m) => {
         const updated = [...m]

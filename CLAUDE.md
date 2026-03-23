@@ -77,15 +77,42 @@ NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=...
 
 Inserts 50 verbs into `verbs` table, then generates 3 sentences per verb × tense (350 combos) via Claude Haiku. Resume-safe — skips combos already written. Then run `pnpm seed:verbs:apply [--dry-run] <file>`. Idempotent — skips combos already in DB.
 
-## Git / GitHub Workflow
+## Development Workflow (mandatory for every feature/fix)
 
-After every meaningful change or completed work step:
+The following workflow is **mandatory** for every feature, fix, or meaningful change. Follow this exact sequence:
 
-1. Stage specific files (never `git add -A` blindly)
-2. Commit with a clear conventional message (`feat:`, `fix:`, `chore:` etc.)
-3. Push to `origin main` (`git push origin main`)
+### 1. Plan → 2. Execute → 3. Review → 4. Document → 5. Commit
+
+| Step | Command | Trigger |
+|------|---------|---------|
+| **1. Plan** | Enter plan mode | Before any edits — present plan, wait for user confirmation |
+| **2. Execute** | `/execute` | After plan is approved — TDD, gate checks after each step |
+| **3. Review** | `/review` | **Auto-triggered** after execution completes (all checks green) |
+| **4. Document** | `/document` | **Auto-triggered** after review passes |
+| **5. Commit** | `/safe-commit` | **Auto-triggered** after docs are updated |
+
+**Auto-trigger rules:**
+- After `/execute` completes (all tests/tsc/lint green), **automatically run `/review`**.
+- After `/review` passes (no unfixed CRITICAL/HIGH issues), **automatically run `/document`**.
+- After `/document` finishes, **automatically run `/safe-commit`**.
+- If `/review` finds CRITICAL or HIGH issues, fix them and re-run `/review` before proceeding.
+- Only push to remote after explicit user confirmation.
+- For small changes (single-file fixes, doc updates), steps can be compressed — but `/review` and `/safe-commit` are never skipped.
+
+### Custom Slash Commands (`.claude/commands/`)
+
+| Command | Purpose |
+|---------|---------|
+| `/execute` | Execute plan step-by-step with TDD and gate checks per step |
+| `/review` | Post-implementation code review with severity labels (CRITICAL/HIGH/MEDIUM/LOW) |
+| `/document` | Update CLAUDE.md and docs/ to reflect actual code changes |
+| `/safe-commit` | Security scan + pre-flight checks + clean commit |
+| `/test` | Run tests — accepts `all`, `coverage`, `e2e`, or file patterns |
+
+## Git / GitHub
 
 Remote: `https://github.com/Nicolas2892/LanguageApp.git`
+Branch: `main` (direct push after `/safe-commit`)
 
 ## Architecture
 
@@ -121,8 +148,11 @@ NEXT_PUBLIC_POSTHOG_HOST        # PostHog ingest host (default: https://us.i.pos
 NEXT_PUBLIC_VAPID_PUBLIC_KEY    # VAPID public key for push subscriptions (Fix-L)
 VAPID_PRIVATE_KEY               # VAPID private key for web-push (Fix-L)
 VAPID_EMAIL                     # VAPID contact email (mailto:you@example.com) (Fix-L)
-OPENAI_API_KEY                  # OpenAI Whisper STT for speech-to-text (Fix-J)
+OPENAI_API_KEY                  # OpenAI Whisper STT + TTS (Fix-J, /api/tts)
 CRON_SECRET                     # Bearer token for cron-triggered push send route
+NEXT_PUBLIC_SITE_URL            # CSRF origin validation (validateOrigin in api-utils.ts)
+KV_REST_API_URL                 # Upstash Redis for rate limiting (@vercel/kv)
+KV_REST_API_TOKEN               # Upstash Redis token (@vercel/kv)
 ```
 
 ### Route Map
@@ -140,7 +170,7 @@ CRON_SECRET                     # Bearer token for cron-triggered push send rout
 | `/curriculum`                   | Server          | Full concept tree with mastery badges; all concepts/units/modules are clickable           |
 | `/progress`                     | Server          | 4-card stats, CEFR level progress bars, AccuracyChart, WeeklyActivityChart, VerbTenseMastery |
 | `/tutor`                        | Server + Client | Streaming AI chat; accepts `?concept=<id>` for context                                    |
-| `/verbs`                        | Server + Client | Verb directory — 50 verbs, search, mastery dots, favorite toggle                          |
+| `/verbs`                        | Server + Client | Verb directory — 250 verbs, search, mastery dots, favorite toggle                         |
 | `/verbs/[infinitive]`           | Server + Client | Conjugation tables per tense + mastery bars + favorite toggle                             |
 | `/verbs/configure`              | Server + Client | Verb drill config — tenses, verb set, length, hint toggle                                 |
 | `/verbs/session`                | Server + Client | In-sentence conjugation session; local grading; no Claude cost                            |
@@ -168,6 +198,16 @@ CRON_SECRET                     # Bearer token for cron-triggered push send rout
 | `/offline/reports/[id]`         | Server          | Report detail: per-attempt scores, feedback, mark reviewed (Feat-F)                       |
 | `GET /api/streak/calendar`      | Route handler   | Streak calendar data — studied dates for month, streak, freeze status                     |
 | `DELETE /api/admin/exercises/[id]` | Route handler | Admin-only: hard-delete exercise (FK ON DELETE SET NULL preserves attempt history)         |
+| `POST /api/tts`                 | Route handler   | OpenAI TTS (`tts-1`, `nova` voice); returns `audio/mpeg`; rate-limit 30/10min; SHA-256 cache |
+| `POST /api/exercises/generate`  | Route handler   | On-demand AI exercise generation for concept+type; rate-limit 10/10min; `EXERCISE_CAP_PER_TYPE` enforced |
+| `GET /api/pwa-icon`             | Route handler   | 512×512 PWA icon via ImageResponse (edge); 30-day cache                                   |
+| `/splash`                       | Route handler   | OG splash screen image via ImageResponse (edge); terracotta S-monogram                    |
+| `/account`                      | Server + Client | Account settings — display name, daily goal, theme, notifications, danger zone            |
+| `/brand-preview`                | Server          | D5 design system showcase (dev tool)                                                      |
+| `/admin`                        | Server          | Admin overview — concept/exercise counts, usage stats                                     |
+| `/admin/curriculum`             | Server + Client | Admin curriculum browser — module/unit/concept accordion                                  |
+| `/admin/exercises`              | Server + Client | Admin exercise browser — filters by concept, type, source                                 |
+| `/admin/exercises/[id]`         | Server + Client | Admin exercise detail — view/edit individual exercise                                     |
 | `/admin/pool`                   | Server + Client | Admin exercise pool dashboard — concept × type grid with counts, "+" generate button      |
 
 
@@ -342,12 +382,12 @@ Migrations (run once in Supabase SQL editor):
 
 ### Curriculum Seed Content
 
-**Currently in DB** (118 concepts, 1486 exercises):
+**Currently in DB** (120 concepts, ~1486 exercises):
 
 - Module 1: Connectors — 4 units, 23 concepts
 - Module 2a: The Subjunctive: Core — 1 unit, 8 concepts
 - Module 2b: The Subjunctive: Advanced — 2 units, 10 concepts
-- Module 3: Past Tenses — 3 units, 12 concepts
+- Module 3: Past Tenses — 4 units, 12 concepts
 - Module 4: Core Spanish Contrasts — 6 units, 20 concepts (incl. new "Comparaciones" + "Preposiciones compuestas" units)
 - Module 5: Verbal Periphrases — 3 units, 14 concepts
 - Module 6: Advanced Clauses — 3 units, 17 concepts
@@ -458,6 +498,12 @@ Tutor (`/tutor`) is a reactive support feature, not a primary nav destination. E
 - `splash-logo-in` — opacity 0→1 + blur(4px)→blur(0) (400ms, 400ms delay); used by SplashScreen logo
 - `splash-fade-out` — opacity 1→0 (500ms ease-in-out); applied to SplashScreen container on fade phase
 - `splash-vellum` — absolute noise texture overlay (SVG feTurbulence, 0.4 opacity); subtle paper grain
+- `tap-highlight` — scale(0.92) active press state
+- `animate-mic-sonar` — 1.5s radiating ring for STT recording
+- `animate-done-stagger` — staggered slide-up entrance for session done screen
+- `animate-exercise-out` — exercise exit/fadeout animation
+- `animate-heart-bounce` — 300ms bounce for verb favorite toggle
+- `animate-message-in` — 150ms chat message entrance (tutor)
 
 ### Loading Skeletons
 
@@ -489,7 +535,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2187 tests across 115 files — all passing.**
+**Test suite: 2227 tests across 122 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -648,12 +694,23 @@ Items are ordered by priority within each group. Full details of completed work 
 
 **Fix-L: Verify push notifications on iOS PWA** *(DONE — see completed-features.md)*
 
-**Fix-M: Offline mode stability audit** *(P1 — broken user experience)*
+**Fix-M: Offline mode stability audit** *(DONE)*
 
-- Multiple pages throw "Algo salió mal" error boundaries when offline or during poor connectivity. The offline module download feature (Feat-F) works for exercise sessions, but navigation to other pages (dashboard, curriculum, progress, verbs) fails because Server Components make Supabase queries that reject without network.
-- Audit scope: (1) identify all routes that crash offline, (2) add graceful fallbacks or cached data for non-session pages, (3) ensure SW caches app shell + static assets so navigation works, (4) review `next.config.ts` caching headers.
-- Goal: everything should work offline (menus, navigation, verbs, downloaded exercises, progress display) — only AI grading of exercises should require connectivity.
-- Related: Feat-R (Capacitor) would further improve offline via native caching layer.
+- **Middleware resilience**: `src/lib/supabase/middleware.ts` — `getUser()` wrapped in try/catch; when Supabase is unreachable, checks for `sb-*-auth-token` cookies → allows through if present (offline mode). Onboarding DB query also catches failures gracefully.
+- **IDB schema v2**: `src/lib/offline/db.ts` — DB_VERSION bumped to 2. Three new stores: `profile_cache` (single-row profile snapshot), `modules_cache` (full module list), `dashboard_cache` (due/studied/total stats).
+- **Write-through cache writers**: `ProfileCacheWriter` (layout), `DashboardCacheWriter` (dashboard), `CurriculumCacheWriter` (curriculum), `ProgressCacheWriter` (progress) — silent client components that write page data to IDB on every successful load.
+- **error.tsx offline shells**: 7 route-level error boundaries detect `!navigator.onLine` → read from IDB → render cached view with `OfflineIndicator` banner:
+  - `dashboard/error.tsx` — cached greeting + stats + offline study/verb practice links
+  - `curriculum/error.tsx` — full concept tree with mastery dots from IDB
+  - `study/configure/error.tsx` — simplified offline study + verb practice options
+  - `verbs/error.tsx` — full verb directory from VerbCacheManager data
+  - `verbs/[infinitive]/error.tsx` — conjugation tables + mastery from IDB
+  - `progress/error.tsx` — CEFR bars + streak from cached data
+  - `tutor/error.tsx` — "El tutor necesita conexión a internet" + verb practice link
+- **global-error.tsx**: enhanced with offline detection → branded "Tu senda te espera" message
+- **ReconnectRefresher**: `src/components/offline/ReconnectRefresher.tsx` — listens for `online` event → `router.refresh()` + "Conexión restaurada" toast
+- **SW improvements**: `public/sw.js` — added stale-while-revalidate for `/_next/data/` (RSC payloads), cache-first for Google Fonts woff2
+- **Offline hooks**: `src/lib/offline/hooks.ts` — `useOfflineProfile()`, `useOfflineDashboard()`, `useOfflineCurriculum()`, `useOfflineVerbs()`, `useOfflineVerbDetail()`, `useOfflineProgress()`
 
 **Fix-N: Analytics implementation** *(P1 — no visibility into user behaviour)*
 
@@ -690,7 +747,6 @@ Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-feat
 
 | Priority | Item | Gate |
 | -------- | ---- | ---- |
-| **P1** | **Fix-M** — Offline mode stability audit | Broken UX — pages crash offline |
 | **P1** | **Fix-N** — Analytics implementation | No user behaviour visibility |
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
 | **P2** | **Infra-E** — Custom domain for Supabase Auth (Google OAuth branding) | Supabase Pro plan + DNS setup |

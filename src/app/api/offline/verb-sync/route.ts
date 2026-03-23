@@ -3,11 +3,12 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { validateOrigin } from '@/lib/api-utils'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { TENSES } from '@/lib/verbs/constants'
 import * as Sentry from '@sentry/nextjs'
 
 const VerbAttemptSchema = z.object({
   verb_id: z.string().uuid(),
-  tense: z.string().min(1),
+  tense: z.enum(TENSES),
   correct: z.boolean(),
   attempted_at: z.string(),
 })

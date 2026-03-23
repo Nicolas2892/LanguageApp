@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { SpeakButton } from '@/components/SpeakButton'
@@ -35,6 +35,20 @@ export function ListeningComprehension({ exercise, onSubmit, disabled }: Props) 
   const [error, setError] = useState<string | null>(null)
   const [playCount, setPlayCount] = useState(0)
   const audioRef = useRef<HTMLAudioElement | null>(null)
+  const audioUrlRef = useRef<string | null>(null)
+
+  // Clean up blob URL and audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+      if (audioUrlRef.current && typeof URL.revokeObjectURL === 'function') {
+        URL.revokeObjectURL(audioUrlRef.current)
+      }
+    }
+  }, [])
 
   const fetchAndPlay = useCallback(async () => {
     // If already fetched, just replay
@@ -59,6 +73,7 @@ export function ListeningComprehension({ exercise, onSubmit, disabled }: Props) 
       }
       const blob = await res.blob()
       const url = URL.createObjectURL(blob)
+      audioUrlRef.current = url
       setAudioUrl(url)
       setPlayCount(1)
 

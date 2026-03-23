@@ -15,6 +15,12 @@ export function useSpeech() {
     } catch {
       setEnabled(true)
     }
+    return () => {
+      // Cancel any in-progress speech on unmount
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel()
+      }
+    }
   }, [])
 
   function speak(text: string, lang = 'es-ES') {

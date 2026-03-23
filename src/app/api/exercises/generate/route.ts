@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
-import type { Concept, Exercise, AnnotationSpan } from '@/lib/supabase/types'
+import type { Concept, Exercise, AnnotationSpan, Profile } from '@/lib/supabase/types'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { validateOrigin } from '@/lib/api-utils'
 import { EXERCISE_CAP_PER_TYPE } from '@/lib/constants'
@@ -37,6 +37,17 @@ export async function POST(request: Request) {
 
     if (!validateOrigin(request)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Admin gate — this route uses service-role client to bypass RLS
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+    const profile = profileData as Pick<Profile, 'is_admin'> | null
+    if (!profile?.is_admin) {
+      return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
     // Rate limit: 10 requests per 10 minutes per user

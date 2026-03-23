@@ -10,20 +10,25 @@ import type { GradeResult } from '@/lib/claude/grader'
 import type { Concept, UserProgress } from '@/lib/supabase/types'
 import * as Sentry from '@sentry/nextjs'
 
+const VALID_EXERCISE_TYPES = [
+  'gap_fill', 'transformation', 'translation', 'error_correction',
+  'free_write', 'listening', 'proofreading', 'register_shift',
+] as const
+
 const AttemptSchema = z.object({
   exercise_id: z.string().uuid().nullable(),
   concept_id: z.string().uuid(),
-  concept_title: z.string().min(1),
+  concept_title: z.string().min(1).max(200),
   user_answer: z.string().min(1),
-  exercise_type: z.string().min(1),
+  exercise_type: z.enum(VALID_EXERCISE_TYPES),
   exercise_prompt: z.string().min(1),
   expected_answer: z.string().nullable(),
   answer_variants: z.array(z.string()).nullable(),
-  attempted_at: z.string(),
+  attempted_at: z.string().datetime({ offset: true }).or(z.string().datetime()),
 })
 
 const BatchSchema = z.object({
-  session_id: z.string().min(1),
+  session_id: z.string().min(1).max(100),
   attempts: z.array(AttemptSchema).min(1).max(50),
 })
 

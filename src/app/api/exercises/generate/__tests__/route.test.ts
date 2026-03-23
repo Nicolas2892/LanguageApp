@@ -70,17 +70,24 @@ function makeRequest(body: Record<string, unknown>) {
   })
 }
 
-function setupMocks({ exerciseCount = 3, conceptExists = true }: { exerciseCount?: number; conceptExists?: boolean } = {}) {
+function setupMocks({ exerciseCount = 3, conceptExists = true, isAdmin = true }: { exerciseCount?: number; conceptExists?: boolean; isAdmin?: boolean } = {}) {
   mockGetUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
 
-  // Auth client: concepts query
+  // Auth client: profiles admin check + concepts query
+  const mockAdminSingle = vi.fn().mockResolvedValue({ data: { is_admin: isAdmin } })
+  const mockAdminEq = vi.fn().mockReturnValue({ single: mockAdminSingle })
+  const mockAdminSelect = vi.fn().mockReturnValue({ eq: mockAdminEq })
+
   mockSingle.mockResolvedValue({
     data: conceptExists ? { id: CONCEPT_ID, title: 'Test concept', explanation: 'Explanation', examples: [] } : null,
   })
   mockEq2.mockReturnValue({ single: mockSingle })
   mockEq1.mockReturnValue({ eq: mockEq2, single: mockSingle })
   mockSelect.mockReturnValue({ eq: mockEq1 })
-  mockFrom.mockReturnValue({ select: mockSelect })
+  mockFrom.mockImplementation((table: string) => {
+    if (table === 'profiles') return { select: mockAdminSelect }
+    return { select: mockSelect }
+  })
 
   vi.mocked(createClient).mockResolvedValue({
     auth: { getUser: mockGetUser },
@@ -143,6 +150,14 @@ describe('POST /api/exercises/generate', () => {
 
     const res = await POST(makeRequest({ concept_id: CONCEPT_ID, type: 'gap_fill' }))
     expect(res.status).toBe(401)
+  })
+
+  it('returns 403 when user is not admin', async () => {
+    setupMocks({ isAdmin: false })
+    const res = await POST(makeRequest({ concept_id: CONCEPT_ID, type: 'gap_fill' }))
+    expect(res.status).toBe(403)
+    const body = await res.json()
+    expect(body.error).toBe('Admin access required')
   })
 
   it('returns 400 for invalid type', async () => {
