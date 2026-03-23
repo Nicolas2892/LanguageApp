@@ -4,6 +4,7 @@ import { SplashScreen } from '../SplashScreen'
 
 beforeEach(() => {
   vi.useFakeTimers()
+  sessionStorage.clear()
   // Default: no reduced motion
   window.matchMedia = vi.fn().mockReturnValue({
     matches: false,
@@ -81,5 +82,26 @@ describe('SplashScreen', () => {
 
     act(() => { vi.advanceTimersByTime(1200) })
     expect(container.style.pointerEvents).toBe('none')
+  })
+
+  it('skips splash when sessionStorage flag is already set', () => {
+    sessionStorage.setItem('senda-splash-shown', '1')
+    render(<SplashScreen />)
+    expect(screen.queryByTestId('splash-screen')).not.toBeInTheDocument()
+  })
+
+  it('sets sessionStorage flag on first render', () => {
+    render(<SplashScreen />)
+    expect(sessionStorage.getItem('senda-splash-shown')).toBe('1')
+  })
+
+  it('still shows splash when sessionStorage throws', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked') })
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
+
+    render(<SplashScreen />)
+    expect(screen.getByTestId('splash-screen')).toBeInTheDocument()
+
+    vi.restoreAllMocks()
   })
 })
