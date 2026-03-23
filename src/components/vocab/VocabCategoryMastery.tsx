@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { CATEGORY_LABELS } from '@/lib/vocab/constants'
 import type { VocabCategory } from '@/lib/vocab/constants'
@@ -43,6 +44,13 @@ export function VocabCategoryMastery({ summaries }: Props) {
           )
         })}
       </div>
+
+      <Link
+        href="/vocab/configure"
+        className="block text-center text-xs font-semibold text-primary hover:underline pt-1"
+      >
+        Practicar Vocabulario →
+      </Link>
     </section>
   )
 }
