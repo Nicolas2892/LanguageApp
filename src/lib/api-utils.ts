@@ -17,6 +17,10 @@ export function validateOrigin(request: Request): boolean {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
   if (!siteUrl) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[validateOrigin] NEXT_PUBLIC_SITE_URL not set in production — rejecting request')
+      return false
+    }
     console.warn('[validateOrigin] NEXT_PUBLIC_SITE_URL not set — skipping origin check')
     return true
   }

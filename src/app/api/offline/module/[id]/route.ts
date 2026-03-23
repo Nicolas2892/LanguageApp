@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
 import type { Concept, Exercise, Unit, UserProgress } from '@/lib/supabase/types'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { validateOrigin } from '@/lib/api-utils'
 import * as Sentry from '@sentry/nextjs'
 
 /**
@@ -14,7 +16,7 @@ import * as Sentry from '@sentry/nextjs'
  * - pre-generated free-write prompts (one per concept, via Claude)
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -22,6 +24,19 @@ export async function GET(
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Rate limit: 5 downloads per 10 minutes (triggers Claude API calls)
+    const rl = await checkRateLimit(user.id, 'offline-module-download', {
+      maxRequests: 5,
+      windowMs: 10 * 60 * 1000,
+    })
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
 
     // Fetch module
     const { data: mod, error: modErr } = await supabase

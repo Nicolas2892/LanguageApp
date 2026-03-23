@@ -23,6 +23,14 @@ export function useSyncManager() {
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null)
   const [syncProgress, setSyncProgress] = useState(0)
   const syncingRef = useRef(false)
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Clear dismiss timer on unmount
+  useEffect(() => {
+    return () => {
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+    }
+  }, [])
 
   const sync = useCallback(async () => {
     if (syncingRef.current) return
@@ -109,7 +117,8 @@ export function useSyncManager() {
       setSyncState('done')
 
       // Auto-dismiss after 5s
-      setTimeout(() => {
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+      dismissTimerRef.current = setTimeout(() => {
         setSyncState('idle')
         setSyncResult(null)
       }, 5000)

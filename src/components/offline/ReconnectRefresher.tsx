@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
 /**
@@ -11,16 +11,21 @@ import { useRouter } from 'next/navigation'
 export function ReconnectRefresher() {
   const router = useRouter()
   const [showToast, setShowToast] = useState(false)
+  const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     function handleOnline() {
       setShowToast(true)
       router.refresh()
-      setTimeout(() => setShowToast(false), 3000)
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+      dismissTimerRef.current = setTimeout(() => setShowToast(false), 3000)
     }
 
     window.addEventListener('online', handleOnline)
-    return () => window.removeEventListener('online', handleOnline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current)
+    }
   }, [router])
 
   if (!showToast) return null

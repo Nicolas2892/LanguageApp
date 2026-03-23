@@ -14,9 +14,6 @@ export function StreakMilestone({ streak }: Props) {
   const [milestone, setMilestone] = useState<number | null>(null)
 
   useEffect(() => {
-    const matched = MILESTONES.find((m) => streak >= m)
-    if (!matched) return
-
     // Find the highest milestone reached
     const highest = [...MILESTONES].reverse().find((m) => streak >= m)
     if (!highest) return

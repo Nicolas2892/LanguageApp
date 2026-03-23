@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { Flag } from 'lucide-react'
 
 interface Props {
@@ -12,11 +12,19 @@ export function HardFlagButton({ conceptId, initialIsHard }: Props) {
   const [isHard, setIsHard] = useState(initialIsHard)
   const [error, setError] = useState(false)
   const [, startTransition] = useTransition()
+  const errorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
+    }
+  }, [])
 
   function toggle() {
     const next = !isHard
     setIsHard(next)
     setError(false)
+    if (errorTimerRef.current) clearTimeout(errorTimerRef.current)
 
     startTransition(async () => {
       try {
@@ -28,12 +36,12 @@ export function HardFlagButton({ conceptId, initialIsHard }: Props) {
         if (!res.ok) {
           setIsHard(!next)
           setError(true)
-          setTimeout(() => setError(false), 3000)
+          errorTimerRef.current = setTimeout(() => setError(false), 3000)
         }
       } catch {
         setIsHard(!next)
         setError(true)
-        setTimeout(() => setError(false), 3000)
+        errorTimerRef.current = setTimeout(() => setError(false), 3000)
       }
     })
   }

@@ -43,11 +43,11 @@ describe('validateOrigin', () => {
     expect(validateOrigin(makeRequest('https://evil.com'))).toBe(false)
   })
 
-  it('returns true (fail-open) when NEXT_PUBLIC_SITE_URL is not set — avoids blocking production when env var is missing', () => {
+  it('returns false (fail-closed) in production when NEXT_PUBLIC_SITE_URL is not set', () => {
     vi.stubEnv('NODE_ENV', 'production')
     vi.stubEnv('NEXT_PUBLIC_SITE_URL', '')
-    // Intentional: missing env var warns but does not block requests (fail-open)
-    expect(validateOrigin(makeRequest('https://evil.com'))).toBe(true)
+    // Production rejects requests when SITE_URL is missing to prevent CSRF bypass
+    expect(validateOrigin(makeRequest('https://evil.com'))).toBe(false)
   })
 
   it('returns false for localhost in production when NEXT_PUBLIC_SITE_URL does not match', () => {

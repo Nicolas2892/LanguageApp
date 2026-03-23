@@ -11,7 +11,8 @@ const bodySchema = z.object({
   text: z.string().min(1).max(2000),
 })
 
-// Server-side cache: SHA-256 of text → audio buffer
+// Server-side cache: SHA-256 of text → audio buffer (LRU, max 500 entries)
+const AUDIO_CACHE_MAX = 500
 const audioCache = new Map<string, Buffer>()
 
 /** Clear the audio cache (for tests). */
@@ -64,7 +65,11 @@ export async function POST(request: Request) {
     const arrayBuffer = await response.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
-    // Cache for future requests (same text across users)
+    // Cache for future requests (same text across users); evict oldest if full
+    if (audioCache.size >= AUDIO_CACHE_MAX) {
+      const oldest = audioCache.keys().next().value!
+      audioCache.delete(oldest)
+    }
     audioCache.set(cacheKey, buffer)
 
     return new NextResponse(new Uint8Array(buffer), {

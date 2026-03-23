@@ -128,7 +128,7 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0" aria-live="polite">
         {messages.length === 0 && (
           <div className="relative overflow-hidden text-center pt-12 space-y-3">
             <BackgroundMagicS />

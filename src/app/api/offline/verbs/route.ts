@@ -6,6 +6,8 @@ import type {
   VerbConjugation,
   VerbProgress,
 } from '@/lib/supabase/types'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { validateOrigin } from '@/lib/api-utils'
 import * as Sentry from '@sentry/nextjs'
 
 /**
@@ -20,6 +22,19 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    // Rate limit: 10 requests per 10 minutes
+    const rl = await checkRateLimit(user.id, 'offline-verbs', {
+      maxRequests: 10,
+      windowMs: 10 * 60 * 1000,
+    })
+    if (!rl.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
+    }
 
     // Check staleness via version query param
     const url = new URL(request.url)
