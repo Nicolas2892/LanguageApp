@@ -8,6 +8,7 @@ import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { userLocalToday, utcToLocalDate } from '@/lib/timezone'
 import { EmptyState } from '@/components/EmptyState'
+import { ProgressCacheWriter } from '@/components/offline/ProgressCacheWriter'
 import type { WeekData } from './WeeklyActivityChart'
 import type { TenseSummary } from '@/components/verbs/VerbTenseMastery'
 
@@ -276,6 +277,8 @@ export default async function ProgressPage() {
               totalMinutes={totalMinutes}
               uniqueDaysStudied={uniqueDaysStudied}
             />
+
+            <ProgressCacheWriter streak={currentStreak} computedLevel={computedLevel} timezone={userTz} />
 
             {/* Footer */}
             <p

@@ -13,6 +13,8 @@ import { SplashScreen } from "@/components/SplashScreen";
 import { TimezoneSync } from "@/components/TimezoneSync";
 import { VerbCacheManager } from "@/components/offline/VerbCacheManager";
 import { SyncBanner } from "@/components/offline/SyncBanner";
+import { ProfileCacheWriter } from "@/components/offline/ProfileCacheWriter";
+import { ReconnectRefresher } from "@/components/offline/ReconnectRefresher";
 import { createClient } from "@/lib/supabase/server";
 import { getInitials } from "@/lib/utils";
 
@@ -98,6 +100,8 @@ export default async function RootLayout({
   let unreadReportCount = 0
   let themePreference: 'light' | 'dark' | 'system' = 'system'
   let userTimezone: string | null = null
+  let displayName: string | null = null
+  let computedLevel: string | null = null
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -106,7 +110,7 @@ export default async function RootLayout({
       const [{ data: profile }, { count: reportCount }] = await Promise.all([
         supabase
           .from('profiles')
-          .select('display_name, theme_preference, streak, timezone, streak_freeze_remaining')
+          .select('display_name, theme_preference, streak, timezone, streak_freeze_remaining, computed_level')
           .eq('id', user.id)
           .single(),
         supabase
@@ -115,12 +119,14 @@ export default async function RootLayout({
           .eq('user_id', user.id)
           .eq('reviewed', false),
       ])
-      const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null; timezone: string | null; streak_freeze_remaining: number | null } | null
-      userInitials = getInitials(p?.display_name ?? null, user.email!)
+      const p = profile as { display_name: string | null; theme_preference: string | null; streak: number | null; timezone: string | null; streak_freeze_remaining: number | null; computed_level: string | null } | null
+      displayName = p?.display_name ?? null
+      userInitials = getInitials(displayName, user.email!)
       streak = p?.streak ?? 0
       streakFreezeRemaining = p?.streak_freeze_remaining ?? 0
       unreadReportCount = reportCount ?? 0
       userTimezone = p?.timezone ?? null
+      computedLevel = p?.computed_level ?? null
       if (p?.theme_preference === 'light' || p?.theme_preference === 'dark' || p?.theme_preference === 'system') {
         themePreference = p.theme_preference
       }
@@ -157,6 +163,16 @@ export default async function RootLayout({
             {userId && <TimezoneSync serverTimezone={userTimezone} />}
             {userId && <VerbCacheManager />}
             {userId && <SyncBanner />}
+            {userId && (
+              <ProfileCacheWriter
+                displayName={displayName}
+                streak={streak}
+                streakFreezeRemaining={streakFreezeRemaining}
+                computedLevel={computedLevel}
+                timezone={userTimezone}
+              />
+            )}
+            <ReconnectRefresher />
           </PostHogProvider>
         </ThemeProvider>
       </body>

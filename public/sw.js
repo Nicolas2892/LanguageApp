@@ -6,7 +6,7 @@
 //   - Network-only for API calls and auth routes
 
 // Bump CACHE_VERSION on each deploy to purge stale navigation cache
-const CACHE_VERSION = '2026-03-12'
+const CACHE_VERSION = '2026-03-23'
 const CACHE = `senda-${CACHE_VERSION}`
 
 const SHELL_URLS = [
@@ -75,12 +75,48 @@ self.addEventListener('fetch', (e) => {
     return
   }
 
-  // ── 2. Network-only for API calls, auth routes, and cross-origin ───────────
+  // ── 2. Cache-first for Google Fonts (woff2) ─────────────────────────────
+  if (url.hostname === 'fonts.gstatic.com' || (url.hostname === 'fonts.googleapis.com' && url.pathname.endsWith('.woff2'))) {
+    e.respondWith(
+      caches.match(request).then(
+        (hit) =>
+          hit ??
+          fetch(request).then((res) => {
+            if (res.ok) {
+              const clone = res.clone()
+              caches.open(CACHE).then((cache) => cache.put(request, clone))
+            }
+            return res
+          })
+      )
+    )
+    return
+  }
+
+  // ── 3. Network-only for API calls, auth routes, and cross-origin ───────────
   if (
     url.origin !== self.location.origin ||
     url.pathname.startsWith('/api/') ||
     url.pathname.startsWith('/auth/')
   ) {
+    return
+  }
+
+  // ── 3b. Stale-while-revalidate for RSC data payloads ────────────────────
+  if (url.pathname.startsWith('/_next/data/')) {
+    e.respondWith(
+      caches.open(CACHE).then((cache) =>
+        cache.match(request).then((cached) => {
+          const networkFetch = fetch(request)
+            .then((res) => {
+              if (res.ok) cache.put(request, res.clone())
+              return res
+            })
+            .catch(() => cached ?? Response.error())
+          return cached ?? networkFetch
+        })
+      )
+    )
     return
   }
 

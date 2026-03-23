@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { computeUnlockedLevels } from '@/lib/curriculum/prerequisites'
 import { getCached } from '@/lib/cache'
 import { CurriculumClient } from './CurriculumClient'
+import { CurriculumCacheWriter } from '@/components/offline/CurriculumCacheWriter'
 
 type ModuleRow  = { id: string; title: string; order_index: number }
 type UnitRow    = { id: string; module_id: string; title: string; order_index: number }
@@ -31,13 +32,23 @@ export default async function CurriculumPage() {
     computeUnlockedLevels(supabase, user.id),
   ])
 
+  const progressEntries = (progressRes.data ?? []) as ProgressRow[]
+
   return (
-    <CurriculumClient
-      modules={modules}
-      units={units}
-      concepts={concepts}
-      progressEntries={((progressRes.data ?? []) as ProgressRow[])}
-      unlockedLevelsList={Array.from(unlockedLevels)}
-    />
+    <>
+      <CurriculumClient
+        modules={modules}
+        units={units}
+        concepts={concepts}
+        progressEntries={progressEntries}
+        unlockedLevelsList={Array.from(unlockedLevels)}
+      />
+      <CurriculumCacheWriter
+        modules={modules}
+        units={units}
+        concepts={concepts}
+        progressEntries={progressEntries}
+      />
+    </>
   )
 }

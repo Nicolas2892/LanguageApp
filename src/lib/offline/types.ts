@@ -157,3 +157,29 @@ export interface VerbCacheMeta {
   key: string                    // e.g. 'version', 'user_id'
   value: string
 }
+
+// ── Write-through cache types (Fix-M) ────────────────────────────────
+
+export interface CachedProfile {
+  key: 'current'
+  display_name: string | null
+  streak: number
+  streak_freeze_remaining: number
+  computed_level: string | null
+  timezone: string | null
+  cached_at: string              // ISO datetime
+}
+
+export interface CachedModule {
+  id: string
+  title: string
+  order_index: number
+}
+
+export interface CachedDashboardStats {
+  key: 'current'
+  due_count: number
+  studied_count: number
+  total_concepts: number
+  cached_at: string              // ISO datetime
+}

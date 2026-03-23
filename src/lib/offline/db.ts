@@ -15,12 +15,15 @@ import type {
   CachedVerbFavorite,
   CachedVerbProgress,
   VerbCacheMeta,
+  CachedProfile,
+  CachedModule,
+  CachedDashboardStats,
 } from './types'
 
 // ── DB name & version ─────────────────────────────────────────────────
 
 const DB_NAME = 'senda-offline'
-const DB_VERSION = 1
+const DB_VERSION = 2
 
 // ── Store names ───────────────────────────────────────────────────────
 
@@ -40,6 +43,10 @@ const STORES = {
   verbFavoritesCache: 'verb_favorites_cache',
   verbProgressCache: 'verb_progress_cache',
   verbCacheMeta: 'verb_cache_meta',
+  // v2 stores (Fix-M: offline shells)
+  profileCache: 'profile_cache',
+  modulesCache: 'modules_cache',
+  dashboardCache: 'dashboard_cache',
 } as const
 
 // ── Open / create DB ──────────────────────────────────────────────────
@@ -149,6 +156,17 @@ export function getDB(): Promise<OfflineDB> {
         // Verb cache metadata
         if (!db.objectStoreNames.contains(STORES.verbCacheMeta)) {
           db.createObjectStore(STORES.verbCacheMeta, { keyPath: 'key' })
+        }
+
+        // ── v2 stores (Fix-M: offline shells write-through cache) ──
+        if (!db.objectStoreNames.contains(STORES.profileCache)) {
+          db.createObjectStore(STORES.profileCache, { keyPath: 'key' })
+        }
+        if (!db.objectStoreNames.contains(STORES.modulesCache)) {
+          db.createObjectStore(STORES.modulesCache, { keyPath: 'id' })
+        }
+        if (!db.objectStoreNames.contains(STORES.dashboardCache)) {
+          db.createObjectStore(STORES.dashboardCache, { keyPath: 'key' })
         }
       },
     })
@@ -576,6 +594,47 @@ export async function getStorageStats(): Promise<StorageStats> {
     verbCacheCount: await db.count(STORES.verbCache),
     verbSentenceCacheCount: await db.count(STORES.verbSentencesCache),
   }
+}
+
+// ── Profile cache (Fix-M) ────────────────────────────────────────────
+
+export async function putCachedProfile(profile: CachedProfile): Promise<void> {
+  const db = await getDB()
+  await db.put(STORES.profileCache, profile)
+}
+
+export async function getCachedProfile(): Promise<CachedProfile | undefined> {
+  const db = await getDB()
+  return db.get(STORES.profileCache, 'current')
+}
+
+// ── Modules cache (Fix-M) ────────────────────────────────────────────
+
+export async function putCachedModules(modules: CachedModule[]): Promise<void> {
+  const db = await getDB()
+  const tx = db.transaction(STORES.modulesCache, 'readwrite')
+  await tx.store.clear()
+  for (const m of modules) {
+    await tx.store.put(m)
+  }
+  await tx.done
+}
+
+export async function getAllCachedModules(): Promise<CachedModule[]> {
+  const db = await getDB()
+  return db.getAll(STORES.modulesCache)
+}
+
+// ── Dashboard cache (Fix-M) ──────────────────────────────────────────
+
+export async function putDashboardCache(stats: CachedDashboardStats): Promise<void> {
+  const db = await getDB()
+  await db.put(STORES.dashboardCache, stats)
+}
+
+export async function getDashboardCache(): Promise<CachedDashboardStats | undefined> {
+  const db = await getDB()
+  return db.get(STORES.dashboardCache, 'current')
 }
 
 // ── Clear all data ────────────────────────────────────────────────────

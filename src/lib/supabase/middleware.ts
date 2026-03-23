@@ -26,14 +26,32 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   const { pathname } = request.nextUrl
 
   const publicPaths = ['/auth/login', '/auth/signup', '/auth/callback', '/brand-preview', '/icon', '/apple-icon', '/api/pwa-icon', '/manifest.webmanifest', '/sw.js']
   const isPublic = publicPaths.some((p) => pathname.startsWith(p))
+
+  // Fix-M: Wrap getUser() in try/catch for offline resilience.
+  // When Supabase is unreachable, check for auth cookies to allow through.
+  let user: { id: string } | null = null
+  try {
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    user = authUser
+  } catch {
+    // Supabase unreachable — check for auth session cookies
+    const hasAuthCookies = request.cookies.getAll().some((c) => c.name.startsWith('sb-') && c.name.endsWith('-auth-token'))
+    if (hasAuthCookies && !isPublic) {
+      // Auth cookies exist — allow through (offline mode)
+      return supabaseResponse
+    }
+    // No auth cookies — redirect to login as normal
+    if (!isPublic) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/login'
+      return NextResponse.redirect(url)
+    }
+    return supabaseResponse
+  }
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone()
@@ -53,26 +71,30 @@ export async function updateSession(request: NextRequest) {
     const onboardingDone = request.cookies.get('onboarding_done')?.value === '1'
 
     if (!onboardingDone) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('onboarding_completed')
-        .eq('id', user.id)
-        .single()
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', user.id)
+          .single()
 
-      if (profile && !(profile as { onboarding_completed: boolean }).onboarding_completed) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/onboarding'
-        return NextResponse.redirect(url)
-      }
+        if (profile && !(profile as { onboarding_completed: boolean }).onboarding_completed) {
+          const url = request.nextUrl.clone()
+          url.pathname = '/onboarding'
+          return NextResponse.redirect(url)
+        }
 
-      // Onboarding confirmed — persist cookie so future requests skip this query
-      if (profile && (profile as { onboarding_completed: boolean }).onboarding_completed) {
-        supabaseResponse.cookies.set('onboarding_done', '1', {
-          httpOnly: true,
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 365,
-          path: '/',
-        })
+        // Onboarding confirmed — persist cookie so future requests skip this query
+        if (profile && (profile as { onboarding_completed: boolean }).onboarding_completed) {
+          supabaseResponse.cookies.set('onboarding_done', '1', {
+            httpOnly: true,
+            sameSite: 'lax',
+            maxAge: 60 * 60 * 24 * 365,
+            path: '/',
+          })
+        }
+      } catch {
+        // Fix-M: DB unreachable for onboarding check — allow through
       }
     }
   }

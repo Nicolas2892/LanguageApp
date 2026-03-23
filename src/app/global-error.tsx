@@ -14,18 +14,38 @@ export default function GlobalError({
     Sentry.captureException(error)
   }, [error])
 
+  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+
   return (
     <html lang="en">
       <body>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '1rem', fontFamily: 'system-ui, sans-serif' }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Algo salió mal</h2>
-          <p style={{ color: '#666', fontSize: '0.875rem' }}>Ha ocurrido un error inesperado.</p>
-          <button
-            onClick={reset}
-            style={{ padding: '0.5rem 1.5rem', borderRadius: '9999px', border: '1px solid #ccc', cursor: 'pointer', background: 'white' }}
-          >
-            Reintentar
-          </button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: '1rem', fontFamily: 'system-ui, sans-serif', padding: '1.5rem' }}>
+          {isOffline ? (
+            <>
+              <div style={{ fontSize: '2rem' }}>📡</div>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Tu senda te espera</h2>
+              <p style={{ color: '#666', fontSize: '0.875rem', textAlign: 'center', maxWidth: '20rem' }}>
+                Sin conexión a internet. Reconéctate para continuar tu camino.
+              </p>
+              <button
+                onClick={reset}
+                style={{ padding: '0.5rem 1.5rem', borderRadius: '9999px', border: '1px solid #ccc', cursor: 'pointer', background: 'white' }}
+              >
+                Reintentar
+              </button>
+            </>
+          ) : (
+            <>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Algo salió mal</h2>
+              <p style={{ color: '#666', fontSize: '0.875rem' }}>Ha ocurrido un error inesperado.</p>
+              <button
+                onClick={reset}
+                style={{ padding: '0.5rem 1.5rem', borderRadius: '9999px', border: '1px solid #ccc', cursor: 'pointer', background: 'white' }}
+              >
+                Reintentar
+              </button>
+            </>
+          )}
         </div>
       </body>
     </html>

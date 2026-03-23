@@ -11,6 +11,7 @@ import { StreakMilestone } from '@/components/StreakMilestone'
 import { StreakFreezeNotification } from '@/components/StreakFreezeNotification'
 import { StreakFreezeStatus } from '@/components/StreakFreezeStatus'
 import { LevelUpOverlay } from '@/components/LevelUpOverlay'
+import { DashboardCacheWriter } from '@/components/offline/DashboardCacheWriter'
 import type { Profile } from '@/lib/supabase/types'
 import { LEVEL_CHIP } from '@/lib/constants'
 import { userLocalToday } from '@/lib/timezone'
@@ -163,6 +164,7 @@ export default async function DashboardPage() {
         streak={profile?.streak ?? 0}
       />
       <LevelUpOverlay currentLevel={profile?.computed_level ?? null} />
+      <DashboardCacheWriter dueCount={dueCount} studiedCount={studiedCount} totalConcepts={totalConcepts} />
     </main>
   )
 }
