@@ -628,12 +628,15 @@ Items are ordered by priority within each group. Full details of completed work 
 - Requires tracking `onboarding_completed = false` users and a transactional email provider.
 - **Do not implement without Feat-K vendor decision (shared email infrastructure).**
 
-**Feat-P: Pronunciation / accent training** *(P3 — new modality)*
+**Feat-P: Pronunciation / accent training** *(P2 — approved, phased implementation)*
 
-- Azure Speech Services Pronunciation Assessment API for phoneme-level scoring + L1 interference maps (German, English).
-- Dedicated `/pronunciation` route with minimal pair drills, record+assess loop, native speaker shadowing comparison.
-- Full plan: `docs/accent-training-plan.md`
-- **Do not implement until core learning loop is stable and PM decision on pricing tier (free vs. premium).**
+- Azure Speech Services Pronunciation Assessment API for phoneme-level scoring. Accent selection: es-ES (Castellano) / es-MX (Latinoamericano) in account settings.
+- **Phase 1:** Backend infra — Azure integration, `POST /api/pronunciation/assess`, recording hook, `pronunciation_progress` table, L1 maps (German/English). No UI.
+- **Phase 2:** Sentence reading ("Lee la Frase") — stress/fluency/prosody scoring, reuses existing verb/vocab sentences. Dashboard card entry. First user-facing feature.
+- **Phase 3:** Shadowing ("Sombra") — listen to native audio, repeat, holistic fluency scoring, audio comparison UI.
+- No beginner exercises (minimal pairs, word repetition) — audience is advanced learners focused on polish.
+- Free for all users initially. Premium gating deferred (see Feat-S).
+- Full design: `.claude/plans/resilient-scribbling-bear.md` + `docs/accent-training-plan.md`
 
 **Feat-Q: Mastery progress chip on concept + verb detail pages** *(DONE — see completed-features.md)*
 
@@ -660,6 +663,13 @@ Items are ordered by priority within each group. Full details of completed work 
 
 **Debt-A: Seed script idempotency guards** *(DONE — see completed-features.md)*
 
+**Feat-S: Premium tier / monetisation** *(P4 — future revenue)*
+
+- Gate certain features behind a paid tier (pronunciation training, advanced AI exercises, etc.).
+- Requires: payment infrastructure (Stripe), entitlement checks, account upgrade flow.
+- Pronunciation (Feat-P) launches free; convert to premium later once value is proven.
+- **Do not implement until user base justifies monetisation and PM decision on pricing model.**
+
 **Debt-B: Monthly STT usage tracking** *(P4 — billing clarity)*
 
 - Current burst limit (20 req/10min) prevents abuse but doesn't enforce the ~80 min/month budget precisely.
@@ -678,7 +688,8 @@ Items are ordered by priority within each group. Full details of completed work 
 | **P3** | **Feat-J** — Verb + Vocab SRS integration | PM decision on unified vs. separate SRS model |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
-| **P3** | **Feat-P** — Pronunciation / accent training | PM decision on pricing tier |
+| **P2** | **Feat-P** — Pronunciation / accent training | Approved — phased implementation |
+| **P4** | **Feat-S** — Premium tier / monetisation | User base justifies it |
 | **P3** | **Feat-R** — Capacitor native shell | Public launch readiness |
 | **P4** | **Infra-D** — A/B testing / feature flags | Needed before adaptive grading |
 | **P4** | **Feat-L** — Reading comprehension | Content strategy needed |
