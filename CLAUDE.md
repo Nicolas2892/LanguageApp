@@ -350,11 +350,7 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | `offline_report_attempts`                | Per-attempt results within an offline report: score, feedback, corrected_version, explanation (Feat-F)                    |
 
 
-Migrations (run once in Supabase SQL editor): 25 total (001–025). Migrations 001–022 are applied. Pending:
-
-- `023_verb_sentence_english.sql` — `verb_sentences.english text DEFAULT NULL`
-- `024_rename_modules.sql` — Rename 3 module titles
-- `025_vocab_drill.sql` — `vocab_items`, `vocab_sentences`, `vocab_progress` tables + `increment_vocab_progress` RPC
+Migrations (run once in Supabase SQL editor): 25 total (001–025). All applied.
 
 ### Dashboard Stats
 
@@ -395,7 +391,7 @@ Migrations (run once in Supabase SQL editor): 25 total (001–025). Migrations 0
 
 ### Vocab Seed Content
 
-**Status: CODE READY — migration 025 pending, seed data pending**
+**Status: LIVE — migration 025 applied, all seed data in DB**
 
 - 249 vocab items hard-coded in `src/lib/curriculum/run-seed-vocab.ts` across 8 categories
 - Categories: discourse_markers (40), fixed_phrases (37), collocations (25), register_phrases (30), idiomatic (25), prepositional (30), adverbial (35), pragmatic (27)
@@ -596,11 +592,13 @@ Items are ordered by priority within each group. Full details of completed work 
 - Evaluate `next-intl` (App Router native) vs. simple JSON dictionaries with a custom hook.
 - **Do not implement until there is a concrete plan to support non-English interface languages.**
 
-**Feat-J: Verb SRS integration** *(P3 — connect verbs to spaced repetition)*
+**Feat-J: Verb + Vocab SRS integration** *(P3 — connect verbs & vocab to spaced repetition)*
 
-- Verb conjugation drills currently track accuracy (`verb_progress`) but do not feed into the SRS system. Verbs the user struggles with should surface more frequently.
-- Requires connecting `verb_progress` to `user_progress` or creating a parallel SRS loop for verbs.
-- **Do not implement without a PM decision on whether verbs should share the concept SRS or have their own.**
+- Verb conjugation drills (`verb_progress`) and vocab drills (`vocab_progress`) currently track accuracy but do not feed into the SRS system. Weak items should surface more frequently via spaced repetition.
+- From a pedagogical standpoint, multi-word vocab expressions need SRS just as much as verb conjugations — they must be memorized as chunks and can't be derived from rules. There is no reason to have SRS for one but not the other.
+- Recommended approach: a **shared SRS model** — one unified `user_progress`-style table across grammar concepts, verb tenses, and vocab items, producing a single "due today" queue that surfaces whatever the learner is weakest at.
+- Alternative: separate SRS loops per content type (simpler but fragments the study experience).
+- **Do not implement without a PM decision on unified vs. separate SRS model.**
 
 **Feat-K: Email re-engagement (Resend / Postmark)** *(P3 — retention)*
 
@@ -677,7 +675,7 @@ Items are ordered by priority within each group. Full details of completed work 
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
 | **P2** | **Infra-E** — Custom domain for Supabase Auth (Google OAuth branding) | Supabase Pro plan + DNS setup |
 | **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |
-| **P3** | **Feat-J** — Verb SRS integration | PM decision on SRS model |
+| **P3** | **Feat-J** — Verb + Vocab SRS integration | PM decision on unified vs. separate SRS model |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
 | **P3** | **Feat-P** — Pronunciation / accent training | PM decision on pricing tier |
