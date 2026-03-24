@@ -52,7 +52,7 @@ export function useDownloadManager() {
 
   const downloadModule = useCallback(async (moduleId: string) => {
     setDownloadState('downloading')
-    setDownloadProgress(10)
+    setDownloadProgress(5)
     setError(null)
 
     try {
@@ -60,9 +60,10 @@ export function useDownloadManager() {
       if (!res.ok) {
         throw new Error(`Download failed: ${res.status}`)
       }
-      setDownloadProgress(50)
+      setDownloadProgress(30)
 
       const bundle = (await res.json()) as ModuleBundleResponse
+      setDownloadProgress(40)
 
       // Write to IDB
       const { module: mod, units, concepts, exercises, user_progress, free_write_prompts, version } = bundle
@@ -95,14 +96,15 @@ export function useDownloadManager() {
 
       const offlinePrompts: OfflineFreeWritePrompt[] = free_write_prompts.filter(p => p.prompt)
 
-      setDownloadProgress(70)
-
       await putUnits(offlineUnits)
+      setDownloadProgress(50)
       await putConcepts(offlineConcepts)
+      setDownloadProgress(60)
       await putExercises(offlineExercises)
+      setDownloadProgress(70)
       await putUserProgress(offlineProgress)
+      setDownloadProgress(80)
       await putFreeWritePrompts(offlinePrompts)
-
       setDownloadProgress(90)
 
       const downloadedModule: DownloadedModule = {

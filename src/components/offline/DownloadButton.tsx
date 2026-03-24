@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { CloudDownload, CheckCircle, Loader2, Trash2 } from 'lucide-react'
+import { CloudDownload, CheckCircle, Trash2 } from 'lucide-react'
 import { useDownloadManager } from '@/lib/offline/useDownloadManager'
+import { CircularProgress } from './CircularProgress'
 
 interface Props {
   moduleId: string
@@ -81,10 +82,7 @@ export function DownloadButton({ moduleId }: Props) {
       aria-label={downloaded ? 'Disponible offline — toca para eliminar' : 'Descarga para offline'}
     >
       {isDownloading ? (
-        <>
-          <Loader2 size={12} strokeWidth={2} className="animate-spin" />
-          {downloadProgress}%
-        </>
+        <CircularProgress progress={downloadProgress} size={16} strokeWidth={2} />
       ) : downloaded ? (
         <>
           <CheckCircle size={12} strokeWidth={2} />
