@@ -60,7 +60,7 @@ export default function VerbDetailError({
       <main className="max-w-2xl mx-auto px-5 pt-16 text-center space-y-4 animate-page-in">
         <OfflineIndicator />
         <h2 className="senda-heading text-xl">Verbo no encontrado</h2>
-        <Link href="/verbs" className="senda-cta-outline">← Volver a Verbos</Link>
+        <Link href="/verbs" className="senda-cta-outline">← Volver a Léxico</Link>
       </main>
     )
   }
@@ -71,7 +71,7 @@ export default function VerbDetailError({
 
       <div>
         <Link href="/verbs" className="text-[11px] font-semibold" style={{ color: 'var(--d5-body)' }}>
-          ← Verbos
+          ← Léxico
         </Link>
         <h1 className="senda-heading text-2xl mt-1">{verb.infinitive}</h1>
         <p className="text-sm" style={{ color: 'var(--d5-warm)' }}>{verb.english}</p>

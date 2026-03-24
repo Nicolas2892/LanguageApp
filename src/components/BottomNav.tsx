@@ -8,7 +8,7 @@ const TABS = [
   { href: ROUTES.dashboard,      label: 'Inicio',     Icon: Home      },
   { href: ROUTES.studyConfigure, label: 'Estudio',    Icon: Pencil    },
   { href: ROUTES.curriculum,     label: 'Currículo',  Icon: Route     },
-  { href: ROUTES.verbs,          label: 'Verbos',     Icon: Book      },
+  { href: ROUTES.verbs,          label: 'Léxico',     Icon: Book      },
   { href: ROUTES.progress,       label: 'Progreso',   Icon: BarChart2 },
 ]
 const HIDDEN_ROUTES = ['/auth', ROUTES.onboarding, ROUTES.write, ROUTES.brandPreview, ROUTES.verbsSession, ROUTES.vocabSession, ROUTES.admin]

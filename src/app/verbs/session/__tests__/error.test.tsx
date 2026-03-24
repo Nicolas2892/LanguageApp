@@ -47,7 +47,7 @@ describe('verbs/session error.tsx', () => {
 
   it('has a navigation link to verbs page', () => {
     render(<VerbSessionError error={new Error('test')} reset={() => {}} />)
-    const link = screen.getByRole('link', { name: /verbos/i })
+    const link = screen.getByRole('link', { name: /léxico/i })
     expect(link).toHaveAttribute('href', '/verbs')
   })
 })

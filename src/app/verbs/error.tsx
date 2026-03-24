@@ -64,7 +64,7 @@ export default function VerbsError({
 
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="senda-heading text-2xl">Verbos</h1>
+          <h1 className="senda-heading text-2xl">Léxico</h1>
           <p className="senda-eyebrow mt-2">{verbs.length} verbos de alta frecuencia</p>
         </div>
         <Link

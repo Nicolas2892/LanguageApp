@@ -27,7 +27,7 @@ describe('BottomNav', () => {
     expect(screen.getByText('Inicio')).toBeTruthy()
     expect(screen.getByText('Estudio')).toBeTruthy()
     expect(screen.getByText('Currículo')).toBeTruthy()
-    expect(screen.getByText('Verbos')).toBeTruthy()
+    expect(screen.getByText('Léxico')).toBeTruthy()
     expect(screen.getByText('Progreso')).toBeTruthy()
   })
 

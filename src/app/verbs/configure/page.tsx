@@ -35,7 +35,7 @@ export default async function VerbConfigurePage({ searchParams }: Props) {
           className="text-[11px] font-semibold"
           style={{ color: 'var(--d5-warm)' }}
         >
-          ← Verbos
+          ← Léxico
         </Link>
         <SvgSendaPath size={22} strokeWidth={3.5} />
         <div style={{ width: 22 }} />

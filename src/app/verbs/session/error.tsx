@@ -29,7 +29,7 @@ export default function VerbSessionError({
           <p className="text-sm" style={{ color: 'var(--d5-warm)' }}>
             No se pudo cargar la sesión de verbos sin conexión.
           </p>
-          <Link href={ROUTES.verbs} className="senda-cta-outline">Volver a Verbos</Link>
+          <Link href={ROUTES.verbs} className="senda-cta-outline">Volver a Léxico</Link>
         </>
       ) : (
         <>
@@ -37,7 +37,7 @@ export default function VerbSessionError({
           <p className="text-sm" style={{ color: 'var(--d5-warm)' }}>Ha ocurrido un error inesperado.</p>
           <div className="flex flex-col gap-2 pt-2">
             <button onClick={reset} className="senda-cta-outline">Reintentar</button>
-            <Link href={ROUTES.verbs} className="senda-cta-outline">Volver a Verbos</Link>
+            <Link href={ROUTES.verbs} className="senda-cta-outline">Volver a Léxico</Link>
           </div>
         </>
       )}
