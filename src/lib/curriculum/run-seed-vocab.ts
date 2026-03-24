@@ -447,8 +447,10 @@ Return ONLY a JSON array (no markdown fences, no explanation) with this structur
         }],
       })
 
-      const text = response.content[0].type === 'text' ? response.content[0].text : ''
-      const sentences = JSON.parse(text.trim()) as SentenceEntry[]
+      let text = response.content[0].type === 'text' ? response.content[0].text : ''
+      // Strip markdown fences if Haiku wraps the response
+      text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim()
+      const sentences = JSON.parse(text) as SentenceEntry[]
 
       if (!Array.isArray(sentences) || sentences.length === 0) {
         console.warn(`  ⚠ Invalid response for "${item.expression}" — skipping`)
