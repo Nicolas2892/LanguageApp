@@ -125,6 +125,15 @@ self.addEventListener('fetch', (e) => {
         fetch(request)
           .then((res) => {
             if (res.ok && !res.redirected) cache.put(request, res.clone())
+            // Safari/WebKit rejects SW-served responses with redirected flag.
+            // Strip it by creating a clean Response with the same body.
+            if (res.redirected) {
+              return new Response(res.body, {
+                status: res.status,
+                statusText: res.statusText,
+                headers: res.headers,
+              })
+            }
             return res
           })
           .catch(() =>
