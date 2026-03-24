@@ -1,30 +1,36 @@
-import { render, cleanup } from '@testing-library/react'
+import { render, cleanup, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ServiceWorkerRegistration } from '../ServiceWorkerRegistration'
 
 describe('ServiceWorkerRegistration', () => {
-  let addEventListenerSpy: ReturnType<typeof vi.fn>
-  let removeEventListenerSpy: ReturnType<typeof vi.fn>
   let registerSpy: ReturnType<typeof vi.fn>
-  let sessionStore: Record<string, string>
+  let swAddEventListenerSpy: ReturnType<typeof vi.fn>
+  let swRemoveEventListenerSpy: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
-    sessionStore = {}
     vi.stubGlobal('sessionStorage', {
-      getItem: vi.fn((key: string) => sessionStore[key] ?? null),
-      setItem: vi.fn((key: string, value: string) => { sessionStore[key] = value }),
-      removeItem: vi.fn((key: string) => { delete sessionStore[key] }),
+      getItem: vi.fn(() => null),
+      setItem: vi.fn(),
+      removeItem: vi.fn(),
     })
 
-    addEventListenerSpy = vi.fn()
-    removeEventListenerSpy = vi.fn()
-    registerSpy = vi.fn().mockResolvedValue({ sync: { register: vi.fn().mockResolvedValue(undefined) } })
+    swAddEventListenerSpy = vi.fn()
+    swRemoveEventListenerSpy = vi.fn()
+    registerSpy = vi.fn().mockResolvedValue({
+      waiting: null,
+      installing: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      sync: { register: vi.fn().mockResolvedValue(undefined) },
+    })
 
     vi.stubGlobal('navigator', {
       serviceWorker: {
         register: registerSpy,
-        addEventListener: addEventListenerSpy,
-        removeEventListener: removeEventListenerSpy,
+        addEventListener: swAddEventListenerSpy,
+        removeEventListener: swRemoveEventListenerSpy,
+        controller: {},
       },
     })
   })
@@ -36,73 +42,128 @@ describe('ServiceWorkerRegistration', () => {
   })
 
   it('does not register SW in non-production (test env)', () => {
-    // NODE_ENV is 'test' by default in vitest — component guards on !== 'production'
     render(<ServiceWorkerRegistration />)
     expect(registerSpy).not.toHaveBeenCalled()
-    expect(addEventListenerSpy).not.toHaveBeenCalled()
   })
 
-  it('registers SW and controllerchange listener in production', () => {
+  it('registers SW in production', () => {
     vi.stubEnv('NODE_ENV', 'production')
     render(<ServiceWorkerRegistration />)
-
     expect(registerSpy).toHaveBeenCalledWith('/sw.js', { scope: '/' })
-    expect(addEventListenerSpy).toHaveBeenCalledWith('controllerchange', expect.any(Function))
   })
 
-  it('reloads on controllerchange and sets sessionStorage guard', () => {
+  it('shows UpdateToast when registration has a waiting SW', async () => {
     vi.stubEnv('NODE_ENV', 'production')
-    const reloadSpy = vi.fn()
-    vi.stubGlobal('location', { reload: reloadSpy })
+    registerSpy.mockResolvedValue({
+      waiting: { postMessage: vi.fn(), state: 'installed' },
+      installing: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      sync: { register: vi.fn().mockResolvedValue(undefined) },
+    })
 
     render(<ServiceWorkerRegistration />)
 
-    // Get the handler that was registered
-    const handler = addEventListenerSpy.mock.calls.find(
-      (call: unknown[]) => call[0] === 'controllerchange',
-    )?.[1] as (() => void) | undefined
-    expect(handler).toBeDefined()
-
-    handler!()
-
-    expect(sessionStorage.setItem).toHaveBeenCalledWith('sw-reload', '1')
-    expect(reloadSpy).toHaveBeenCalled()
+    await vi.waitFor(() => {
+      expect(screen.getByText('Actualización Disponible')).toBeInTheDocument()
+    })
   })
 
-  it('does NOT reload if guard is already set (prevents loop)', () => {
+  it('shows UpdateToast when new SW enters waiting state', async () => {
     vi.stubEnv('NODE_ENV', 'production')
-    sessionStore['sw-reload'] = '1'
-    const reloadSpy = vi.fn()
-    vi.stubGlobal('location', { reload: reloadSpy })
+    let updateFoundCallback: (() => void) | null = null
+    const mockInstalling = {
+      state: 'installing' as string,
+      addEventListener: vi.fn((event: string, cb: () => void) => {
+        if (event === 'statechange') {
+          // Simulate statechange after a tick
+          setTimeout(() => {
+            mockInstalling.state = 'installed'
+            cb()
+          }, 0)
+        }
+      }),
+    }
+
+    registerSpy.mockResolvedValue({
+      waiting: null,
+      get installing() { return mockInstalling },
+      addEventListener: vi.fn((event: string, cb: () => void) => {
+        if (event === 'updatefound') updateFoundCallback = cb
+      }),
+      removeEventListener: vi.fn(),
+      sync: { register: vi.fn().mockResolvedValue(undefined) },
+    })
 
     render(<ServiceWorkerRegistration />)
 
-    // Component clears the guard on mount, so set it back to simulate
-    // a second controllerchange after a reload already happened
-    sessionStore['sw-reload'] = '1'
+    // Wait for registration to resolve
+    await vi.waitFor(() => {
+      expect(updateFoundCallback).not.toBeNull()
+    })
 
-    const handler = addEventListenerSpy.mock.calls.find(
-      (call: unknown[]) => call[0] === 'controllerchange',
-    )?.[1] as (() => void) | undefined
+    // Trigger updatefound
+    updateFoundCallback!()
 
-    handler!()
-
-    expect(reloadSpy).not.toHaveBeenCalled()
+    await vi.waitFor(() => {
+      expect(screen.getByText('Actualización Disponible')).toBeInTheDocument()
+    })
   })
 
-  it('cleans up listener on unmount', () => {
+  it('sends SKIP_WAITING message when Actualizar is clicked', async () => {
     vi.stubEnv('NODE_ENV', 'production')
-    const { unmount } = render(<ServiceWorkerRegistration />)
+    const postMessageSpy = vi.fn()
+    registerSpy.mockResolvedValue({
+      waiting: { postMessage: postMessageSpy, state: 'installed' },
+      installing: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      sync: { register: vi.fn().mockResolvedValue(undefined) },
+    })
 
-    unmount()
+    render(<ServiceWorkerRegistration />)
 
-    expect(removeEventListenerSpy).toHaveBeenCalledWith('controllerchange', expect.any(Function))
+    await vi.waitFor(() => {
+      expect(screen.getByText('Actualizar')).toBeInTheDocument()
+    })
+
+    screen.getByText('Actualizar').click()
+
+    expect(postMessageSpy).toHaveBeenCalledWith({ type: 'SKIP_WAITING' })
+  })
+
+  it('hides toast when dismiss is clicked', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    const user = userEvent.setup()
+    registerSpy.mockResolvedValue({
+      waiting: { postMessage: vi.fn(), state: 'installed' },
+      installing: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      sync: { register: vi.fn().mockResolvedValue(undefined) },
+    })
+
+    render(<ServiceWorkerRegistration />)
+
+    await vi.waitFor(() => {
+      expect(screen.getByText('Actualización Disponible')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByLabelText('Cerrar'))
+
+    expect(screen.queryByText('Actualización Disponible')).not.toBeInTheDocument()
   })
 
   it('registers background sync after SW registration', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     const syncRegister = vi.fn().mockResolvedValue(undefined)
-    registerSpy.mockResolvedValue({ sync: { register: syncRegister } })
+    registerSpy.mockResolvedValue({
+      waiting: null,
+      installing: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      sync: { register: syncRegister },
+    })
 
     render(<ServiceWorkerRegistration />)
 

@@ -25,7 +25,8 @@ const SHELL_URLS = [
 ]
 
 self.addEventListener('install', (e) => {
-  self.skipWaiting()
+  // Do NOT call skipWaiting() here — let the client decide when to activate
+  // the new SW via a SKIP_WAITING message (user-triggered update toast).
   e.waitUntil(
     caches.open(CACHE).then((cache) =>
       // Add shell URLs individually — a single failure won't block the install
@@ -193,6 +194,13 @@ self.addEventListener('push', (event) => {
     data: { url: data.url ?? '/dashboard' },
   }
   event.waitUntil(self.registration.showNotification(title, options))
+})
+
+// Client-triggered update — called when user taps "Actualizar" in UpdateToast
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
 
 // Notification clicked — open/focus the app

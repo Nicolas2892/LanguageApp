@@ -464,7 +464,8 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/components/HardFlagButton.tsx` — optimistic toggle for concept `is_hard` flag
 - `src/lib/hooks/useSpeech.ts` + `SpeakButton.tsx` — TTS (wired in all exercise types)
 - `src/lib/hooks/useSpeechRecognition.ts` + `MicButton.tsx` — STT via OpenAI Whisper
-- `src/components/ServiceWorkerRegistration.tsx` — SW lifecycle + Background Sync
+- `src/components/ServiceWorkerRegistration.tsx` — SW registration + update detection; renders `<UpdateToast>` when a new SW is waiting; user-triggered `SKIP_WAITING` message → reload (no more silent auto-reload)
+- `src/components/UpdateToast.tsx` — fixed-bottom toast for PWA updates; "Actualizar" CTA + dismiss; follows `StreakFreezeNotification` pattern (`senda-card`, `animate-card-in`)
 - `src/lib/offline/db.ts` — IDB storage layer + `requestBackgroundSync()`
 
 ### Navigation
@@ -534,7 +535,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2406 tests across 140 files — all passing.**
+**Test suite: 2411 tests across 141 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
