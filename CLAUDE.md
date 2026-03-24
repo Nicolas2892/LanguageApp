@@ -397,8 +397,8 @@ Migrations (run once in Supabase SQL editor): 25 total (001–025). Migrations 0
 
 **Status: CODE READY — migration 025 pending, seed data pending**
 
-- 200 vocab items hard-coded in `src/lib/curriculum/run-seed-vocab.ts` across 8 categories
-- Categories: discourse_markers (30), fixed_phrases (30), collocations (25), register_phrases (25), idiomatic (25), prepositional (25), adverbial (20), pragmatic (20)
+- 249 vocab items hard-coded in `src/lib/curriculum/run-seed-vocab.ts` across 8 categories
+- Categories: discourse_markers (40), fixed_phrases (37), collocations (25), register_phrases (30), idiomatic (25), prepositional (30), adverbial (35), pragmatic (27)
 - `pnpm seed:vocab` — inserts items into `vocab_items`, generates 5 sentences per item via Claude Haiku → `docs/vocab-sentences-YYYY-MM-DD.json`; resume-safe
 - `pnpm seed:vocab:apply <file>` — inserts `vocab_sentences` rows; idempotent (skips existing vocab_ids)
 

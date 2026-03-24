@@ -44,7 +44,7 @@ type VocabItemData = {
 }
 
 const VOCAB_DATA: VocabItemData[] = [
-  // ── discourse_markers (30) ─────────────────────────────────────────────────
+  // ── discourse_markers (40) ─────────────────────────────────────────────────
   { expression: 'sin embargo',        english: 'however',                category: 'discourse_markers', level: 'B1', frequency_rank: 1 },
   { expression: 'por lo tanto',       english: 'therefore',              category: 'discourse_markers', level: 'B1', frequency_rank: 2 },
   { expression: 'en cambio',          english: 'on the other hand',      category: 'discourse_markers', level: 'B1', frequency_rank: 3 },
@@ -75,8 +75,18 @@ const VOCAB_DATA: VocabItemData[] = [
   { expression: 'por ende',           english: 'therefore / hence',      category: 'discourse_markers', level: 'B2', frequency_rank: 28 },
   { expression: 'ante todo',          english: 'above all',              category: 'discourse_markers', level: 'B2', frequency_rank: 29 },
   { expression: 'a su vez',           english: 'in turn',                category: 'discourse_markers', level: 'B2', frequency_rank: 30 },
+  { expression: 'acerca de',          english: 'about / concerning',     category: 'discourse_markers', level: 'B1', frequency_rank: 31 },
+  { expression: 'a partir de',        english: 'starting from / as of',  category: 'discourse_markers', level: 'B1', frequency_rank: 32 },
+  { expression: 'gracias a',          english: 'thanks to',              category: 'discourse_markers', level: 'B1', frequency_rank: 33 },
+  { expression: 'a causa de',         english: 'because of',             category: 'discourse_markers', level: 'B1', frequency_rank: 34 },
+  { expression: 'mientras que',       english: 'whereas / while',        category: 'discourse_markers', level: 'B2', frequency_rank: 35 },
+  { expression: 'a pesar de que',     english: 'despite the fact that',  category: 'discourse_markers', level: 'B2', frequency_rank: 36 },
+  { expression: 'por cierto',         english: 'by the way',             category: 'discourse_markers', level: 'B1', frequency_rank: 37 },
+  { expression: 'por ejemplo',        english: 'for example',            category: 'discourse_markers', level: 'B1', frequency_rank: 38 },
+  { expression: 'en cuanto',          english: 'as soon as',             category: 'discourse_markers', level: 'B2', frequency_rank: 39 },
+  { expression: 'al contrario',       english: 'on the contrary',        category: 'discourse_markers', level: 'B2', frequency_rank: 40 },
 
-  // ── fixed_phrases (30) ────────────────────────────────────────────────────
+  // ── fixed_phrases (37) ────────────────────────────────────────────────────
   { expression: 'tener que ver con',      english: 'to have to do with',       category: 'fixed_phrases', level: 'B1', frequency_rank: 1 },
   { expression: 'estar a punto de',       english: 'to be about to',           category: 'fixed_phrases', level: 'B1', frequency_rank: 2 },
   { expression: 'dar por hecho',          english: 'to take for granted',      category: 'fixed_phrases', level: 'B2', frequency_rank: 3 },
@@ -107,6 +117,13 @@ const VOCAB_DATA: VocabItemData[] = [
   { expression: 'salir adelante',         english: 'to get through / succeed',   category: 'fixed_phrases', level: 'B2', frequency_rank: 28 },
   { expression: 'dejar de lado',          english: 'to set aside',               category: 'fixed_phrases', level: 'B2', frequency_rank: 29 },
   { expression: 'ir al grano',            english: 'to get to the point',        category: 'fixed_phrases', level: 'B2', frequency_rank: 30 },
+  { expression: 'ponerse a',              english: 'to start doing',             category: 'fixed_phrases', level: 'B1', frequency_rank: 31 },
+  { expression: 'acabar de',              english: 'to have just (done)',        category: 'fixed_phrases', level: 'B1', frequency_rank: 32 },
+  { expression: 'dejar de',               english: 'to stop doing',             category: 'fixed_phrases', level: 'B1', frequency_rank: 33 },
+  { expression: 'volver a',               english: 'to do again',               category: 'fixed_phrases', level: 'B1', frequency_rank: 34 },
+  { expression: 'llegar a ser',           english: 'to become',                 category: 'fixed_phrases', level: 'B2', frequency_rank: 35 },
+  { expression: 'quedar en',              english: 'to arrange to meet',        category: 'fixed_phrases', level: 'B2', frequency_rank: 36 },
+  { expression: 'tener que',              english: 'to have to',                category: 'fixed_phrases', level: 'B1', frequency_rank: 37 },
 
   // ── collocations (25) ─────────────────────────────────────────────────────
   { expression: 'prestar atención',       english: 'to pay attention',           category: 'collocations', level: 'B2', frequency_rank: 1 },
@@ -135,7 +152,7 @@ const VOCAB_DATA: VocabItemData[] = [
   { expression: 'tomar medidas',          english: 'to take measures',           category: 'collocations', level: 'B2', frequency_rank: 24 },
   { expression: 'correr prisa',           english: 'to be urgent',               category: 'collocations', level: 'B2', frequency_rank: 25 },
 
-  // ── register_phrases (25) ─────────────────────────────────────────────────
+  // ── register_phrases (30) ─────────────────────────────────────────────────
   { expression: 'en lo que respecta a',   english: 'as regards / regarding',     category: 'register_phrases', level: 'B2', frequency_rank: 1 },
   { expression: 'a pesar de ello',        english: 'in spite of it',             category: 'register_phrases', level: 'B2', frequency_rank: 2 },
   { expression: 'cabe destacar que',      english: 'it is worth noting that',    category: 'register_phrases', level: 'C1', frequency_rank: 3 },
@@ -161,6 +178,11 @@ const VOCAB_DATA: VocabItemData[] = [
   { expression: 'en aras de',            english: 'for the sake of',             category: 'register_phrases', level: 'C1', frequency_rank: 23 },
   { expression: 'a efectos de',          english: 'for the purposes of',         category: 'register_phrases', level: 'C1', frequency_rank: 24 },
   { expression: 'en lo sucesivo',        english: 'henceforth / from now on',    category: 'register_phrases', level: 'C1', frequency_rank: 25 },
+  { expression: 'por medio de',         english: 'by means of',                 category: 'register_phrases', level: 'C1', frequency_rank: 26 },
+  { expression: 'a diferencia de',      english: 'unlike / as opposed to',      category: 'register_phrases', level: 'B2', frequency_rank: 27 },
+  { expression: 'al cabo de',           english: 'after (a period of time)',    category: 'register_phrases', level: 'B2', frequency_rank: 28 },
+  { expression: 'en comparación con',   english: 'in comparison with',          category: 'register_phrases', level: 'B2', frequency_rank: 29 },
+  { expression: 'a cambio de',          english: 'in exchange for',             category: 'register_phrases', level: 'B2', frequency_rank: 30 },
 
   // ── idiomatic (25) ────────────────────────────────────────────────────────
   { expression: 'meter la pata',         english: 'to put one\'s foot in it',    category: 'idiomatic', level: 'B2', frequency_rank: 1 },
@@ -189,7 +211,7 @@ const VOCAB_DATA: VocabItemData[] = [
   { expression: 'tener mala pata',       english: 'to have bad luck',            category: 'idiomatic', level: 'B2', frequency_rank: 24 },
   { expression: 'estar al loro',         english: 'to be alert / pay attention', category: 'idiomatic', level: 'C1', frequency_rank: 25 },
 
-  // ── prepositional (25) ────────────────────────────────────────────────────
+  // ── prepositional (30) ────────────────────────────────────────────────────
   { expression: 'consistir en',          english: 'to consist of',               category: 'prepositional', level: 'B1', frequency_rank: 1 },
   { expression: 'depender de',           english: 'to depend on',                category: 'prepositional', level: 'B1', frequency_rank: 2 },
   { expression: 'insistir en',           english: 'to insist on',                category: 'prepositional', level: 'B1', frequency_rank: 3 },
@@ -215,8 +237,13 @@ const VOCAB_DATA: VocabItemData[] = [
   { expression: 'alegrarse de',          english: 'to be glad about',            category: 'prepositional', level: 'B1', frequency_rank: 23 },
   { expression: 'disponer de',           english: 'to have available',            category: 'prepositional', level: 'B2', frequency_rank: 24 },
   { expression: 'optar por',             english: 'to opt for / choose',         category: 'prepositional', level: 'B2', frequency_rank: 25 },
+  { expression: 'pensar en',            english: 'to think about',              category: 'prepositional', level: 'B1', frequency_rank: 26 },
+  { expression: 'tratar de',            english: 'to try to',                   category: 'prepositional', level: 'B1', frequency_rank: 27 },
+  { expression: 'acabar con',           english: 'to put an end to',            category: 'prepositional', level: 'B2', frequency_rank: 28 },
+  { expression: 'dar con',              english: 'to come across / find',       category: 'prepositional', level: 'B2', frequency_rank: 29 },
+  { expression: 'dirigirse a',          english: 'to address / head towards',   category: 'prepositional', level: 'B2', frequency_rank: 30 },
 
-  // ── adverbial (20) ────────────────────────────────────────────────────────
+  // ── adverbial (35) ────────────────────────────────────────────────────────
   { expression: 'a menudo',              english: 'often',                        category: 'adverbial', level: 'B2', frequency_rank: 1 },
   { expression: 'por lo general',        english: 'generally / usually',          category: 'adverbial', level: 'B2', frequency_rank: 2 },
   { expression: 'a fin de cuentas',      english: 'after all / in the end',      category: 'adverbial', level: 'B2', frequency_rank: 3 },
@@ -237,8 +264,23 @@ const VOCAB_DATA: VocabItemData[] = [
   { expression: 'a ciegas',              english: 'blindly',                     category: 'adverbial', level: 'B2', frequency_rank: 18 },
   { expression: 'al pie de la letra',    english: 'to the letter / literally',   category: 'adverbial', level: 'B2', frequency_rank: 19 },
   { expression: 'a grandes rasgos',      english: 'broadly / in broad terms',    category: 'adverbial', level: 'B2', frequency_rank: 20 },
+  { expression: 'por fin',              english: 'finally',                     category: 'adverbial', level: 'B1', frequency_rank: 21 },
+  { expression: 'por ahora',            english: 'for now',                     category: 'adverbial', level: 'B1', frequency_rank: 22 },
+  { expression: 'por supuesto',         english: 'of course',                   category: 'adverbial', level: 'B1', frequency_rank: 23 },
+  { expression: 'en seguida',           english: 'immediately / right away',    category: 'adverbial', level: 'B1', frequency_rank: 24 },
+  { expression: 'a veces',              english: 'sometimes',                   category: 'adverbial', level: 'B1', frequency_rank: 25 },
+  { expression: 'en realidad',          english: 'in reality / actually',       category: 'adverbial', level: 'B1', frequency_rank: 26 },
+  { expression: 'todavía',              english: 'still / yet',                 category: 'adverbial', level: 'B1', frequency_rank: 27 },
+  { expression: 'mientras tanto',       english: 'meanwhile',                   category: 'adverbial', level: 'B2', frequency_rank: 28 },
+  { expression: 'al principio',         english: 'at the beginning',            category: 'adverbial', level: 'B1', frequency_rank: 29 },
+  { expression: 'en general',           english: 'in general',                  category: 'adverbial', level: 'B1', frequency_rank: 30 },
+  { expression: 'a propósito',          english: 'on purpose / by the way',     category: 'adverbial', level: 'B2', frequency_rank: 31 },
+  { expression: 'al menos',             english: 'at least',                    category: 'adverbial', level: 'B1', frequency_rank: 32 },
+  { expression: 'por desgracia',        english: 'unfortunately',               category: 'adverbial', level: 'B2', frequency_rank: 33 },
+  { expression: 'a lo mejor',           english: 'maybe / perhaps',             category: 'adverbial', level: 'B1', frequency_rank: 34 },
+  { expression: 'tal vez',              english: 'perhaps',                     category: 'adverbial', level: 'B1', frequency_rank: 35 },
 
-  // ── pragmatic (20) ────────────────────────────────────────────────────────
+  // ── pragmatic (27) ────────────────────────────────────────────────────────
   { expression: 'o sea',                 english: 'I mean / that is',            category: 'pragmatic', level: 'B2', frequency_rank: 1 },
   { expression: 'es decir',              english: 'that is to say',              category: 'pragmatic', level: 'B2', frequency_rank: 2 },
   { expression: 'a ver',                 english: 'let\'s see',                  category: 'pragmatic', level: 'B2', frequency_rank: 3 },
@@ -259,6 +301,13 @@ const VOCAB_DATA: VocabItemData[] = [
   { expression: 'mira',                  english: 'look (discourse marker)',      category: 'pragmatic', level: 'B2', frequency_rank: 18 },
   { expression: 'vale la pena',          english: 'it\'s worth it',              category: 'pragmatic', level: 'B2', frequency_rank: 19 },
   { expression: 'no me digas',           english: 'you don\'t say / no way',     category: 'pragmatic', level: 'C1', frequency_rank: 20 },
+  { expression: 'entre tú y yo',        english: 'between you and me',          category: 'pragmatic', level: 'B2', frequency_rank: 21 },
+  { expression: 'a mi modo de ver',     english: 'in my view',                  category: 'pragmatic', level: 'B2', frequency_rank: 22 },
+  { expression: 'para colmo',           english: 'to top it all off',           category: 'pragmatic', level: 'B2', frequency_rank: 23 },
+  { expression: 'ni hablar',            english: 'no way / out of the question', category: 'pragmatic', level: 'B2', frequency_rank: 24 },
+  { expression: 'por lo visto',         english: 'apparently',                  category: 'pragmatic', level: 'B2', frequency_rank: 25 },
+  { expression: '¿sabes qué?',          english: 'you know what?',              category: 'pragmatic', level: 'B2', frequency_rank: 26 },
+  { expression: 'la cosa es que',       english: 'the thing is that',           category: 'pragmatic', level: 'B2', frequency_rank: 27 },
 ]
 
 // ── Output file ──────────────────────────────────────────────────────────────
