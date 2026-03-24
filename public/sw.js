@@ -6,7 +6,7 @@
 //   - Network-only for API calls and auth routes
 
 // Bump CACHE_VERSION on each deploy to purge stale navigation cache
-const CACHE_VERSION = '2026-03-23'
+const CACHE_VERSION = '2026-03-24'
 const CACHE = `senda-${CACHE_VERSION}`
 
 // Only pre-cache public/static assets — auth-gated pages are cached on first
@@ -19,17 +19,25 @@ const SHELL_URLS = [
 ]
 
 self.addEventListener('install', (e) => {
-  // Do NOT call skipWaiting() here — let the client decide when to activate
-  // the new SW via a SKIP_WAITING message (user-triggered update toast).
   e.waitUntil(
-    caches.open(CACHE).then((cache) =>
-      // Add shell URLs individually — a single failure won't block the install
-      Promise.allSettled(
-        SHELL_URLS.map((url) =>
-          cache.add(url).catch(() => { /* ignore — shell pre-cache is best-effort */ })
+    caches.keys().then((existingKeys) => {
+      // Auto-activate when upgrading from a different cache version (or first install).
+      // This ensures users with an old SW get the new one immediately.
+      // For same-version updates, the client controls activation via SKIP_WAITING message.
+      const hasCurrentCache = existingKeys.includes(CACHE)
+      if (!hasCurrentCache) {
+        self.skipWaiting()
+      }
+
+      return caches.open(CACHE).then((cache) =>
+        // Add shell URLs individually — a single failure won't block the install
+        Promise.allSettled(
+          SHELL_URLS.map((url) =>
+            cache.add(url).catch(() => { /* ignore — shell pre-cache is best-effort */ })
+          )
         )
       )
-    )
+    })
   )
 })
 
