@@ -547,6 +547,17 @@
   animation: splash-fade-out 500ms ease-in-out forwards;
 }
 
+/* Splash screen — CSS-only safety net.
+   If React fails to hydrate, the splash still auto-hides after 2s.
+   Uses opacity + pointer-events so it doesn't block interaction. */
+@keyframes splash-auto-hide {
+  0%, 70%  { opacity: 1; }
+  100%     { opacity: 0; pointer-events: none; }
+}
+.splash-auto-hide {
+  animation: splash-auto-hide 2s ease-in-out forwards;
+}
+
 /* Splash screen — vellum noise texture pseudo-element */
 .splash-vellum {
   position: absolute;

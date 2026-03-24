@@ -48,7 +48,7 @@ export function SplashScreen() {
   return (
     <div
       data-testid="splash-screen"
-      className={phase === 'fading' ? 'splash-fade-out' : ''}
+      className={`splash-auto-hide${phase === 'fading' ? ' splash-fade-out' : ''}`}
       style={{
         position: 'fixed',
         inset: 0,
