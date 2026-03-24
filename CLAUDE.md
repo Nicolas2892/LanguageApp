@@ -41,43 +41,7 @@ pnpm seed:vocab           # Generate vocab sentences via Claude Haiku → docs/v
 pnpm seed:vocab:apply     # Insert vocab_sentences rows from review JSON (idempotent)
 ```
 
-Post-deploy API smoke check (requires env vars):
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm exec tsx scripts/smoke-test.ts
-```
-
-Seed command requires env vars:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... pnpm seed
-```
-
-Re-seeding duplicates rows — truncate `exercises`, `concepts`, `units`, `modules` first.
-
-Annotate command requires env vars:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm annotate
-```
-
-Annotates all exercises where `annotations IS NULL`; safe to re-run (skips already-annotated rows).
-
-Seed:ai command requires env vars:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm seed:ai
-```
-
-Queries DB for existing exercise counts; generates missing exercises for new and existing concepts; writes review JSON to `docs/`. Set `_approved: true` on entries, then run `pnpm seed:ai:apply [--dry-run] <file>`.
-
-Seed:verbs command requires env vars:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... ANTHROPIC_API_KEY=... pnpm seed:verbs
-```
-
-Inserts 50 verbs into `verbs` table, then generates 3 sentences per verb × tense (350 combos) via Claude Haiku. Resume-safe — skips combos already written. Then run `pnpm seed:verbs:apply [--dry-run] <file>`. Idempotent — skips combos already in DB.
+All seed, annotate, and smoke commands require env vars: `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and (except `pnpm seed`) `ANTHROPIC_API_KEY`. Re-seeding duplicates rows — truncate `exercises`, `concepts`, `units`, `modules` first. `pnpm annotate` and `pnpm seed:ai:apply` are idempotent (skip existing rows).
 
 ## Development Workflow (mandatory for every feature/fix)
 
@@ -386,25 +350,11 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | `offline_report_attempts`                | Per-attempt results within an offline report: score, feedback, corrected_version, explanation (Feat-F)                    |
 
 
-Migrations (run once in Supabase SQL editor):
+Migrations (run once in Supabase SQL editor): 25 total (001–025). Migrations 001–022 are applied. Pending:
 
-- `001–009`: initial schema, onboarding flag, indexes, exercise_id nullable, Google OAuth trigger fix, computed_level, grammar_focus, exercise annotations, push_subscription
-- `supabase/migrations/010_theme_preference.sql` — `profiles.theme_preference text DEFAULT 'system'`
-- `supabase/migrations/011_streak_rpc.sql` — `increment_streak_if_new_day(p_user_id uuid)` atomic RPC
-- `supabase/migrations/012_push_due_count_rpc.sql` — `get_subscribers_with_due_counts(...)` RPC
-- `supabase/migrations/013_hard_flag.sql` — `user_progress.is_hard boolean NOT NULL DEFAULT false`
-- `supabase/migrations/014_verb_conjugation.sql` — `verbs`, `verb_sentences`, `user_verb_favorites`, `verb_progress` tables + `increment_verb_progress(p_user_id, p_verb_id, p_tense, p_correct)` RPC
-- `supabase/migrations/015_verb_conjugations.sql` — `verb_conjugations` table (full 6-pronoun paradigm + stem per verb × tense)
-- `supabase/migrations/016_is_admin.sql` — `profiles.is_admin boolean NOT NULL DEFAULT false`; run `UPDATE profiles SET is_admin = true WHERE id = '<uuid>'` after applying
-- `supabase/migrations/017_skip_gap_fill.sql` — `profiles.skip_gap_fill boolean NOT NULL DEFAULT false`
-- `supabase/migrations/018_exercise_pool.sql` — `exercises.source text NOT NULL DEFAULT 'seed'` CHECK IN ('seed','ai_generated'); FK `exercise_attempts.exercise_id` changed to ON DELETE SET NULL
-- `supabase/migrations/019_user_timezone.sql` — `profiles.timezone text DEFAULT NULL`; replaces `increment_streak_if_new_day` RPC to use user's IANA timezone (Audit-E1)
-- `supabase/migrations/020_streak_freeze.sql` — `profiles.streak_freeze_remaining integer DEFAULT 1`, `streak_freeze_last_replenished text`, `streak_freeze_used_date text`; replaces `increment_streak_if_new_day` RPC (now `RETURNS jsonb`) with freeze logic + auto-replenish. **Note:** must `DROP FUNCTION increment_streak_if_new_day(uuid)` before running (return type change)
-- `supabase/migrations/021_accuracy_rpc.sql` — `get_accuracy_by_type(p_user_id uuid)` RPC; returns per-type + `_total` accuracy rows (replaces unbounded exercise_attempts fetch on progress page)
-- `supabase/migrations/022_offline_reports.sql` — `offline_reports` + `offline_report_attempts` tables with indexes (Feat-F; applied 2026-03-16)
-- `supabase/migrations/023_verb_sentence_english.sql` — `verb_sentences.english text DEFAULT NULL` (UX-Verb; ⚠️ pending — run in Supabase SQL editor)
-- `supabase/migrations/024_rename_modules.sql` — Rename 3 module titles: Connectors, Advanced Clauses, Conversational Spanish (⚠️ pending — run in Supabase SQL editor)
-- `supabase/migrations/025_vocab_drill.sql` — `vocab_items`, `vocab_sentences`, `vocab_progress` tables + `increment_vocab_progress` RPC with RLS + indexes (Feat-M; ⚠️ pending — run in Supabase SQL editor)
+- `023_verb_sentence_english.sql` — `verb_sentences.english text DEFAULT NULL`
+- `024_rename_modules.sql` — Rename 3 module titles
+- `025_vocab_drill.sql` — `vocab_items`, `vocab_sentences`, `vocab_progress` tables + `increment_vocab_progress` RPC
 
 ### Dashboard Stats
 
@@ -486,47 +436,36 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ### Key Shared Components & Utilities
 
-- `src/lib/timezone.ts` — `userLocalToday(tz?)` returns YYYY-MM-DD in user's IANA timezone; falls back to UTC
-- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, EXERCISE_CAP_PER_TYPE=15, LEVEL_CHIP, HARD_INTERVAL_MULTIPLIER=0.6
-- `src/lib/practiceUtils.ts` — `cycleToMinimum(items, min)` pads Open Practice sessions to at least MIN_PRACTICE_SIZE; avoids consecutive duplicates when pool ≥ 2
-- `src/lib/studyUtils.ts` — `biasedExercisePick(exercises, underweight)` (80% gap_fill exclusion in SRS) + `dropGapFillForPractice(items)` (~60% gap_fill drop in Open Practice)
-- `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map)
-- `src/lib/verbs/constants.ts` — `TENSES` (10 incl. infinitive), `CONJUGATION_TENSES` (9 conjugation-only), `TENSE_LABELS` (Spanish names), `TENSE_DESCRIPTIONS`, `VerbTense` type
-- `src/lib/verbs/grader.ts` — `normalizeSpanish(s)` + `gradeConjugation(userAnswer, correctForm, tenseRule)` → `VerbGradeResult`; pure functions, no network calls
-- `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
-- `src/lib/hooks/useSpeech.ts` — TTS hook; `src/components/SpeakButton.tsx` — speaker button (wired in all 5 exercise types)
-- `src/lib/hooks/useSpeechRecognition.ts` — STT hook (MediaRecorder → OpenAI Whisper via `/api/transcribe`, SSR-safe); `src/components/MicButton.tsx` — mic button used in FreeWritePrompt; states: idle, listening, processing, not-supported, denied
-- `src/lib/openai/client.ts` — OpenAI client singleton (Whisper STT)
-- `src/components/exercises/ExerciseRenderer.tsx` — shared exercise switch
-- `src/components/exercises/FreeWritePrompt.tsx` — AI prompt + textarea + SpeakButton + MicButton; used by WriteSession
-- `src/components/ErrorBoundary.tsx` — wraps StudySession, DiagnosticSession, WriteSession
-- `src/components/HardFlagButton.tsx` — orange Flag icon; optimistic toggle with revert on failure; rate-limited via `/api/concepts/[id]/hard`
+**Platform & Infrastructure:**
+- `src/lib/routes.ts` — `ROUTES` constant + `RoutePath` type; used across ~60 files. Do NOT use for dynamic routes or API fetch paths.
+- `src/lib/platform/` — `getPlatform()` (index.ts), `storage.get/set/remove/getSession/setSession/removeSession` (storage.ts), `isOnline()` + `onStatusChange()` (network.ts), `isIOSDevice()` + `isInstalledPWA()` + `isSafariBrowser()` (pwa.ts). All SSR-safe.
+- `src/lib/fireAndForget.ts` — logs rejected fire-and-forget promises to Sentry with `fire_and_forget` tag
+- `src/lib/cache.ts` — `getCached(key, fetcher, ttlMs?)` in-memory 5-min TTL cache for curriculum queries
 - `src/lib/rate-limit.ts` — `checkRateLimit(userId, routeKey, opts)` sliding-window (backed by @vercel/kv)
-- `src/lib/mastery/badge.ts` — `getMasteryState(intervalDays, productionMastered?)`, `getMasteryProgress(intervalDays, correctNonGapFill, uniqueTypes)`, `MASTERY_DOT`, `MASTERY_BADGE`; constants `PRODUCTION_CORRECT_REQUIRED=3`, `PRODUCTION_TYPES_REQUIRED=2`
-- `src/lib/mastery/computeLevel.ts` — `computeLevel(masteredByLevel, totalByLevel)` + `PRODUCTION_TYPES` array
 - `src/lib/api-utils.ts` — `updateStreakIfNeeded` + `updateComputedLevel` shared by submit + grade
-- `src/lib/routes.ts` — `ROUTES` constant object with all static route paths; `RoutePath` type. Used across ~60 files for navigation, redirects, HIDDEN_ROUTES arrays. Do NOT use for dynamic routes with template literals or API fetch paths.
-- `src/lib/platform/index.ts` — `getPlatform(): 'web' | 'pwa' | 'native'`; SSR-safe. Future Capacitor swap point.
-- `src/lib/platform/storage.ts` — `storage.get/set/remove` (localStorage) + `storage.getSession/setSession/removeSession` (sessionStorage); try/catch wrappers for consistent error handling. Used by ~15 components.
-- `src/lib/platform/network.ts` — `isOnline(): boolean` (SSR-safe, returns true on server) + `onStatusChange(cb): () => void`; replaces direct `navigator.onLine` checks across ~13 files.
-- `src/lib/platform/pwa.ts` — `isIOSDevice()`, `isInstalledPWA()`, `isSafariBrowser()`; SSR-safe. Used by IOSInstallPrompt, IOSInstallCard, NotificationSettings.
-- `src/lib/fireAndForget.ts` — `fireAndForget(promise, label)` logs rejected promises to Sentry with `fire_and_forget` tag + dev console.warn. Used by StudySession, VerbSession, VocabSession.
-- `src/lib/cache.ts` — `getCached(key, fetcher, ttlMs?)` in-memory cache with 5-min TTL; used by `/curriculum`, `/dashboard`, `/study/configure` for static curriculum queries (modules, units, concepts); `invalidateCache(prefix)` + `clearCache()` for tests
-- `src/components/ServiceWorkerRegistration.tsx` — registers `/sw.js`; listens for `controllerchange` → auto-reloads page (loop-guarded via sessionStorage); registers Background Sync tag `sync-offline-attempts` (Chrome/Edge)
-- `src/lib/offline/db.ts` — `requestBackgroundSync()` helper; called fire-and-forget from `queueAttempt()` and `queueVerbAttempt()` to trigger sync even after app is closed
-- `src/components/verbs/VerbCard.tsx` — verb grid card with mastery dots + favorite button
-- `src/components/verbs/VerbFavoriteButton.tsx` — optimistic heart toggle → `POST /api/verbs/favorite`
-- `src/components/verbs/VerbFeedbackPanel.tsx` — correct / accent_error / incorrect feedback UI
-- `src/components/verbs/VerbSummary.tsx` — session done screen with per-tense breakdown
-- `src/components/verbs/VerbTenseMastery.tsx` — progress page section; accuracy bars per tense sorted worst-first
-- `src/lib/vocab/constants.ts` — `VOCAB_CATEGORIES` (8), `CATEGORY_LABELS`, `CATEGORY_DESCRIPTIONS`, `CATEGORY_LEVELS`, `VocabCategory` type
-- `src/lib/vocab/grader.ts` — `gradeVocab(userAnswer, correctForm, answerVariants, hint)` → `VocabGradeResult`; reuses `normalizeSpanish()` from verb grader
-- `src/lib/vocab/types.ts` — `VocabSessionItem`, `VocabCategoryStat` interfaces
-- `src/components/vocab/VocabFeedbackPanel.tsx` — correct / accent_error / incorrect feedback UI (mirrors VerbFeedbackPanel)
-- `src/components/vocab/VocabSummary.tsx` — session done screen with per-category breakdown sorted worst-first
-- `src/components/vocab/VocabCategoryMastery.tsx` — progress page section; accuracy bars per category sorted worst-first
-- `src/app/verbs/VerbsVocabToggle.tsx` — client segmented control ("Verbos | Vocabulario") on `/verbs` page
-- `src/app/verbs/VocabCategoryView.tsx` — category card list with accuracy bars + CTA → `/vocab/configure`
+- `src/lib/timezone.ts` — `userLocalToday(tz?)` returns YYYY-MM-DD in user's IANA timezone
+
+**Learning & Grading:**
+- `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, EXERCISE_CAP_PER_TYPE=15
+- `src/lib/scoring.ts` — SCORE_CONFIG (score→label/colour map)
+- `src/lib/mastery/badge.ts` — `getMasteryState()`, `getMasteryProgress()`, `MASTERY_DOT`, `MASTERY_BADGE`
+- `src/lib/mastery/computeLevel.ts` — `computeLevel(masteredByLevel, totalByLevel)`
+- `src/lib/practiceUtils.ts` — `cycleToMinimum(items, min)` for Open Practice padding
+- `src/lib/studyUtils.ts` — `biasedExercisePick()` (gap_fill exclusion) + `dropGapFillForPractice()`
+- `src/lib/verbs/grader.ts` — `normalizeSpanish()` + `gradeConjugation()` (pure, no network)
+- `src/lib/verbs/constants.ts` — `TENSES`, `CONJUGATION_TENSES`, `TENSE_LABELS`, `VerbTense`
+- `src/lib/vocab/grader.ts` — `gradeVocab()` (reuses `normalizeSpanish()`)
+- `src/lib/vocab/constants.ts` — `VOCAB_CATEGORIES` (8), `CATEGORY_LABELS`, `VocabCategory`
+- `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
+
+**UI Components:**
+- `src/components/exercises/ExerciseRenderer.tsx` — shared exercise type switch
+- `src/components/ErrorBoundary.tsx` — wraps StudySession, DiagnosticSession, WriteSession, VerbSession, VocabSession
+- `src/components/HardFlagButton.tsx` — optimistic toggle for concept `is_hard` flag
+- `src/lib/hooks/useSpeech.ts` + `SpeakButton.tsx` — TTS (wired in all exercise types)
+- `src/lib/hooks/useSpeechRecognition.ts` + `MicButton.tsx` — STT via OpenAI Whisper
+- `src/components/ServiceWorkerRegistration.tsx` — SW lifecycle + Background Sync
+- `src/lib/offline/db.ts` — IDB storage layer + `requestBackgroundSync()`
 
 ### Navigation
 
@@ -599,7 +538,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
-**CI: Fully green (TypeScript + lint + tests).**
+**CI: Fully green (TypeScript + lint + tests).** Codebase audit (2026-03-13): 22/22 findings fixed.
 
 **D5 brand direction applied** across all production pages and components (dashboard, progress, study configure, verbs detail, nav). CSS utility classes (`.senda-card`, `.senda-eyebrow`, `.senda-heading`) + adaptive tokens (`--d5-*`) defined in `globals.css`.
 
@@ -642,39 +581,13 @@ Items are ordered by priority within each group. Full details of completed work 
 
 **Ped-F: Shared AI-generated exercise pool** *(DONE — see completed-features.md)*
 
-**Ped-I: Concept explanation content audit** *(very low priority — content only, no code)*
-
-- A "Concept Notes" collapsible already exists in `StudySession.tsx` showing `concept.explanation`. No new column or UI needed.
-- Audit whether existing `explanation` values are concise and rule-focused enough to be useful at exercise time, or whether they are too wordy/vague.
-- If poor quality: rewrite via a Claude batch script (similar to `pnpm annotate`) — no DB schema change required.
-- **Do not implement until the core learning loop is stable and content quality becomes a measurable problem.**
-
 ### New Features
 
-**Feat-F: Offline exercise packs (module download)** *(DONE — migration 022 applied)*
+**Feat-F: Offline exercise packs (module download)** *(DONE — migration 022 applied; see completed-features.md)*
 
-- 6-phase implementation: IDB storage layer (`idb` v8), download manager + verb auto-cache, offline session engine, batch grading API, sync engine, report-out UI.
-- IndexedDB stores: 15 object stores for exercises, concepts, units, progress snapshots, queued attempts, verb cache, sessions, free-write prompts.
-- Download: per-module bundle via `GET /api/offline/module/[id]` with pre-generated free-write prompts (Claude, concurrency=3). Verb data auto-cached on login + `/verbs` visit via `VerbCacheManager`.
-- Offline session: neutral "Respuesta registrada" feedback; exercises queued in IDB; SRS-based queue builder across all downloaded modules with module filter option.
-- Sync: on reconnect, `SyncBanner` shows progress; `POST /api/offline/grade-batch` grades via Claude (batches of 5), applies SM-2 sequentially with server-wins conflict resolution; creates `offline_reports` + push notification.
-- Report-out: `/offline/reports` list + `/offline/reports/[id]` detail with per-attempt scores, feedback, corrected version. Dashboard badge (AppHeader + SideNav) for unread reports.
-- Migration 022: `offline_reports` + `offline_report_attempts` tables.
+**Feat-G: Streak freeze** *(DONE — migration 020 applied; see completed-features.md)*
 
-**Feat-G: Streak freeze** *(DONE — migration 020 applied)*
-
-- 1 free streak freeze per week. If user misses exactly 1 day and has a freeze, streak is preserved + freeze consumed. Auto-replenishes after 7 days.
-- UI: `StreakBadge` shield icon, `StreakFreezeStatus` dashboard chip, `StreakFreezeNotification` toast.
-- Migration 020: 3 new `profiles` columns + updated `increment_streak_if_new_day` RPC (now `RETURNS jsonb`).
-
-**Feat-H: Listening comprehension + proofreading + register shift exercise types** *(DONE)*
-
-- Three new exercise types added: `listening`, `proofreading`, `register_shift`
-- Components: `ListeningComprehension.tsx`, `Proofreading.tsx`, `RegisterShift.tsx` — wired in `ExerciseRenderer`
-- Seed config: generation rules in `ai-seed-config.ts`; B2 gets `listening` + `proofreading`, C1 gets all three
-- Exercise distribution: B1 = 3 types (9 exercises), B2 = 5 types (15 exercises), C1 = 6 types (18 exercises)
-- Grader: type-specific rubrics in `grader.ts` for all three new types
-- All hardcoded type lists updated: curriculum detail, admin pool, study page, session config, validation script
+**Feat-H: Listening comprehension + proofreading + register shift exercise types** *(DONE — see completed-features.md)*
 
 **Feat-I: i18n architecture (next-intl or JSON dictionaries)** *(P2 — future market expansion)*
 
@@ -701,16 +614,7 @@ Items are ordered by priority within each group. Full details of completed work 
 - Could be AI-generated or curated. Exercises would be tied to passages rather than individual concepts.
 - **Future consideration — requires content strategy and new DB schema for passages.**
 
-**Feat-M: Vocabulary drill mode** *(DONE — migration 025 pending)*
-
-- 8-category vocab drill: discourse markers, fixed phrases, collocations, register phrases, idiomatic, prepositional, adverbial, pragmatic (~200 items, ~1000 sentences when seeded)
-- Entry via segmented "Verbos | Vocabulario" toggle on `/verbs` page → category cards → `/vocab/configure` → `/vocab/session`
-- Local grading (`gradeVocab()`) — zero Claude cost; same correct/accent_error/incorrect pattern as verb drills
-- No SRS — pure practice mode; accuracy tracking per item via `vocab_progress` + `increment_vocab_progress` RPC
-- Offline: IDB v3 `queued_vocab_attempts` store + `POST /api/offline/vocab-sync` batch sync
-- Progress page: `VocabCategoryMastery` section with per-category accuracy bars
-- Migration 025: `vocab_items`, `vocab_sentences`, `vocab_progress` tables + RPC (⚠️ pending — run in Supabase SQL editor)
-- Seed: `pnpm seed:vocab` → generate sentences via Haiku; `pnpm seed:vocab:apply` → insert rows (pending after migration)
+**Feat-M: Vocabulary drill mode** *(DONE — migration 025 pending; see completed-features.md)*
 
 **Feat-N: Social / accountability features** *(P4 — retention)*
 
@@ -732,11 +636,7 @@ Items are ordered by priority within each group. Full details of completed work 
 - Full plan: `docs/accent-training-plan.md`
 - **Do not implement until core learning loop is stable and PM decision on pricing tier (free vs. premium).**
 
-**Feat-Q: Mastery progress chip on concept + verb detail pages** *(DONE)*
-
-- `MasteryChip` client component in concept detail header: tappable badge + nudge text + expandable milestones (SRS, production, variety gates). Replaces old "Tu progreso" card at page bottom.
-- `computeNudgeText()` provides state-based actionable hints (days remaining, missing exercise type, or "start practising").
-- Verb detail page: cross-tense accuracy nudge with "Reforzar [weakest tense] →" drill link; only shows when ≥2 tenses have progress.
+**Feat-Q: Mastery progress chip on concept + verb detail pages** *(DONE — see completed-features.md)*
 
 **Feat-R: Capacitor native shell** *(P3 — App Store distribution + offline)*
 
@@ -753,32 +653,9 @@ Items are ordered by priority within each group. Full details of completed work 
 
 **Fix-L: Verify push notifications on iOS PWA** *(DONE — see completed-features.md)*
 
-**Fix-M: Offline mode stability audit** *(DONE)*
+**Fix-M: Offline mode stability audit** *(DONE — see completed-features.md)*
 
-- **Middleware resilience**: `src/lib/supabase/middleware.ts` — `getUser()` wrapped in try/catch; when Supabase is unreachable, checks for `sb-*-auth-token` cookies → allows through if present (offline mode). Onboarding DB query also catches failures gracefully.
-- **IDB schema v3**: `src/lib/offline/db.ts` — DB_VERSION bumped to 3 (v2: cache stores; v3: `queued_vocab_attempts` for Feat-M). Stores: `profile_cache`, `modules_cache`, `dashboard_cache` + vocab attempt queue.
-- **Write-through cache writers**: `ProfileCacheWriter` (layout), `DashboardCacheWriter` (dashboard), `CurriculumCacheWriter` (curriculum), `ProgressCacheWriter` (progress) — silent client components that write page data to IDB on every successful load.
-- **error.tsx offline shells**: 7 route-level error boundaries detect `!navigator.onLine` → read from IDB → render cached view with `OfflineIndicator` banner:
-  - `dashboard/error.tsx` — cached greeting + stats + offline study/verb practice links
-  - `curriculum/error.tsx` — full concept tree with mastery dots from IDB
-  - `study/configure/error.tsx` — simplified offline study + verb practice options
-  - `verbs/error.tsx` — full verb directory from VerbCacheManager data
-  - `verbs/[infinitive]/error.tsx` — conjugation tables + mastery from IDB
-  - `progress/error.tsx` — CEFR bars + streak from cached data
-  - `tutor/error.tsx` — "El tutor necesita conexión a internet" + verb practice link
-- **global-error.tsx**: enhanced with offline detection → branded "Tu senda te espera" message
-- **ReconnectRefresher**: `src/components/offline/ReconnectRefresher.tsx` — listens for `online` event → `router.refresh()` + "Conexión restaurada" toast
-- **SW improvements**: `public/sw.js` — added stale-while-revalidate for `/_next/data/` (RSC payloads), cache-first for Google Fonts woff2
-- **Offline hooks**: `src/lib/offline/hooks.ts` — `useOfflineProfile()`, `useOfflineDashboard()`, `useOfflineCurriculum()`, `useOfflineVerbs()`, `useOfflineVerbDetail()`, `useOfflineProgress()`
-
-**Fix-N: Comprehensive PostHog analytics** *(DONE)*
-
-- 20 events tracked across all user journeys (see event catalog in `src/lib/analytics.ts`)
-- `identifyUser()` sends 6 person properties: `computed_level`, `streak`, `timezone`, `streak_freeze_remaining`, `mastered_count`, `days_since_signup`
-- `trackFeatureFirstUse()` fires once per feature via localStorage dedup (tutor, free_write, verb_drill, vocab_drill)
-- All 4 previously-dead tracking functions now wired (onboarding, tutor, free-write, streak milestone)
-- 8 new tracking functions: `trackOnboardingStarted`, `trackSessionStarted`, `trackHintRequested`, `trackExerciseGenerated`, `trackHardFlagToggled`, `trackOfflineModuleDownloaded`, `trackOfflineSyncCompleted`, `trackFeatureFirstUse`
-- PostHog dashboards for DAU/WAU, funnels, feature adoption still need to be created manually in PostHog UI
+**Fix-N: Comprehensive PostHog analytics** *(DONE — see completed-features.md)*
 
 ### Technical Debt
 
@@ -789,17 +666,6 @@ Items are ordered by priority within each group. Full details of completed work 
 - Current burst limit (20 req/10min) prevents abuse but doesn't enforce the ~80 min/month budget precisely.
 - Would require a `profiles.stt_minutes_used` column + monthly reset cron + duration tracking in `/api/transcribe`.
 - **Do not implement unless billing/cost becomes a measurable problem.**
-
-### Audit Findings (2026-03-13)
-
-Full codebase audit: 22 findings, 21 fixed. Full details in `docs/completed-features.md` under "Audit Fixes Batch".
-
-**Audit-E7: SRS due_date UTC assumption** *(DONE — documented in `src/lib/srs/index.ts` and `supabase/migrations/011_streak_rpc.sql`)*
-
-**Audit-E1: Timezone-aware streak & SRS** *(DONE — migration 019)*
-
-**Open items:**
-- None remaining from audit
 
 ---
 
