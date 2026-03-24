@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 
@@ -66,7 +67,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
 
   function handleStart() {
     if (sessionMode === 'review') {
-      router.push('/study?mode=review')
+      router.push(`${ROUTES.study}?mode=review`)
       return
     }
     const params = new URLSearchParams()

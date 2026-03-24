@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { TutorChat } from './TutorChat'
 
@@ -10,7 +11,7 @@ export default async function TutorPage({
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   const { concept: conceptId } = await searchParams
 

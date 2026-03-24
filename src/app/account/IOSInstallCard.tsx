@@ -2,21 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { Share2, PlusSquare, Smartphone } from 'lucide-react'
+import { isIOSDevice, isSafariBrowser, isInstalledPWA } from '@/lib/platform/pwa'
 
 export function IOSInstallCard() {
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    const isIOS =
-      /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-      (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
-
-    const isSafari =
-      /safari/i.test(navigator.userAgent) &&
-      !/crios|fxios|opios|edgios/i.test(navigator.userAgent)
-
-    const isStandalone =
-      (navigator as Navigator & { standalone?: boolean }).standalone === true
+    const isIOS = isIOSDevice()
+    const isSafari = isSafariBrowser()
+    const isStandalone = isInstalledPWA()
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isIOS && isSafari && !isStandalone) setShow(true)

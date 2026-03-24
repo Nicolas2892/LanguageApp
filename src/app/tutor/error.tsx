@@ -5,6 +5,7 @@ import Link from 'next/link'
 import * as Sentry from '@sentry/nextjs'
 import { WifiOff } from 'lucide-react'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
+import { isOnline } from '@/lib/platform/network'
 
 export default function TutorError({
   error,
@@ -17,7 +18,7 @@ export default function TutorError({
     Sentry.captureException(error)
   }, [error])
 
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+  const isOffline = !isOnline()
 
   return (
     <div className="flex flex-col h-[100dvh] pb-[calc(3.125rem+env(safe-area-inset-bottom))] lg:pb-0">

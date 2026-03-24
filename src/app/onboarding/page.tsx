@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { DiagnosticSession } from './DiagnosticSession'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { WelcomeScreen } from '@/components/WelcomeScreen'
@@ -11,7 +12,7 @@ import type { Concept, Exercise, Profile } from '@/lib/supabase/types'
 export default async function OnboardingPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // If already completed, skip to dashboard
   const { data: profileData } = await supabase
@@ -21,7 +22,7 @@ export default async function OnboardingPage() {
     .single()
 
   const profile = profileData as Pick<Profile, 'onboarding_completed'> | null
-  if (profile?.onboarding_completed) redirect('/dashboard')
+  if (profile?.onboarding_completed) redirect(ROUTES.dashboard)
 
   // Fetch the 6 diagnostic concepts by title
   const { data: conceptsData } = await supabase

@@ -7,17 +7,18 @@ import { UserAvatar } from '@/components/UserAvatar'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { StreakBadge } from '@/components/StreakBadge'
 import { StreakCalendarModal } from '@/components/StreakCalendarModal'
+import { ROUTES } from '@/lib/routes'
 
 const NAV_ITEMS = [
-  { href: '/dashboard',       label: 'Inicio'     },
-  { href: '/study/configure', label: 'Estudio'    },
-  { href: '/curriculum',      label: 'Currículo'  },
-  { href: '/verbs',           label: 'Verbos'     },
-  { href: '/progress',        label: 'Progreso'   },
-  { href: '/tutor',           label: 'Tutor'      },
+  { href: ROUTES.dashboard,      label: 'Inicio'     },
+  { href: ROUTES.studyConfigure, label: 'Estudio'    },
+  { href: ROUTES.curriculum,     label: 'Currículo'  },
+  { href: ROUTES.verbs,          label: 'Verbos'     },
+  { href: ROUTES.progress,       label: 'Progreso'   },
+  { href: ROUTES.tutor,          label: 'Tutor'      },
 ]
 
-const HIDDEN_ROUTES = ['/auth', '/onboarding', '/brand-preview', '/admin']
+const HIDDEN_ROUTES = ['/auth', ROUTES.onboarding, ROUTES.brandPreview, ROUTES.admin]
 
 // D5 inline S-path — terracotta, no background rect
 
@@ -41,7 +42,7 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unrea
     >
       {/* Logo */}
       <Link
-        href="/dashboard"
+        href={ROUTES.dashboard}
         className="tap-highlight flex items-center gap-2.5 px-5 h-14 shrink-0 border-b"
         style={{ borderColor: 'var(--d5-nav-border)' }}
       >
@@ -64,8 +65,8 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unrea
         {NAV_ITEMS.map(({ href, label }) => {
           const active =
             pathname === href ||
-            (href === '/study/configure' && pathname.startsWith('/study')) ||
-            (href !== '/dashboard' && href !== '/study/configure' && pathname.startsWith(href))
+            (href === ROUTES.studyConfigure && pathname.startsWith(ROUTES.study)) ||
+            (href !== ROUTES.dashboard && href !== ROUTES.studyConfigure && pathname.startsWith(href))
           return (
             <Link
               key={href}
@@ -97,7 +98,7 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unrea
       <div className="p-3 border-t shrink-0 space-y-2" style={{ borderColor: 'var(--d5-nav-border)' }}>
         {unreadReportCount > 0 && (
           <Link
-            href="/offline/reports"
+            href={ROUTES.offlineReports}
             className="tap-highlight flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-muted"
             style={{ color: 'var(--d5-terracotta)' }}
           >
@@ -122,12 +123,12 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unrea
           />
         </div>
         <Link
-          href="/account"
+          href={ROUTES.account}
           className="tap-highlight flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors"
           style={{
-            background: pathname.startsWith('/account') ? 'var(--d5-nav-active-bg)' : 'transparent',
-            color: pathname.startsWith('/account') ? 'var(--d5-terracotta)' : 'var(--d5-nav-inactive)',
-            fontWeight: pathname.startsWith('/account') ? 600 : 500,
+            background: pathname.startsWith(ROUTES.account) ? 'var(--d5-nav-active-bg)' : 'transparent',
+            color: pathname.startsWith(ROUTES.account) ? 'var(--d5-terracotta)' : 'var(--d5-nav-inactive)',
+            fontWeight: pathname.startsWith(ROUTES.account) ? 600 : 500,
           }}
         >
           <span
@@ -136,7 +137,7 @@ export function SideNav({ userInitials, streak, streakFreezeRemaining = 0, unrea
               width: '0.1875rem',
               height: '1rem',
               borderRadius: '0.125rem',
-              background: pathname.startsWith('/account') ? 'var(--d5-terracotta)' : 'transparent',
+              background: pathname.startsWith(ROUTES.account) ? 'var(--d5-terracotta)' : 'transparent',
             }}
           />
           <UserAvatar initials={userInitials} size="sm" />

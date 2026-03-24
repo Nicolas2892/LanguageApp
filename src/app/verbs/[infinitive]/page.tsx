@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { VerbDetailClient } from './VerbDetailClient'
 import type { Verb, VerbConjugation, VerbProgress } from '@/lib/supabase/types'
 import { TENSES } from '@/lib/verbs/constants'
@@ -13,7 +14,7 @@ export default async function VerbDetailPage({ params }: Props) {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // Fetch verb by infinitive
   const { data: verbData } = await supabase

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { SvgTilde } from '@/components/SvgTilde'
 import { SCORE_CONFIG } from '@/lib/scoring'
@@ -111,7 +112,7 @@ export function DiagnosticSession({ items }: Props) {
         })
         if (!res.ok) throw new Error(`Onboarding complete failed: ${res.status}`)
         trackOnboardingComplete('diagnostic')
-        router.push('/dashboard')
+        router.push(ROUTES.dashboard)
       } catch {
         // If completion fails, user would be stuck in redirect loop — retry
         setCompleting(false)

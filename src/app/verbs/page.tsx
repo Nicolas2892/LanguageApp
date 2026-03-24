@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { VerbDirectory } from './VerbDirectory'
 import { VerbsVocabToggle } from './VerbsVocabToggle'
 import { VocabCategoryView } from './VocabCategoryView'
@@ -13,7 +14,7 @@ import type { VocabCategory } from '@/lib/vocab/constants'
 export default async function VerbsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // Fetch all verbs, user favorites, verb progress, vocab items, vocab progress in parallel
   const [

@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from './types'
+import { ROUTES } from '@/lib/routes'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -28,7 +29,7 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const publicPaths = ['/auth/login', '/auth/signup', '/auth/callback', '/brand-preview', '/icon', '/apple-icon', '/api/pwa-icon', '/manifest.webmanifest', '/sw.js']
+  const publicPaths = [ROUTES.login, ROUTES.signup, ROUTES.authCallback, ROUTES.brandPreview, '/icon', '/apple-icon', '/api/pwa-icon', '/manifest.webmanifest', '/sw.js']
   const isPublic = publicPaths.some((p) => pathname.startsWith(p))
 
   // Fix-M: Wrap getUser() in try/catch for offline resilience.
@@ -47,7 +48,7 @@ export async function updateSession(request: NextRequest) {
     // No auth cookies — redirect to login as normal
     if (!isPublic) {
       const url = request.nextUrl.clone()
-      url.pathname = '/auth/login'
+      url.pathname = ROUTES.login
       return NextResponse.redirect(url)
     }
     return supabaseResponse
@@ -55,7 +56,7 @@ export async function updateSession(request: NextRequest) {
 
   if (!user && !isPublic) {
     const url = request.nextUrl.clone()
-    url.pathname = '/auth/login'
+    url.pathname = ROUTES.login
     const redirectResponse = NextResponse.redirect(url)
     // Clear stale onboarding cookie so a new user on the same browser gets onboarding
     if (request.cookies.has('onboarding_done')) {
@@ -66,7 +67,7 @@ export async function updateSession(request: NextRequest) {
 
   // Redirect authenticated users who haven't completed onboarding
   // Skip API routes — they must never be redirected to a page
-  if (user && !isPublic && pathname !== '/onboarding' && !pathname.startsWith('/api/')) {
+  if (user && !isPublic && pathname !== ROUTES.onboarding && !pathname.startsWith('/api/')) {
     // PERF-04: skip DB query when the onboarding cookie is present (set by /api/onboarding/complete)
     const onboardingDone = request.cookies.get('onboarding_done')?.value === '1'
 
@@ -80,7 +81,7 @@ export async function updateSession(request: NextRequest) {
 
         if (profile && !(profile as { onboarding_completed: boolean }).onboarding_completed) {
           const url = request.nextUrl.clone()
-          url.pathname = '/onboarding'
+          url.pathname = ROUTES.onboarding
           return NextResponse.redirect(url)
         }
 

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Bell, BellOff, BellRing, Send } from 'lucide-react'
+import { storage } from '@/lib/platform/storage'
+import { isIOSDevice, isInstalledPWA } from '@/lib/platform/pwa'
 
 type NotifState = 'loading' | 'unsupported' | 'denied' | 'granted' | 'default'
 
@@ -37,11 +39,7 @@ async function subscribeToPush(): Promise<boolean> {
 
 /** Detect iOS Safari running as a browser tab (not installed as PWA) */
 function isIOSSafariTab(): boolean {
-  if (typeof navigator === 'undefined') return false
-  const ua = navigator.userAgent
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  const isStandalone = 'standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true
-  return isIOS && !isStandalone
+  return isIOSDevice() && !isInstalledPWA()
 }
 
 interface NotificationSettingsProps {
@@ -80,7 +78,7 @@ export function NotificationSettings({ isAdmin = false }: NotificationSettingsPr
           setSubscribeError(true)
         } else {
           // Clear dismissed flag so post-session prompt won't show redundantly
-          localStorage.removeItem(DISMISSED_KEY)
+          storage.remove(DISMISSED_KEY)
         }
       }
       setNotifState(permission as NotifState)

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
 import { useNetworkStatus } from '@/lib/offline/useNetworkStatus'
 import { getAllDownloadedModules } from '@/lib/offline/db'
 import { OfflineStudySession } from './OfflineStudySession'
@@ -48,7 +49,7 @@ export function OfflineGate({ children }: { children: React.ReactNode }) {
           No tienes módulos descargados para estudiar offline. Descarga módulos desde el currículo cuando tengas conexión.
         </p>
         <Button
-          onClick={() => router.push('/dashboard')}
+          onClick={() => router.push(ROUTES.dashboard)}
           variant="outline"
           className="rounded-full"
         >

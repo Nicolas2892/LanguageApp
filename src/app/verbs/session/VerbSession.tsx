@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
+import { fireAndForget } from '@/lib/fireAndForget'
 import { X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,6 +24,7 @@ import { useHaptics } from '@/lib/hooks/useHaptics'
 import { focusWithoutScroll } from '@/lib/hooks/useAutoFocus'
 import { queueVerbAttempt } from '@/lib/offline/db'
 import { trackVerbDrillStarted, trackVerbDrillCompleted, trackFeatureFirstUse } from '@/lib/analytics'
+import { isOnline } from '@/lib/platform/network'
 
 const PRONOUN_LABELS: Record<string, string> = {
   yo:       'yo',
@@ -128,16 +131,15 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
       if (attemptRecordedRef.current.has(idx)) return
       attemptRecordedRef.current.add(idx)
 
-      if (navigator.onLine) {
-        try {
-          await fetch('/api/verbs/grade', {
+      if (isOnline()) {
+        fireAndForget(
+          fetch('/api/verbs/grade', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ verb_id: verbId, tense, is_correct: isCorrect }),
-          })
-        } catch {
-          // fire-and-forget; don't block UI on network failure
-        }
+          }),
+          'verb-grade',
+        )
       } else {
         // Offline — queue for later sync
         try {
@@ -243,7 +245,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
             <Button variant="outline" onClick={() => setShowExitDialog(false)}>
               Seguir
             </Button>
-            <Button variant="destructive" onClick={() => router.push('/verbs')}>
+            <Button variant="destructive" onClick={() => router.push(ROUTES.verbs)}>
               Salir
             </Button>
           </DialogFooter>

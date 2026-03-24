@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { SpeakButton } from '@/components/SpeakButton'
 import { getMasteryState, getMasteryProgress, MASTERY_BADGE } from '@/lib/mastery/badge'
 import { ChevronLeft, Pencil, Bot } from 'lucide-react'
@@ -83,7 +84,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // Fetch concept
   const { data: conceptData } = await supabase

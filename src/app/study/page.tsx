@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { StudySession } from './StudySession'
 import { OfflineGate } from './OfflineGate'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
@@ -48,7 +49,7 @@ export default async function StudyPage({
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // Fetch skip_gap_fill preference + timezone
   const { data: profileData } = await supabase
@@ -168,7 +169,7 @@ export default async function StudyPage({
       })
       .map((c) => (c as { id: string }).id)
       .slice(0, SESSION_SIZE)
-    if (unlearnedIds.length === 0) redirect('/dashboard')
+    if (unlearnedIds.length === 0) redirect(ROUTES.dashboard)
     conceptIds = unlearnedIds
   } else if (params.mode === 'review') {
     // Mistake review: most-recent failed attempt per concept
@@ -185,7 +186,7 @@ export default async function StudyPage({
       .map((a) => (a as { exercise_id: string | null }).exercise_id)
       .filter((id): id is string => id !== null)
 
-    if (failedExerciseIds.length === 0) redirect('/dashboard')
+    if (failedExerciseIds.length === 0) redirect(ROUTES.dashboard)
 
     // Fetch exercises to map exerciseId → conceptId
     const { data: failedExercisesData } = await supabase
@@ -210,7 +211,7 @@ export default async function StudyPage({
       if (reviewExerciseByConceptId.size >= sessionSize) break
     }
 
-    if (reviewExerciseByConceptId.size === 0) redirect('/dashboard')
+    if (reviewExerciseByConceptId.size === 0) redirect(ROUTES.dashboard)
     conceptIds = [...seenConceptIds]
   } else {
     // Default: SRS due queue
@@ -278,7 +279,7 @@ export default async function StudyPage({
     supabase.from('concepts').select('*').in('id', conceptIds),
     exerciseQuery,
   ])
-  if (!concepts || concepts.length === 0) redirect('/dashboard')
+  if (!concepts || concepts.length === 0) redirect(ROUTES.dashboard)
   const typedConcepts = concepts as Concept[]
   const conceptMap = new Map(typedConcepts.map((c) => [c.id, c]))
 
@@ -352,7 +353,7 @@ export default async function StudyPage({
   // Cap items to sessionSize (only in non-sprint, non-drill modes)
   const cappedItems = (!isSprint && !isDrillMode) ? orderedItems.slice(0, sessionSize) : orderedItems
 
-  if (cappedItems.length === 0) redirect('/dashboard')
+  if (cappedItems.length === 0) redirect(ROUTES.dashboard)
 
   // Build a human-readable session label for the session header badge
   const sessionLabel = isOpenPractice

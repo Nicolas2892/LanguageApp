@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
 import { Button } from '@/components/ui/button'
 import { LogOut, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -16,7 +17,7 @@ export function DangerZone() {
 
   async function handleSignOut() {
     await supabase.auth.signOut()
-    router.push('/auth/login')
+    router.push(ROUTES.login)
   }
 
   async function handleDeleteConfirm() {
@@ -26,7 +27,7 @@ export function DangerZone() {
       const res = await fetch('/api/account/delete', { method: 'POST' })
       const data = await res.json() as { ok?: boolean; error?: string }
       if (!res.ok) throw new Error(data.error ?? 'Error al eliminar la cuenta')
-      router.push('/auth/login')
+      router.push(ROUTES.login)
     } catch (err) {
       setDeleteError(err instanceof Error ? err.message : 'Algo salió mal.')
       setDeleting(false)

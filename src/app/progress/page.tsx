@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { WeeklyActivityChart } from './WeeklyActivityChart'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { VerbTenseMastery } from '@/components/verbs/VerbTenseMastery'
@@ -25,7 +26,7 @@ const CEFR_COLORS: Record<string, { barStyle: React.CSSProperties }> = {
 export default async function ProgressPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // ── 1. Profile (streak + computed level) ──────────────────────────────────
   const { data: profileData } = await supabase

@@ -7,9 +7,10 @@ import { UserAvatar } from '@/components/UserAvatar'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { StreakBadge } from '@/components/StreakBadge'
 import { StreakCalendarModal } from '@/components/StreakCalendarModal'
+import { ROUTES } from '@/lib/routes'
 
-const HIDDEN_ROUTES = ['/auth', '/study', '/tutor', '/onboarding', '/brand-preview']
-const TUTOR_ICON_ROUTES = ['/dashboard', '/curriculum', '/verbs']
+const HIDDEN_ROUTES = ['/auth', ROUTES.study, ROUTES.tutor, ROUTES.onboarding, ROUTES.brandPreview]
+const TUTOR_ICON_ROUTES = [ROUTES.dashboard, ROUTES.curriculum, ROUTES.verbs]
 
 interface Props {
   userInitials: string
@@ -28,15 +29,15 @@ export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unr
     <header className="sticky top-0 z-50 bg-background lg:hidden">
       <div className="h-14 flex items-center justify-between px-5">
         {/* Logo */}
-        <Link href="/dashboard" aria-label="Senda home" className="tap-highlight">
+        <Link href={ROUTES.dashboard} aria-label="Senda home" className="tap-highlight">
           <SvgSendaPath size={26} strokeWidth={3.5} />
         </Link>
 
         {/* Right side: tutor + streak + avatar */}
         <div className="flex items-center gap-3">
-          {TUTOR_ICON_ROUTES.some((r) => pathname === r || (r !== '/dashboard' && pathname.startsWith(r))) && (
+          {TUTOR_ICON_ROUTES.some((r) => pathname === r || (r !== ROUTES.dashboard && pathname.startsWith(r))) && (
             <Link
-              href="/tutor"
+              href={ROUTES.tutor}
               aria-label="Tutor"
               className="tap-highlight rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
                          min-h-[44px] flex items-center justify-center text-[var(--d5-nav-inactive)]"
@@ -46,7 +47,7 @@ export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unr
           )}
           {unreadReportCount > 0 && (
             <Link
-              href="/offline/reports"
+              href={ROUTES.offlineReports}
               aria-label="Informes offline"
               className="tap-highlight relative rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
                          min-h-[44px] flex items-center justify-center"
@@ -71,7 +72,7 @@ export function AppHeader({ userInitials, streak, streakFreezeRemaining = 0, unr
             timezone={timezone}
           />
           <Link
-            href="/account"
+            href={ROUTES.account}
             aria-label="Account"
             className="tap-highlight rounded-full p-1.5 hover:bg-muted transition-colors min-w-[44px]
                        min-h-[44px] flex items-center justify-center"

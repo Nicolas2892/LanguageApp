@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { storage } from '@/lib/platform/storage'
 
 // S-trail path — scaled to fill a large viewBox
 const S_TRAIL_PATH = 'M 80 230 C 20 220, 0 185, 28 158 C 56 131, 130 138, 158 110 C 186 82, 192 42, 158 20'
@@ -11,19 +12,11 @@ const S_LOGO_PATH = 'M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 
 const STORAGE_KEY = 'senda-splash-shown'
 
 function hasSeenSplash(): boolean {
-  try {
-    return sessionStorage.getItem(STORAGE_KEY) === '1'
-  } catch {
-    return false
-  }
+  return storage.getSession(STORAGE_KEY) === '1'
 }
 
 function markSplashShown(): void {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, '1')
-  } catch {
-    // Safari private browsing may throw — silently ignore
-  }
+  storage.setSession(STORAGE_KEY, '1')
 }
 
 export function SplashScreen() {

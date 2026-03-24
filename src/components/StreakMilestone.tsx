@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Flame, X } from 'lucide-react'
 import { trackStreakMilestone } from '@/lib/analytics'
+import { storage } from '@/lib/platform/storage'
 
 const MILESTONES = [7, 14, 30, 60, 100] as const
 
@@ -20,21 +21,17 @@ export function StreakMilestone({ streak }: Props) {
     if (!highest) return
 
     const key = `streak_milestone_${highest}_seen`
-    try {
-      if (localStorage.getItem(key)) return
-      setMilestone(highest)
-      setVisible(true)
-      trackStreakMilestone(highest)
+    if (storage.get(key)) return
+    setMilestone(highest)
+    setVisible(true)
+    trackStreakMilestone(highest)
 
-      if (highest >= 30) {
-        import('canvas-confetti')
-          .then(({ default: confetti }) => {
-            confetti({ particleCount: 60, spread: 60, origin: { y: 0.8 } })
-          })
-          .catch(() => {})
-      }
-    } catch {
-      // localStorage unavailable
+    if (highest >= 30) {
+      import('canvas-confetti')
+        .then(({ default: confetti }) => {
+          confetti({ particleCount: 60, spread: 60, origin: { y: 0.8 } })
+        })
+        .catch(() => {})
     }
   }, [streak])
 
@@ -47,11 +44,7 @@ export function StreakMilestone({ streak }: Props) {
   function dismiss() {
     setVisible(false)
     if (milestone) {
-      try {
-        localStorage.setItem(`streak_milestone_${milestone}_seen`, '1')
-      } catch {
-        // ignore
-      }
+      storage.set(`streak_milestone_${milestone}_seen`, '1')
     }
   }
 

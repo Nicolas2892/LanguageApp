@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { getInitials } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
@@ -15,11 +16,11 @@ import type { Profile } from '@/lib/supabase/types'
 export default async function AccountPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   const profileRes = await supabase.from('profiles').select('*').eq('id', user.id).single()
 
-  if (!profileRes.data) redirect('/dashboard')
+  if (!profileRes.data) redirect(ROUTES.dashboard)
   const profile = profileRes.data as Profile
 
   const isOAuthUser = user.app_metadata?.provider === 'google'

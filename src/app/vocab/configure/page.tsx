@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { VocabConfig } from './VocabConfig'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
@@ -9,7 +10,7 @@ import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 export default async function VocabConfigurePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   return (
     <main className="relative overflow-hidden max-w-md mx-auto pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-8 animate-page-in">

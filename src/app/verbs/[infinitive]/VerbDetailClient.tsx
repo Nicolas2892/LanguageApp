@@ -8,6 +8,7 @@ import { AnimatedBar } from '@/components/AnimatedBar'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { TENSE_LABELS, TENSE_DESCRIPTIONS, type VerbTense } from '@/lib/verbs/constants'
+import { storage } from '@/lib/platform/storage'
 
 const COLOUR_ENDINGS_KEY = 'verb-colour-endings'
 
@@ -99,23 +100,15 @@ function ColouredForm({ form, stem }: { form: string; stem: string }) {
 export function VerbDetailClient({ verbId, infinitive, english, verbGroup, favorited, tenseData }: Props) {
   const [colourEndings, setColourEndings] = useState(() => {
     if (typeof window === 'undefined') return true
-    try {
-      const stored = localStorage.getItem(COLOUR_ENDINGS_KEY)
-      return stored !== null ? stored === 'true' : true
-    } catch {
-      return true
-    }
+    const stored = storage.get(COLOUR_ENDINGS_KEY)
+    return stored !== null ? stored === 'true' : true
   })
   const [selectedTense, setSelectedTense] = useState<VerbTense>('present_indicative')
 
   function toggleColourEndings() {
     const next = !colourEndings
     setColourEndings(next)
-    try {
-      localStorage.setItem(COLOUR_ENDINGS_KEY, String(next))
-    } catch {
-      // ignore
-    }
+    storage.set(COLOUR_ENDINGS_KEY, String(next))
   }
 
   const activeData = tenseData.find((d) => d.tense === selectedTense)

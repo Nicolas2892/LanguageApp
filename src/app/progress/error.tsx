@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import * as Sentry from '@sentry/nextjs'
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator'
 import { useOfflineProgress } from '@/lib/offline/hooks'
+import { isOnline } from '@/lib/platform/network'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { AnimatedBar } from '@/components/AnimatedBar'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
@@ -25,7 +26,7 @@ export default function ProgressError({
     Sentry.captureException(error)
   }, [error])
 
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+  const isOffline = !isOnline()
   const { data, loading } = useOfflineProgress()
 
   if (!isOffline) {

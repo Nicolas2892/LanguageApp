@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { OfflineFeedbackPanel } from '@/components/offline/OfflineFeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
@@ -138,7 +139,7 @@ export function OfflineStudySession({ moduleId }: Props) {
           <p className="text-xs mb-6" style={{ color: 'var(--d5-muted)' }}>
             Tus respuestas se calificarán cuando vuelvas a conectarte.
           </p>
-          <Button onClick={() => router.push('/dashboard')} className="rounded-full">
+          <Button onClick={() => router.push(ROUTES.dashboard)} className="rounded-full">
             Volver al inicio
           </Button>
         </div>
@@ -152,7 +153,7 @@ export function OfflineStudySession({ moduleId }: Props) {
       <div className="flex items-center justify-between mb-4">
         <button
           type="button"
-          onClick={() => router.push('/dashboard')}
+          onClick={() => router.push(ROUTES.dashboard)}
           className="flex items-center gap-1 text-sm"
           style={{ color: 'var(--d5-warm)' }}
         >

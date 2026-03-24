@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { getCached } from '@/lib/cache'
 import { SessionConfig } from './SessionConfig'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
@@ -11,7 +12,7 @@ import { userLocalToday } from '@/lib/timezone'
 export default async function ConfigurePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // Fetch timezone for today calculation
   const { data: profileTz } = await supabase

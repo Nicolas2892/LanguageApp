@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { computeUnlockedLevels } from '@/lib/curriculum/prerequisites'
 import { getCached } from '@/lib/cache'
 import { CurriculumClient } from './CurriculumClient'
@@ -13,7 +14,7 @@ type ProgressRow = { concept_id: string; interval_days: number; is_hard: boolean
 export default async function CurriculumPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   const [modules, units, concepts, progressRes, unlockedLevels] = await Promise.all([
     getCached('curriculum:modules', async () => {

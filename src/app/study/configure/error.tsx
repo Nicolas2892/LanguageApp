@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import * as Sentry from '@sentry/nextjs'
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator'
+import { isOnline } from '@/lib/platform/network'
 
 export default function StudyConfigureError({
   error,
@@ -16,7 +17,7 @@ export default function StudyConfigureError({
     Sentry.captureException(error)
   }, [error])
 
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+  const isOffline = !isOnline()
 
   if (!isOffline) {
     return (

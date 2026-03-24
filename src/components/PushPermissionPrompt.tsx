@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Bell, BellOff } from 'lucide-react'
+import { storage } from '@/lib/platform/storage'
 
 const DISMISSED_KEY = 'push_prompt_dismissed'
 
@@ -44,7 +45,7 @@ export function PushPermissionPrompt() {
       !notif ||
       !('PushManager' in window) ||
       notif.permission !== 'default' ||
-      localStorage.getItem(DISMISSED_KEY) === '1'
+      storage.get(DISMISSED_KEY) === '1'
     ) return
     setVisible(true)
   }, [])
@@ -67,7 +68,7 @@ export function PushPermissionPrompt() {
   }
 
   function handleDismiss() {
-    localStorage.setItem(DISMISSED_KEY, '1')
+    storage.set(DISMISSED_KEY, '1')
     setVisible(false)
   }
 

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import * as Sentry from '@sentry/nextjs'
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator'
 import { useOfflineVerbs } from '@/lib/offline/hooks'
+import { isOnline } from '@/lib/platform/network'
 
 export default function VerbsError({
   error,
@@ -17,7 +18,7 @@ export default function VerbsError({
     Sentry.captureException(error)
   }, [error])
 
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+  const isOffline = !isOnline()
   const { data, loading } = useOfflineVerbs()
 
   if (!isOffline) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
+import { storage } from '@/lib/platform/storage'
 
 const STORAGE_KEY = 'tour_dismissed'
 
@@ -10,22 +11,14 @@ export function OnboardingTour() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    try {
-      if (!localStorage.getItem(STORAGE_KEY)) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setVisible(true)
-      }
-    } catch {
-      // localStorage unavailable — skip tour
+    if (!storage.get(STORAGE_KEY)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setVisible(true)
     }
   }, [])
 
   function dismiss() {
-    try {
-      localStorage.setItem(STORAGE_KEY, '1')
-    } catch {
-      // ignore
-    }
+    storage.set(STORAGE_KEY, '1')
     setVisible(false)
   }
 

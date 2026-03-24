@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
 import { Button } from '@/components/ui/button'
 import { CheckCircle2 } from 'lucide-react'
 
@@ -19,7 +20,7 @@ export function MarkReviewedButton({ reportId }: Props) {
       await fetch(`/api/offline/reports/${reportId}/review`, {
         method: 'POST',
       })
-      router.push('/dashboard')
+      router.push(ROUTES.dashboard)
     } catch {
       setMarking(false)
     }

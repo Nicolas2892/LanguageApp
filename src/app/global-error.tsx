@@ -2,6 +2,7 @@
 
 import * as Sentry from '@sentry/nextjs'
 import { useEffect } from 'react'
+import { isOnline } from '@/lib/platform/network'
 
 export default function GlobalError({
   error,
@@ -14,7 +15,7 @@ export default function GlobalError({
     Sentry.captureException(error)
   }, [error])
 
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+  const isOffline = !isOnline()
 
   return (
     <html lang="en">

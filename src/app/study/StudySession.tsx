@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useTransition, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
+import { fireAndForget } from '@/lib/fireAndForget'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
@@ -216,15 +218,18 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       const elapsed = sprintConfig?.limitType === 'time' ? totalSeconds - secondsLeft : undefined
       setState({ phase: 'done', correct, total: index + 1, elapsedSeconds: elapsed })
       trackSessionCompleted({ correct, total: index + 1, practiceMode: !!practiceMode, elapsedSeconds: elapsed })
-      fetch('/api/sessions/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          started_at: startedAt.current,
-          concepts_reviewed: index + 1,
-          accuracy: Math.round((correct / (index + 1)) * 100),
+      fireAndForget(
+        fetch('/api/sessions/complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            started_at: startedAt.current,
+            concepts_reviewed: index + 1,
+            accuracy: Math.round((correct / (index + 1)) * 100),
+          }),
         }),
-      }).catch(() => {})
+        'session-complete',
+      )
     } else {
       // Exit animation before advancing
       setExiting(true)
@@ -263,15 +268,18 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     const correct = scores.filter((s) => s >= 2).length
     setState({ phase: 'done', correct, total: scores.length, elapsedSeconds: totalSeconds })
     trackSessionCompleted({ correct, total: scores.length, practiceMode: !!practiceMode, elapsedSeconds: totalSeconds })
-    fetch('/api/sessions/complete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        started_at: startedAt.current,
-        concepts_reviewed: scores.length,
-        accuracy: scores.length > 0 ? Math.round((correct / scores.length) * 100) : 0,
+    fireAndForget(
+      fetch('/api/sessions/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          started_at: startedAt.current,
+          concepts_reviewed: scores.length,
+          accuracy: scores.length > 0 ? Math.round((correct / scores.length) * 100) : 0,
+        }),
       }),
-    }).catch(() => {})
+      'session-complete-sprint',
+    )
   }, [secondsLeft, sprintConfig, state.phase, scores, totalSeconds])
 
   // Progress bar values
@@ -299,7 +307,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       })
 
       if (res.status === 401) {
-        router.push('/auth/login?returnUrl=/study')
+        router.push(`${ROUTES.login}?returnUrl=${ROUTES.study}`)
         return
       }
 
@@ -506,7 +514,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
     return (
       <div className="text-center py-12 space-y-4">
         <p className="text-muted-foreground">No hay ejercicios disponibles.</p>
-        <Button onClick={() => router.push(returnHref ?? '/dashboard')} variant="outline">
+        <Button onClick={() => router.push(returnHref ?? ROUTES.dashboard)} variant="outline">
           ← Volver
         </Button>
       </div>
@@ -603,7 +611,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             </button>
           )}
           <button
-            onClick={() => router.push(returnHref ?? '/dashboard')}
+            onClick={() => router.push(returnHref ?? ROUTES.dashboard)}
             className="inline-flex items-center justify-center rounded-xl bg-primary text-primary-foreground px-6 py-2.5 text-sm font-semibold hover:bg-primary/90 active:scale-95 transition-transform"
           >
             {backLabel}
@@ -659,7 +667,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             <Button variant="outline" onClick={() => setShowExitDialog(false)}>
               Seguir
             </Button>
-            <Button variant="destructive" onClick={() => router.push(returnHref ?? '/dashboard')}>
+            <Button variant="destructive" onClick={() => router.push(returnHref ?? ROUTES.dashboard)}>
               Salir
             </Button>
           </DialogFooter>

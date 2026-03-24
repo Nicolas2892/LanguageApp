@@ -1,4 +1,5 @@
 import posthog from 'posthog-js'
+import { storage } from '@/lib/platform/storage'
 
 // ── Initialisation (called once from PostHogProvider) ────────────────────────
 
@@ -221,11 +222,7 @@ export function trackOfflineSyncCompleted(props: {
 export function trackFeatureFirstUse(feature: string) {
   if (typeof window === 'undefined') return
   const key = `posthog_first_use_${feature}`
-  try {
-    if (localStorage.getItem(key)) return
-    posthog.capture('feature_first_use', { feature })
-    localStorage.setItem(key, '1')
-  } catch {
-    // localStorage unavailable
-  }
+  if (storage.get(key)) return
+  posthog.capture('feature_first_use', { feature })
+  storage.set(key, '1')
 }

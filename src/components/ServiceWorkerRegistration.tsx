@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { storage } from '@/lib/platform/storage'
 
 export function ServiceWorkerRegistration() {
   useEffect(() => {
@@ -10,8 +11,8 @@ export function ServiceWorkerRegistration() {
     // Loop guard — at most 1 reload per tab session
     const RELOAD_KEY = 'sw-reload'
     const handleControllerChange = () => {
-      if (sessionStorage.getItem(RELOAD_KEY)) return
-      sessionStorage.setItem(RELOAD_KEY, '1')
+      if (storage.getSession(RELOAD_KEY)) return
+      storage.setSession(RELOAD_KEY, '1')
       window.location.reload()
     }
 
@@ -32,8 +33,8 @@ export function ServiceWorkerRegistration() {
       })
 
     // Clear reload guard on fresh mount (new session)
-    if (sessionStorage.getItem(RELOAD_KEY)) {
-      sessionStorage.removeItem(RELOAD_KEY)
+    if (storage.getSession(RELOAD_KEY)) {
+      storage.removeSession(RELOAD_KEY)
     }
 
     return () => {

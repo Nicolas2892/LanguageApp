@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { VerbSession } from './VerbSession'
 import type { SessionItem } from './VerbSession'
 import type { VerbSentence, Verb } from '@/lib/supabase/types'
@@ -30,14 +32,14 @@ export default async function VerbSessionPage({ searchParams }: Props) {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // Parse config from query params
   const selectedTenses = (params.tenses ?? 'present_indicative')
     .split(',')
     .filter((t) => (TENSES as readonly string[]).includes(t))
 
-  if (selectedTenses.length === 0) redirect('/verbs/configure')
+  if (selectedTenses.length === 0) redirect(ROUTES.verbsConfigure)
 
   const verbSet = params.verbSet ?? 'top25'
   const sessionLength = Math.min(30, Math.max(1, parseInt(params.length ?? '10', 10) || 10))
@@ -52,7 +54,7 @@ export default async function VerbSessionPage({ searchParams }: Props) {
       .select('verb_id')
       .eq('user_id', user.id)
     verbIds = (favRows ?? []).map((r) => (r as { verb_id: string }).verb_id)
-    if (verbIds.length === 0) redirect('/verbs/configure')
+    if (verbIds.length === 0) redirect(ROUTES.verbsConfigure)
   } else if (verbSet === 'single' && params.verb) {
     const { data: verbRow } = await supabase
       .from('verbs')
@@ -60,7 +62,7 @@ export default async function VerbSessionPage({ searchParams }: Props) {
       .eq('infinitive', params.verb)
       .single()
     if (verbRow) verbIds = [(verbRow as Pick<Verb, 'id'>).id]
-    if (verbIds.length === 0) redirect('/verbs/configure')
+    if (verbIds.length === 0) redirect(ROUTES.verbsConfigure)
   } else if (verbSet === 'irregular') {
     const { data: verbRows } = await supabase
       .from('verbs')
@@ -68,7 +70,7 @@ export default async function VerbSessionPage({ searchParams }: Props) {
       .eq('verb_group', 'irregular')
       .order('frequency_rank')
     verbIds = (verbRows as Pick<Verb, 'id'>[] ?? []).map((v) => v.id)
-    if (verbIds.length === 0) redirect('/verbs/configure')
+    if (verbIds.length === 0) redirect(ROUTES.verbsConfigure)
   } else {
     // top25, top50, top100, or top250
     const limit = verbSet === 'top250' ? 250 : verbSet === 'top100' ? 100 : verbSet === 'top50' ? 50 : 25
@@ -169,7 +171,7 @@ export default async function VerbSessionPage({ searchParams }: Props) {
     console.warn('Verb session: 0 items after building session — redirecting to configure', {
       conjugationTenses, hasInfinitive, sentenceCount: sentences.length, verbCount: verbs.length,
     })
-    redirect('/verbs/configure')
+    redirect(ROUTES.verbsConfigure)
   }
 
   // Shuffle and take up to sessionLength
@@ -186,7 +188,9 @@ export default async function VerbSessionPage({ searchParams }: Props) {
 
   return (
     <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
-      <VerbSession items={items} showHint={showHint} sessionUrl={sessionUrl} />
+      <ErrorBoundary>
+        <VerbSession items={items} showHint={showHint} sessionUrl={sessionUrl} />
+      </ErrorBoundary>
     </main>
   )
 }

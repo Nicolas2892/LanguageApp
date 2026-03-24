@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { Share2, PlusSquare, X } from 'lucide-react'
+import { ROUTES } from '@/lib/routes'
+import { storage } from '@/lib/platform/storage'
+import { isIOSDevice, isSafariBrowser, isInstalledPWA } from '@/lib/platform/pwa'
 
-const HIDDEN_ROUTES = ['/auth', '/onboarding']
+const HIDDEN_ROUTES = ['/auth', ROUTES.onboarding]
 
 export function IOSInstallPrompt() {
   const pathname = usePathname()
@@ -13,25 +16,18 @@ export function IOSInstallPrompt() {
   useEffect(() => {
     if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return
 
-    const isIOS =
-      /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-      (/macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1)
+    const isIOS = isIOSDevice()
+    const isSafari = isSafariBrowser()
+    const isStandalone = isInstalledPWA()
 
-    const isSafari =
-      /safari/i.test(navigator.userAgent) &&
-      !/crios|fxios|opios|edgios/i.test(navigator.userAgent)
-
-    const isStandalone =
-      (navigator as Navigator & { standalone?: boolean }).standalone === true
-
-    const dismissed = localStorage.getItem('pwa_prompt_dismissed') === 'true'
+    const dismissed = storage.get('pwa_prompt_dismissed') === 'true'
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isIOS && isSafari && !isStandalone && !dismissed) setVisible(true)
   }, [pathname])
 
   function handleDismiss() {
-    localStorage.setItem('pwa_prompt_dismissed', 'true')
+    storage.set('pwa_prompt_dismissed', 'true')
     setVisible(false)
   }
 

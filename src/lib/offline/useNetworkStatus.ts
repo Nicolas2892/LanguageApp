@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { isOnline as checkOnline, onStatusChange } from '@/lib/platform/network'
 
 /**
  * Detects online/offline status.
@@ -8,9 +9,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
  * 1s debounce to avoid flicker on unstable connections.
  */
 export function useNetworkStatus() {
-  const [isOnline, setIsOnline] = useState(() =>
-    typeof navigator !== 'undefined' ? navigator.onLine : true,
-  )
+  const [isOnline, setIsOnline] = useState(() => checkOnline())
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const debouncedSet = useCallback((value: boolean) => {
@@ -19,19 +18,18 @@ export function useNetworkStatus() {
   }, [])
 
   useEffect(() => {
-    const handleOnline = () => debouncedSet(true)
-    const handleOffline = () => {
-      // Go offline immediately (no debounce) for responsiveness
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-      setIsOnline(false)
-    }
-
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    const cleanup = onStatusChange((online) => {
+      if (online) {
+        debouncedSet(true)
+      } else {
+        // Go offline immediately (no debounce) for responsiveness
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        setIsOnline(false)
+      }
+    })
 
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+      cleanup()
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
   }, [debouncedSet])

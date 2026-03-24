@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { ReportCard } from '@/components/offline/ReportCard'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import type { OfflineReport } from '@/lib/supabase/types'
@@ -7,7 +8,7 @@ import type { OfflineReport } from '@/lib/supabase/types'
 export default async function OfflineReportsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   const { data: rawReports } = await supabase
     .from('offline_reports')

@@ -505,6 +505,12 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/lib/mastery/badge.ts` — `getMasteryState(intervalDays, productionMastered?)`, `getMasteryProgress(intervalDays, correctNonGapFill, uniqueTypes)`, `MASTERY_DOT`, `MASTERY_BADGE`; constants `PRODUCTION_CORRECT_REQUIRED=3`, `PRODUCTION_TYPES_REQUIRED=2`
 - `src/lib/mastery/computeLevel.ts` — `computeLevel(masteredByLevel, totalByLevel)` + `PRODUCTION_TYPES` array
 - `src/lib/api-utils.ts` — `updateStreakIfNeeded` + `updateComputedLevel` shared by submit + grade
+- `src/lib/routes.ts` — `ROUTES` constant object with all static route paths; `RoutePath` type. Used across ~60 files for navigation, redirects, HIDDEN_ROUTES arrays. Do NOT use for dynamic routes with template literals or API fetch paths.
+- `src/lib/platform/index.ts` — `getPlatform(): 'web' | 'pwa' | 'native'`; SSR-safe. Future Capacitor swap point.
+- `src/lib/platform/storage.ts` — `storage.get/set/remove` (localStorage) + `storage.getSession/setSession/removeSession` (sessionStorage); try/catch wrappers for consistent error handling. Used by ~15 components.
+- `src/lib/platform/network.ts` — `isOnline(): boolean` (SSR-safe, returns true on server) + `onStatusChange(cb): () => void`; replaces direct `navigator.onLine` checks across ~13 files.
+- `src/lib/platform/pwa.ts` — `isIOSDevice()`, `isInstalledPWA()`, `isSafariBrowser()`; SSR-safe. Used by IOSInstallPrompt, IOSInstallCard, NotificationSettings.
+- `src/lib/fireAndForget.ts` — `fireAndForget(promise, label)` logs rejected promises to Sentry with `fire_and_forget` tag + dev console.warn. Used by StudySession, VerbSession, VocabSession.
 - `src/lib/cache.ts` — `getCached(key, fetcher, ttlMs?)` in-memory cache with 5-min TTL; used by `/curriculum`, `/dashboard`, `/study/configure` for static curriculum queries (modules, units, concepts); `invalidateCache(prefix)` + `clearCache()` for tests
 - `src/components/ServiceWorkerRegistration.tsx` — registers `/sw.js`; listens for `controllerchange` → auto-reloads page (loop-guarded via sessionStorage); registers Background Sync tag `sync-offline-attempts` (Chrome/Edge)
 - `src/lib/offline/db.ts` — `requestBackgroundSync()` helper; called fire-and-forget from `queueAttempt()` and `queueVerbAttempt()` to trigger sync even after app is closed
@@ -589,7 +595,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2353 tests across 130 files — all passing.**
+**Test suite: 2406 tests across 140 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -734,6 +740,7 @@ Items are ordered by priority within each group. Full details of completed work 
 
 **Feat-R: Capacitor native shell** *(P3 — App Store distribution + offline)*
 
+- **Pre-Capacitor refactors DONE** (2026-03-24): route constants (`src/lib/routes.ts`), platform abstraction layer (`src/lib/platform/`), `fireAndForget` utility, error boundaries for verb/vocab sessions. See `docs/pre-capacitor-architecture.md` for full spec.
 - Wrap PWA in Capacitor (Mode A: remote URL pointing at Vercel deployment) for App Store / Play Store listing.
 - Phase 1: Basic shell + signing + store submission.
 - Phase 2: Swap web push → `@capacitor/push-notifications` (APNs/FCM), add `@capacitor/keyboard` (fixes iOS scroll issues natively), `@capacitor/haptics`, biometric auth.

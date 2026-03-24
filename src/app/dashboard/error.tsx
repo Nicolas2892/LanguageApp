@@ -5,6 +5,7 @@ import Link from 'next/link'
 import * as Sentry from '@sentry/nextjs'
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator'
 import { useOfflineDashboard } from '@/lib/offline/hooks'
+import { isOnline } from '@/lib/platform/network'
 
 export default function DashboardError({
   error,
@@ -17,7 +18,7 @@ export default function DashboardError({
     Sentry.captureException(error)
   }, [error])
 
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+  const isOffline = !isOnline()
   const { data, loading } = useOfflineDashboard()
 
   // Online error → standard error boundary

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -51,7 +52,7 @@ export default function LoginPage() {
       return
     }
     trackLogin()
-    router.push('/dashboard')
+    router.push(ROUTES.dashboard)
     router.refresh()
   }
 

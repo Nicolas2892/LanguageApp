@@ -18,6 +18,7 @@ import { HardFlagButton } from '@/components/HardFlagButton'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { DownloadButton } from '@/components/offline/DownloadButton'
+import { storage } from '@/lib/platform/storage'
 
 type ModuleRow  = { id: string; title: string; order_index: number }
 type UnitRow    = { id: string; module_id: string; title: string; order_index: number }
@@ -107,24 +108,16 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
       if (state !== 'mastered') continue
 
       const key = `module_completed_${mod.id}_seen`
-      try {
-        if (localStorage.getItem(key)) continue
-        setCelebratingModule({ id: mod.id, title: mod.title })
-        break
-      } catch {
-        // ignore
-      }
+      if (storage.get(key)) continue
+      setCelebratingModule({ id: mod.id, title: mod.title })
+      break
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function dismissModuleCelebration() {
     if (celebratingModule) {
-      try {
-        localStorage.setItem(`module_completed_${celebratingModule.id}_seen`, '1')
-      } catch {
-        // ignore
-      }
+      storage.set(`module_completed_${celebratingModule.id}_seen`, '1')
     }
     setCelebratingModule(null)
   }

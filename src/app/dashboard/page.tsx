@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { getCached } from '@/lib/cache'
 import { OnboardingTour } from '@/components/OnboardingTour'
 import { DashboardDeferredSection, DashboardDeferredSkeleton } from '@/components/DashboardDeferredSection'
@@ -19,7 +20,7 @@ import { userLocalToday } from '@/lib/timezone'
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // Item 10: Parallelise profile fetch with timezone-independent queries
   const [{ data: profileRaw }, totalConcepts, studiedRes] = await Promise.all([

@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/nextjs'
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator'
 import { useOfflineCurriculum } from '@/lib/offline/hooks'
 import { getMasteryState, MASTERY_DOT } from '@/lib/mastery/badge'
+import { isOnline } from '@/lib/platform/network'
 import type { MasteryState } from '@/lib/mastery/badge'
 
 export default function CurriculumError({
@@ -19,7 +20,7 @@ export default function CurriculumError({
     Sentry.captureException(error)
   }, [error])
 
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+  const isOffline = !isOnline()
   const { data, loading } = useOfflineCurriculum()
 
   if (!isOffline) {

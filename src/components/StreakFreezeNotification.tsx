@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, startTransition } from 'react'
 import { X } from 'lucide-react'
+import { storage } from '@/lib/platform/storage'
 
 interface Props {
   freezeUsedDate: string | null
@@ -20,11 +21,7 @@ export function StreakFreezeNotification({ freezeUsedDate, streak }: Props) {
   const dismiss = useCallback(() => {
     setVisible(false)
     if (freezeUsedDate) {
-      try {
-        localStorage.setItem(`streak_freeze_used_${freezeUsedDate}`, '1')
-      } catch {
-        // ignore
-      }
+      storage.set(`streak_freeze_used_${freezeUsedDate}`, '1')
     }
   }, [freezeUsedDate])
 
@@ -33,12 +30,8 @@ export function StreakFreezeNotification({ freezeUsedDate, streak }: Props) {
     if (freezeUsedDate !== getYesterday()) return
 
     const key = `streak_freeze_used_${freezeUsedDate}`
-    try {
-      if (localStorage.getItem(key)) return
-      startTransition(() => setVisible(true))
-    } catch {
-      // localStorage unavailable
-    }
+    if (storage.get(key)) return
+    startTransition(() => setVisible(true))
   }, [freezeUsedDate, streak])
 
   useEffect(() => {

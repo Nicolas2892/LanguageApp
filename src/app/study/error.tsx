@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import * as Sentry from '@sentry/nextjs'
 import { WifiOff } from 'lucide-react'
+import { isOnline } from '@/lib/platform/network'
 
 export default function StudyError({
   error,
@@ -16,7 +17,7 @@ export default function StudyError({
     Sentry.captureException(error)
   }, [error])
 
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+  const isOffline = !isOnline()
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 text-center space-y-4">

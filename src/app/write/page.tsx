@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { WriteSession } from './WriteSession'
@@ -17,7 +18,7 @@ export default async function WritePage({ searchParams }: Props) {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // Resolve conceptIds: ?concepts=id1,id2 or legacy ?concept=id
   const rawIds = conceptsParam ?? (legacyConceptParam ? legacyConceptParam : null)
@@ -32,7 +33,7 @@ export default async function WritePage({ searchParams }: Props) {
       .select('id, title')
       .in('id', conceptIds)
 
-    if (!conceptRows || conceptRows.length === 0) redirect('/write')
+    if (!conceptRows || conceptRows.length === 0) redirect(ROUTES.write)
 
     const typedConcepts = conceptRows as Pick<Concept, 'id' | 'title'>[]
     const conceptInfos = conceptIds

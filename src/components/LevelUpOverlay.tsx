@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { LEVEL_CHIP } from '@/lib/constants'
+import { storage } from '@/lib/platform/storage'
 
 const LEVEL_ORDER = ['B1', 'B2', 'C1']
 const LS_KEY = 'last_known_level'
@@ -24,25 +25,21 @@ export function LevelUpOverlay({ currentLevel }: Props) {
 
   useEffect(() => {
     if (!currentLevel) return
-    try {
-      const stored = localStorage.getItem(LS_KEY)
-      const currentIdx = LEVEL_ORDER.indexOf(currentLevel)
-      const storedIdx = stored ? LEVEL_ORDER.indexOf(stored) : -1
+    const stored = storage.get(LS_KEY)
+    const currentIdx = LEVEL_ORDER.indexOf(currentLevel)
+    const storedIdx = stored ? LEVEL_ORDER.indexOf(stored) : -1
 
-      // Save immediately to prevent re-trigger
-      localStorage.setItem(LS_KEY, currentLevel)
+    // Save immediately to prevent re-trigger
+    storage.set(LS_KEY, currentLevel)
 
-      if (stored && currentIdx > storedIdx) {
-        setLevelLabel(currentLevel)
-        setOpen(true)
-        import('canvas-confetti')
-          .then(({ default: confetti }) => {
-            confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } })
-          })
-          .catch(() => {})
-      }
-    } catch {
-      // localStorage unavailable
+    if (stored && currentIdx > storedIdx) {
+      setLevelLabel(currentLevel)
+      setOpen(true)
+      import('canvas-confetti')
+        .then(({ default: confetti }) => {
+          confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } })
+        })
+        .catch(() => {})
     }
   }, [currentLevel])
 

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { AdminTabNav } from '@/components/admin/AdminTabNav'
 import type { Profile } from '@/lib/supabase/types'
 
@@ -8,14 +9,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
-    redirect('/auth/login')
+    redirect(ROUTES.login)
     return null  // unreachable in production (redirect throws); guards tests
   }
 
   const { data } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
   const profile = data as Pick<Profile, 'is_admin'> | null
   if (!profile?.is_admin) {
-    redirect('/dashboard')
+    redirect(ROUTES.dashboard)
     return null  // unreachable in production
   }
 

@@ -2,15 +2,16 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Pencil, Route, Book, BarChart2 } from 'lucide-react'
+import { ROUTES } from '@/lib/routes'
 
 const TABS = [
-  { href: '/dashboard',       label: 'Inicio',     Icon: Home      },
-  { href: '/study/configure', label: 'Estudio',    Icon: Pencil    },
-  { href: '/curriculum',      label: 'Currículo',  Icon: Route     },
-  { href: '/verbs',           label: 'Verbos',     Icon: Book      },
-  { href: '/progress',        label: 'Progreso',   Icon: BarChart2 },
+  { href: ROUTES.dashboard,      label: 'Inicio',     Icon: Home      },
+  { href: ROUTES.studyConfigure, label: 'Estudio',    Icon: Pencil    },
+  { href: ROUTES.curriculum,     label: 'Currículo',  Icon: Route     },
+  { href: ROUTES.verbs,          label: 'Verbos',     Icon: Book      },
+  { href: ROUTES.progress,       label: 'Progreso',   Icon: BarChart2 },
 ]
-const HIDDEN_ROUTES = ['/auth', '/onboarding', '/write', '/brand-preview', '/verbs/session', '/vocab/session', '/admin']
+const HIDDEN_ROUTES = ['/auth', ROUTES.onboarding, ROUTES.write, ROUTES.brandPreview, ROUTES.verbsSession, ROUTES.vocabSession, ROUTES.admin]
 
 export function BottomNav() {
   const pathname = usePathname()
@@ -32,8 +33,8 @@ export function BottomNav() {
         {TABS.map(({ href, label, Icon }) => {
           const active =
             pathname === href ||
-            (href === '/study/configure' && pathname.startsWith('/study')) ||
-            (href !== '/dashboard' && href !== '/study/configure' && pathname.startsWith(href))
+            (href === ROUTES.studyConfigure && pathname.startsWith(ROUTES.study)) ||
+            (href !== ROUTES.dashboard && href !== ROUTES.studyConfigure && pathname.startsWith(href))
           return (
             <Link
               key={href}

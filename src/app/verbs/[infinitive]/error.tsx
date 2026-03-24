@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/nextjs'
 import { OfflineIndicator } from '@/components/offline/OfflineIndicator'
 import { useOfflineVerbDetail } from '@/lib/offline/hooks'
 import { TENSES, TENSE_LABELS } from '@/lib/verbs/constants'
+import { isOnline } from '@/lib/platform/network'
 
 const PRONOUNS = ['yo', 'tú', 'él/ella', 'nosotros', 'vosotros', 'ellos'] as const
 const PRONOUN_KEYS = ['yo', 'tu', 'el', 'nosotros', 'vosotros', 'ellos'] as const
@@ -21,7 +22,7 @@ export default function VerbDetailError({
     Sentry.captureException(error)
   }, [error])
 
-  const isOffline = typeof navigator !== 'undefined' && !navigator.onLine
+  const isOffline = !isOnline()
 
   // Extract infinitive from pathname
   const infinitive = typeof window !== 'undefined'

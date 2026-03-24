@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { VocabSession } from './VocabSession'
 import type { VocabSessionItem } from '@/lib/vocab/types'
 import type { VocabItem, VocabSentence } from '@/lib/supabase/types'
@@ -30,14 +32,14 @@ export default async function VocabSessionPage({ searchParams }: Props) {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   // Parse config from query params
   const selectedCategories = (params.categories ?? 'discourse_markers')
     .split(',')
     .filter((c) => (VOCAB_CATEGORIES as readonly string[]).includes(c)) as VocabCategory[]
 
-  if (selectedCategories.length === 0) redirect('/vocab/configure')
+  if (selectedCategories.length === 0) redirect(ROUTES.vocabConfigure)
 
   const selectedLevels = params.levels
     ? params.levels.split(',').filter((l) => ['B1', 'B2', 'C1'].includes(l))
@@ -63,7 +65,7 @@ export default async function VocabSessionPage({ searchParams }: Props) {
   }
 
   const items = (itemRows as Pick<VocabItem, 'id' | 'expression' | 'english' | 'category' | 'level'>[] ?? [])
-  if (items.length === 0) redirect('/vocab/configure')
+  if (items.length === 0) redirect(ROUTES.vocabConfigure)
 
   const itemIds = items.map((i) => i.id)
 
@@ -98,7 +100,7 @@ export default async function VocabSessionPage({ searchParams }: Props) {
     }
   })
 
-  if (allSessionItems.length === 0) redirect('/vocab/configure')
+  if (allSessionItems.length === 0) redirect(ROUTES.vocabConfigure)
 
   // Shuffle and take up to sessionLength
   const sessionItems = shuffle(allSessionItems).slice(0, sessionLength)
@@ -113,7 +115,9 @@ export default async function VocabSessionPage({ searchParams }: Props) {
 
   return (
     <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
-      <VocabSession items={sessionItems} showHint={showHint} sessionUrl={sessionUrl} />
+      <ErrorBoundary>
+        <VocabSession items={sessionItems} showHint={showHint} sessionUrl={sessionUrl} />
+      </ErrorBoundary>
     </main>
   )
 }

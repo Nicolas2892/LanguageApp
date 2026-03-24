@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { ROUTES } from '@/lib/routes'
 import { VerbConfig } from './VerbConfig'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
@@ -15,7 +16,7 @@ export default async function VerbConfigurePage({ searchParams }: Props) {
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+  if (!user) redirect(ROUTES.login)
 
   const { count } = await supabase
     .from('user_verb_favorites')

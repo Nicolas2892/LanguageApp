@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { storage } from '@/lib/platform/storage'
 
 const STORAGE_KEY = 'audio_enabled'
 
@@ -8,13 +9,9 @@ export function useSpeech() {
   const [speaking, setSpeaking] = useState(false)
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setEnabled(stored === 'false' ? false : true)
-    } catch {
-      setEnabled(true)
-    }
+    const stored = storage.get(STORAGE_KEY)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEnabled(stored === 'false' ? false : true)
     return () => {
       // Cancel any in-progress speech on unmount
       if (typeof window !== 'undefined' && window.speechSynthesis) {
@@ -40,11 +37,7 @@ export function useSpeech() {
     const currentlyEnabled = enabled !== false
     const next = !currentlyEnabled
     setEnabled(next)
-    try {
-      localStorage.setItem(STORAGE_KEY, String(next))
-    } catch {
-      // localStorage unavailable (private browsing, etc.)
-    }
+    storage.set(STORAGE_KEY, String(next))
     if (!next && typeof window !== 'undefined') {
       window.speechSynthesis?.cancel()
       setSpeaking(false)

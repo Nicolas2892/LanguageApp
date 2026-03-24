@@ -2306,3 +2306,43 @@ Full analytics coverage across all user journeys + enriched user identification 
 ### Not included
 - PostHog dashboards (DAU/WAU, funnels, feature adoption) — must be created manually in PostHog UI
 - Server-side event tracking — all events are client-side via posthog-js
+
+---
+
+## Pre-Capacitor Architecture Refactors (2026-03-24)
+
+Four structural refactors to prepare the codebase for Capacitor native shell (Feat-R). None change runtime behaviour — they wrap existing code behind cleaner interfaces so the Capacitor transition is a swap-not-scatter operation.
+
+### Refactor 1: Route Constants
+
+- **New file:** `src/lib/routes.ts` — `ROUTES` constant with 24 static route paths + `RoutePath` type
+- **Migrated:** ~60 files — HIDDEN_ROUTES arrays (4 nav components), middleware publicPaths, `router.push()` calls (~10 files), `redirect()` calls (~20 server pages), admin nav
+- **Not migrated:** dynamic routes with template literals, API fetch paths, query parameters, `sw.js`
+- **Tests:** 3 new tests in `src/lib/__tests__/routes.test.ts`
+
+### Refactor 2: Platform Abstraction Layer
+
+- **New files:** `src/lib/platform/index.ts` (getPlatform), `storage.ts` (localStorage/sessionStorage wrapper), `network.ts` (isOnline + onStatusChange), `pwa.ts` (isIOSDevice, isInstalledPWA, isSafariBrowser)
+- **Migrated:** 15 files for storage (18 call sites), 13 files for network (15 call sites), 3 files for PWA detection (4 call sites)
+- **Not created:** push.ts (rewritten for Capacitor), audio.ts (hooks are the abstraction), haptics.ts (hook is the abstraction)
+- **Tests:** 30 new tests across 4 test files in `src/lib/platform/__tests__/`
+
+### Refactor 3: Fire-and-Forget Utility
+
+- **New file:** `src/lib/fireAndForget.ts` — logs rejected promises to Sentry with `fire_and_forget` tag + dev console.warn
+- **Migrated:** 3 HIGH-risk files — StudySession (session-complete), VerbSession (verb-grade), VocabSession (vocab-grade)
+- **Not changed:** canvas-confetti (cosmetic), AccountForm theme (intentionally silent), requestBackgroundSync (expected Safari failures)
+- **Tests:** 4 new tests in `src/lib/__tests__/fireAndForget.test.ts`
+
+### Refactor 4: Error Boundary Coverage
+
+- **New files:** 4 error.tsx files — `verbs/session/error.tsx`, `vocab/session/error.tsx`, `verbs/configure/error.tsx`, `vocab/configure/error.tsx`
+- **Page.tsx edits:** Added `<ErrorBoundary>` wrapper around VerbSession and VocabSession in their page.tsx files
+- **Not added (Phase 2):** admin routes, auth routes, offline report routes, brand-preview
+- **Tests:** 16 new tests across 4 test files
+
+### Summary
+
+- **Total files changed:** ~65 modified + 15 new
+- **Total new tests:** 53 (2406 total, up from 2353)
+- **Spec document:** `docs/pre-capacitor-architecture.md`

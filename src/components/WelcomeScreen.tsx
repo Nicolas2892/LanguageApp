@@ -3,15 +3,12 @@
 import { useState, useSyncExternalStore, type ReactNode } from 'react'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
+import { storage } from '@/lib/platform/storage'
 
 const LS_KEY = 'welcome_seen'
 
 function getSnapshot(): boolean {
-  try {
-    return localStorage.getItem(LS_KEY) === '1'
-  } catch {
-    return true
-  }
+  return storage.get(LS_KEY) === '1'
 }
 function getServerSnapshot(): boolean { return true }
 function subscribe(cb: () => void) {
@@ -32,11 +29,7 @@ export function WelcomeScreen({ children }: Props) {
 
   function handleStart() {
     setFadingOut(true)
-    try {
-      localStorage.setItem(LS_KEY, '1')
-    } catch {
-      // ignore
-    }
+    storage.set(LS_KEY, '1')
     setTimeout(() => setDismissed(true), 300)
   }
 

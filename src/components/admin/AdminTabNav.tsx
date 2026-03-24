@@ -1,12 +1,13 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ROUTES } from '@/lib/routes'
 
 const TABS = [
-  { href: '/admin',            label: 'Overview'   },
-  { href: '/admin/curriculum', label: 'Curriculum' },
-  { href: '/admin/exercises',  label: 'Exercises'  },
-  { href: '/admin/pool',       label: 'Pool'       },
+  { href: ROUTES.admin,           label: 'Overview'   },
+  { href: ROUTES.adminCurriculum, label: 'Curriculum' },
+  { href: ROUTES.adminExercises,  label: 'Exercises'  },
+  { href: ROUTES.adminPool,       label: 'Pool'       },
 ]
 
 export function AdminTabNav() {
@@ -15,7 +16,7 @@ export function AdminTabNav() {
   return (
     <div className="flex items-center gap-1">
       {TABS.map(({ href, label }) => {
-        const active = href === '/admin' ? pathname === '/admin' : pathname.startsWith(href)
+        const active = href === ROUTES.admin ? pathname === ROUTES.admin : pathname.startsWith(href)
         return (
           <Link
             key={href}
