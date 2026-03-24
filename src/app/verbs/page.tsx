@@ -4,12 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { ROUTES } from '@/lib/routes'
 import { VerbDirectory } from './VerbDirectory'
 import { VerbsVocabToggle } from './VerbsVocabToggle'
-import { VocabCategoryView } from './VocabCategoryView'
-import type { VocabCategoryData } from './VocabCategoryView'
+import { VocabDirectory } from './VocabDirectory'
+import type { VocabListItem } from './VocabDirectory'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import type { Verb, VerbProgress, UserVerbFavorite, VocabItem, VocabProgress } from '@/lib/supabase/types'
-import { VOCAB_CATEGORIES } from '@/lib/vocab/constants'
-import type { VocabCategory } from '@/lib/vocab/constants'
 
 export default async function VerbsPage() {
   const supabase = await createClient()
@@ -27,7 +25,7 @@ export default async function VerbsPage() {
     supabase.from('verbs').select('*').order('infinitive'),
     supabase.from('user_verb_favorites').select('verb_id').eq('user_id', user.id),
     supabase.from('verb_progress').select('verb_id, tense, attempt_count, correct_count').eq('user_id', user.id),
-    supabase.from('vocab_items').select('id, category').order('frequency_rank'),
+    supabase.from('vocab_items').select('id, expression, english, category').order('expression'),
     supabase.from('vocab_progress').select('vocab_id, attempt_count, correct_count').eq('user_id', user.id),
   ])
 
@@ -68,35 +66,32 @@ export default async function VerbsPage() {
   }
 
   // ── Vocab data ─────────────────────────────────────────────────────
-  const vocabItems = (vocabItemRows as Pick<VocabItem, 'id' | 'category'>[] ?? [])
+  const vocabItems = (vocabItemRows as Pick<VocabItem, 'id' | 'expression' | 'english' | 'category'>[] ?? [])
   const vocabProgress = (vocabProgressRows as Pick<VocabProgress, 'vocab_id' | 'attempt_count' | 'correct_count'>[] ?? [])
 
-  // Build per-item progress map
   const vocabProgressMap = new Map(vocabProgress.map((p) => [p.vocab_id, p]))
 
-  // Build per-category stats
-  const categoryCounts = new Map<VocabCategory, number>()
-  const categoryAttempts = new Map<VocabCategory, { attempts: number; correct: number }>()
+  let vocabPracticados = 0
+  let vocabDominados = 0
 
-  for (const item of vocabItems) {
-    const cat = item.category as VocabCategory
-    categoryCounts.set(cat, (categoryCounts.get(cat) ?? 0) + 1)
-
+  const vocabListItems: VocabListItem[] = vocabItems.map((item) => {
     const progress = vocabProgressMap.get(item.id)
+    let masteryState: VocabListItem['masteryState'] = 'none'
     if (progress && progress.attempt_count > 0) {
-      const existing = categoryAttempts.get(cat) ?? { attempts: 0, correct: 0 }
-      existing.attempts += progress.attempt_count
-      existing.correct += progress.correct_count
-      categoryAttempts.set(cat, existing)
+      vocabPracticados++
+      const accuracy = Math.round((progress.correct_count / progress.attempt_count) * 100)
+      if (accuracy >= 70) {
+        vocabDominados++
+        masteryState = 'mastered'
+      } else {
+        masteryState = 'in_progress'
+      }
     }
-  }
-
-  const vocabCategories: VocabCategoryData[] = VOCAB_CATEGORIES.map((cat) => {
-    const attempts = categoryAttempts.get(cat)
     return {
-      category: cat,
-      itemCount: categoryCounts.get(cat) ?? 0,
-      accuracy: attempts ? Math.round((attempts.correct / attempts.attempts) * 100) : null,
+      expression: item.expression,
+      english: item.english,
+      category: item.category,
+      masteryState,
     }
   })
 
@@ -137,7 +132,24 @@ export default async function VerbsPage() {
           </div>
         }
         vocabContent={
-          <VocabCategoryView categories={vocabCategories} />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                {vocabPracticados > 0 && (
+                  <p className="text-xs" style={{ color: 'var(--d5-body)' }}>
+                    {vocabPracticados} practicados · {vocabDominados} dominados
+                  </p>
+                )}
+              </div>
+              <Link
+                href="/vocab/configure"
+                className="shrink-0 rounded-xl bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors"
+              >
+                Practica →
+              </Link>
+            </div>
+            <VocabDirectory items={vocabListItems} />
+          </div>
         }
       />
     </main>

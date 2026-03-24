@@ -136,7 +136,7 @@ KV_REST_API_TOKEN               # Upstash Redis token (@vercel/kv)
 | `/curriculum`                   | Server          | Full concept tree with mastery badges; all concepts/units/modules are clickable           |
 | `/progress`                     | Server          | 4-card stats, CEFR level progress bars, AccuracyChart, WeeklyActivityChart, VerbTenseMastery, VocabCategoryMastery |
 | `/tutor`                        | Server + Client | Streaming AI chat; accepts `?concept=<id>` for context                                    |
-| `/verbs`                        | Server + Client | Verb + vocab directory — segmented toggle (Verbos/Vocabulario), search, mastery dots, category cards |
+| `/verbs`                        | Server + Client | Verb + vocab directory — segmented toggle (Verbos/Vocabulario), search, filter chips, mastery dots, alphabetical list |
 | `/verbs/[infinitive]`           | Server + Client | Conjugation tables per tense + mastery bars + favorite toggle                             |
 | `/verbs/configure`              | Server + Client | Verb drill config — tenses, verb set, length, hint toggle                                 |
 | `/verbs/session`                | Server + Client | In-sentence conjugation session; local grading; no Claude cost                            |
@@ -293,7 +293,7 @@ Concept mastery requires **both** conditions:
 3. Three outcomes: `correct` (auto-advance 1.5s, green flash) · `accent_error` (orange flash, manual Next) · `incorrect` (red flash, Try Again or Next)
 4. Fire-and-forget `POST /api/vocab/grade` records attempt in `vocab_progress` via `increment_vocab_progress` RPC
 5. Session done screen shows overall % + per-category breakdown sorted worst-first
-6. Entry via segmented "Verbos | Vocabulario" toggle on `/verbs` page → category cards view
+6. Entry via segmented "Verbos | Vocabulario" toggle on `/verbs` page → searchable alphabetical list with category filter chips + mastery dots
 7. 8 categories: `discourse_markers`, `fixed_phrases`, `collocations`, `register_phrases`, `idiomatic`, `prepositional`, `adverbial`, `pragmatic`
 8. No SRS — pure practice mode (same pattern as verb drills); accuracy tracking per item
 9. Offline: queued attempts in IDB `queued_vocab_attempts` store; synced via `POST /api/offline/vocab-sync`
@@ -535,7 +535,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2411 tests across 141 files — all passing.**
+**Test suite: 2428 tests across 143 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
