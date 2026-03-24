@@ -9,16 +9,10 @@
 const CACHE_VERSION = '2026-03-23'
 const CACHE = `senda-${CACHE_VERSION}`
 
+// Only pre-cache public/static assets — auth-gated pages are cached on first
+// successful visit via the network-first navigation handler.
 const SHELL_URLS = [
-  '/',
-  '/dashboard',
-  '/study',
-  '/study/configure',
-  '/verbs',
-  '/progress',
-  '/curriculum',
   '/offline',
-  '/offline/reports',
   '/manifest.webmanifest',
   '/icon',
   '/apple-icon',
@@ -121,24 +115,23 @@ self.addEventListener('fetch', (e) => {
     return
   }
 
-  // ── 3. Stale-while-revalidate for page navigation ─────────────────────────
-  // Serve cached shell immediately; revalidate in background.
-  // Auth-gated data comes from fresh Supabase API calls, so stale HTML is safe.
-  // Falls back to /offline page when both cache and network are unavailable.
+  // ── 3. Network-first for page navigation ───────────────────────────────────
+  // Always fetch fresh from server (auth/middleware runs server-side).
+  // Fall back to cache only when offline. This prevents stale cached pages
+  // from causing redirect errors when auth sessions expire after deploys.
   if (request.mode === 'navigate') {
     e.respondWith(
       caches.open(CACHE).then((cache) =>
-        cache.match(request).then((cached) => {
-          const networkFetch = fetch(request)
-            .then((res) => {
-              if (res.ok && !res.redirected) cache.put(request, res.clone())
-              return res
-            })
-            .catch(() =>
-              caches.match('/offline').then((offlinePage) => offlinePage ?? Response.error())
+        fetch(request)
+          .then((res) => {
+            if (res.ok && !res.redirected) cache.put(request, res.clone())
+            return res
+          })
+          .catch(() =>
+            cache.match(request).then((cached) =>
+              cached ?? caches.match('/offline').then((offlinePage) => offlinePage ?? Response.error())
             )
-          return cached ?? networkFetch
-        })
+          )
       )
     )
     return
