@@ -151,6 +151,30 @@ export async function DashboardDeferredSection({
       )}
 
 
+      {/* Pronunciación card */}
+      {!isNewUser && (
+        <div className="senda-card space-y-3 relative overflow-hidden">
+          <svg
+            style={{ position: 'absolute', top: '1rem', right: '1rem', pointerEvents: 'none', opacity: 0.25 }}
+            width={28} height={28} viewBox="0 0 24 24" fill="none"
+            aria-hidden="true"
+          >
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M12 19v4M8 23h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <p className="senda-heading text-base">
+            Pronunciación
+          </p>
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
+            Mejora tu acento leyendo frases en voz alta.
+          </p>
+          <Link href="/pronunciation/session" className="senda-cta-outline w-full">
+            Practicar →
+          </Link>
+        </div>
+      )}
+
       {/* Tu Currículo — module progress list */}
       {moduleSummaries.length > 0 && (
         <>

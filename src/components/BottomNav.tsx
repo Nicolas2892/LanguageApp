@@ -11,7 +11,7 @@ const TABS = [
   { href: ROUTES.verbs,          label: 'Léxico',     Icon: Book      },
   { href: ROUTES.progress,       label: 'Progreso',   Icon: BarChart2 },
 ]
-const HIDDEN_ROUTES = ['/auth', ROUTES.onboarding, ROUTES.write, ROUTES.brandPreview, ROUTES.verbsSession, ROUTES.vocabSession, ROUTES.admin]
+const HIDDEN_ROUTES = ['/auth', ROUTES.onboarding, ROUTES.write, ROUTES.brandPreview, ROUTES.verbsSession, ROUTES.vocabSession, ROUTES.pronunciationSession, ROUTES.admin]
 
 export function BottomNav() {
   const pathname = usePathname()

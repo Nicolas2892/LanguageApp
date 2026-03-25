@@ -162,6 +162,8 @@ KV_REST_API_TOKEN               # Upstash Redis token (@vercel/kv)
 | `POST /api/push/subscribe`      | Route handler   | Save/delete push subscription to `profiles.push_subscription`                             |
 | `POST /api/push/send`           | Route handler   | Cron-triggered: batch push notifications to subscribers with due exercises                 |
 | `POST /api/transcribe`          | Route handler   | OpenAI Whisper STT — accepts FormData with `audio` blob, returns `{ text }` (Fix-J)      |
+| `/pronunciation`                  | Server + Client | Pronunciation hub — per-category progress bars, "Practicar →" CTA (Feat-P)                |
+| `/pronunciation/session`          | Server + Client | Pronunciation session — record sentences, Azure scoring, word-level feedback (Feat-P)     |
 | `POST /api/pronunciation/assess` | Route handler  | Azure Pronunciation Assessment — FormData audio+text, returns phoneme/fluency/prosody scores (Feat-P) |
 | `GET /api/offline/module/[id]`   | Route handler   | Download bundle for offline study: exercises, concepts, units, progress, free-write prompts (Feat-F) |
 | `GET /api/offline/verbs`        | Route handler   | Full verb data bundle; supports `?version=` for 304 Not Modified (Feat-F)                 |
@@ -537,7 +539,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2448 tests across 146 files — all passing.**
+**Test suite: 2454 tests across 147 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 

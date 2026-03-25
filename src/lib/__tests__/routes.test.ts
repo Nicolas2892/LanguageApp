@@ -16,6 +16,7 @@ describe('ROUTES', () => {
       'dashboard', 'study', 'studyConfigure',
       'curriculum', 'verbs', 'verbsConfigure', 'verbsSession',
       'vocabConfigure', 'vocabSession',
+      'pronunciation', 'pronunciationSession',
       'progress', 'tutor', 'write', 'account', 'onboarding',
       'admin', 'adminCurriculum', 'adminExercises', 'adminPool',
       'offlineReports', 'brandPreview',

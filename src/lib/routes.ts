@@ -14,6 +14,8 @@ export const ROUTES = {
   verbsSession: '/verbs/session',
   vocabConfigure: '/vocab/configure',
   vocabSession: '/vocab/session',
+  pronunciation: '/pronunciation',
+  pronunciationSession: '/pronunciation/session',
   progress: '/progress',
   tutor: '/tutor',
   write: '/write',
