@@ -6,7 +6,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://*.ingest.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.anthropic.com https://*.ingest.sentry.io https://us.i.posthog.com https://us-assets.i.posthog.com https://*.cognitiveservices.azure.com",
   "frame-ancestors 'none'",
   "worker-src 'self'",
   "manifest-src 'self'",
@@ -30,9 +30,15 @@ const nextConfig: NextConfig = {
     return [
       // Apply all security headers globally (microphone blocked everywhere)
       { source: '/(.*)', headers: securityHeaders },
-      // Override: allow microphone on the free-write page only (STT)
+      // Override: allow microphone on free-write + pronunciation pages (STT + assessment)
       {
         source: '/write(.*)',
+        headers: [
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(self), geolocation=()' },
+        ],
+      },
+      {
+        source: '/pronunciation(.*)',
         headers: [
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(self), geolocation=()' },
         ],

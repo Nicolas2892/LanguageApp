@@ -115,6 +115,8 @@ NEXT_PUBLIC_VAPID_PUBLIC_KEY    # VAPID public key for push subscriptions (Fix-L
 VAPID_PRIVATE_KEY               # VAPID private key for web-push (Fix-L)
 VAPID_EMAIL                     # VAPID contact email (mailto:you@example.com) (Fix-L)
 OPENAI_API_KEY                  # OpenAI Whisper STT + TTS (Fix-J, /api/tts)
+AZURE_SPEECH_KEY                # Azure Speech Services key (Feat-P pronunciation assessment)
+AZURE_SPEECH_REGION             # Azure Speech Services region (e.g. westeurope)
 CRON_SECRET                     # Bearer token for cron-triggered push send route
 NEXT_PUBLIC_SITE_URL            # CSRF origin validation (validateOrigin in api-utils.ts)
 KV_REST_API_URL                 # Upstash Redis for rate limiting (@vercel/kv)
@@ -160,6 +162,7 @@ KV_REST_API_TOKEN               # Upstash Redis token (@vercel/kv)
 | `POST /api/push/subscribe`      | Route handler   | Save/delete push subscription to `profiles.push_subscription`                             |
 | `POST /api/push/send`           | Route handler   | Cron-triggered: batch push notifications to subscribers with due exercises                 |
 | `POST /api/transcribe`          | Route handler   | OpenAI Whisper STT — accepts FormData with `audio` blob, returns `{ text }` (Fix-J)      |
+| `POST /api/pronunciation/assess` | Route handler  | Azure Pronunciation Assessment — FormData audio+text, returns phoneme/fluency/prosody scores (Feat-P) |
 | `GET /api/offline/module/[id]`   | Route handler   | Download bundle for offline study: exercises, concepts, units, progress, free-write prompts (Feat-F) |
 | `GET /api/offline/verbs`        | Route handler   | Full verb data bundle; supports `?version=` for 304 Not Modified (Feat-F)                 |
 | `POST /api/offline/grade-batch` | Route handler   | Batch grade queued offline attempts via Claude; creates report + push notification (Feat-F) |
@@ -333,7 +336,7 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 
 | Table                                    | Purpose                                                                                                                  |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `profiles`                               | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level`, `skip_gap_fill`, `timezone`, `streak_freeze_remaining`, `streak_freeze_used_date` |
+| `profiles`                               | One row per user; `streak`, `last_studied_date`, `onboarding_completed`, `computed_level`, `skip_gap_fill`, `timezone`, `streak_freeze_remaining`, `streak_freeze_used_date`, `l1_language`, `target_accent` |
 | `modules / units / concepts / exercises` | Curriculum hierarchy (publicly readable); `concepts.level` = B1/B2/C1; `exercises.source` = 'seed' or 'ai_generated'     |
 | `user_progress`                          | SRS state per user+concept (`ease_factor`, `interval_days`, `due_date`, `repetitions`, `production_mastered`, `is_hard`) |
 | `exercise_attempts`                      | Full attempt history with AI score + feedback                                                                            |
@@ -348,9 +351,12 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | `vocab_progress`                         | Per-user accuracy per vocab item; `attempt_count`, `correct_count`; upserted via `increment_vocab_progress` RPC          |
 | `offline_reports`                        | Aggregated results from offline batch grading; `reviewed` flag for report-out UI (Feat-F)                                |
 | `offline_report_attempts`                | Per-attempt results within an offline report: score, feedback, corrected_version, explanation (Feat-F)                    |
+| `pronunciation_progress`                 | Per-user accuracy per phoneme category; `attempt_count`, `correct_count`; upserted via `increment_pronunciation_progress` RPC (Feat-P) |
 
 
-Migrations (run once in Supabase SQL editor): 25 total (001–025). All applied.
+Migrations (run once in Supabase SQL editor): 26 total (001–026). 001–025 applied. Pending:
+
+- `026_pronunciation.sql` — `profiles.l1_language`, `profiles.target_accent`, `pronunciation_progress` table + `increment_pronunciation_progress` RPC
 
 ### Dashboard Stats
 
@@ -531,7 +537,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2434 tests across 144 files — all passing.**
+**Test suite: 2448 tests across 146 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 

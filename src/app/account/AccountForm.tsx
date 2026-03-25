@@ -68,6 +68,8 @@ export function AccountForm({ profile }: Props) {
     }
   }
 
+  const [targetAccent, setTargetAccent] = useState<string>(profile.target_accent ?? 'castilian')
+  const [accentError, setAccentError] = useState(false)
   const [skipError, setSkipError] = useState(false)
 
   async function handleSkipGapFillToggle() {
@@ -239,7 +241,63 @@ export function AccountForm({ profile }: Props) {
 
       <div style={{ height: '1.5rem' }} />
 
-      {/* ── Section 4: Datos Offline ── */}
+      {/* ── Section 4: Pronunciación ── */}
+      <div style={{ padding: '0.25rem 0 1rem' }}>
+        <span className="senda-eyebrow block mb-3">Pronunciación</span>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="target_accent" className="senda-field-label">Acento Objetivo</label>
+          <div className="flex gap-2">
+            {([
+              { value: 'castilian', label: 'Castellano (España)' },
+              { value: 'latin_american', label: 'Latinoamericano (México)' },
+            ] as const).map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={async () => {
+                  setTargetAccent(value)
+                  setAccentError(false)
+                  try {
+                    const res = await fetch('/api/account/update', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ target_accent: value }),
+                    })
+                    if (!res.ok) {
+                      setTargetAccent(targetAccent)
+                      setAccentError(true)
+                      setTimeout(() => setAccentError(false), 3000)
+                    }
+                  } catch {
+                    setTargetAccent(targetAccent)
+                    setAccentError(true)
+                    setTimeout(() => setAccentError(false), 3000)
+                  }
+                }}
+                aria-pressed={targetAccent === value}
+                className={`senda-focus-ring flex-1 rounded-full px-3.5 border-none cursor-pointer transition-[background,color] duration-200 ease-out ${
+                  targetAccent === value
+                    ? 'bg-[rgba(140,106,63,0.12)] text-[var(--d5-ink)] font-bold dark:bg-[rgba(184,170,153,0.18)] dark:text-[var(--d5-paper)]'
+                    : 'bg-[rgba(140,106,63,0.04)] text-[var(--d5-muted)] dark:bg-[rgba(184,170,153,0.06)]'
+                }`}
+                style={{ fontSize: '0.75rem', minHeight: '2.75rem' }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {accentError && (
+            <p className="text-xs mt-1.5" style={{ color: 'var(--d5-error)' }} role="alert">
+              No se pudo guardar. Inténtalo de nuevo.
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div style={{ height: '1.5rem' }} />
+
+      {/* ── Section 5: Datos Offline ── */}
       <div style={{ padding: '0.25rem 0 1rem' }}>
         <span className="senda-eyebrow block mb-3">Datos Offline</span>
         <OfflineStorageManager />

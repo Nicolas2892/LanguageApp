@@ -10,6 +10,8 @@ const AccountUpdateSchema = z.object({
   theme_preference: z.enum(['light', 'dark', 'system']).optional(),
   skip_gap_fill: z.boolean().optional(),
   timezone: z.string().min(1).max(100).optional(),
+  l1_language: z.enum(['german', 'english']).nullable().optional(),
+  target_accent: z.enum(['castilian', 'latin_american']).optional(),
 })
 
 export async function POST(request: Request) {

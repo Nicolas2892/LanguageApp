@@ -23,6 +23,8 @@ const baseProfile: Profile = {
   streak_freeze_remaining: 1,
   streak_freeze_last_replenished: null,
   streak_freeze_used_date: null,
+  l1_language: null,
+  target_accent: null,
 }
 
 function renderWithTheme(ui: React.ReactElement) {

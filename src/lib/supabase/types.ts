@@ -33,6 +33,8 @@ export interface Database {
           streak_freeze_remaining: number
           streak_freeze_last_replenished: string | null
           streak_freeze_used_date: string | null
+          l1_language: string | null
+          target_accent: string | null
         }
         Insert: {
           id: string
@@ -52,6 +54,8 @@ export interface Database {
           streak_freeze_remaining?: number
           streak_freeze_last_replenished?: string | null
           streak_freeze_used_date?: string | null
+          l1_language?: string | null
+          target_accent?: string | null
         }
         Update: {
           id?: string
@@ -71,6 +75,8 @@ export interface Database {
           streak_freeze_remaining?: number
           streak_freeze_last_replenished?: string | null
           streak_freeze_used_date?: string | null
+          l1_language?: string | null
+          target_accent?: string | null
         }
         Relationships: []
       }
@@ -661,9 +667,40 @@ export interface Database {
         }
         Relationships: []
       }
+      pronunciation_progress: {
+        Row: {
+          id: string
+          user_id: string
+          category: string
+          attempt_count: number
+          correct_count: number
+          last_practiced: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          category: string
+          attempt_count?: number
+          correct_count?: number
+          last_practiced?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          category?: string
+          attempt_count?: number
+          correct_count?: number
+          last_practiced?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
+      increment_pronunciation_progress: {
+        Args: { p_user_id: string; p_category: string; p_correct: boolean }
+        Returns: void
+      }
       increment_streak_if_new_day: {
         Args: { p_user_id: string }
         Returns: Json
@@ -718,3 +755,4 @@ export type OfflineReportAttempt = Database['public']['Tables']['offline_report_
 export type VocabItem = Database['public']['Tables']['vocab_items']['Row']
 export type VocabSentence = Database['public']['Tables']['vocab_sentences']['Row']
 export type VocabProgress = Database['public']['Tables']['vocab_progress']['Row']
+export type PronunciationProgress = Database['public']['Tables']['pronunciation_progress']['Row']
