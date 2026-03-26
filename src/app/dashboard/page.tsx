@@ -49,7 +49,7 @@ export default async function DashboardPage() {
   const isNewUser = studiedCount === 0
 
   return (
-    <main className="max-w-2xl mx-auto px-5 pt-5 pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:px-8 lg:pt-8 lg:pb-8 animate-page-in">
+    <main className="max-w-2xl mx-auto px-6 pt-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:p-8 animate-page-in">
 
       {/* ── Greeting ────────────────────────────────────────────────────────── */}
       <div className="mb-3">

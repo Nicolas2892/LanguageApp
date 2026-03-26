@@ -366,7 +366,7 @@
 .senda-feedback-card {
   background: rgba(196, 82, 46, 0.06);
   border-radius: 20px;
-  padding: 1.25rem 1rem;
+  padding: 1.25rem;
   text-align: center;
 }
 .dark .senda-feedback-card {
@@ -527,17 +527,23 @@
 .splash-trail-draw {
   stroke-dasharray: 400;
   stroke-dashoffset: 400;
-  animation: splash-trail-draw 800ms ease-out forwards;
+  animation: splash-trail-draw 1000ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+/* Echo trail — thinner, delayed by 200ms */
+.splash-trail-echo {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: splash-trail-draw 1000ms cubic-bezier(0.25, 0.1, 0.25, 1) 200ms forwards;
 }
 
-/* Splash screen — logo entrance (blur + opacity) */
+/* Splash screen — logo entrance (blur + opacity + subtle scale) */
 @keyframes splash-logo-in {
-  from { opacity: 0; filter: blur(4px); }
-  to   { opacity: 1; filter: blur(0); }
+  from { opacity: 0; filter: blur(4px); transform: scale(0.96); }
+  to   { opacity: 1; filter: blur(0); transform: scale(1); }
 }
 .splash-logo-in {
   opacity: 0;
-  animation: splash-logo-in 400ms ease-out 400ms forwards;
+  animation: splash-logo-in 500ms ease-out 600ms forwards;
 }
 
 /* Splash screen — fade out entire overlay */
@@ -546,7 +552,7 @@
   to   { opacity: 0; }
 }
 .splash-fade-out {
-  animation: splash-fade-out 500ms ease-in-out forwards;
+  animation: splash-fade-out 600ms ease-in-out forwards;
 }
 
 /* Splash screen — CSS-only safety net.
@@ -587,6 +593,7 @@
   .animate-mic-sonar,
   .tap-highlight:active,
   .splash-trail-draw,
+  .splash-trail-echo,
   .splash-logo-in {
     animation: none !important;
     opacity: 1 !important;

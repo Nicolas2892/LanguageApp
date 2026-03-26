@@ -6,7 +6,7 @@ function Bone({ className }: { className: string }) {
 
 export default function DashboardLoading() {
   return (
-    <main className="max-w-2xl mx-auto px-5 pt-5 pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:px-8 lg:pt-8 lg:pb-8">
+    <main className="max-w-2xl mx-auto px-6 pt-6 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:p-8">
       {/* Greeting */}
       <div className="mb-3">
         <Bone className="h-7 w-48 rounded-xl" />

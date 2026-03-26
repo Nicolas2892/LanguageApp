@@ -26,7 +26,7 @@ export default async function VerbConfigurePage({ searchParams }: Props) {
   const favoriteCount = count ?? 0
 
   return (
-    <main className="relative overflow-hidden max-w-md mx-auto pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-8 animate-page-in">
+    <main className="relative overflow-hidden max-w-md mx-auto pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-8 animate-page-in">
       <BackgroundMagicS opacity={0.05} />
       {/* Compact header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">

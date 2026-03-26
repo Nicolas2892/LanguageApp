@@ -17,12 +17,13 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import {
-  PartyPopper, CheckCircle2, XCircle,
+  CheckCircle2, XCircle,
   Languages, Type, Shuffle, AlertTriangle, PenLine, ArrowLeftRight, Sparkles, Timer, X, Loader2,
   Headphones, FileSearch, RefreshCw,
 } from 'lucide-react'
 import { PushPermissionPrompt } from '@/components/PushPermissionPrompt'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
+import { SvgCelebration } from '@/components/SvgCelebration'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import type { Concept, Exercise } from '@/lib/supabase/types'
 import type { GradeResult } from '@/lib/claude/grader'
@@ -542,7 +543,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       <div className="animate-done-stagger space-y-6 text-center py-8" aria-live="polite">
         <div className="flex justify-center">
           <div className={pct < 50 ? 'rounded-full ring-2 ring-orange-400 ring-offset-2 animate-pulse p-2' : ''}>
-            <PartyPopper className="h-14 w-14 text-orange-500" strokeWidth={1.5} />
+            <SvgCelebration size={56} />
           </div>
         </div>
         <div>

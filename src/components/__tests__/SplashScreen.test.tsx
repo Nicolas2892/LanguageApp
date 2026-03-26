@@ -42,16 +42,16 @@ describe('SplashScreen', () => {
     expect(screen.getByTestId('splash-screen')).toBeInTheDocument()
   })
 
-  it('unmounts after animation completes (1700ms)', () => {
+  it('unmounts after animation completes (2200ms)', () => {
     render(<SplashScreen />)
     expect(screen.getByTestId('splash-screen')).toBeInTheDocument()
 
-    // At 1200ms, starts fading
-    act(() => { vi.advanceTimersByTime(1200) })
+    // At 1600ms, starts fading
+    act(() => { vi.advanceTimersByTime(1600) })
     expect(screen.getByTestId('splash-screen')).toHaveClass('splash-fade-out')
 
-    // At 1700ms, fully unmounted
-    act(() => { vi.advanceTimersByTime(500) })
+    // At 2200ms, fully unmounted
+    act(() => { vi.advanceTimersByTime(600) })
     expect(screen.queryByTestId('splash-screen')).not.toBeInTheDocument()
   })
 
@@ -98,19 +98,19 @@ describe('SplashScreen', () => {
     const container = screen.getByTestId('splash-screen')
     expect(container.style.pointerEvents).toBe('')
 
-    act(() => { vi.advanceTimersByTime(1200) })
+    act(() => { vi.advanceTimersByTime(1600) })
     expect(container.style.pointerEvents).toBe('none')
   })
 
   it('skips splash when localStorage flag is already set', () => {
-    mockStore['senda-splash-v1'] = '1'
+    mockStore['senda-splash-v2'] = '1'
     render(<SplashScreen />)
     expect(screen.queryByTestId('splash-screen')).not.toBeInTheDocument()
   })
 
   it('sets localStorage flag on first render', () => {
     render(<SplashScreen />)
-    expect(storage.set).toHaveBeenCalledWith('senda-splash-v1', '1')
+    expect(storage.set).toHaveBeenCalledWith('senda-splash-v2', '1')
   })
 
   it('still shows splash when storage returns null (e.g. blocked storage)', () => {

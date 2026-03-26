@@ -3,7 +3,7 @@ import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 
 export default function VocabConfigureLoading() {
   return (
-    <main className="max-w-md mx-auto pb-[calc(3.125rem+env(safe-area-inset-bottom)+1rem)] lg:pb-8">
+    <main className="max-w-md mx-auto pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-8">
       {/* Header */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <div className="h-3 w-24 senda-skeleton-fill animate-senda-pulse rounded" />
