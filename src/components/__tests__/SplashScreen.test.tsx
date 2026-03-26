@@ -1,10 +1,28 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
+
+// Mock the storage module used by SplashScreen
+const mockStore: Record<string, string> = {}
+vi.mock('@/lib/platform/storage', () => ({
+  storage: {
+    get: vi.fn((key: string) => mockStore[key] ?? null),
+    set: vi.fn((key: string, value: string) => { mockStore[key] = value }),
+    remove: vi.fn((key: string) => { delete mockStore[key] }),
+    getSession: vi.fn(() => null),
+    setSession: vi.fn(),
+    removeSession: vi.fn(),
+  },
+}))
+
 import { SplashScreen } from '../SplashScreen'
+import { storage } from '@/lib/platform/storage'
 
 beforeEach(() => {
   vi.useFakeTimers()
-  sessionStorage.clear()
+  // Clear mock store
+  Object.keys(mockStore).forEach(k => delete mockStore[k])
+  vi.mocked(storage.get).mockImplementation((key: string) => mockStore[key] ?? null)
+  vi.mocked(storage.set).mockImplementation((key: string, value: string) => { mockStore[key] = value })
   // Default: no reduced motion
   window.matchMedia = vi.fn().mockReturnValue({
     matches: false,
@@ -84,24 +102,23 @@ describe('SplashScreen', () => {
     expect(container.style.pointerEvents).toBe('none')
   })
 
-  it('skips splash when sessionStorage flag is already set', () => {
-    sessionStorage.setItem('senda-splash-shown', '1')
+  it('skips splash when localStorage flag is already set', () => {
+    mockStore['senda-splash-v1'] = '1'
     render(<SplashScreen />)
     expect(screen.queryByTestId('splash-screen')).not.toBeInTheDocument()
   })
 
-  it('sets sessionStorage flag on first render', () => {
+  it('sets localStorage flag on first render', () => {
     render(<SplashScreen />)
-    expect(sessionStorage.getItem('senda-splash-shown')).toBe('1')
+    expect(storage.set).toHaveBeenCalledWith('senda-splash-v1', '1')
   })
 
-  it('still shows splash when sessionStorage throws', () => {
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => { throw new Error('blocked') })
-    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
+  it('still shows splash when storage returns null (e.g. blocked storage)', () => {
+    // storage.get/set already catch internally — when storage is blocked they return null / no-op
+    vi.mocked(storage.get).mockReturnValue(null)
+    vi.mocked(storage.set).mockImplementation(() => { /* no-op */ })
 
     render(<SplashScreen />)
     expect(screen.getByTestId('splash-screen')).toBeInTheDocument()
-
-    vi.restoreAllMocks()
   })
 })

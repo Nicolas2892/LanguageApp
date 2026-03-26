@@ -9,14 +9,15 @@ const S_TRAIL_PATH = 'M 80 230 C 20 220, 0 185, 28 158 C 56 131, 130 138, 158 11
 // S monogram path (from SvgSendaPath.tsx)
 const S_LOGO_PATH = 'M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2'
 
-const STORAGE_KEY = 'senda-splash-shown'
+// Bump version to re-show splash after major brand changes
+const STORAGE_KEY = 'senda-splash-v1'
 
 function hasSeenSplash(): boolean {
-  return storage.getSession(STORAGE_KEY) === '1'
+  return storage.get(STORAGE_KEY) === '1'
 }
 
 function markSplashShown(): void {
-  storage.setSession(STORAGE_KEY, '1')
+  storage.set(STORAGE_KEY, '1')
 }
 
 export function SplashScreen() {
