@@ -368,9 +368,7 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | `srs_items`                              | Unified SRS state for verbs + vocab; SM-2 columns (`ease_factor`, `interval_days`, `due_date`, `repetitions`); discriminated by `item_type` ('verb'/'vocab') with CHECK constraint; upserted via `upsert_verb_srs` / `upsert_vocab_srs` RPCs; seeded via `seed_srs_items` RPC (Feat-J) |
 
 
-Migrations (run once in Supabase SQL editor): 27 total (001–027). 001–025 applied; 026 applied (2026-03-26). Pending:
-
-- `027_unified_srs.sql` — `srs_items` table + indexes + RLS + `upsert_verb_srs` / `upsert_vocab_srs` / `seed_srs_items` RPCs (Feat-J)
+Migrations (run once in Supabase SQL editor): 27 total (001–027). All applied. 026 applied (2026-03-26). 027 applied (2026-03-26).
 
 ### Dashboard Stats
 

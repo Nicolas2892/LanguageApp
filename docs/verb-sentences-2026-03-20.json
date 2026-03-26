@@ -1,0 +1,412 @@
+{
+  "generated_at": "2026-03-20T07:09:59.998Z",
+  "combos": [
+    {
+      "verb_infinitive": "ser",
+      "verb_id": "aa13e6e1-e803-436c-8b57-3bef93663264",
+      "tense": "present_indicative",
+      "sentences": [
+        {
+          "pronoun": "yo",
+          "sentence": "Yo _____ ingeniero de software en una empresa tecnológica internacional.",
+          "correct_form": "soy",
+          "tense_rule": "Ser Presente: soy, eres, es, somos, sois, son (irregular)"
+        },
+        {
+          "pronoun": "tú",
+          "sentence": "Tú _____ muy talentoso para la música y deberías estudiar composición.",
+          "correct_form": "eres",
+          "tense_rule": "Ser Presente: soy, eres, es, somos, sois, son (irregular)"
+        },
+        {
+          "pronoun": "él",
+          "sentence": "Él _____ profesor universitario especializado en literatura contemporánea latinoamericana.",
+          "correct_form": "es",
+          "tense_rule": "Ser Presente: soy, eres, es, somos, sois, son (irregular)"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "Nosotros _____ amigos desde la infancia, a pesar de vivir en ciudades diferentes.",
+          "correct_form": "somos",
+          "tense_rule": "Ser Presente: soy, eres, es, somos, sois, son (irregular)"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "Ellos _____ responsables de organizar la conferencia internacional el próximo mes.",
+          "correct_form": "son",
+          "tense_rule": "Ser Presente: soy, eres, es, somos, sois, son (irregular)"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "ser",
+      "verb_id": "aa13e6e1-e803-436c-8b57-3bef93663264",
+      "tense": "preterite",
+      "sentences": [
+        {
+          "pronoun": "yo",
+          "sentence": "Yo _____ muy feliz cuando recibí la noticia del viaje.",
+          "correct_form": "fui",
+          "tense_rule": "Ser/ir irregular preterite: fui, fuiste, fue, fuimos, fueron"
+        },
+        {
+          "pronoun": "tú",
+          "sentence": "Tú _____ el mejor candidato para el puesto de gerente.",
+          "correct_form": "fuiste",
+          "tense_rule": "Ser/ir irregular preterite: fui, fuiste, fue, fuimos, fueron"
+        },
+        {
+          "pronoun": "él",
+          "sentence": "Él _____ médico durante treinta años antes de jubilarse.",
+          "correct_form": "fue",
+          "tense_rule": "Ser/ir irregular preterite: fui, fuiste, fue, fuimos, fueron"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "Nosotros _____ testigos de un momento histórico en la ceremonia.",
+          "correct_form": "fuimos",
+          "tense_rule": "Ser/ir irregular preterite: fui, fuiste, fue, fuimos, fueron"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "Ellos _____ los fundadores de esa prestigiosa institución educativa.",
+          "correct_form": "fueron",
+          "tense_rule": "Ser/ir irregular preterite: fui, fuiste, fue, fuimos, fueron"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "ser",
+      "verb_id": "aa13e6e1-e803-436c-8b57-3bef93663264",
+      "tense": "imperfect",
+      "sentences": [
+        {
+          "pronoun": "yo",
+          "sentence": "Yo _____ muy tímido cuando era niño y no me gustaba hablar en público.",
+          "correct_form": "era",
+          "tense_rule": "Pretérito Imperfecto of ser: era, eras, era, éramos, erais, eran"
+        },
+        {
+          "pronoun": "tú",
+          "sentence": "Tú _____ el mejor estudiante de la clase durante todo el año escolar.",
+          "correct_form": "eras",
+          "tense_rule": "Pretérito Imperfecto of ser: era, eras, era, éramos, erais, eran"
+        },
+        {
+          "pronoun": "él",
+          "sentence": "Él _____ ingeniero en una empresa multinacional antes de jubilarse hace cinco años.",
+          "correct_form": "era",
+          "tense_rule": "Pretérito Imperfecto of ser: era, eras, era, éramos, erais, eran"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "Nosotros _____ muy amigos en la universidad, aunque ahora casi no nos vemos.",
+          "correct_form": "éramos",
+          "tense_rule": "Pretérito Imperfecto of ser: era, eras, era, éramos, erais, eran"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "Ellos _____ profesores dedicados que siempre se preocupaban por el aprendizaje de sus alumnos.",
+          "correct_form": "eran",
+          "tense_rule": "Pretérito Imperfecto of ser: era, eras, era, éramos, erais, eran"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "ser",
+      "verb_id": "aa13e6e1-e803-436c-8b57-3bef93663264",
+      "tense": "future",
+      "sentences": [
+        {
+          "pronoun": "yo",
+          "sentence": "Yo _____ ingeniera de software en una empresa multinacional.",
+          "correct_form": "seré",
+          "tense_rule": "Futuro Simple: ser → seré, serás, será, seremos, seréis, serán"
+        },
+        {
+          "pronoun": "tú",
+          "sentence": "Tú _____ un excelente profesor si te dedicas a la enseñanza.",
+          "correct_form": "serás",
+          "tense_rule": "Futuro Simple: ser → seré, serás, será, seremos, seréis, serán"
+        },
+        {
+          "pronoun": "él/ella",
+          "sentence": "Él _____ el próximo presidente del club de debate universitario.",
+          "correct_form": "será",
+          "tense_rule": "Futuro Simple: ser → seré, serás, será, seremos, seréis, serán"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "Nosotros _____ responsables de organizar la conferencia internacional.",
+          "correct_form": "seremos",
+          "tense_rule": "Futuro Simple: ser → seré, serás, será, seremos, seréis, serán"
+        },
+        {
+          "pronoun": "ellos/ellas",
+          "sentence": "Ellos _____ los ganadores del campeonato si entrenan con dedicación.",
+          "correct_form": "serán",
+          "tense_rule": "Futuro Simple: ser → seré, serás, será, seremos, seréis, serán"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "ser",
+      "verb_id": "aa13e6e1-e803-436c-8b57-3bef93663264",
+      "tense": "conditional",
+      "sentences": [
+        {
+          "pronoun": "yo",
+          "sentence": "Yo _____ muy feliz si pudiera viajar a España el próximo año.",
+          "correct_form": "sería",
+          "tense_rule": "Condicional Simple: ser → sería, serías, sería, seríamos, seríais, serían"
+        },
+        {
+          "pronoun": "tú",
+          "sentence": "Tú _____ un excelente profesor si decidieras dedicarte a la educación.",
+          "correct_form": "serías",
+          "tense_rule": "Condicional Simple: ser → sería, serías, sería, seríamos, seríais, serían"
+        },
+        {
+          "pronoun": "él",
+          "sentence": "Él _____ más responsable si tuviera un trabajo estable y bien remunerado.",
+          "correct_form": "sería",
+          "tense_rule": "Condicional Simple: ser → sería, serías, sería, seríamos, seríais, serían"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "Nosotros _____ los mejores amigos si nos viéramos más frecuentemente.",
+          "correct_form": "seríamos",
+          "tense_rule": "Condicional Simple: ser → sería, serías, sería, seríamos, seríais, serían"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "Ellos _____ capaces de resolver el problema si tuvieran suficiente tiempo.",
+          "correct_form": "serían",
+          "tense_rule": "Condicional Simple: ser → sería, serías, sería, seríamos, seríais, serían"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "ser",
+      "verb_id": "aa13e6e1-e803-436c-8b57-3bef93663264",
+      "tense": "present_subjunctive",
+      "sentences": [
+        {
+          "pronoun": "yo",
+          "sentence": "Es importante que yo _____ honesto en todas mis decisiones.",
+          "correct_form": "sea",
+          "tense_rule": "Presente de Subjuntivo: sea, seas, sea, seamos, seáis, sean"
+        },
+        {
+          "pronoun": "tú",
+          "sentence": "Tu profesor espera que tú _____ más responsable con tus tareas.",
+          "correct_form": "seas",
+          "tense_rule": "Presente de Subjuntivo: sea, seas, sea, seamos, seáis, sean"
+        },
+        {
+          "pronoun": "él",
+          "sentence": "Dudo que él _____ capaz de terminar el proyecto a tiempo.",
+          "correct_form": "sea",
+          "tense_rule": "Presente de Subjuntivo: sea, seas, sea, seamos, seáis, sean"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "Es posible que nosotros _____ los únicos que no entendamos la lección.",
+          "correct_form": "seamos",
+          "tense_rule": "Presente de Subjuntivo: sea, seas, sea, seamos, seáis, sean"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "Aunque ellos _____ expertos en el tema, no deberían ignorar otras opiniones.",
+          "correct_form": "sean",
+          "tense_rule": "Presente de Subjuntivo: sea, seas, sea, seamos, seáis, sean"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "ser",
+      "verb_id": "aa13e6e1-e803-436c-8b57-3bef93663264",
+      "tense": "imperfect_subjunctive",
+      "sentences": [
+        {
+          "pronoun": "yo",
+          "sentence": "Si yo _____ más responsable, habría terminado el proyecto a tiempo.",
+          "correct_form": "fuera",
+          "tense_rule": "Imperfect subjunctive: yo fuera, tú fueras, él fuera, nosotros fuéramos, ellos fueran"
+        },
+        {
+          "pronoun": "tú",
+          "sentence": "Aunque tú _____ el director de la empresa, no podrías cambiar esa decisión.",
+          "correct_form": "fueras",
+          "tense_rule": "Used in conditional sentences and contrary-to-fact situations with imperfect subjunctive"
+        },
+        {
+          "pronoun": "él",
+          "sentence": "Era importante que él _____ honesto con sus clientes para mantener su reputación.",
+          "correct_form": "fuera",
+          "tense_rule": "Imperfect subjunctive follows imperfect main clause verbs in dependent clauses"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "Nuestros padres querían que nosotros _____ médicos o abogados cuando creciéramos.",
+          "correct_form": "fuéramos",
+          "tense_rule": "Nosotros form has accent: fuéramos. Common with verbs of wanting, requesting"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "Si ellos _____ más prudentes, no habrían cometido tantos errores en la negociación.",
+          "correct_form": "fueran",
+          "tense_rule": "Plural form fueran used in contrary-to-fact conditionals with past implications"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "ser",
+      "verb_id": "aa13e6e1-e803-436c-8b57-3bef93663264",
+      "tense": "imperative_affirmative",
+      "sentences": [
+        {
+          "pronoun": "tu",
+          "sentence": "_____ honesto con tus amigos en todo momento.",
+          "correct_form": "Sé",
+          "tense_rule": "Imperativo afirmativo tú: irregular verb, uses 'sé' form"
+        },
+        {
+          "pronoun": "el",
+          "sentence": "_____ usted paciente durante la reunión de hoy.",
+          "correct_form": "Sea",
+          "tense_rule": "Imperativo afirmativo usted: uses present subjunctive form"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "_____ fuertes y valientes ante las dificultades.",
+          "correct_form": "Seamos",
+          "tense_rule": "Imperativo afirmativo nosotros: uses present subjunctive nosotros form"
+        },
+        {
+          "pronoun": "vosotros",
+          "sentence": "_____ responsables de vuestras decisiones.",
+          "correct_form": "Sed",
+          "tense_rule": "Imperativo afirmativo vosotros: replace infinitive -r with -d"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "_____ ustedes puntuales para la presentación.",
+          "correct_form": "Sean",
+          "tense_rule": "Imperativo afirmativo ustedes: uses present subjunctive ustedes form"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "ser",
+      "verb_id": "aa13e6e1-e803-436c-8b57-3bef93663264",
+      "tense": "imperative_negative",
+      "sentences": [
+        {
+          "pronoun": "tu",
+          "sentence": "No _____ impaciente con los resultados.",
+          "correct_form": "seas",
+          "tense_rule": "Imperativo negativo tú: no + presente subjuntivo tú"
+        },
+        {
+          "pronoun": "el",
+          "sentence": "No _____ usted tan crítico con los demás.",
+          "correct_form": "sea",
+          "tense_rule": "Imperativo negativo usted: no + presente subjuntivo usted"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "No _____ nosotros tan duros en nuestros juicios.",
+          "correct_form": "seamos",
+          "tense_rule": "Imperativo negativo nosotros: no + presente subjuntivo nosotros"
+        },
+        {
+          "pronoun": "vosotros",
+          "sentence": "No _____ vosotros negligentes en vuestras obligaciones.",
+          "correct_form": "seáis",
+          "tense_rule": "Imperativo negativo vosotros: no + presente subjuntivo vosotros"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "No _____ ustedes egoístas en esta situación.",
+          "correct_form": "sean",
+          "tense_rule": "Imperativo negativo ustedes: no + presente subjuntivo ustedes"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "estar",
+      "verb_id": "d63db7fe-88f1-4423-ad90-7a94078ce270",
+      "tense": "present_indicative",
+      "sentences": [
+        {
+          "pronoun": "yo",
+          "sentence": "Yo _____ muy cansado después de trabajar todo el día.",
+          "correct_form": "estoy",
+          "tense_rule": "Estar present indicative: estoy, estás, está, estamos, estáis, están"
+        },
+        {
+          "pronoun": "tú",
+          "sentence": "Tú _____ en la biblioteca estudiando para el examen final.",
+          "correct_form": "estás",
+          "tense_rule": "Estar present indicative: estoy, estás, está, estamos, estáis, están"
+        },
+        {
+          "pronoun": "él",
+          "sentence": "Él _____ esperando una llamada importante de su empresa.",
+          "correct_form": "está",
+          "tense_rule": "Estar present indicative: estoy, estás, está, estamos, estáis, están"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "Nosotros _____ preparando la cena para la reunión de esta noche.",
+          "correct_form": "estamos",
+          "tense_rule": "Estar present indicative: estoy, estás, está, estamos, estáis, están"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "Ellos _____ interesados en participar en el nuevo proyecto comunitario.",
+          "correct_form": "están",
+          "tense_rule": "Estar present indicative: estoy, estás, está, estamos, estáis, están"
+        }
+      ]
+    },
+    {
+      "verb_infinitive": "estar",
+      "verb_id": "d63db7fe-88f1-4423-ad90-7a94078ce270",
+      "tense": "preterite",
+      "sentences": [
+        {
+          "pronoun": "yo",
+          "sentence": "Yo _____ en la oficina hasta las ocho de la noche el día pasado.",
+          "correct_form": "estuve",
+          "tense_rule": "Estar in preterite: estuve, estuviste, estuvo, estuvimos, estuvisteis, estuvieron"
+        },
+        {
+          "pronoun": "tú",
+          "sentence": "¿Dónde _____ tú cuando te llamé esta mañana?",
+          "correct_form": "estuviste",
+          "tense_rule": "Estar in preterite: estuve, estuviste, estuvo, estuvimos, estuvisteis, estuvieron"
+        },
+        {
+          "pronoun": "él",
+          "sentence": "Mi hermano _____ en Barcelona durante dos semanas el verano pasado.",
+          "correct_form": "estuvo",
+          "tense_rule": "Estar in preterite: estuve, estuviste, estuvo, estuvimos, estuvisteis, estuvieron"
+        },
+        {
+          "pronoun": "nosotros",
+          "sentence": "Nosotros _____ muy preocupados cuando escuchamos las noticias anoche.",
+          "correct_form": "estuvimos",
+          "tense_rule": "Estar in preterite: estuve, estuviste, estuvo, estuvimos, estuvisteis, estuvieron"
+        },
+        {
+          "pronoun": "ellos",
+          "sentence": "Ellas _____ en el concierto el fin de semana y lo disfrutaron mucho.",
+          "correct_form": "estuvieron",
+          "tense_rule": "Estar in preterite: estuve, estuviste, estuvo, estuvimos, estuvisteis, estuvieron"
+        }
+      ]
+    }
+  ]
+}
