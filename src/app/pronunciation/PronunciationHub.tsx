@@ -2,19 +2,8 @@
 
 import Link from 'next/link'
 import { Mic } from 'lucide-react'
-import { PRONUNCIATION_CATEGORIES } from '@/lib/pronunciation/l1-maps'
+import { PRONUNCIATION_CATEGORIES, PRONUNCIATION_CATEGORY_LABELS } from '@/lib/pronunciation/l1-maps'
 import type { PronunciationCategory } from '@/lib/pronunciation/l1-maps'
-
-const CATEGORY_LABELS: Record<PronunciationCategory, string> = {
-  stress: 'Acentuación',
-  fluency: 'Fluidez',
-  prosody: 'Prosodia',
-  rr: 'R Vibrante (rr)',
-  x: 'Jota (J/G)',
-  ɲ: 'Eñe (Ñ)',
-  vowels: 'Vocales',
-  consonants: 'Consonantes',
-}
 
 interface ProgressItem {
   category: string
@@ -64,7 +53,7 @@ export function PronunciationHub({ progress }: Props) {
           <div key={category} className="senda-card" style={{ padding: '0.75rem 1rem' }}>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-sm font-semibold" style={{ color: 'var(--d5-ink)' }}>
-                {CATEGORY_LABELS[category as PronunciationCategory] ?? category}
+                {PRONUNCIATION_CATEGORY_LABELS[category as PronunciationCategory] ?? category}
               </span>
               {accuracy !== null && (
                 <span className="text-xs font-bold" style={{ color: 'var(--d5-terracotta)' }}>

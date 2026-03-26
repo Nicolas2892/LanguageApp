@@ -4,6 +4,8 @@ import { useState, useCallback } from 'react'
 import { X, Mic, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/routes'
+import { fireAndForget } from '@/lib/fireAndForget'
+import { isOnline } from '@/lib/platform/network'
 import { usePronunciationRecording } from '@/lib/hooks/usePronunciationRecording'
 import { SpeakButton } from '@/components/SpeakButton'
 import { PronunciationFeedbackPanel } from '@/components/pronunciation/PronunciationFeedbackPanel'
@@ -62,6 +64,7 @@ export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
     setFlashClass(cls)
     setTimeout(() => setFlashClass(''), 400)
     setPhase({ kind: 'feedback', result })
+    trackProgress(result)
   }
 
   // Watch for recording errors during assessing phase
@@ -88,6 +91,27 @@ export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
       setPhase({ kind: 'answering' })
     }
   }, [isLast, recording])
+
+  // ── Fire-and-forget progress tracking ──
+  function trackProgress(result: PronunciationResult) {
+    if (!isOnline()) return
+    const THRESHOLD = 70
+    const categories: { category: string; correct: boolean }[] = [
+      { category: 'stress', correct: result.overallScore >= THRESHOLD },
+      { category: 'fluency', correct: result.fluencyScore >= THRESHOLD },
+      { category: 'prosody', correct: result.prosodyScore >= THRESHOLD },
+    ]
+    for (const entry of categories) {
+      fireAndForget(
+        fetch('/api/pronunciation/progress', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry),
+        }),
+        'pronunciation-progress',
+      )
+    }
+  }
 
   // ── Done screen ──
   if (phase.kind === 'done') {

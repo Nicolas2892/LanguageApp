@@ -4,6 +4,23 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Feat-P Phase 1+2: Pronunciation / Accent Training (2026-03-26)
+
+Sentence-level pronunciation assessment using Azure Speech Services. Users record sentences aloud and receive phoneme-level, fluency, and prosody scoring with L1-specific coaching tips (German, English).
+
+**What was built:**
+- **Phase 1 (backend):** Azure client (`src/lib/azure/client.ts`), `POST /api/pronunciation/assess`, L1 interference maps (`src/lib/pronunciation/l1-maps.ts`), account settings for `l1_language` + `target_accent`, migration 026 (pending apply), `pronunciation_progress` table + RPC
+- **Phase 2 (UI):** `/pronunciation` hub with per-category progress bars, `/pronunciation/session` with record/assess/feedback state machine, fire-and-forget progress tracking via `POST /api/pronunciation/progress`, `PronunciationFeedbackPanel` (word-level chips, score bars, L1 tips, audio comparison), `PronunciationSummary` (done screen), dashboard card, SideNav link, progress page integration (`PronunciationCategoryMastery`)
+- **Shared constant:** `PRONUNCIATION_CATEGORY_LABELS` in `src/lib/pronunciation/l1-maps.ts` (used by hub + progress page)
+- **Tests:** 60 new tests across 8 files (API route, session, hub, feedback panel, summary, word chips, error boundary, recording hook)
+- **Phase 2 tracks 3 categories** (stress/fluency/prosody via Azure dimension scores); word-level phoneme categories (rr, x, ɲ, vowels, consonants) deferred to Phase 3
+
+**What's NOT included (Phase 3):** Shadowing mode (listen → repeat → compare), word-level phoneme category tracking, native audio pitch contour overlay
+
+**Migration note:** `026_pronunciation.sql` must be applied in Supabase SQL editor before production use.
+
+---
+
 ## Feat-M: Vocabulary Drill Mode ✓ (2026-03-23)
 
 Full vocabulary drill feature for multi-word expressions, collocations, discourse markers, and idiomatic phrases. 8 categories (~200 items when seeded), contextual gap-fill exercises with local grading (zero Claude cost).

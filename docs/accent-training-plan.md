@@ -97,4 +97,9 @@ New route: `/pronunciation`
 
 ## Status
 
-**Not started** — pending PM decision on priority and whether to gate behind premium tier.
+**Phase 1 + Phase 2 DONE** (2026-03-26). Phase 3 (Shadowing) not yet started.
+
+- Phase 1: Backend infrastructure — Azure client, `/api/pronunciation/assess`, L1 maps, account settings, migration 026
+- Phase 2: Sentence reading ("Lee la Frase") — `/pronunciation` hub, `/pronunciation/session`, progress tracking via `/api/pronunciation/progress`, dashboard card, SideNav + progress page integration
+- Migration 026 must be applied in Supabase SQL editor before production use
+- Free for all users. Premium gating deferred (see Feat-S).

@@ -12,6 +12,8 @@ import { EmptyState } from '@/components/EmptyState'
 import { ProgressCacheWriter } from '@/components/offline/ProgressCacheWriter'
 import type { WeekData } from './WeeklyActivityChart'
 import { VocabCategoryMastery } from '@/components/vocab/VocabCategoryMastery'
+import { PronunciationCategoryMastery } from '@/components/pronunciation/PronunciationCategoryMastery'
+import type { PronunciationCategorySummary } from '@/components/pronunciation/PronunciationCategoryMastery'
 import type { TenseSummary } from '@/components/verbs/VerbTenseMastery'
 import type { VocabItem, VocabProgress } from '@/lib/supabase/types'
 import { VOCAB_CATEGORIES } from '@/lib/vocab/constants'
@@ -57,6 +59,7 @@ export default async function ProgressPage() {
     { data: verbProgressRows },
     { data: vocabItemRows },
     { data: vocabProgressRows },
+    { data: pronunciationProgressRows },
   ] = await Promise.all([
     supabase.from('concepts').select('id, level'),
     supabase.from('user_progress')
@@ -81,6 +84,10 @@ export default async function ProgressPage() {
     supabase.from('vocab_items').select('id, category'),
     supabase.from('vocab_progress')
       .select('vocab_id, attempt_count, correct_count')
+      .eq('user_id', user.id)
+      .gt('attempt_count', 0),
+    supabase.from('pronunciation_progress')
+      .select('category, attempt_count, correct_count')
       .eq('user_id', user.id)
       .gt('attempt_count', 0),
   ])
@@ -210,6 +217,19 @@ export default async function ProgressPage() {
     }))
     .sort((a, b) => a.pct - b.pct)  // worst first
 
+  // ── Pronunciation category mastery ────────────────────────────────────────
+  type PronunciationRow = { category: string; attempt_count: number; correct_count: number }
+  const pronunciationSummaries: PronunciationCategorySummary[] = (
+    (pronunciationProgressRows as PronunciationRow[] ?? [])
+      .map(({ category, attempt_count, correct_count }) => ({
+        category,
+        correct: correct_count,
+        attempts: attempt_count,
+        pct: attempt_count > 0 ? Math.round((correct_count / attempt_count) * 100) : 0,
+      }))
+      .sort((a, b) => a.pct - b.pct)  // worst first
+  )
+
   const hasAnyData = totalAttempts > 0
 
   return (
@@ -308,6 +328,14 @@ export default async function ProgressPage() {
               <>
                 <WindingPathSeparator />
                 <VocabCategoryMastery summaries={vocabCategorySummaries} />
+              </>
+            )}
+
+            {/* Pronunciation category mastery */}
+            {pronunciationSummaries.length > 0 && (
+              <>
+                <WindingPathSeparator />
+                <PronunciationCategoryMastery summaries={pronunciationSummaries} />
               </>
             )}
 

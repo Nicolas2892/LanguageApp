@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: ROUTES.studyConfigure, label: 'Estudio'    },
   { href: ROUTES.curriculum,     label: 'Currículo'  },
   { href: ROUTES.verbs,          label: 'Léxico'     },
+  { href: ROUTES.pronunciation,  label: 'Pronunciación' },
   { href: ROUTES.progress,       label: 'Progreso'   },
   { href: ROUTES.tutor,          label: 'Tutor'      },
 ]

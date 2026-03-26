@@ -165,6 +165,7 @@ KV_REST_API_TOKEN               # Upstash Redis token (@vercel/kv)
 | `/pronunciation`                  | Server + Client | Pronunciation hub — per-category progress bars, "Practicar →" CTA (Feat-P)                |
 | `/pronunciation/session`          | Server + Client | Pronunciation session — record sentences, Azure scoring, word-level feedback (Feat-P)     |
 | `POST /api/pronunciation/assess` | Route handler  | Azure Pronunciation Assessment — FormData audio+text, returns phoneme/fluency/prosody scores (Feat-P) |
+| `POST /api/pronunciation/progress` | Route handler | Fire-and-forget pronunciation progress tracking via `increment_pronunciation_progress` RPC; Zod + rate-limit 120/10min (Feat-P) |
 | `GET /api/offline/module/[id]`   | Route handler   | Download bundle for offline study: exercises, concepts, units, progress, free-write prompts (Feat-F) |
 | `GET /api/offline/verbs`        | Route handler   | Full verb data bundle; supports `?version=` for 304 Not Modified (Feat-F)                 |
 | `POST /api/offline/grade-batch` | Route handler   | Batch grade queued offline attempts via Claude; creates report + push notification (Feat-F) |
@@ -474,7 +475,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 
 ### Navigation
 
-- **SideNav** (`src/components/SideNav.tsx`) — desktop sidebar (`hidden lg:flex`); D5 design: `SvgSendaPath` + DM Serif italic wordmark, left 3px terracotta accent bar per active item (no icons), `--d5-nav-inactive` for inactive items; 6 items: Dashboard → Study → Curriculum → Verbs → Progress → Tutor; hidden on `/auth`, `/onboarding`, `/brand-preview`, `/admin`; `StreakBadge` (md) in bottom section above account link
+- **SideNav** (`src/components/SideNav.tsx`) — desktop sidebar (`hidden lg:flex`); D5 design: `SvgSendaPath` + DM Serif italic wordmark, left 3px terracotta accent bar per active item (no icons), `--d5-nav-inactive` for inactive items; 7 items: Dashboard → Study → Curriculum → Verbs → Pronunciación → Progress → Tutor; hidden on `/auth`, `/onboarding`, `/brand-preview`, `/admin`; `StreakBadge` (md) in bottom section above account link
 - **BottomNav** (`src/components/BottomNav.tsx`) — mobile 5-tab bar (`lg:hidden`); Dashboard → Study → Curriculum → Verbs → Progress (Tutor removed — surfaced via AppHeader icon + FeedbackPanel link instead); active pill uses inline `rgba(184,170,153,0.28)` bg; `HIDDEN_ROUTES` includes `/verbs/session`, `/vocab/session`; label font `text-[0.625rem]` (10px, WCAG compliant)
 - **AppHeader** (`src/components/AppHeader.tsx`) — sticky mobile header (`lg:hidden`); `SvgSendaPath size={26}`; right side: tutor Bot icon (on `/dashboard`, `/curriculum`, `/verbs` + sub-routes only) + `StreakBadge` (sm) + avatar; hidden on `/auth`, `/study`, `/tutor`, `/onboarding`, `/brand-preview`
 
@@ -539,7 +540,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2454 tests across 147 files — all passing.**
+**Test suite: 2514 tests across 154 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -636,15 +637,16 @@ Items are ordered by priority within each group. Full details of completed work 
 - Requires tracking `onboarding_completed = false` users and a transactional email provider.
 - **Do not implement without Feat-K vendor decision (shared email infrastructure).**
 
-**Feat-P: Pronunciation / accent training** *(P2 — approved, phased implementation)*
+**Feat-P: Pronunciation / accent training** *(Phase 1+2 DONE — Phase 3 pending)*
 
 - Azure Speech Services Pronunciation Assessment API for phoneme-level scoring. Accent selection: es-ES (Castellano) / es-MX (Latinoamericano) in account settings.
-- **Phase 1:** Backend infra — Azure integration, `POST /api/pronunciation/assess`, recording hook, `pronunciation_progress` table, L1 maps (German/English). No UI.
-- **Phase 2:** Sentence reading ("Lee la Frase") — stress/fluency/prosody scoring, reuses existing verb/vocab sentences. Dashboard card entry. First user-facing feature.
-- **Phase 3:** Shadowing ("Sombra") — listen to native audio, repeat, holistic fluency scoring, audio comparison UI.
+- **Phase 1 DONE:** Backend infra — Azure integration, `POST /api/pronunciation/assess`, recording hook, `pronunciation_progress` table, L1 maps (German/English), account settings for l1_language + target_accent.
+- **Phase 2 DONE:** Sentence reading ("Lee la Frase") — `/pronunciation` hub with per-category progress bars, `/pronunciation/session` with record→assess→feedback state machine, fire-and-forget progress tracking via `POST /api/pronunciation/progress`, dashboard card, SideNav + progress page integration, `PronunciationCategoryMastery` component, `PRONUNCIATION_CATEGORY_LABELS` shared constant.
+- **Phase 3 pending:** Shadowing ("Sombra") — listen to native audio, repeat, holistic fluency scoring, audio comparison UI.
+- Migration 026 must be applied in Supabase SQL editor before production use.
 - No beginner exercises (minimal pairs, word repetition) — audience is advanced learners focused on polish.
 - Free for all users initially. Premium gating deferred (see Feat-S).
-- Full design: `.claude/plans/resilient-scribbling-bear.md` + `docs/accent-training-plan.md`
+- Full design: `docs/accent-training-plan.md`
 
 **Feat-Q: Mastery progress chip on concept + verb detail pages** *(DONE — see completed-features.md)*
 
@@ -696,7 +698,7 @@ Items are ordered by priority within each group. Full details of completed work 
 | **P3** | **Feat-J** — Verb + Vocab SRS integration | PM decision on unified vs. separate SRS model |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
-| **P2** | **Feat-P** — Pronunciation / accent training | Approved — phased implementation |
+| **P2** | **Feat-P Phase 3** — Pronunciation shadowing mode | Phase 1+2 done; Phase 3 design needed |
 | **P4** | **Feat-S** — Premium tier / monetisation | User base justifies it |
 | **P3** | **Feat-R** — Capacitor native shell | Public launch readiness |
 | **P4** | **Infra-D** — A/B testing / feature flags | Needed before adaptive grading |

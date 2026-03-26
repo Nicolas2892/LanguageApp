@@ -4,6 +4,17 @@ export const PRONUNCIATION_CATEGORIES = [
 
 export type PronunciationCategory = typeof PRONUNCIATION_CATEGORIES[number]
 
+export const PRONUNCIATION_CATEGORY_LABELS: Record<PronunciationCategory, string> = {
+  stress: 'Acentuación',
+  fluency: 'Fluidez',
+  prosody: 'Prosodia',
+  rr: 'R Vibrante (rr)',
+  x: 'Jota (J/G)',
+  ɲ: 'Eñe (Ñ)',
+  vowels: 'Vocales',
+  consonants: 'Consonantes',
+}
+
 interface L1Tip {
   description: string
   tip: string
