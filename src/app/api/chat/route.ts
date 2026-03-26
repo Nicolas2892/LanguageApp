@@ -39,11 +39,11 @@ export async function POST(request: Request) {
   const { messages, conceptId } = parsed.data
 
   // Fetch profile, concept context, and recent errors in parallel
-  const [{ data: profile }, conceptResult, { data: recentAttempts }] = await Promise.all([
+  const [{ data: profile, error: profileErr }, conceptResult, { data: recentAttempts }] = await Promise.all([
     supabase.from('profiles').select('display_name, computed_level').eq('id', user.id).single(),
     conceptId
       ? supabase.from('concepts').select('title, explanation').eq('id', conceptId).single()
-      : Promise.resolve({ data: null }),
+      : Promise.resolve({ data: null, error: null }),
     supabase
       .from('exercise_attempts')
       .select('ai_feedback')
@@ -52,6 +52,10 @@ export async function POST(request: Request) {
       .order('created_at', { ascending: false })
       .limit(5),
   ])
+
+  if (profileErr) {
+    console.error('[chat] profile fetch error:', profileErr)
+  }
 
   const typedProfile = profile as { display_name: string | null; computed_level: string } | null
 

@@ -5,8 +5,8 @@ import * as Sentry from '@sentry/nextjs'
  * Does not change control flow — the promise result is still ignored.
  * Errors are sent to Sentry and logged in development.
  */
-export function fireAndForget(promise: Promise<unknown>, label: string): void {
-  promise.catch((err) => {
+export function fireAndForget(promise: PromiseLike<unknown>, label: string): void {
+  Promise.resolve(promise).catch((err) => {
     if (process.env.NODE_ENV === 'development') {
       console.warn(`[fireAndForget:${label}]`, err)
     }

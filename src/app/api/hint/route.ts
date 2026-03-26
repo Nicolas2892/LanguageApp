@@ -32,10 +32,17 @@ export async function POST(request: Request) {
     }
     const { exercise_id, concept_id } = parsed.data
 
-    const [{ data: exercise }, { data: concept }] = await Promise.all([
+    const [{ data: exercise, error: exErr }, { data: concept, error: conErr }] = await Promise.all([
       supabase.from('exercises').select('id, concept_id, prompt, expected_answer').eq('id', exercise_id).single(),
       supabase.from('concepts').select('id, title, explanation').eq('id', concept_id).single(),
     ])
+
+    if (exErr || conErr) {
+      const dbErr = exErr || conErr
+      Sentry.captureException(dbErr, { tags: { route: 'hint' } })
+      console.error('[hint] db error:', dbErr)
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
 
     if (!exercise || !concept) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })

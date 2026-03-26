@@ -13,6 +13,7 @@ import { updateStreakIfNeeded, updateComputedLevel, validateOrigin } from '@/lib
 import { MASTERY_THRESHOLD, HARD_INTERVAL_MULTIPLIER } from '@/lib/constants'
 import { userLocalToday } from '@/lib/timezone'
 import { getCached } from '@/lib/cache'
+import { fireAndForget } from '@/lib/fireAndForget'
 import * as Sentry from '@sentry/nextjs'
 
 const SubmitSchema = z.object({
@@ -191,7 +192,7 @@ export async function POST(request: Request) {
             nextReviewInDays = newSRS.interval_days
 
             // Upsert user_progress before emitting chunk 1
-            await supabase
+            const { error: upsertErr } = await supabase
               .from('user_progress')
               .upsert({
                 user_id: user.id,
@@ -202,6 +203,11 @@ export async function POST(request: Request) {
                 repetitions: newSRS.repetitions,
                 last_reviewed_at: new Date().toISOString(),
               }, { onConflict: 'user_id,concept_id' })
+
+            if (upsertErr) {
+              Sentry.captureException(upsertErr, { tags: { route: 'submit', op: 'upsert_progress' } })
+              console.error('[submit] upsert error:', upsertErr)
+            }
           }
 
           controller.enqueue(encoder.encode(JSON.stringify({
@@ -221,7 +227,7 @@ export async function POST(request: Request) {
           controller.close()
 
           // Fire-and-forget: record attempt + streak + production_mastered + computed level
-          const bgOps: PromiseLike<unknown>[] = [
+          fireAndForget(
             supabase.from('exercise_attempts').insert({
               user_id: user.id,
               exercise_id,
@@ -229,23 +235,25 @@ export async function POST(request: Request) {
               is_correct,
               ai_score: score,
               ai_feedback: feedback,
-            }),
-            updateStreakIfNeeded(supabase, user.id),
-          ]
+            }).then(({ error }) => { if (error) throw error }),
+            'submit:insert_attempt',
+          )
+          fireAndForget(updateStreakIfNeeded(supabase, user.id), 'submit:streak')
           if (!skip_srs) {
             // Set production_mastered when breadth gate is met (≥3 correct, ≥2 types)
             if (productionReady && !existingProductionMastered) {
-              bgOps.push(
+              fireAndForget(
                 supabase
                   .from('user_progress')
                   .update({ production_mastered: true })
                   .eq('user_id', user.id)
-                  .eq('concept_id', concept_id),
+                  .eq('concept_id', concept_id)
+                  .then(({ error }) => { if (error) throw error }),
+                'submit:production_mastered',
               )
             }
-            bgOps.push(updateComputedLevel(supabase, user.id, { justMastered }))
+            fireAndForget(updateComputedLevel(supabase, user.id, { justMastered }), 'submit:computed_level')
           }
-          Promise.all(bgOps).catch(console.error)
         } catch (err) {
           console.error('[submit] stream error:', err)
           controller.error(err)

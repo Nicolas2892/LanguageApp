@@ -26,13 +26,19 @@ export async function POST(request: Request) {
     }
     const { started_at, concepts_reviewed, accuracy } = parsed.data
 
-    await supabase.from('study_sessions').insert({
+    const { error: insertError } = await supabase.from('study_sessions').insert({
       user_id: user.id,
       started_at,
       ended_at: new Date().toISOString(),
       concepts_reviewed,
       accuracy,
     })
+
+    if (insertError) {
+      Sentry.captureException(insertError, { tags: { route: 'sessions/complete' } })
+      console.error('[sessions/complete] db error:', insertError)
+      return NextResponse.json({ error: 'Failed to record session' }, { status: 500 })
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {

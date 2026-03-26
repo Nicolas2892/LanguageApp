@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
     // Upsert SRS state + update accuracy counters
     if (input.item_type === 'verb') {
-      await Promise.all([
+      const [{ error: srsErr }, { error: progErr }] = await Promise.all([
         supabase.rpc('upsert_verb_srs', {
           p_user_id: user.id,
           p_verb_id: input.verb_id,
@@ -105,8 +105,14 @@ export async function POST(request: Request) {
           p_correct: input.outcome !== 'incorrect',
         }),
       ])
+      const rpcError = srsErr || progErr
+      if (rpcError) {
+        Sentry.captureException(rpcError, { tags: { route: 'srs/grade', item_type: 'verb' } })
+        console.error('[srs/grade] verb rpc error:', rpcError)
+        return NextResponse.json({ error: 'Failed to update progress' }, { status: 500 })
+      }
     } else {
-      await Promise.all([
+      const [{ error: srsErr }, { error: progErr }] = await Promise.all([
         supabase.rpc('upsert_vocab_srs', {
           p_user_id: user.id,
           p_vocab_id: input.vocab_id,
@@ -121,6 +127,12 @@ export async function POST(request: Request) {
           p_correct: input.outcome !== 'incorrect',
         }),
       ])
+      const rpcError = srsErr || progErr
+      if (rpcError) {
+        Sentry.captureException(rpcError, { tags: { route: 'srs/grade', item_type: 'vocab' } })
+        console.error('[srs/grade] vocab rpc error:', rpcError)
+        return NextResponse.json({ error: 'Failed to update progress' }, { status: 500 })
+      }
     }
 
     // Streak update (any SRS submission counts)

@@ -58,16 +58,28 @@ export async function POST(request: Request) {
       }
     })
 
-    await supabase
+    const { error: upsertError } = await supabase
       .from('user_progress')
       .upsert(progressRows, { onConflict: 'user_id,concept_id' })
 
+    if (upsertError) {
+      Sentry.captureException(upsertError, { tags: { route: 'onboarding/complete' } })
+      console.error('[onboarding/complete] upsert error:', upsertError)
+      return NextResponse.json({ error: 'Failed to save progress' }, { status: 500 })
+    }
+
     // 2. Mark onboarding as complete
     // Note: exercise_attempts already inserted by /api/submit during grading
-    await supabase
+    const { error: updateError } = await supabase
       .from('profiles')
       .update({ onboarding_completed: true })
       .eq('id', user.id)
+
+    if (updateError) {
+      Sentry.captureException(updateError, { tags: { route: 'onboarding/complete' } })
+      console.error('[onboarding/complete] update error:', updateError)
+      return NextResponse.json({ error: 'Failed to complete onboarding' }, { status: 500 })
+    }
 
     // Set a long-lived HttpOnly cookie so middleware can skip the onboarding DB check
     // on every subsequent page navigation (PERF-04)

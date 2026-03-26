@@ -39,11 +39,15 @@ export async function POST(request: Request) {
     }
 
     // Fetch user's target accent preference
-    const { data: profile } = await supabase
+    const { data: profile, error: profileErr } = await supabase
       .from('profiles')
       .select('target_accent')
       .eq('id', user.id)
       .single()
+
+    if (profileErr) {
+      console.error('[pronunciation/assess] profile fetch error:', profileErr)
+    }
 
     const targetAccent = (profile as { target_accent: string | null } | null)?.target_accent ?? 'castilian'
 

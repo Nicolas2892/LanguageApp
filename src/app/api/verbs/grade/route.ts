@@ -34,12 +34,18 @@ export async function POST(request: Request) {
 
     const { verb_id, tense, is_correct } = parsed.data
 
-    await supabase.rpc('increment_verb_progress', {
+    const { error: rpcError } = await supabase.rpc('increment_verb_progress', {
       p_user_id:  user.id,
       p_verb_id:  verb_id,
       p_tense:    tense,
       p_correct:  is_correct,
     })
+
+    if (rpcError) {
+      Sentry.captureException(rpcError, { tags: { route: 'verbs/grade' } })
+      console.error('[verbs/grade] db error:', rpcError)
+      return NextResponse.json({ error: 'Failed to record progress' }, { status: 500 })
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err) {
