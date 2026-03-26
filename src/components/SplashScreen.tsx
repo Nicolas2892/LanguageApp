@@ -7,20 +7,6 @@ import { S_STROKE_PATH } from '@/components/SvgSendaPath'
 // S-trail path — scaled to fill a large viewBox (same as BackgroundMagicS)
 const S_TRAIL_PATH = 'M 80 230 C 20 220, 0 185, 28 158 C 56 131, 130 138, 158 110 C 186 82, 192 42, 158 20'
 
-// S monogram — calligraphic filled outline (matching SvgSendaPath)
-const S_LOGO_FILL = [
-  'M 5.2 21',
-  'C 1 19.5, -0.8 14.5, 2.5 11',
-  'C 5.8 7.5, 14.2 9.8, 17.2 7',
-  'C 20.2 4.2, 20.8 0.5, 17.8 0.8',
-  'C 16.5 0.2, 15.8 2.2, 17 3.2',
-  'C 21 1.5, 21.5 5.8, 18.8 8.8',
-  'C 16 12, 7.5 9.5, 5 12.5',
-  'C 2.5 15.5, 4 19, 7.2 20',
-  'C 8.5 21, 7 21.5, 5.2 21',
-  'Z',
-].join(' ')
-
 // Bump version to re-show splash after major brand changes
 const STORAGE_KEY = 'senda-splash-v2'
 
@@ -125,7 +111,7 @@ export function SplashScreen() {
         />
       </svg>
 
-      {/* Logo group — S monogram + wordmark */}
+      {/* Logo group — S monogram (stroked) + wordmark */}
       <div
         className="splash-logo-in"
         style={{
@@ -143,7 +129,7 @@ export function SplashScreen() {
           fill="none"
           aria-hidden="true"
         >
-          <path d={S_LOGO_FILL} fill="var(--d5-terracotta)" />
+          <path d={S_STROKE_PATH} stroke="var(--d5-terracotta)" strokeWidth={2.5} strokeLinecap="round" />
         </svg>
         <span
           className="senda-heading"

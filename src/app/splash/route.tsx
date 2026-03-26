@@ -22,11 +22,13 @@ export async function GET(request: NextRequest) {
           gap: '24px',
         }}
       >
-        {/* Terracotta S monogram — calligraphic fill */}
+        {/* Terracotta S monogram — refined stroke */}
         <svg viewBox="0 0 24 24" width="96" height="96" fill="none">
           <path
-            d="M 5.2 21 C 1 19.5, -0.8 14.5, 2.5 11 C 5.8 7.5, 14.2 9.8, 17.2 7 C 20.2 4.2, 20.8 0.5, 17.8 0.8 C 16.5 0.2, 15.8 2.2, 17 3.2 C 21 1.5, 21.5 5.8, 18.8 8.8 C 16 12, 7.5 9.5, 5 12.5 C 2.5 15.5, 4 19, 7.2 20 C 8.5 21, 7 21.5, 5.2 21 Z"
-            fill="#C4522E"
+            d="M 7 20 C 4 18, 1 15, 4 12 C 7 9, 14 9.5, 18 8 C 20.5 5.5, 20 1.5, 16.5 2.5"
+            stroke="#C4522E"
+            strokeWidth={3.5}
+            strokeLinecap="round"
           />
         </svg>
 

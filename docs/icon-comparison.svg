@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500">
+  <style>
+    text { font-family: system-ui, sans-serif; fill: #1A1108; }
+  </style>
+
+  <!-- Labels -->
+  <text x="100" y="30" font-size="14" font-weight="700" text-anchor="middle">A: Original (stroked)</text>
+  <text x="350" y="30" font-size="14" font-weight="700" text-anchor="middle">B: Current (broken fill)</text>
+  <text x="600" y="30" font-size="14" font-weight="700" text-anchor="middle">C: Multi-stroke taper</text>
+  <text x="850" y="30" font-size="14" font-weight="700" text-anchor="middle">D: Smooth filled outline</text>
+  <text x="1100" y="30" font-size="14" font-weight="700" text-anchor="middle">E: Thick uniform stroke</text>
+
+  <!-- A: Original stroked (what we had before) -->
+  <g transform="translate(10, 40)">
+    <rect width="180" height="180" rx="32" fill="#C4522E"/>
+    <g transform="translate(27, 27) scale(5.25)">
+      <path
+        d="M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2"
+        stroke="#FDFCF9" stroke-width="3" stroke-linecap="round" fill="none"
+      />
+    </g>
+  </g>
+
+  <!-- B: Current calligraphic fill (the problematic one) -->
+  <g transform="translate(260, 40)">
+    <rect width="180" height="180" rx="32" fill="#C4522E"/>
+    <g transform="translate(27, 27) scale(5.25)">
+      <path
+        d="M 5.2 21 C 1 19.5, -0.8 14.5, 2.5 11 C 5.8 7.5, 14.2 9.8, 17.2 7 C 20.2 4.2, 20.8 0.5, 17.8 0.8 C 16.5 0.2, 15.8 2.2, 17 3.2 C 21 1.5, 21.5 5.8, 18.8 8.8 C 16 12, 7.5 9.5, 5 12.5 C 2.5 15.5, 4 19, 7.2 20 C 8.5 21, 7 21.5, 5.2 21 Z"
+        fill="#FDFCF9"
+      />
+    </g>
+  </g>
+
+  <!-- C: Multi-stroke taper (3 overlapping strokes, decreasing width) -->
+  <g transform="translate(510, 40)">
+    <rect width="180" height="180" rx="32" fill="#C4522E"/>
+    <g transform="translate(27, 27) scale(5.25)">
+      <!-- Base: thick at entry -->
+      <path d="M 7 20 C 3 19, 1 15, 4 12" stroke="#FDFCF9" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <!-- Middle: medium -->
+      <path d="M 4 12 C 7 9, 15 11, 18 8" stroke="#FDFCF9" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+      <!-- Tip: thin exit -->
+      <path d="M 18 8 C 21 5, 21 1, 17 2" stroke="#FDFCF9" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </g>
+  </g>
+
+  <!-- D: Smooth filled outline (wider bottom bowl, natural taper, no pinch) -->
+  <g transform="translate(760, 40)">
+    <rect width="180" height="180" rx="32" fill="#C4522E"/>
+    <g transform="translate(27, 27) scale(5.25)">
+      <path
+        d="M 5.5 21.5 C 1.5 20, -0.5 15, 2.5 11.5 C 5.5 8, 13.5 10, 17 7.5 C 20 5, 21 2, 18.5 1 L 16 2.5 C 18.5 2, 19 4.5, 17.5 7 C 15 10.5, 8 8.5, 4.5 12 C 1.5 15, 2.5 18.5, 6 19.8 Z"
+        fill="#FDFCF9"
+      />
+    </g>
+  </g>
+
+  <!-- E: Single thick stroke with round cap (bold, simple, confident) -->
+  <g transform="translate(1010, 40)">
+    <rect width="180" height="180" rx="32" fill="#C4522E"/>
+    <g transform="translate(27, 27) scale(5.25)">
+      <path
+        d="M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2"
+        stroke="#FDFCF9" stroke-width="3.8" stroke-linecap="round" fill="none"
+      />
+    </g>
+  </g>
+
+  <!-- Row 2: Same options on terracotta-on-paper (in-app context) -->
+  <text x="600" y="260" font-size="14" font-weight="700" text-anchor="middle">Same marks on paper background (in-app header context)</text>
+
+  <!-- A on paper -->
+  <g transform="translate(10, 280)">
+    <rect width="180" height="180" rx="20" fill="#FDFCF9" stroke="#E8E6E1"/>
+    <g transform="translate(60, 50) scale(3.5)">
+      <path d="M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2"
+        stroke="#C4522E" stroke-width="3" stroke-linecap="round" fill="none"/>
+    </g>
+    <text x="90" y="170" font-size="11" text-anchor="middle" fill="#8C6A3F">Original</text>
+  </g>
+
+  <!-- B on paper -->
+  <g transform="translate(260, 280)">
+    <rect width="180" height="180" rx="20" fill="#FDFCF9" stroke="#E8E6E1"/>
+    <g transform="translate(60, 50) scale(3.5)">
+      <path d="M 5.2 21 C 1 19.5, -0.8 14.5, 2.5 11 C 5.8 7.5, 14.2 9.8, 17.2 7 C 20.2 4.2, 20.8 0.5, 17.8 0.8 C 16.5 0.2, 15.8 2.2, 17 3.2 C 21 1.5, 21.5 5.8, 18.8 8.8 C 16 12, 7.5 9.5, 5 12.5 C 2.5 15.5, 4 19, 7.2 20 C 8.5 21, 7 21.5, 5.2 21 Z"
+        fill="#C4522E"/>
+    </g>
+    <text x="90" y="170" font-size="11" text-anchor="middle" fill="#8C6A3F">Current (broken)</text>
+  </g>
+
+  <!-- C on paper -->
+  <g transform="translate(510, 280)">
+    <rect width="180" height="180" rx="20" fill="#FDFCF9" stroke="#E8E6E1"/>
+    <g transform="translate(60, 50) scale(3.5)">
+      <path d="M 7 20 C 3 19, 1 15, 4 12" stroke="#C4522E" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+      <path d="M 4 12 C 7 9, 15 11, 18 8" stroke="#C4522E" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+      <path d="M 18 8 C 21 5, 21 1, 17 2" stroke="#C4522E" stroke-width="2" stroke-linecap="round" fill="none"/>
+    </g>
+    <text x="90" y="170" font-size="11" text-anchor="middle" fill="#8C6A3F">Multi-stroke</text>
+  </g>
+
+  <!-- D on paper -->
+  <g transform="translate(760, 280)">
+    <rect width="180" height="180" rx="20" fill="#FDFCF9" stroke="#E8E6E1"/>
+    <g transform="translate(60, 50) scale(3.5)">
+      <path d="M 5.5 21.5 C 1.5 20, -0.5 15, 2.5 11.5 C 5.5 8, 13.5 10, 17 7.5 C 20 5, 21 2, 18.5 1 L 16 2.5 C 18.5 2, 19 4.5, 17.5 7 C 15 10.5, 8 8.5, 4.5 12 C 1.5 15, 2.5 18.5, 6 19.8 Z"
+        fill="#C4522E"/>
+    </g>
+    <text x="90" y="170" font-size="11" text-anchor="middle" fill="#8C6A3F">Smooth fill</text>
+  </g>
+
+  <!-- E on paper -->
+  <g transform="translate(1010, 280)">
+    <rect width="180" height="180" rx="20" fill="#FDFCF9" stroke="#E8E6E1"/>
+    <g transform="translate(60, 50) scale(3.5)">
+      <path d="M 7 20 C 3 19, 1 15, 4 12 C 7 9, 15 11, 18 8 C 21 5, 21 1, 17 2"
+        stroke="#C4522E" stroke-width="3.8" stroke-linecap="round" fill="none"/>
+    </g>
+    <text x="90" y="170" font-size="11" text-anchor="middle" fill="#8C6A3F">Bold stroke</text>
+  </g>
+</svg>
