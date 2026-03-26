@@ -144,6 +144,7 @@
   --d5-eyebrow: var(--d5-warm);
   --d5-separator: var(--d5-warm);
   --d5-nav-inactive: var(--d5-warm);
+  --d5-nav-pill: rgba(184, 170, 153, 0.28);
 
   /* Adaptive text tokens — auto-swap for dark mode */
   --d5-heading: var(--d5-ink);          /* headings: ink in light, paper in dark */
@@ -184,6 +185,7 @@
   --d5-eyebrow: var(--d5-muted);
   --d5-separator: var(--d5-muted);
   --d5-nav-inactive: var(--d5-muted);
+  --d5-nav-pill: rgba(184, 170, 153, 0.18);
   --d5-heading: var(--d5-paper);
   --d5-body: var(--d5-muted);
   --d5-subtle: rgba(184, 170, 153, 0.7);
@@ -589,6 +591,7 @@
     animation: none !important;
     opacity: 1 !important;
     filter: none !important;
+    transform: none !important;
     stroke-dashoffset: 0 !important;
   }
 }

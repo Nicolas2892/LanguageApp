@@ -46,7 +46,7 @@ export function BottomNav() {
               {/* Pill: wider than tall, matching iOS active indicator proportions */}
               <span
                 className="rounded-full px-3 py-0.5 transition-colors"
-                style={{ background: active ? 'rgba(184,170,153,0.28)' : 'transparent' }}
+                style={{ background: active ? 'var(--d5-nav-pill)' : 'transparent' }}
               >
                 <Icon className="h-6 w-6" strokeWidth={1.5} />
               </span>

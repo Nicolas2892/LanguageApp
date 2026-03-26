@@ -107,11 +107,12 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
             onChange={(e) => setNewEmail(e.target.value)}
             placeholder="tu@ejemplo.com"
             className="senda-input"
+            aria-describedby={emailError ? 'email-error' : undefined}
           />
         </div>
 
         {emailError && (
-          <p style={{ fontSize: '0.75rem', color: 'var(--d5-error)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--d5-error-surface)' }}>{emailError}</p>
+          <p id="email-error" role="alert" style={{ fontSize: '0.75rem', color: 'var(--d5-error)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--d5-error-surface)' }}>{emailError}</p>
         )}
         {emailMessage && (
           <p style={{ fontSize: '0.75rem', color: 'var(--d5-terracotta)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(196,82,46,0.06)' }}>{emailMessage}</p>
@@ -149,7 +150,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                 />
                 <button
                   type="button"
-                  tabIndex={-1}
+                  tabIndex={0}
                   onClick={() => setShowCurrentPwd(!showCurrentPwd)}
                   className="senda-focus-ring absolute right-1 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label={showCurrentPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
@@ -174,7 +175,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                 />
                 <button
                   type="button"
-                  tabIndex={-1}
+                  tabIndex={0}
                   onClick={() => setShowNewPwd(!showNewPwd)}
                   className="senda-focus-ring absolute right-1 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label={showNewPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
@@ -219,7 +220,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
                 />
                 <button
                   type="button"
-                  tabIndex={-1}
+                  tabIndex={0}
                   onClick={() => setShowConfirmPwd(!showConfirmPwd)}
                   className="senda-focus-ring absolute right-1 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-0 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label={showConfirmPwd ? 'Ocultar contraseña' : 'Mostrar contraseña'}
@@ -237,7 +238,7 @@ export function SecurityForm({ userEmail, isOAuthUser }: Props) {
             </div>
 
             {pwdError && (
-              <p style={{ fontSize: '0.75rem', color: 'var(--d5-error)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--d5-error-surface)' }}>{pwdError}</p>
+              <p id="pwd-error" role="alert" style={{ fontSize: '0.75rem', color: 'var(--d5-error)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'var(--d5-error-surface)' }}>{pwdError}</p>
             )}
             {pwdMessage && (
               <p style={{ fontSize: '0.75rem', color: 'var(--d5-terracotta)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', background: 'rgba(196,82,46,0.06)' }}>{pwdMessage}</p>

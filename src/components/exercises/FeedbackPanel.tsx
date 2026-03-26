@@ -24,7 +24,7 @@ export function FeedbackPanel({ result, userAnswer, onNext, onTryAgain, isLast, 
   const isCorrect = result.is_correct
 
   return (
-    <div className="senda-feedback-card space-y-4">
+    <div className="senda-feedback-card space-y-4" aria-live="polite">
       {/* Tilde ornament */}
       <div className="flex justify-center">
         <SvgTilde size={52} />
