@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
 import { VerbRow, type VerbMasteryState } from '@/components/verbs/VerbRow'
 import { CONJUGATION_TENSES } from '@/lib/verbs/constants'
@@ -33,7 +33,7 @@ export function VerbDirectory({ verbs }: Props) {
   const [groupFilter, setGroupFilter] = useState<VerbGroupFilter>('todos')
   const [favoritesOnly, setFavoritesOnly] = useState(false)
 
-  const filtered = verbs
+  const filtered = useMemo(() => verbs
     .filter((v) => {
       if (groupFilter !== 'todos' && v.verb_group !== groupFilter) return false
       if (favoritesOnly && !v.favorited) return false
@@ -43,7 +43,7 @@ export function VerbDirectory({ verbs }: Props) {
       !query.trim() ||
       v.infinitive.toLowerCase().includes(query.toLowerCase()) ||
       v.english.toLowerCase().includes(query.toLowerCase()),
-    )
+    ), [verbs, query, groupFilter, favoritesOnly])
 
   return (
     <div className="space-y-4">

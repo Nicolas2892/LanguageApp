@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Search } from 'lucide-react'
 import { VocabRow, type VocabMasteryState } from '@/components/vocab/VocabRow'
 import { CHIP_LABELS } from '@/components/vocab/VocabCategoryChip'
@@ -22,7 +22,7 @@ export function VocabDirectory({ items }: Props) {
   const [query, setQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<VocabCategory | 'todos'>('todos')
 
-  const filtered = items
+  const filtered = useMemo(() => items
     .filter((v) => {
       if (categoryFilter !== 'todos' && v.category !== categoryFilter) return false
       return true
@@ -31,7 +31,7 @@ export function VocabDirectory({ items }: Props) {
       !query.trim() ||
       v.expression.toLowerCase().includes(query.toLowerCase()) ||
       v.english.toLowerCase().includes(query.toLowerCase()),
-    )
+    ), [items, query, categoryFilter])
 
   return (
     <div className="space-y-4">
