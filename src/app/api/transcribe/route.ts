@@ -29,6 +29,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing audio field' }, { status: 400 })
     }
 
+    if (!audio.type.startsWith('audio/')) {
+      return NextResponse.json({ error: 'Only audio files are allowed' }, { status: 400 })
+    }
+
     if (audio.size > MAX_AUDIO_SIZE) {
       return NextResponse.json({ error: 'Audio file too large (max 5MB)' }, { status: 400 })
     }

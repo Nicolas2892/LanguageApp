@@ -7,6 +7,7 @@ import { VerbTenseMastery } from '@/components/verbs/VerbTenseMastery'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { getCached } from '@/lib/cache'
 import { userLocalToday, utcToLocalDate } from '@/lib/timezone'
 import { EmptyState } from '@/components/EmptyState'
 import { ProgressCacheWriter } from '@/components/offline/ProgressCacheWriter'
@@ -61,7 +62,7 @@ export default async function ProgressPage() {
     { data: vocabProgressRows },
     { data: pronunciationProgressRows },
   ] = await Promise.all([
-    supabase.from('concepts').select('id, level'),
+    getCached('progress:concepts', () => supabase.from('concepts').select('id, level')),
     supabase.from('user_progress')
       .select('concept_id, interval_days, production_mastered')
       .eq('user_id', user.id),
@@ -81,7 +82,7 @@ export default async function ProgressPage() {
       .select('tense, attempt_count, correct_count')
       .eq('user_id', user.id)
       .gt('attempt_count', 0),
-    supabase.from('vocab_items').select('id, category'),
+    getCached('progress:vocab-items', () => supabase.from('vocab_items').select('id, category')),
     supabase.from('vocab_progress')
       .select('vocab_id, attempt_count, correct_count')
       .eq('user_id', user.id)

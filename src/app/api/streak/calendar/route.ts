@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { utcToLocalDate } from '@/lib/timezone'
 
 /**
@@ -15,6 +16,11 @@ export async function GET(request: Request) {
   } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const limited = await checkRateLimit(user.id, 'streak-calendar', { maxRequests: 30, windowMs: 10 * 60 * 1000 })
+  if (!limited.allowed) {
+    return NextResponse.json({ error: 'Rate limit exceeded. Try again shortly.' }, { status: 429 })
   }
 
   const url = new URL(request.url)
