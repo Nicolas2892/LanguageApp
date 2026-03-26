@@ -11,7 +11,13 @@ interface PronunciationItem {
   source: 'verb' | 'vocab'
 }
 
-export default async function PronunciationSessionPage() {
+export default async function PronunciationSessionPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string }>
+}) {
+  const params = await searchParams
+  const mode = params.mode === 'shadow' ? 'shadow' : 'read' as const
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect(ROUTES.login)
@@ -65,7 +71,8 @@ export default async function PronunciationSessionPage() {
         <PronunciationSession
           items={sessionItems}
           l1Language={l1Language}
-          sessionUrl="/pronunciation/session"
+          sessionUrl={mode === 'shadow' ? '/pronunciation/session?mode=shadow' : '/pronunciation/session'}
+          mode={mode}
         />
       </ErrorBoundary>
     </main>

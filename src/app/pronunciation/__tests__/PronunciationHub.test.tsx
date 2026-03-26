@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { PronunciationHub } from '../PronunciationHub'
 
 vi.mock('next/link', () => ({
@@ -69,9 +70,35 @@ describe('PronunciationHub', () => {
     expect(percentages[2].textContent).toBe('90%')
   })
 
-  it('renders CTA link to session', () => {
+  it('renders CTA link to session in read mode', () => {
     render(<PronunciationHub progress={[]} />)
     const link = screen.getByRole('link', { name: /Practicar Pronunciación/i })
     expect(link).toHaveAttribute('href', '/pronunciation/session')
+  })
+
+  it('renders mode toggle with Lee la Frase and Sombra', () => {
+    render(<PronunciationHub progress={[]} />)
+    expect(screen.getByText('Lee la Frase')).toBeInTheDocument()
+    expect(screen.getByText('Sombra')).toBeInTheDocument()
+  })
+
+  it('switches CTA to shadow session when Sombra selected', async () => {
+    const user = userEvent.setup()
+    render(<PronunciationHub progress={[]} />)
+    await user.click(screen.getByText('Sombra'))
+    const link = screen.getByRole('link', { name: /Practicar Sombra/i })
+    expect(link).toHaveAttribute('href', '/pronunciation/session?mode=shadow')
+  })
+
+  it('shows mode description for read mode', () => {
+    render(<PronunciationHub progress={[]} />)
+    expect(screen.getByText(/Lee la frase en voz alta/)).toBeInTheDocument()
+  })
+
+  it('shows mode description for shadow mode', async () => {
+    const user = userEvent.setup()
+    render(<PronunciationHub progress={[]} />)
+    await user.click(screen.getByText('Sombra'))
+    expect(screen.getByText(/Escucha primero al nativo/)).toBeInTheDocument()
   })
 })

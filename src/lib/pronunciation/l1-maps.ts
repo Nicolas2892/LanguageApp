@@ -15,6 +15,24 @@ export const PRONUNCIATION_CATEGORY_LABELS: Record<PronunciationCategory, string
   consonants: 'Consonantes',
 }
 
+/**
+ * Classify the worst phoneme in a word into a pronunciation category.
+ * Returns null if no phonemes are present.
+ */
+export function classifyPhoneme(word: { phonemes: { phoneme: string; score: number }[] }): PronunciationCategory | null {
+  if (word.phonemes.length === 0) return null
+
+  const worst = word.phonemes.reduce((a, b) => (a.score < b.score ? a : b))
+  const p = worst.phoneme.toLowerCase()
+
+  if (p.includes('r') || p.includes('ɾ') || p.includes('ɹ')) return 'rr'
+  if (p.includes('x') || p.includes('χ') || p.includes('h')) return 'x'
+  if (p.includes('ɲ') || p.includes('ñ')) return 'ɲ'
+  if ('aeiou'.includes(p)) return 'vowels'
+
+  return 'consonants'
+}
+
 interface L1Tip {
   description: string
   tip: string

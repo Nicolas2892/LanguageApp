@@ -97,9 +97,10 @@ New route: `/pronunciation`
 
 ## Status
 
-**Phase 1 + Phase 2 DONE** (2026-03-26). Phase 3 (Shadowing) not yet started.
+**Phase 1 + Phase 2 + Phase 3 DONE** (2026-03-26). All phases complete.
 
 - Phase 1: Backend infrastructure — Azure client, `/api/pronunciation/assess`, L1 maps, account settings, migration 026
 - Phase 2: Sentence reading ("Lee la Frase") — `/pronunciation` hub, `/pronunciation/session`, progress tracking via `/api/pronunciation/progress`, dashboard card, SideNav + progress page integration
+- Phase 3: Shadowing ("Sombra") — `?mode=shadow`; listen→record→compare flow; `useNativeAudio` hook; mode toggle on hub; A/B audio comparison; `classifyPhoneme()` utility; word-level phoneme category tracking
 - Migration 026 must be applied in Supabase SQL editor before production use
 - Free for all users. Premium gating deferred (see Feat-S).

@@ -240,6 +240,14 @@ Session configure page (`/study/configure`) builds these params via a UI before 
 | `hint`       | `1`                                     | Show English gloss of blank expression    |
 
 
+### Pronunciation Session Query Params (`/pronunciation/session`)
+
+
+| Param  | Values              | Effect                                              |
+| ------ | ------------------- | --------------------------------------------------- |
+| `mode` | `shadow`            | Shadow mode: listen to native TTS first, then record. Default: read mode (no param). |
+
+
 ### Exercise Types & Components
 
 
@@ -540,7 +548,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2514 tests across 154 files — all passing.**
+**Test suite: 2543 tests across 155 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -637,12 +645,12 @@ Items are ordered by priority within each group. Full details of completed work 
 - Requires tracking `onboarding_completed = false` users and a transactional email provider.
 - **Do not implement without Feat-K vendor decision (shared email infrastructure).**
 
-**Feat-P: Pronunciation / accent training** *(Phase 1+2 DONE — Phase 3 pending)*
+**Feat-P: Pronunciation / accent training** *(Phase 1+2+3 DONE — see completed-features.md)*
 
 - Azure Speech Services Pronunciation Assessment API for phoneme-level scoring. Accent selection: es-ES (Castellano) / es-MX (Latinoamericano) in account settings.
 - **Phase 1 DONE:** Backend infra — Azure integration, `POST /api/pronunciation/assess`, recording hook, `pronunciation_progress` table, L1 maps (German/English), account settings for l1_language + target_accent.
 - **Phase 2 DONE:** Sentence reading ("Lee la Frase") — `/pronunciation` hub with per-category progress bars, `/pronunciation/session` with record→assess→feedback state machine, fire-and-forget progress tracking via `POST /api/pronunciation/progress`, dashboard card, SideNav + progress page integration, `PronunciationCategoryMastery` component, `PRONUNCIATION_CATEGORY_LABELS` shared constant.
-- **Phase 3 pending:** Shadowing ("Sombra") — listen to native audio, repeat, holistic fluency scoring, audio comparison UI.
+- **Phase 3 DONE:** Shadowing ("Sombra") — `?mode=shadow` on session URL; listen→record→compare flow; `useNativeAudio` hook (fetch/cache/play via `/api/tts`); mode toggle on hub ("Lee la Frase" / "Sombra"); A/B audio comparison (nativeAudioUrl in feedback panel); `classifyPhoneme()` shared utility for word-level phoneme→category mapping; phoneme category tracking (rr/x/ɲ/vowels/consonants) in progress.
 - Migration 026 must be applied in Supabase SQL editor before production use.
 - No beginner exercises (minimal pairs, word repetition) — audience is advanced learners focused on polish.
 - Free for all users initially. Premium gating deferred (see Feat-S).
@@ -698,7 +706,7 @@ Items are ordered by priority within each group. Full details of completed work 
 | **P3** | **Feat-J** — Verb + Vocab SRS integration | PM decision on unified vs. separate SRS model |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
-| **P2** | **Feat-P Phase 3** — Pronunciation shadowing mode | Phase 1+2 done; Phase 3 design needed |
+| **P2** | **Feat-P** — Pronunciation (all 3 phases) | DONE — see completed-features.md |
 | **P4** | **Feat-S** — Premium tier / monetisation | User base justifies it |
 | **P3** | **Feat-R** — Capacitor native shell | Public launch readiness |
 | **P4** | **Infra-D** — A/B testing / feature flags | Needed before adaptive grading |

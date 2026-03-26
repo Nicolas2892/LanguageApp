@@ -1,15 +1,17 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { X, Mic, Loader2 } from 'lucide-react'
+import { useState, useCallback, useEffect } from 'react'
+import { X, Mic, Loader2, Volume2 } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/routes'
 import { fireAndForget } from '@/lib/fireAndForget'
 import { isOnline } from '@/lib/platform/network'
 import { usePronunciationRecording } from '@/lib/hooks/usePronunciationRecording'
+import { useNativeAudio } from '@/lib/hooks/useNativeAudio'
 import { SpeakButton } from '@/components/SpeakButton'
 import { PronunciationFeedbackPanel } from '@/components/pronunciation/PronunciationFeedbackPanel'
 import { PronunciationSummary } from '@/components/pronunciation/PronunciationSummary'
+import { classifyPhoneme } from '@/lib/pronunciation/l1-maps'
 import type { PronunciationResult } from '@/lib/azure/client'
 
 interface PronunciationItem {
@@ -19,6 +21,7 @@ interface PronunciationItem {
 }
 
 type Phase =
+  | { kind: 'listening' }
   | { kind: 'answering' }
   | { kind: 'recording' }
   | { kind: 'assessing' }
@@ -29,18 +32,34 @@ interface Props {
   items: PronunciationItem[]
   l1Language: string | null
   sessionUrl: string
+  mode?: 'read' | 'shadow'
 }
 
-export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
+export function PronunciationSession({ items, l1Language, sessionUrl, mode = 'read' }: Props) {
+  const isShadow = mode === 'shadow'
   const [index, setIndex] = useState(0)
-  const [phase, setPhase] = useState<Phase>({ kind: 'answering' })
+  const [phase, setPhase] = useState<Phase>({ kind: isShadow ? 'listening' : 'answering' })
   const [results, setResults] = useState<PronunciationResult[]>([])
   const [flashClass, setFlashClass] = useState('')
 
   const recording = usePronunciationRecording()
+  const nativeAudio = useNativeAudio()
   const current = items[index]
   const isLast = index === items.length - 1
   const progress = ((index + (phase.kind === 'done' ? 1 : 0)) / items.length) * 100
+
+  // Shadow mode: auto-play native audio when entering listening phase
+  useEffect(() => {
+    if (phase.kind === 'listening' && current) {
+      nativeAudio.play(current.displayText)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase.kind, index])
+
+  // Shadow mode: transition from listening → answering when audio finishes
+  if (phase.kind === 'listening' && !nativeAudio.playing && nativeAudio.audioUrl) {
+    setPhase({ kind: 'answering' })
+  }
 
   // Watch recording state transitions
   const handleRecord = useCallback(() => {
@@ -79,8 +98,8 @@ export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
 
   const handleRetry = useCallback(() => {
     recording.reset()
-    setPhase({ kind: 'answering' })
-  }, [recording])
+    setPhase({ kind: isShadow ? 'listening' : 'answering' })
+  }, [recording, isShadow])
 
   const handleNext = useCallback(() => {
     recording.reset()
@@ -88,9 +107,17 @@ export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
       setPhase({ kind: 'done' })
     } else {
       setIndex((i) => i + 1)
-      setPhase({ kind: 'answering' })
+      setPhase({ kind: isShadow ? 'listening' : 'answering' })
     }
-  }, [isLast, recording])
+  }, [isLast, recording, isShadow])
+
+  const handleSkipListening = useCallback(() => {
+    setPhase({ kind: 'answering' })
+  }, [])
+
+  const handleReplayNative = useCallback(() => {
+    if (current) nativeAudio.play(current.displayText)
+  }, [current, nativeAudio])
 
   // ── Fire-and-forget progress tracking ──
   function trackProgress(result: PronunciationResult) {
@@ -101,6 +128,12 @@ export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
       { category: 'fluency', correct: result.fluencyScore >= THRESHOLD },
       { category: 'prosody', correct: result.prosodyScore >= THRESHOLD },
     ]
+    // Word-level phoneme category tracking
+    for (const word of result.words) {
+      if (word.accuracyScore >= THRESHOLD) continue
+      const cat = classifyPhoneme(word)
+      if (cat) categories.push({ category: cat, correct: false })
+    }
     for (const entry of categories) {
       fireAndForget(
         fetch('/api/pronunciation/progress', {
@@ -136,7 +169,7 @@ export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
       {/* Eyebrow */}
       <div className="shrink-0 mb-2">
         <span className="senda-eyebrow">
-          Pronunciación · {index + 1}/{items.length}
+          {isShadow ? 'Sombra' : 'Pronunciación'} · {index + 1}/{items.length}
         </span>
       </div>
 
@@ -147,16 +180,36 @@ export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
             {current.displayText}
           </p>
 
-          {/* Native audio */}
-          <div className="flex items-center gap-2">
-            <SpeakButton text={current.displayText} />
-            <span className="text-xs" style={{ color: 'var(--d5-muted)' }}>Escuchar nativo</span>
-          </div>
+          {/* Native audio — SpeakButton in read mode, hidden in shadow listening phase */}
+          {!isShadow && (
+            <div className="flex items-center gap-2">
+              <SpeakButton text={current.displayText} />
+              <span className="text-xs" style={{ color: 'var(--d5-muted)' }}>Escuchar nativo</span>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Bottom action area */}
       <div className="shrink-0 space-y-3 pb-2">
+        {/* Shadow: listening phase */}
+        {phase.kind === 'listening' && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-2 py-3">
+              <Volume2 size={16} className="text-primary animate-pulse" />
+              <span className="text-sm" style={{ color: 'var(--d5-warm)' }}>Escucha atentamente…</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleSkipListening}
+              className="w-full text-center text-xs font-semibold transition-colors"
+              style={{ color: 'var(--d5-muted)' }}
+            >
+              Saltar →
+            </button>
+          </div>
+        )}
+
         {phase.kind === 'answering' && (
           <>
             {recording.error && (
@@ -167,6 +220,19 @@ export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
                 {recording.error === 'audio-capture' && 'No se pudo acceder al micrófono.'}
                 {recording.error === 'no-speech' && 'No se detectó audio. Inténtalo de nuevo.'}
               </p>
+            )}
+            {/* Shadow mode: replay native before recording */}
+            {isShadow && (
+              <button
+                type="button"
+                onClick={handleReplayNative}
+                disabled={nativeAudio.playing}
+                className="w-full flex items-center justify-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold transition-colors disabled:opacity-50"
+                style={{ background: 'rgba(140,106,63,0.07)', color: 'var(--d5-warm)' }}
+              >
+                <Volume2 size={14} />
+                {nativeAudio.playing ? 'Reproduciendo…' : 'Escuchar de Nuevo'}
+              </button>
             )}
             <button
               type="button"
@@ -205,6 +271,7 @@ export function PronunciationSession({ items, l1Language, sessionUrl }: Props) {
             sentence={current.displayText}
             l1Language={l1Language}
             userAudioUrl={recording.userAudioUrl}
+            nativeAudioUrl={isShadow ? nativeAudio.audioUrl : null}
             onRetry={handleRetry}
             onNext={handleNext}
             isLast={isLast}

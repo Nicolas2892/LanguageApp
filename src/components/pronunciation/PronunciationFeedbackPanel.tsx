@@ -3,7 +3,7 @@
 import { Volume2 } from 'lucide-react'
 import { useSpeech } from '@/lib/hooks/useSpeech'
 import { WordScoreChips } from './WordScoreChips'
-import { L1_TIPS } from '@/lib/pronunciation/l1-maps'
+import { L1_TIPS, classifyPhoneme } from '@/lib/pronunciation/l1-maps'
 import type { PronunciationResult } from '@/lib/azure/client'
 
 interface Props {
@@ -11,6 +11,7 @@ interface Props {
   sentence: string
   l1Language: string | null
   userAudioUrl: string | null
+  nativeAudioUrl?: string | null
   onRetry: () => void
   onNext: () => void
   isLast: boolean
@@ -32,7 +33,7 @@ function ScoreBar({ label, score }: { label: string; score: number }) {
 }
 
 export function PronunciationFeedbackPanel({
-  result, sentence, l1Language, userAudioUrl, onRetry, onNext, isLast,
+  result, sentence, l1Language, userAudioUrl, nativeAudioUrl, onRetry, onNext, isLast,
 }: Props) {
   const { speak } = useSpeech()
 
@@ -70,7 +71,14 @@ export function PronunciationFeedbackPanel({
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => speak(sentence, 'es-ES')}
+          onClick={() => {
+            if (nativeAudioUrl) {
+              const audio = new Audio(nativeAudioUrl)
+              audio.play()
+            } else {
+              speak(sentence, 'es-ES')
+            }
+          }}
           className="flex-1 flex items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold transition-colors"
           style={{ background: 'rgba(140,106,63,0.07)', color: 'var(--d5-warm)' }}
         >
@@ -119,18 +127,8 @@ function findRelevantTip(l1: string, word: { phonemes: { phoneme: string; score:
   const tips = L1_TIPS[l1]
   if (!tips) return null
 
-  // Check for specific problem phonemes
-  const worstPhoneme = word.phonemes.length > 0
-    ? word.phonemes.reduce((a, b) => (a.score < b.score ? a : b))
-    : null
+  const category = classifyPhoneme(word)
+  if (!category) return tips.stress ?? null
 
-  if (!worstPhoneme) return tips.stress ?? null
-
-  const p = worstPhoneme.phoneme.toLowerCase()
-  if (p.includes('r') || p.includes('ɾ') || p.includes('ɹ')) return tips.rr
-  if (p.includes('x') || p.includes('χ') || p.includes('h')) return tips.x
-  if (p.includes('ɲ') || p.includes('ñ')) return tips.ɲ
-  if ('aeiou'.includes(p)) return tips.vowels
-
-  return tips.consonants
+  return tips[category] ?? tips.consonants
 }

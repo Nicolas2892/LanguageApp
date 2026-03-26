@@ -44,6 +44,20 @@ vi.mock('@/lib/hooks/useSpeech', () => ({
   useSpeech: () => ({ speak: vi.fn(), speaking: false, supported: true }),
 }))
 
+const mockNativePlay = vi.fn()
+let nativeAudioState: {
+  playing: boolean
+  audioUrl: string | null
+  error: string | null
+}
+
+vi.mock('@/lib/hooks/useNativeAudio', () => ({
+  useNativeAudio: () => ({
+    ...nativeAudioState,
+    play: mockNativePlay,
+  }),
+}))
+
 vi.mock('@/components/SpeakButton', () => ({
   SpeakButton: () => <button data-testid="speak-btn">Speak</button>,
 }))
@@ -107,6 +121,11 @@ describe('PronunciationSession', () => {
       userAudioUrl: null,
       error: null,
       permissionState: 'unknown',
+    }
+    nativeAudioState = {
+      playing: false,
+      audioUrl: null,
+      error: null,
     }
     vi.clearAllMocks()
   })
@@ -247,5 +266,64 @@ describe('PronunciationSession', () => {
   it('renders SpeakButton for native audio', () => {
     render(<PronunciationSession items={defaultItems} l1Language={null} sessionUrl="/pronunciation/session" />)
     expect(screen.getByTestId('speak-btn')).toBeInTheDocument()
+  })
+
+  // ── Shadow mode tests ──
+
+  it('shadow mode: starts in listening phase', () => {
+    render(<PronunciationSession items={defaultItems} l1Language={null} sessionUrl="/pronunciation/session?mode=shadow" mode="shadow" />)
+    expect(screen.getByText('Escucha atentamente…')).toBeInTheDocument()
+    expect(mockNativePlay).toHaveBeenCalledWith('Hola, ¿cómo estás?')
+  })
+
+  it('shadow mode: shows eyebrow as Sombra', () => {
+    render(<PronunciationSession items={defaultItems} l1Language={null} sessionUrl="/pronunciation/session?mode=shadow" mode="shadow" />)
+    expect(screen.getByText('Sombra · 1/2')).toBeInTheDocument()
+  })
+
+  it('shadow mode: Saltar button skips to answering', async () => {
+    const user = userEvent.setup()
+    render(<PronunciationSession items={defaultItems} l1Language={null} sessionUrl="/pronunciation/session?mode=shadow" mode="shadow" />)
+    await user.click(screen.getByText('Saltar →'))
+    expect(screen.getByText('Grabar')).toBeInTheDocument()
+  })
+
+  it('shadow mode: transitions to answering when audio finishes', () => {
+    nativeAudioState.audioUrl = 'blob:native-audio'
+    nativeAudioState.playing = false
+    render(<PronunciationSession items={defaultItems} l1Language={null} sessionUrl="/pronunciation/session?mode=shadow" mode="shadow" />)
+    // Should auto-transition since audioUrl is set and not playing
+    expect(screen.getByText('Grabar')).toBeInTheDocument()
+  })
+
+  it('shadow mode: shows replay button in answering phase', async () => {
+    const user = userEvent.setup()
+    render(<PronunciationSession items={defaultItems} l1Language={null} sessionUrl="/pronunciation/session?mode=shadow" mode="shadow" />)
+    await user.click(screen.getByText('Saltar →'))
+    expect(screen.getByText('Escuchar de Nuevo')).toBeInTheDocument()
+  })
+
+  it('shadow mode: hides SpeakButton (uses TTS instead)', () => {
+    render(<PronunciationSession items={defaultItems} l1Language={null} sessionUrl="/pronunciation/session?mode=shadow" mode="shadow" />)
+    expect(screen.queryByTestId('speak-btn')).not.toBeInTheDocument()
+  })
+
+  it('shadow mode: retry goes back to listening', async () => {
+    const user = userEvent.setup()
+    const singleItem = [makeItem('1', 'Test sentence')]
+    // Start with no audioUrl so listening phase renders
+    const { rerender } = render(
+      <PronunciationSession items={singleItem} l1Language={null} sessionUrl="/pronunciation/session?mode=shadow" mode="shadow" />,
+    )
+    // Skip listening → record → stop → get result → retry
+    await user.click(screen.getByText('Saltar →'))
+    await user.click(screen.getByText('Grabar'))
+    await user.click(screen.getByText('Detener Grabación'))
+    hookState.result = makeResult()
+    rerender(
+      <PronunciationSession items={singleItem} l1Language={null} sessionUrl="/pronunciation/session?mode=shadow" mode="shadow" />,
+    )
+    await user.click(screen.getByText('Repetir'))
+    expect(screen.getByText('Escucha atentamente…')).toBeInTheDocument()
   })
 })

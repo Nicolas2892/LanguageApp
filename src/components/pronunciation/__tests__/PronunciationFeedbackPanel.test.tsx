@@ -116,4 +116,14 @@ describe('PronunciationFeedbackPanel', () => {
     expect(screen.getByText('Finalizar')).toBeInTheDocument()
     expect(screen.queryByText('Siguiente →')).not.toBeInTheDocument()
   })
+
+  it('renders Nativo button even without nativeAudioUrl', () => {
+    render(<PronunciationFeedbackPanel {...defaultProps} />)
+    expect(screen.getByText('Nativo')).toBeInTheDocument()
+  })
+
+  it('renders Nativo button with nativeAudioUrl', () => {
+    render(<PronunciationFeedbackPanel {...defaultProps} nativeAudioUrl="blob:native-tts" />)
+    expect(screen.getByText('Nativo')).toBeInTheDocument()
+  })
 })

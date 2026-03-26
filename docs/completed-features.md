@@ -4,7 +4,7 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
-## Feat-P Phase 1+2: Pronunciation / Accent Training (2026-03-26)
+## Feat-P Phase 1+2+3: Pronunciation / Accent Training (2026-03-26)
 
 Sentence-level pronunciation assessment using Azure Speech Services. Users record sentences aloud and receive phoneme-level, fluency, and prosody scoring with L1-specific coaching tips (German, English).
 
@@ -13,9 +13,11 @@ Sentence-level pronunciation assessment using Azure Speech Services. Users recor
 - **Phase 2 (UI):** `/pronunciation` hub with per-category progress bars, `/pronunciation/session` with record/assess/feedback state machine, fire-and-forget progress tracking via `POST /api/pronunciation/progress`, `PronunciationFeedbackPanel` (word-level chips, score bars, L1 tips, audio comparison), `PronunciationSummary` (done screen), dashboard card, SideNav link, progress page integration (`PronunciationCategoryMastery`)
 - **Shared constant:** `PRONUNCIATION_CATEGORY_LABELS` in `src/lib/pronunciation/l1-maps.ts` (used by hub + progress page)
 - **Tests:** 60 new tests across 8 files (API route, session, hub, feedback panel, summary, word chips, error boundary, recording hook)
-- **Phase 2 tracks 3 categories** (stress/fluency/prosody via Azure dimension scores); word-level phoneme categories (rr, x, ɲ, vowels, consonants) deferred to Phase 3
+- **Phase 3 (Shadowing):** `?mode=shadow` on session URL; `useNativeAudio` hook (fetch/cache/play via `/api/tts`); mode toggle on hub ("Lee la Frase" / "Sombra"); `classifyPhoneme()` shared utility in `l1-maps.ts`; word-level phoneme category tracking (rr/x/ɲ/vowels/consonants) in progress; A/B audio comparison (`nativeAudioUrl` prop on feedback panel)
+- All 8 pronunciation categories now tracked: stress, fluency, prosody (dimension scores) + rr, x, ɲ, vowels, consonants (word-level phonemes)
+- **Tests:** 89 total across 9 files
 
-**What's NOT included (Phase 3):** Shadowing mode (listen → repeat → compare), word-level phoneme category tracking, native audio pitch contour overlay
+**What's NOT included:** Pitch contour overlay (Azure doesn't return timing data; alignment problem makes it misleading), waveform visualization
 
 **Migration note:** `026_pronunciation.sql` must be applied in Supabase SQL editor before production use.
 
