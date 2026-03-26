@@ -38,6 +38,7 @@ describe('TutorChat', () => {
     vi.clearAllMocks()
     mockTrackTutorMessageSent.mockClear()
     mockTrackFeatureFirstUse.mockClear()
+    sessionStorage.clear()
   })
 
   afterEach(() => {

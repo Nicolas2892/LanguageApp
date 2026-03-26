@@ -17,7 +17,7 @@ export function HintPanel({ hint1, hint2, claudeHint, wrongAttempts, loadingHint
   const hint2Revealed = wrongAttempts >= 2
 
   return (
-    <div className="space-y-2 text-sm">
+    <div className="space-y-2 text-sm" aria-live="polite">
       {/* Dots indicator — always visible when hints exist */}
       <div className="flex items-center gap-1.5 text-xs text-[var(--d5-muted)] mt-3">
         <span>Pistas:</span>

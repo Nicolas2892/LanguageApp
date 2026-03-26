@@ -121,7 +121,7 @@ export function VocabSummary({ correct, total, categoryStats, onPracticeAgain }:
         >
           Practica de nuevo
         </button>
-        <Link href="/verbs" className="senda-cta-outline">
+        <Link href="/verbs?tab=vocab" className="senda-cta-outline">
           Ver Léxico
         </Link>
       </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { SpeakButton } from '@/components/SpeakButton'
 import { MicButton } from '@/components/MicButton'
@@ -36,6 +36,17 @@ export function FreeWritePrompt({
       return prev + separator + stt.transcript
     })
   }, [stt.transcript])
+
+  // Warn before leaving with unsaved answer
+  const answerRef = useRef(answer)
+  answerRef.current = answer
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (answerRef.current.trim()) { e.preventDefault() }
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [])
 
   const wordCount = answer.trim() ? answer.trim().split(/\s+/).length : 0
   const overLimit = wordCount > 200

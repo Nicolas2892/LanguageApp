@@ -10,7 +10,8 @@ interface Props {
 export function UpdateToast({ onUpdate, onDismiss }: Props) {
   return (
     <div
-      className="fixed bottom-20 left-4 right-4 z-50 mx-auto max-w-sm senda-card flex items-center gap-3 animate-card-in"
+      className="fixed left-4 right-4 z-50 mx-auto max-w-sm senda-card flex items-center gap-3 animate-card-in
+                 bottom-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:bottom-6"
       role="status"
     >
       <RefreshCw

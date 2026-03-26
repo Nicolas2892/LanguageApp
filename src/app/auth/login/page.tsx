@@ -89,7 +89,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4 pt-0">
               {serverError && (
-                <p className="text-sm text-destructive">{serverError}</p>
+                <p className="text-sm text-destructive" role="alert">{serverError}</p>
               )}
               <div className="space-y-2">
                 <Label htmlFor="email" className="senda-field-label">Correo electrónico</Label>
@@ -97,6 +97,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   placeholder="you@example.com"
+                  autoComplete="email"
                   className="senda-input"
                   {...register('email')}
                 />
@@ -109,6 +110,7 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="current-password"
                   className="senda-input"
                   {...register('password')}
                 />

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ROUTES } from '@/lib/routes'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
@@ -32,6 +33,13 @@ export default async function TutorPage({
         className="px-4 py-3 shrink-0 flex items-center gap-3"
         style={{ borderBottom: '1px solid var(--d5-line)' }}
       >
+        <Link
+          href={ROUTES.dashboard}
+          className="tap-highlight text-sm font-medium shrink-0"
+          style={{ color: 'var(--d5-warm)' }}
+        >
+          ← Inicio
+        </Link>
         <SvgSendaPath size={24} />
         <div>
           <p className="senda-eyebrow">Tu Tutor de Español</p>

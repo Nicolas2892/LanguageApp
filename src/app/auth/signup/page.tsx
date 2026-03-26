@@ -110,13 +110,14 @@ export default function SignupPage() {
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4 pt-0">
               {serverError && (
-                <p className="text-sm text-destructive">{serverError}</p>
+                <p className="text-sm text-destructive" role="alert">{serverError}</p>
               )}
               <div className="space-y-2">
                 <Label htmlFor="display_name" className="senda-field-label">Nombre</Label>
                 <Input
                   id="display_name"
                   placeholder="Maria"
+                  autoComplete="name"
                   className="senda-input"
                   {...register('display_name')}
                 />
@@ -130,6 +131,7 @@ export default function SignupPage() {
                   id="email"
                   type="email"
                   placeholder="you@example.com"
+                  autoComplete="email"
                   className="senda-input"
                   {...register('email')}
                 />
@@ -142,6 +144,7 @@ export default function SignupPage() {
                 <Input
                   id="password"
                   type="password"
+                  autoComplete="new-password"
                   className="senda-input"
                   {...register('password')}
                 />
@@ -154,6 +157,7 @@ export default function SignupPage() {
                 <Input
                   id="confirm_password"
                   type="password"
+                  autoComplete="new-password"
                   className="senda-input"
                   {...register('confirm_password')}
                 />

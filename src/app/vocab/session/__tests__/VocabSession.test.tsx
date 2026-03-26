@@ -468,7 +468,7 @@ describe('VocabSession', () => {
 
     expect(screen.getByText('¿Salir de la Sesión?')).toBeInTheDocument()
     expect(
-      screen.getByText('Tu progreso de esta sesión no se guardará.'),
+      screen.getByText('Tu progreso parcial se ha guardado.'),
     ).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Seguir/ })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Salir/ })).toBeInTheDocument()

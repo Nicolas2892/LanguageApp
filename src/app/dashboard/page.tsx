@@ -84,6 +84,9 @@ export default async function DashboardPage() {
             <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-warm)' }}>
               Completa tu primera sesión y lo seguiremos desde aquí.
             </p>
+            <Link href="/study/configure" className="senda-cta w-full">
+              Empezar Tu Primera Sesión
+            </Link>
           </>
         ) : dueCount > 0 ? (
           <>

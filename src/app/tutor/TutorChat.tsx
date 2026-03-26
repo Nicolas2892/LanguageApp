@@ -18,8 +18,22 @@ interface Props {
   conceptTitle?: string
 }
 
+const CHAT_STORAGE_KEY = 'tutor_chat_messages'
+
+function restoreMessages(): Message[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = sessionStorage.getItem(CHAT_STORAGE_KEY)
+    if (!raw) return []
+    return JSON.parse(raw) as Message[]
+  } catch { return [] }
+}
+
 export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Props) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages)
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const restored = restoreMessages()
+    return restored.length > 0 ? restored : initialMessages
+  })
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -34,6 +48,10 @@ export function TutorChat({ initialMessages = [], conceptId, conceptTitle }: Pro
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    // Persist non-empty conversations to sessionStorage (survives page refresh, clears on tab close)
+    if (messages.length > 0) {
+      try { sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages)) } catch { /* quota */ }
+    }
   }, [messages])
 
   useEffect(() => {

@@ -164,6 +164,16 @@ export function UnifiedStudySession({ items }: Props) {
     const correctCount = Array.from(scores.values()).filter(Boolean).length
     const pct = items.length > 0 ? Math.round((correctCount / items.length) * 100) : 0
 
+    // Per-type breakdown
+    const typeStats = new Map<string, { correct: number; total: number }>()
+    items.forEach((item, i) => {
+      const label = item.type === 'concept' ? 'Gramática' : item.type === 'verb' ? 'Verbos' : 'Vocabulario'
+      const prev = typeStats.get(label) ?? { correct: 0, total: 0 }
+      prev.total++
+      if (scores.get(i)) prev.correct++
+      typeStats.set(label, prev)
+    })
+
     return (
       <div className="max-w-md mx-auto text-center space-y-6 animate-done-stagger relative overflow-hidden">
         <BackgroundMagicS />
@@ -174,6 +184,19 @@ export function UnifiedStudySession({ items }: Props) {
             {correctCount}/{items.length} correctas
           </p>
         </div>
+        {typeStats.size > 1 && (
+          <div className="senda-card-sm text-left space-y-2">
+            {Array.from(typeStats.entries()).map(([label, s]) => {
+              const typePct = s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0
+              return (
+                <div key={label} className="flex items-center justify-between text-sm">
+                  <span style={{ color: 'var(--d5-warm)' }}>{label}</span>
+                  <span className="font-semibold">{typePct}% <span className="font-normal text-xs" style={{ color: 'var(--d5-muted)' }}>({s.correct}/{s.total})</span></span>
+                </div>
+              )
+            })}
+          </div>
+        )}
         <div className="space-y-2">
           <Button onClick={() => router.push(ROUTES.studyConfigure)} className="w-full rounded-full">
             Nueva Sesión

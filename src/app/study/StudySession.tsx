@@ -101,6 +101,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const [loadingHint, setLoadingHint] = useState(false)
 
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const failedAnswerRef = useRef<string | null>(null)
   const [generatingMore, setGeneratingMore] = useState(false)
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [streamingDetails, setStreamingDetails] = useState(false)
@@ -112,8 +113,8 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const pendingDetailsRef = useRef<{ feedback: string; corrected_version: string; explanation: string } | null>(null)
   const confettiFired = useRef(false)
 
-  // UX-AB: concept explanation collapsed by default
-  const [isConceptExpanded, setIsConceptExpanded] = useState(false)
+  // UX-AB: concept explanation — persists expanded state per concept
+  const [expandedConcepts, setExpandedConcepts] = useState<Set<string>>(new Set())
 
   // UX-AA: mastery milestone overlay
   const [masteryOverlayOpen, setMasteryOverlayOpen] = useState(false)
@@ -134,14 +135,17 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Countdown interval
+  // Countdown interval — auto-pauses when tab is hidden (Page Visibility API)
   useEffect(() => {
     if (sprintConfig?.limitType !== 'time') return
     if (state.phase === 'done') return
-    const id = setInterval(() => {
-      setSecondsLeft((s) => Math.max(0, s - 1))
-    }, 1000)
-    return () => clearInterval(id)
+    let id: ReturnType<typeof setInterval> | null = null
+    const start = () => { id = setInterval(() => setSecondsLeft((s) => Math.max(0, s - 1)), 1000) }
+    const stop = () => { if (id) { clearInterval(id); id = null } }
+    const onVisibility = () => { document.hidden ? stop() : start() }
+    if (!document.hidden) start()
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => { stop(); document.removeEventListener('visibilitychange', onVisibility) }
   }, [sprintConfig, state.phase])
 
   // Cleanup flash timer on unmount
@@ -235,8 +239,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       setExiting(true)
       setTimeout(() => {
         setExiting(false)
-        // UX-AB: collapse concept note on each new exercise
-        setIsConceptExpanded(false)
+        // UX-AB: concept notes now persist per concept (no reset needed)
         startTransition(() => {
           setIndex((i) => i + 1)
           setState({ phase: 'answering' })
@@ -312,8 +315,10 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       }
 
       if (!res.ok || !res.body) {
-        setSubmitError('Algo salió mal. Inténtalo de nuevo.')
+        failedAnswerRef.current = answer
+        setSubmitError('Algo salió mal.')
         setSubmitting(false)
+        submittingRef.current = false
         return
       }
 
@@ -534,7 +539,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
       ? 'Paso a paso — las difíciles son las que vale la pena repetir.'
       : 'Sesión difícil — pero cuenta.'
     return (
-      <div className="animate-done-stagger space-y-6 text-center py-8">
+      <div className="animate-done-stagger space-y-6 text-center py-8" aria-live="polite">
         <div className="flex justify-center">
           <div className={pct < 50 ? 'rounded-full ring-2 ring-orange-400 ring-offset-2 animate-pulse p-2' : ''}>
             <PartyPopper className="h-14 w-14 text-orange-500" strokeWidth={1.5} />
@@ -661,7 +666,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
             <DialogTitle>¿Salir de la Sesión?</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Tu progreso de esta sesión no se guardará.
+            Tu progreso parcial se ha guardado.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowExitDialog(false)}>
@@ -731,18 +736,23 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           )}
           <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
           <button
-            onClick={() => setIsConceptExpanded((e) => !e)}
-            aria-expanded={isConceptExpanded}
+            onClick={() => setExpandedConcepts((prev) => {
+              const next = new Set(prev)
+              if (next.has(item.concept.id)) next.delete(item.concept.id)
+              else next.add(item.concept.id)
+              return next
+            })}
+            aria-expanded={expandedConcepts.has(item.concept.id)}
             className="text-[var(--d5-muted)] hover:text-foreground transition-colors"
           >
-            Notas {isConceptExpanded ? '↑' : '↓'}
+            Notas {expandedConcepts.has(item.concept.id) ? '↑' : '↓'}
           </button>
         </div>
 
         {/* Concept notes panel — inline below metadata row */}
         <div
           className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
-          style={{ maxHeight: isConceptExpanded ? '16rem' : '0' }}
+          style={{ maxHeight: expandedConcepts.has(item.concept.id) ? '16rem' : '0' }}
         >
           <div className="bg-muted/50 rounded-lg text-sm px-4 py-3 max-w-prose">
             <p>{item.concept.explanation}</p>
@@ -761,7 +771,20 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                 </div>
               )}
               {submitError && (
-                <p className="text-sm text-destructive mt-2">{submitError}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <p className="text-sm text-destructive">{submitError}</p>
+                  {failedAnswerRef.current && (
+                    <button
+                      onClick={() => {
+                        setSubmitError(null)
+                        handleSubmit(failedAnswerRef.current!)
+                      }}
+                      className="text-sm font-medium text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
+                    >
+                      Reintentar
+                    </button>
+                  )}
+                </div>
               )}
               {wrongAttempts > 0 && (
                 <div className="animate-in fade-in duration-300">

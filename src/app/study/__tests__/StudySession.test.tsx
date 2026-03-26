@@ -238,15 +238,17 @@ describe('StudySession — UX-AB concept collapse', () => {
     expect(screen.getByText('Notas ↑')).toBeTruthy()
   })
 
-  it('collapses again after moving to the next exercise', async () => {
-    render(<StudySession items={[makeItem('e1'), makeItem('e2')]} />)
-    // Expand on exercise 1
+  it('collapses when moving to a different concept', async () => {
+    const concept2: Concept = { ...mockConcept, id: 'concept-2', title: 'Other Concept' }
+    const item2: StudyItem = { concept: concept2, exercise: { ...makeExercise('e2'), concept_id: 'concept-2' } }
+    render(<StudySession items={[makeItem('e1'), item2]} />)
+    // Expand on exercise 1 (concept-1)
     await userEvent.click(screen.getByRole('button', { name: /Notas/i }))
     expect(screen.getByText('Notas ↑')).toBeTruthy()
-    // Submit and advance
+    // Submit and advance to exercise 2 (concept-2)
     await submitAndWaitForFeedback()
     await userEvent.click(screen.getByTestId('next-btn'))
-    // Exercise 2 should be collapsed again
+    // Different concept should be collapsed
     await waitFor(() => expect(screen.getByText('Notas ↓')).toBeTruthy())
   })
 })

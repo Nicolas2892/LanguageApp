@@ -258,7 +258,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
             <DialogTitle>¿Salir de la Sesión?</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Tu progreso de esta sesión no se guardará.
+            Tu progreso parcial se ha guardado.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowExitDialog(false)}>

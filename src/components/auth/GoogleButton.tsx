@@ -6,20 +6,32 @@ import { Button } from '@/components/ui/button'
 
 export function GoogleButton() {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function handleClick() {
     setLoading(true)
-    const supabase = createClient()
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-    // Page will redirect; no need to reset loading state
+    setError(null)
+    try {
+      const supabase = createClient()
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      if (oauthError) {
+        setError('No se pudo iniciar sesión con Google. Inténtalo de nuevo.')
+        setLoading(false)
+      }
+      // Page will redirect on success; no need to reset loading state
+    } catch {
+      setError('No se pudo iniciar sesión con Google. Inténtalo de nuevo.')
+      setLoading(false)
+    }
   }
 
   return (
+    <>
     <Button
       type="button"
       variant="outline"
@@ -36,5 +48,7 @@ export function GoogleButton() {
       </svg>
       {loading ? 'Redirigiendo…' : 'Continuar con Google'}
     </Button>
+    {error && <p className="text-sm text-destructive mt-2 text-center" role="alert">{error}</p>}
+    </>
   )
 }
