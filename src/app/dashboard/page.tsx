@@ -16,6 +16,7 @@ import { DashboardCacheWriter } from '@/components/offline/DashboardCacheWriter'
 import type { Profile } from '@/lib/supabase/types'
 import { LEVEL_CHIP } from '@/lib/constants'
 import { userLocalToday } from '@/lib/timezone'
+import { fetchUnifiedDueCount } from '@/lib/srs/queue'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -41,14 +42,8 @@ export default async function DashboardPage() {
   const profile = profileRaw as Profile | null
   const today = userLocalToday(profile?.timezone)
 
-  // Due count query needs timezone (for today's date), so runs after profile fetch
-  const dueRes = await supabase
-    .from('user_progress')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .lte('due_date', today)
-
-  const dueCount = dueRes.count ?? 0
+  // Unified due count (grammar + verbs + vocab)
+  const dueCount = await fetchUnifiedDueCount(supabase, user.id, today)
   const studiedCount = studiedRes.count ?? 0
   const newConceptsCount = totalConcepts - studiedCount
   const isNewUser = studiedCount === 0

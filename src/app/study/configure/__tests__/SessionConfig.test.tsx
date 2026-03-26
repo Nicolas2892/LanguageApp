@@ -93,6 +93,6 @@ describe('SessionConfig', () => {
 
   it('shows due count in Repaso Diario subtitle', () => {
     render(<SessionConfig modules={mockModules} mistakeConceptCount={0} dueCount={7} />)
-    expect(screen.getByText(/7 conceptos pendientes hoy/i)).toBeTruthy()
+    expect(screen.getByText(/7 pendientes hoy/i)).toBeTruthy()
   })
 })

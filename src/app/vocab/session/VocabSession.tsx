@@ -173,6 +173,24 @@ export function VocabSession({ items, showHint, sessionUrl }: Props) {
     doneTrackedRef.current = true
     const correctCount = Array.from(scores.values()).filter(Boolean).length
     trackVocabDrillCompleted({ correct: correctCount, total: scores.size })
+
+    // Seed SRS items for all practiced vocab items
+    if (isOnline()) {
+      const uniqueItems = new Map<string, { item_type: 'vocab'; vocab_id: string }>()
+      for (const item of items) {
+        if (!uniqueItems.has(item.vocabId)) {
+          uniqueItems.set(item.vocabId, { item_type: 'vocab', vocab_id: item.vocabId })
+        }
+      }
+      fireAndForget(
+        fetch('/api/srs/seed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: Array.from(uniqueItems.values()) }),
+        }),
+        'srs-seed-vocab',
+      )
+    }
   }
 
   if (phase.kind === 'done') {

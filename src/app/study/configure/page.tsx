@@ -8,6 +8,7 @@ import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { SvgSendaPath } from '@/components/SvgSendaPath'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { userLocalToday } from '@/lib/timezone'
+import { fetchUnifiedDueCount } from '@/lib/srs/queue'
 
 export default async function ConfigurePage() {
   const supabase = await createClient()
@@ -22,7 +23,7 @@ export default async function ConfigurePage() {
     .single()
   const today = userLocalToday((profileTz as { timezone: string | null } | null)?.timezone)
 
-  const [modules, { data: concepts }, { data: progress }, { data: mistakeAttempts }, { count: rawDueCount }] = await Promise.all([
+  const [modules, { data: concepts }, { data: progress }, { data: mistakeAttempts }, dueCount] = await Promise.all([
     getCached('curriculum:modules-slim', async () => {
       const { data } = await supabase.from('modules').select('id, title').order('order_index')
       return (data ?? []) as Array<{ id: string; title: string }>
@@ -36,14 +37,8 @@ export default async function ConfigurePage() {
       .lte('ai_score', 1)
       .not('exercise_id', 'is', null)
       .limit(100),
-    supabase
-      .from('user_progress')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .lte('due_date', today),
+    fetchUnifiedDueCount(supabase, user.id, today),
   ])
-
-  const dueCount = rawDueCount ?? 0
 
   type ConceptRow = { id: string; unit_id: string; units: { module_id: string } | null }
   type ProgressRow = { concept_id: string; interval_days: number }

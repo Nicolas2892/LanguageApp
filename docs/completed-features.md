@@ -4,6 +4,34 @@ This file contains implementation details for all completed work. Reference it w
 
 ---
 
+## Feat-J: Unified SRS Queue for Grammar + Verbs + Vocab (2026-03-26)
+
+Unified spaced repetition queue that surfaces grammar concepts, verb conjugations, and vocab expressions in a single "due today" study session. Items are scheduled via SM-2 and mixed by type for variety.
+
+**What was built:**
+- **Schema:** `srs_items` table (migration 027) — SM-2 state for verb+tense and vocab items. Discriminated by `item_type` CHECK. `user_progress` untouched for grammar. RPCs: `upsert_verb_srs`, `upsert_vocab_srs`, `seed_srs_items`.
+- **API routes:** `POST /api/srs/grade` (SM-2 + upsert + accuracy counter + streak), `POST /api/srs/seed` (batch-seed on first encounter, idempotent)
+- **Queue utilities:** `fetchUnifiedDueQueue()` + `fetchUnifiedDueCount()` in `src/lib/srs/queue.ts` — 3 parallel Supabase queries merged in TypeScript
+- **Score mapping:** `src/lib/srs/scoreMapping.ts` — correct→3, accent_error→2, incorrect→0
+- **Inline components:** `VerbExerciseInline.tsx` + `VocabExerciseInline.tsx` — extracted from standalone sessions for unified use
+- **UnifiedStudySession:** `src/app/study/UnifiedStudySession.tsx` — renders mixed grammar/verb/vocab items; grammar→ExerciseRenderer+Claude, verb/vocab→inline+local grading
+- **Study page:** default SRS mode now uses unified queue; other modes (practice, sprint, review, new) remain grammar-only
+- **Dashboard + configure:** due count now includes verb/vocab SRS items via `fetchUnifiedDueCount()`
+- **SRS seeding:** VerbSession + VocabSession seed SRS items on drill completion (fire-and-forget)
+- **Tests:** 55 new tests across 9 files
+
+**Design decisions:**
+- SRS granularity for verbs: verb + tense (~2,500 combos)
+- Mastery: `interval_days >= 21` (SRS-only, no production breadth for verbs/vocab)
+- Streak: any SRS submission counts (verb/vocab included)
+- Standalone drills remain as Open Practice alongside unified SRS queue
+
+**What's NOT included:** Push notification RPC update, sprint/practice/review modes for verb/vocab, progress page SRS stats, queue balance enforcement (50% cap)
+
+**Migration note:** `027_unified_srs.sql` must be applied in Supabase SQL editor.
+
+---
+
 ## Feat-P Phase 1+2+3: Pronunciation / Accent Training (2026-03-26)
 
 Sentence-level pronunciation assessment using Azure Speech Services. Users record sentences aloud and receive phoneme-level, fluency, and prosody scoring with L1-specific coaching tips (German, English).

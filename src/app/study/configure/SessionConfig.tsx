@@ -79,7 +79,7 @@ export function SessionConfig({ modules, mistakeConceptCount, dueCount }: Props)
   }
 
   const modes: Array<{ id: SessionMode; title: string; subtitle: string }> = [
-    { id: 'srs',      title: 'Repaso Diario',    subtitle: `${dueCount} concepto${dueCount !== 1 ? 's' : ''} pendientes hoy` },
+    { id: 'srs',      title: 'Repaso Diario',    subtitle: `${dueCount} pendiente${dueCount !== 1 ? 's' : ''} hoy` },
     { id: 'practice', title: 'Práctica Abierta', subtitle: 'Todo el catálogo · sin límite SRS' },
     ...(mistakeConceptCount > 0
       ? [{ id: 'review' as SessionMode, title: 'Revisar Errores', subtitle: `${mistakeConceptCount} concepto${mistakeConceptCount !== 1 ? 's' : ''} con errores` }]

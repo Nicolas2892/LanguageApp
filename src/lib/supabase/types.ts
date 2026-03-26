@@ -694,6 +694,49 @@ export interface Database {
         }
         Relationships: []
       }
+      srs_items: {
+        Row: {
+          id: string
+          user_id: string
+          item_type: string
+          verb_id: string | null
+          tense: string | null
+          vocab_id: string | null
+          ease_factor: number
+          interval_days: number
+          due_date: string
+          repetitions: number
+          last_reviewed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          item_type: string
+          verb_id?: string | null
+          tense?: string | null
+          vocab_id?: string | null
+          ease_factor?: number
+          interval_days?: number
+          due_date?: string
+          repetitions?: number
+          last_reviewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          item_type?: string
+          verb_id?: string | null
+          tense?: string | null
+          vocab_id?: string | null
+          ease_factor?: number
+          interval_days?: number
+          due_date?: string
+          repetitions?: number
+          last_reviewed_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -730,6 +773,33 @@ export interface Database {
         Args: { p_user_id: string; p_vocab_id: string; p_correct: boolean }
         Returns: void
       }
+      upsert_verb_srs: {
+        Args: {
+          p_user_id: string
+          p_verb_id: string
+          p_tense: string
+          p_ease_factor: number
+          p_interval_days: number
+          p_due_date: string
+          p_repetitions: number
+        }
+        Returns: void
+      }
+      upsert_vocab_srs: {
+        Args: {
+          p_user_id: string
+          p_vocab_id: string
+          p_ease_factor: number
+          p_interval_days: number
+          p_due_date: string
+          p_repetitions: number
+        }
+        Returns: void
+      }
+      seed_srs_items: {
+        Args: { p_user_id: string; p_items: string }
+        Returns: void
+      }
     }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
@@ -756,3 +826,4 @@ export type VocabItem = Database['public']['Tables']['vocab_items']['Row']
 export type VocabSentence = Database['public']['Tables']['vocab_sentences']['Row']
 export type VocabProgress = Database['public']['Tables']['vocab_progress']['Row']
 export type PronunciationProgress = Database['public']['Tables']['pronunciation_progress']['Row']
+export type SRSItem = Database['public']['Tables']['srs_items']['Row']

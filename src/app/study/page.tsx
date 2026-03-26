@@ -3,6 +3,10 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ROUTES } from '@/lib/routes'
 import { StudySession } from './StudySession'
+import { UnifiedStudySession } from './UnifiedStudySession'
+import { fetchUnifiedDueQueue } from '@/lib/srs/queue'
+import type { UnifiedStudyItem } from './types'
+import type { Verb, VerbSentence, VocabItem, VocabSentence } from '@/lib/supabase/types'
 import { OfflineGate } from './OfflineGate'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { SESSION_SIZE, BOOTSTRAP_SIZE } from '@/lib/constants'
@@ -214,17 +218,118 @@ export default async function StudyPage({
     if (reviewExerciseByConceptId.size === 0) redirect(ROUTES.dashboard)
     conceptIds = [...seenConceptIds]
   } else {
-    // Default: SRS due queue
-    const { data: dueProgress } = await supabase
-      .from('user_progress')
-      .select('concept_id')
-      .eq('user_id', user.id)
-      .lte('due_date', today)
-      .limit(sessionSize)
+    // Default: Unified SRS due queue (grammar + verbs + vocab)
+    const dueItems = await fetchUnifiedDueQueue(supabase, user.id, today, sessionSize)
 
-    conceptIds = (dueProgress ?? []).map((p) => (p as { concept_id: string }).concept_id)
+    // Separate grammar concept IDs from verb/vocab items
+    const verbDueItems = dueItems.filter((d) => d.type === 'verb') as Array<{ type: 'verb'; verbId: string; tense: string }>
+    const vocabDueItems = dueItems.filter((d) => d.type === 'vocab') as Array<{ type: 'vocab'; vocabId: string }>
+    conceptIds = dueItems.filter((d) => d.type === 'concept').map((d) => (d as { type: 'concept'; conceptId: string }).conceptId)
 
-    // Bootstrap new users
+    // If we have verb/vocab items, hydrate them and render UnifiedStudySession
+    if (verbDueItems.length > 0 || vocabDueItems.length > 0) {
+      // Hydrate verb items
+      const verbItems: UnifiedStudyItem[] = []
+      if (verbDueItems.length > 0) {
+        const verbIds = [...new Set(verbDueItems.map((d) => d.verbId))]
+        const [{ data: verbsData }, { data: verbSentencesData }] = await Promise.all([
+          supabase.from('verbs').select('*').in('id', verbIds),
+          supabase.from('verb_sentences').select('*').in('verb_id', verbIds),
+        ])
+        const verbMap = new Map((verbsData as Verb[] ?? []).map((v) => [v.id, v]))
+        const sentencesByVerbTense = new Map<string, VerbSentence[]>()
+        for (const s of (verbSentencesData as VerbSentence[] ?? [])) {
+          const key = `${s.verb_id}:${s.tense}`
+          const arr = sentencesByVerbTense.get(key) ?? []
+          arr.push(s)
+          sentencesByVerbTense.set(key, arr)
+        }
+        for (const d of verbDueItems) {
+          const verb = verbMap.get(d.verbId)
+          const sentences = sentencesByVerbTense.get(`${d.verbId}:${d.tense}`) ?? []
+          if (!verb || sentences.length === 0) continue
+          const sentence = sentences[0]
+          verbItems.push({ type: 'verb', verb, sentence, verbId: d.verbId, tense: d.tense })
+        }
+      }
+
+      // Hydrate vocab items
+      const vocabItems: UnifiedStudyItem[] = []
+      if (vocabDueItems.length > 0) {
+        const vocabIds = vocabDueItems.map((d) => d.vocabId)
+        const [{ data: vocabItemsData }, { data: vocabSentencesData }] = await Promise.all([
+          supabase.from('vocab_items').select('*').in('id', vocabIds),
+          supabase.from('vocab_sentences').select('*').in('vocab_id', vocabIds),
+        ])
+        const vocabMap = new Map((vocabItemsData as VocabItem[] ?? []).map((v) => [v.id, v]))
+        const sentencesByVocab = new Map<string, VocabSentence[]>()
+        for (const s of (vocabSentencesData as VocabSentence[] ?? [])) {
+          const arr = sentencesByVocab.get(s.vocab_id) ?? []
+          arr.push(s)
+          sentencesByVocab.set(s.vocab_id, arr)
+        }
+        for (const d of vocabDueItems) {
+          const vocabItem = vocabMap.get(d.vocabId)
+          const sentences = sentencesByVocab.get(d.vocabId) ?? []
+          if (!vocabItem || sentences.length === 0) continue
+          const sentence = sentences[0]
+          vocabItems.push({ type: 'vocab', vocabItem, sentence, vocabId: d.vocabId })
+        }
+      }
+
+      // Hydrate grammar items (if any)
+      const grammarItems: UnifiedStudyItem[] = []
+      if (conceptIds.length > 0) {
+        const [{ data: concepts }, { data: exercises }] = await Promise.all([
+          supabase.from('concepts').select('*').in('id', conceptIds),
+          supabase.from('exercises').select('*').in('concept_id', conceptIds),
+        ])
+        const conceptMap = new Map((concepts as Concept[] ?? []).map((c) => [c.id, c]))
+        const exercisesByConceptId = new Map<string, Exercise[]>()
+        for (const ex of (exercises as Exercise[] ?? [])) {
+          const arr = exercisesByConceptId.get(ex.concept_id) ?? []
+          arr.push(ex)
+          exercisesByConceptId.set(ex.concept_id, arr)
+        }
+        for (const cid of conceptIds) {
+          const concept = conceptMap.get(cid)
+          const exArr = exercisesByConceptId.get(cid)
+          if (!concept || !exArr || exArr.length === 0) continue
+          const exercise = biasedExercisePick(exArr, true)
+          grammarItems.push({ type: 'concept', concept, exercise })
+        }
+      }
+
+      // Merge all items, interleave by type for variety
+      const allUnifiedItems: UnifiedStudyItem[] = []
+      const queues = [grammarItems, verbItems, vocabItems].filter((q) => q.length > 0)
+      const maxLen = Math.max(...queues.map((q) => q.length), 0)
+      for (let i = 0; i < maxLen; i++) {
+        for (const q of queues) {
+          if (i < q.length) allUnifiedItems.push(q[i])
+        }
+      }
+      const cappedUnified = allUnifiedItems.slice(0, sessionSize)
+
+      if (cappedUnified.length > 0) {
+        return (
+          <OfflineGate>
+            <main className="max-w-2xl mx-auto p-6 md:p-10 pb-[calc(3.125rem+env(safe-area-inset-bottom)+0.75rem)] lg:pb-10">
+              <div className="mb-8">
+                <h1 className="senda-heading text-2xl">Sesión de Estudio</h1>
+              </div>
+              <ErrorBoundary>
+                <UnifiedStudySession items={cappedUnified} />
+              </ErrorBoundary>
+            </main>
+          </OfflineGate>
+        )
+      }
+      // If all items failed to hydrate, fall through to empty state
+      conceptIds = []
+    }
+
+    // Bootstrap new users (grammar-only)
     if (conceptIds.length === 0) {
       const { count } = await supabase
         .from('user_progress')

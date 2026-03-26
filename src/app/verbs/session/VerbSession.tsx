@@ -204,6 +204,25 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
     doneTrackedRef.current = true
     const correctCount = Array.from(scores.values()).filter(Boolean).length
     trackVerbDrillCompleted({ correct: correctCount, total: scores.size })
+
+    // Seed SRS items for all practiced verb+tense combos
+    if (isOnline()) {
+      const uniqueItems = new Map<string, { item_type: 'verb'; verb_id: string; tense: string }>()
+      for (const item of items) {
+        const key = `${item.verbId}:${item.tense}`
+        if (!uniqueItems.has(key)) {
+          uniqueItems.set(key, { item_type: 'verb', verb_id: item.verbId, tense: item.tense })
+        }
+      }
+      fireAndForget(
+        fetch('/api/srs/seed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: Array.from(uniqueItems.values()) }),
+        }),
+        'srs-seed-verbs',
+      )
+    }
   }
 
   if (phase.kind === 'done') {

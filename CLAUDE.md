@@ -166,6 +166,8 @@ KV_REST_API_TOKEN               # Upstash Redis token (@vercel/kv)
 | `/pronunciation/session`          | Server + Client | Pronunciation session — record sentences, Azure scoring, word-level feedback (Feat-P)     |
 | `POST /api/pronunciation/assess` | Route handler  | Azure Pronunciation Assessment — FormData audio+text, returns phoneme/fluency/prosody scores (Feat-P) |
 | `POST /api/pronunciation/progress` | Route handler | Fire-and-forget pronunciation progress tracking via `increment_pronunciation_progress` RPC; Zod + rate-limit 120/10min (Feat-P) |
+| `POST /api/srs/grade`              | Route handler | Unified SRS grade for verb/vocab items; SM-2 + upsert + accuracy counter + streak; Zod discriminated union + rate-limit 120/10min (Feat-J) |
+| `POST /api/srs/seed`               | Route handler | Batch-seed SRS items for verb+tense / vocab on first encounter; idempotent via ON CONFLICT DO NOTHING (Feat-J) |
 | `GET /api/offline/module/[id]`   | Route handler   | Download bundle for offline study: exercises, concepts, units, progress, free-write prompts (Feat-F) |
 | `GET /api/offline/verbs`        | Route handler   | Full verb data bundle; supports `?version=` for 304 Not Modified (Feat-F)                 |
 | `POST /api/offline/grade-batch` | Route handler   | Batch grade queued offline attempts via Claude; creates report + push notification (Feat-F) |
@@ -363,11 +365,12 @@ All routes except `/auth/`* redirect unauthenticated users to `/auth/login`. Pro
 | `offline_reports`                        | Aggregated results from offline batch grading; `reviewed` flag for report-out UI (Feat-F)                                |
 | `offline_report_attempts`                | Per-attempt results within an offline report: score, feedback, corrected_version, explanation (Feat-F)                    |
 | `pronunciation_progress`                 | Per-user accuracy per phoneme category; `attempt_count`, `correct_count`; upserted via `increment_pronunciation_progress` RPC (Feat-P) |
+| `srs_items`                              | Unified SRS state for verbs + vocab; SM-2 columns (`ease_factor`, `interval_days`, `due_date`, `repetitions`); discriminated by `item_type` ('verb'/'vocab') with CHECK constraint; upserted via `upsert_verb_srs` / `upsert_vocab_srs` RPCs; seeded via `seed_srs_items` RPC (Feat-J) |
 
 
-Migrations (run once in Supabase SQL editor): 26 total (001–026). 001–025 applied. Pending:
+Migrations (run once in Supabase SQL editor): 27 total (001–027). 001–025 applied; 026 applied (2026-03-26). Pending:
 
-- `026_pronunciation.sql` — `profiles.l1_language`, `profiles.target_accent`, `pronunciation_progress` table + `increment_pronunciation_progress` RPC
+- `027_unified_srs.sql` — `srs_items` table + indexes + RLS + `upsert_verb_srs` / `upsert_vocab_srs` / `seed_srs_items` RPCs (Feat-J)
 
 ### Dashboard Stats
 
@@ -548,7 +551,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2543 tests across 155 files — all passing.**
+**Test suite: 2598 tests across 162 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
@@ -609,13 +612,15 @@ Items are ordered by priority within each group. Full details of completed work 
 - Evaluate `next-intl` (App Router native) vs. simple JSON dictionaries with a custom hook.
 - **Do not implement until there is a concrete plan to support non-English interface languages.**
 
-**Feat-J: Verb + Vocab SRS integration** *(P3 — connect verbs & vocab to spaced repetition)*
+**Feat-J: Verb + Vocab SRS integration** *(DONE — see completed-features.md)*
 
-- Verb conjugation drills (`verb_progress`) and vocab drills (`vocab_progress`) currently track accuracy but do not feed into the SRS system. Weak items should surface more frequently via spaced repetition.
-- From a pedagogical standpoint, multi-word vocab expressions need SRS just as much as verb conjugations — they must be memorized as chunks and can't be derived from rules. There is no reason to have SRS for one but not the other.
-- Recommended approach: a **shared SRS model** — one unified `user_progress`-style table across grammar concepts, verb tenses, and vocab items, producing a single "due today" queue that surfaces whatever the learner is weakest at.
-- Alternative: separate SRS loops per content type (simpler but fragments the study experience).
-- **Do not implement without a PM decision on unified vs. separate SRS model.**
+- Unified SRS queue: `srs_items` table for verb+tense and vocab SM-2 state. `user_progress` untouched for grammar.
+- `POST /api/srs/grade` — SM-2 + upsert + accuracy counter + streak. `POST /api/srs/seed` — batch-seed on first encounter.
+- `UnifiedStudySession` component renders mixed grammar/verb/vocab items in one session.
+- Dashboard + study configure use `fetchUnifiedDueCount()` for unified due count.
+- Standalone drills remain as Open Practice; seed SRS items on session completion.
+- Score mapping: correct→3, accent_error→2, incorrect→0. Mastery: `interval_days >= 21` (SRS-only, no production breadth for verbs/vocab).
+- Migration 027 must be applied in Supabase SQL editor.
 
 **Feat-K: Email re-engagement (Resend / Postmark)** *(P3 — retention)*
 
@@ -703,7 +708,7 @@ Items are ordered by priority within each group. Full details of completed work 
 | **P2** | **Feat-I** — i18n architecture | PM decision on target languages |
 | **P2** | **Infra-E** — Custom domain for Supabase Auth (Google OAuth branding) | Supabase Pro plan + DNS setup |
 | **P3** | **Infra-C** — Database migration tooling | PM decision on tooling |
-| **P3** | **Feat-J** — Verb + Vocab SRS integration | PM decision on unified vs. separate SRS model |
+| **P3** | **Feat-J** — Verb + Vocab SRS integration | DONE — see completed-features.md |
 | **P3** | **Feat-K** — Email re-engagement | PM decision on vendor |
 | **P3** | **Feat-O** — Onboarding re-engagement emails | Depends on Feat-K |
 | **P2** | **Feat-P** — Pronunciation (all 3 phases) | DONE — see completed-features.md |
