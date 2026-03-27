@@ -124,7 +124,6 @@
   body {
     @apply bg-background text-foreground;
     overscroll-behavior: none;
-    padding-top: env(safe-area-inset-top);
   }
   button, a, [role="button"] {
     touch-action: manipulation;

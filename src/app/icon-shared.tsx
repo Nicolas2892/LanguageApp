@@ -14,8 +14,8 @@ export function renderIcon(
 ): ImageResponse {
   // S fills ~96% of the icon — bleeds past edges for cropped calligraphic effect
   const svgSize = Math.round(width * 0.96)
-  // Offset to center the bleed (the S path sits in roughly 0-22 of the 24-unit viewBox)
-  const offset = Math.round((width - svgSize) / 2) - Math.round(width * 0.03)
+  // Center the S path within the icon
+  const offset = Math.round((width - svgSize) / 2)
 
   return new ImageResponse(
     (

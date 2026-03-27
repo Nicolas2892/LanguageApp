@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: 'Senda',
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
     startupImage: [
       // iPhone SE (2x) — 320×568pt
       { url: '/splash?w=640&h=1136', media: '(device-width:320px) and (device-height:568px) and (-webkit-device-pixel-ratio:2)' },
