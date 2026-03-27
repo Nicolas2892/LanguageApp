@@ -243,8 +243,8 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                 }
               : { width: nodeSize, height: nodeSize, borderRadius: '50%', border: '1.5px solid var(--d5-border-subtle)', background: 'transparent', flexShrink: 0 }
 
-          // Title size per state (all use senda-heading font)
-          const titleFontSize = state === 'active' ? 15 : 13
+          // Module title: consistent 16px for clear hierarchy over concept titles (13px)
+          const titleFontSize = 16
 
           // Status chip per state
           const statusChip =
@@ -414,8 +414,10 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                             >
                               <span
                                 style={{
-                                  fontSize: '0.625rem',
-                                  fontWeight: 600,
+                                  fontSize: '0.5625rem',
+                                  fontWeight: 500,
+                                  letterSpacing: '0.06em',
+                                  textTransform: 'uppercase',
                                   color: 'var(--d5-muted)',
                                   whiteSpace: 'nowrap',
                                 }}
@@ -444,7 +446,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                     gap: '0.75rem',
-                                    marginTop: '0.75rem',
+                                    marginTop: '1rem',
                                     paddingLeft: '1.25rem',
                                     borderLeft: '2px solid rgba(196,82,46,0.15)',
                                   }}
