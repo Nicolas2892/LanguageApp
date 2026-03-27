@@ -30,7 +30,7 @@ interface Props {
   units: UnitRow[]
   concepts: ConceptRow[]
   progressEntries: ProgressRow[]
-  unlockedLevelsList: string[]
+  unlockedLevelsList?: string[]
 }
 
 function isConceptMastered(p: ProgressRow | undefined): boolean {
@@ -53,7 +53,6 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
   const [searchQuery, setSearchQuery] = useState('')
 
   const progressMap = new Map(progressEntries.map(p => [p.concept_id, p]))
-  const unlockedLevels = new Set(unlockedLevelsList)
 
   const unitsByModule = new Map<string, UnitRow[]>()
   const conceptsByUnit = new Map<string, ConceptRow[]>()
@@ -119,10 +118,6 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
       storage.set(`module_completed_${celebratingModule.id}_seen`, '1')
     }
     setCelebratingModule(null)
-  }
-
-  function isLocked(concept: ConceptRow): boolean {
-    return !unlockedLevels.has(concept.level ?? 'B1')
   }
 
   return (
@@ -308,7 +303,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                   {statusChip && <span style={statusChip.style}>{statusChip.label}</span>}
                 </div>
 
-                {/* Meta chip + actions row */}
+                {/* Meta row: mastered count (left) + actions (right) */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.375rem' }}>
                   <span
                     style={{
@@ -336,7 +331,6 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                     />
                     {masteredCount}/{allModConcepts.length} Dominados
                   </span>
-                  {/* Module actions: download + practice */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                     <div onClick={e => e.stopPropagation()}>
                       <DownloadButton moduleId={mod.id} />
@@ -346,11 +340,9 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                       onClick={e => e.stopPropagation()}
                       style={{
                         color: 'var(--d5-terracotta)',
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: 600,
                         whiteSpace: 'nowrap',
-                        padding: '4px 0',
-                        flexShrink: 0,
                         position: 'relative',
                         zIndex: 10,
                       }}
@@ -420,7 +412,14 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                 marginBottom: '0.375rem',
                               }}
                             >
-                              <span className="senda-eyebrow">
+                              <span
+                                style={{
+                                  fontSize: '0.625rem',
+                                  fontWeight: 600,
+                                  color: 'var(--d5-muted)',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
                                 {unit.title}
                               </span>
                               <div style={{ flex: 1, height: '0.0625rem', background: 'rgba(196,82,46,0.12)' }} />
@@ -432,8 +431,6 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                             const p = progressMap.get(concept.id)
                             const masteryState = getMasteryState(p?.interval_days, p?.production_mastered)
                             const dot = MASTERY_DOT[masteryState]
-                            const locked = isLocked(concept)
-
                             return (
                               <Link
                                 key={concept.id}
@@ -449,8 +446,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                     gap: '0.75rem',
                                     marginTop: '0.75rem',
                                     paddingLeft: '1.25rem',
-                                    borderLeft: `2px solid ${locked ? 'var(--d5-line)' : 'rgba(196,82,46,0.15)'}`,
-                                    opacity: locked ? 0.4 : 1,
+                                    borderLeft: '2px solid rgba(196,82,46,0.15)',
                                   }}
                                 >
                                   <span
