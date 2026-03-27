@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { toTitleCase } from '@/lib/utils'
 import Link from 'next/link'
-import { Lock, ChevronRight, ChevronDown, X, Search } from 'lucide-react'
+import { ChevronRight, ChevronDown, X, Search } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -14,8 +14,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
 import { getMasteryState, MASTERY_DOT } from '@/lib/mastery/badge'
-import { LevelChip } from '@/components/LevelChip'
-import { HardFlagButton } from '@/components/HardFlagButton'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { DownloadButton } from '@/components/offline/DownloadButton'
@@ -259,7 +257,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
               ? { label: 'Completado', style: { background: 'var(--d5-surface-tint)', color: 'var(--d5-subtle)', padding: '0.125rem 0.4375rem', borderRadius: 9999, fontSize: '0.625rem', fontWeight: 500 } as React.CSSProperties }
               : state === 'active'
               ? { label: 'En Progreso', style: { background: 'var(--d5-terracotta)', color: 'var(--d5-paper)', padding: '0.125rem 0.4375rem', borderRadius: 9999, fontSize: '0.625rem', fontWeight: 500 } as React.CSSProperties }
-              : { label: 'Próximamente', style: { color: 'var(--d5-pill-text-soft)', fontSize: '0.625rem', fontWeight: 400, padding: '0.125rem 0.4375rem' } as React.CSSProperties }
+              : null
 
           const lineColor = idx === 1 ? 'var(--d5-subtle)' : 'var(--d5-line)'
 
@@ -307,7 +305,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                   >
                     {mod.title}
                   </span>
-                  <span style={statusChip.style}>{statusChip.label}</span>
+                  {statusChip && <span style={statusChip.style}>{statusChip.label}</span>}
                 </div>
 
                 {/* Meta chip + actions row */}
@@ -435,7 +433,6 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                             const masteryState = getMasteryState(p?.interval_days, p?.production_mastered)
                             const dot = MASTERY_DOT[masteryState]
                             const locked = isLocked(concept)
-                            const isHard = p?.is_hard ?? false
 
                             return (
                               <Link
@@ -449,43 +446,26 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
-                                    gap: '0.5rem',
+                                    gap: '0.75rem',
                                     marginTop: '0.75rem',
                                     paddingLeft: '1.25rem',
-                                    borderLeft: '2px solid rgba(196,82,46,0.15)',
+                                    borderLeft: `2px solid ${locked ? 'var(--d5-line)' : 'rgba(196,82,46,0.15)'}`,
                                     opacity: locked ? 0.4 : 1,
                                   }}
                                 >
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
-                                    <LevelChip level={concept.level} />
-                                    <span
-                                      className="text-foreground"
-                                      style={{
-                                        fontSize: 13,
-                                        fontWeight: 400,
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap',
-                                      }}
-                                    >
-                                      {toTitleCase(concept.title)}
-                                    </span>
-                                  </div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
+                                  <span
+                                    className="senda-heading"
+                                    style={{
+                                      fontSize: 13,
+                                      lineHeight: 1.4,
+                                      flex: 1,
+                                      minWidth: 0,
+                                    }}
+                                  >
+                                    {toTitleCase(concept.title)}
+                                  </span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                                     <span title={dot.title} style={dot.style} />
-                                    <div
-                                      onClick={e => e.stopPropagation()}
-                                      style={{ position: 'relative', zIndex: 20 }}
-                                    >
-                                      <HardFlagButton conceptId={concept.id} initialIsHard={isHard} />
-                                    </div>
-                                    {locked && (
-                                      <Lock
-                                        size={12}
-                                        strokeWidth={1.5}
-                                        style={{ flexShrink: 0, color: 'var(--d5-subtle)' }}
-                                      />
-                                    )}
                                     <ChevronRight
                                       size={14}
                                       strokeWidth={1.5}

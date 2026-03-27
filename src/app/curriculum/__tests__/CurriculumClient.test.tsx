@@ -70,10 +70,9 @@ describe('CurriculumClient', () => {
     expect(screen.getByText('Subjuntivo')).toBeInTheDocument()
   })
 
-  it('shows "Próximamente" status for modules with no progress', () => {
+  it('does not show "Próximamente" status chip for upcoming modules', () => {
     render(<CurriculumClient {...defaultProps} />)
-    const chips = screen.getAllByText('Próximamente')
-    expect(chips.length).toBeGreaterThan(0)
+    expect(screen.queryByText('Próximamente')).not.toBeInTheDocument()
   })
 
   it('shows "En Progreso" for a partially-attempted module', () => {
@@ -244,13 +243,15 @@ describe('CurriculumClient', () => {
     expect(titles[2]).toContain('Zorro')
   })
 
-  it('renders LevelChip inline with concept title (no GrammarFocusChip in rows)', async () => {
+  it('renders concept titles in senda-heading font without LevelChip in rows', async () => {
     const user = userEvent.setup()
     render(<CurriculumClient {...defaultProps} />)
     await user.click(screen.getByText('Conectores'))
 
-    // LevelChip is rendered (mocked as <span>{level}</span>)
-    expect(screen.getByText('B1')).toBeInTheDocument()
+    // Concept title is rendered (title-cased)
+    expect(screen.getByText('Sin Embargo')).toBeInTheDocument()
+    // LevelChip should NOT be rendered in concept rows (removed for cleaner layout)
+    expect(screen.queryByText('B1')).not.toBeInTheDocument()
     // GrammarFocusChip should NOT be rendered in concept rows
     expect(screen.queryByText('Subjunctive')).not.toBeInTheDocument()
   })
