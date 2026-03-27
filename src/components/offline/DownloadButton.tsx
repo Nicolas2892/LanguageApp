@@ -40,6 +40,7 @@ export function DownloadButton({ moduleId }: Props) {
   }, [moduleId, removeModule])
 
   const isDownloading = downloadState === 'downloading'
+  const isDownloaded = downloaded || downloadState === 'complete'
 
   // Delete confirmation
   if (showConfirm) {
@@ -72,18 +73,18 @@ export function DownloadButton({ moduleId }: Props) {
       disabled={isDownloading}
       className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-60"
       style={{
-        background: downloaded
+        background: isDownloaded
           ? 'rgba(196,82,46,0.08)'
           : 'rgba(140,106,63,0.07)',
-        color: downloaded
+        color: isDownloaded
           ? 'var(--d5-terracotta)'
           : 'var(--d5-warm)',
       }}
-      aria-label={downloaded ? 'Disponible offline — toca para eliminar' : 'Descarga para offline'}
+      aria-label={isDownloaded ? 'Disponible offline — toca para eliminar' : 'Descarga para offline'}
     >
       {isDownloading ? (
         <CircularProgress progress={downloadProgress} size={16} strokeWidth={2} />
-      ) : downloaded ? (
+      ) : isDownloaded ? (
         <>
           <CheckCircle size={12} strokeWidth={2} />
           Offline
