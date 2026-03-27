@@ -73,11 +73,11 @@ describe('SplashScreen', () => {
     expect(screen.queryByTestId('splash-screen')).not.toBeInTheDocument()
   })
 
-  it('renders the S-trail SVG path', () => {
+  it('renders the S-trail SVG', () => {
     render(<SplashScreen />)
-    const trailPath = screen.getByTestId('splash-screen').querySelector('.splash-trail-draw')
-    expect(trailPath).toBeInTheDocument()
-    expect(trailPath?.tagName).toBe('path')
+    const trail = screen.getByTestId('splash-screen').querySelector('.splash-trail-draw')
+    expect(trail).toBeInTheDocument()
+    expect(trail?.tagName).toBe('svg')
   })
 
   it('renders the logo with splash-logo-in animation class', () => {

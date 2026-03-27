@@ -13,11 +13,8 @@ export function BackgroundMagicS({ opacity, style }: { opacity?: number; style?:
       aria-hidden="true"
     >
       <path
-        d="M 80 230 C 20 220, 0 185, 28 158 C 56 131, 130 138, 158 110 C 186 82, 192 42, 158 20"
-        stroke="var(--d5-magic-stroke)"
-        strokeWidth={44}
-        strokeLinecap="round"
-        fill="none"
+        d="M 57 242 C 24 230, 5 195, 14 161 C 24 126, 52 115, 86 103 C 119 92, 152 80, 171 57 C 185 40, 181 17, 162 17 C 157 17, 160 29, 166 34 C 181 23, 200 34, 195 63 C 190 92, 162 109, 128 121 C 95 132, 62 138, 43 161 C 24 184, 29 218, 52 230 C 67 239, 71 230, 57 242 Z"
+        fill="var(--d5-magic-stroke)"
       />
     </svg>
   )
