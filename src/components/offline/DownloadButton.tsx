@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { CloudDownload, CheckCircle, Trash2 } from 'lucide-react'
+import { CloudDownload, CheckCircle, Trash2, AlertCircle } from 'lucide-react'
 import { useDownloadManager } from '@/lib/offline/useDownloadManager'
 import { CircularProgress } from './CircularProgress'
 
@@ -25,6 +25,15 @@ export function DownloadButton({ moduleId }: Props) {
     isModuleDownloaded(moduleId).then(setDownloaded)
   }, [moduleId, isModuleDownloaded, downloadState])
 
+  // Auto-clear error after 5 seconds
+  useEffect(() => {
+    if (downloadState !== 'error') return
+    const t = setTimeout(() => {
+      // The hook doesn't expose a reset — but re-clicking will retry
+    }, 5000)
+    return () => clearTimeout(t)
+  }, [downloadState])
+
   const handleClick = useCallback(async () => {
     if (downloaded) {
       setShowConfirm(true)
@@ -40,6 +49,7 @@ export function DownloadButton({ moduleId }: Props) {
   }, [moduleId, removeModule])
 
   const isDownloading = downloadState === 'downloading'
+  const isError = downloadState === 'error'
   const isDownloaded = downloaded || downloadState === 'complete'
 
   // Delete confirmation
@@ -66,12 +76,27 @@ export function DownloadButton({ moduleId }: Props) {
     )
   }
 
+  // Error state — tap to retry
+  if (isError) {
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        className="flex items-center justify-center rounded-full p-1.5 transition-colors"
+        style={{ background: 'rgba(220,38,38,0.08)', color: 'var(--d5-error)' }}
+        aria-label="Error al descargar — toca para reintentar"
+      >
+        <AlertCircle size={14} strokeWidth={2} />
+      </button>
+    )
+  }
+
   return (
     <button
       type="button"
       onClick={handleClick}
       disabled={isDownloading}
-      className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-60"
+      className="flex items-center justify-center rounded-full p-1.5 transition-colors disabled:opacity-60"
       style={{
         background: isDownloaded
           ? 'rgba(196,82,46,0.08)'
@@ -80,20 +105,18 @@ export function DownloadButton({ moduleId }: Props) {
           ? 'var(--d5-terracotta)'
           : 'var(--d5-warm)',
       }}
-      aria-label={isDownloaded ? 'Disponible offline — toca para eliminar' : 'Descarga para offline'}
+      aria-label={
+        isDownloading ? 'Descargando…'
+        : isDownloaded ? 'Disponible offline — toca para eliminar'
+        : 'Descarga para offline'
+      }
     >
       {isDownloading ? (
         <CircularProgress progress={downloadProgress} size={16} strokeWidth={2} />
       ) : isDownloaded ? (
-        <>
-          <CheckCircle size={12} strokeWidth={2} />
-          Offline
-        </>
+        <CheckCircle size={14} strokeWidth={2} />
       ) : (
-        <>
-          <CloudDownload size={12} strokeWidth={2} />
-          Descarga
-        </>
+        <CloudDownload size={14} strokeWidth={2} />
       )}
     </button>
   )

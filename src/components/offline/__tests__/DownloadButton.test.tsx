@@ -32,21 +32,23 @@ beforeEach(() => {
 })
 
 describe('DownloadButton', () => {
-  it('renders download state when not downloaded', async () => {
+  it('renders download icon when not downloaded', async () => {
     render(<DownloadButton moduleId="mod-1" />)
-    expect(await screen.findByText('Descarga')).toBeInTheDocument()
+    const btn = await screen.findByRole('button', { name: /descarga para offline/i })
+    expect(btn).toBeInTheDocument()
   })
 
-  it('renders offline state when downloaded', async () => {
+  it('renders checkmark icon when downloaded', async () => {
     mockIsModuleDownloaded.mockResolvedValue(true)
     render(<DownloadButton moduleId="mod-1" />)
-    expect(await screen.findByText('Offline')).toBeInTheDocument()
+    const btn = await screen.findByRole('button', { name: /disponible offline/i })
+    expect(btn).toBeInTheDocument()
   })
 
   it('calls downloadModule on click when not downloaded', async () => {
     const user = userEvent.setup()
     render(<DownloadButton moduleId="mod-1" />)
-    const btn = await screen.findByText('Descarga')
+    const btn = await screen.findByRole('button', { name: /descarga para offline/i })
     await user.click(btn)
     expect(mockDownloadModule).toHaveBeenCalledWith('mod-1')
   })
@@ -55,7 +57,7 @@ describe('DownloadButton', () => {
     mockIsModuleDownloaded.mockResolvedValue(true)
     const user = userEvent.setup()
     render(<DownloadButton moduleId="mod-1" />)
-    const btn = await screen.findByText('Offline')
+    const btn = await screen.findByRole('button', { name: /disponible offline/i })
     await user.click(btn)
     expect(await screen.findByText('Eliminar')).toBeInTheDocument()
     expect(screen.getByText('Cancelar')).toBeInTheDocument()
@@ -65,7 +67,7 @@ describe('DownloadButton', () => {
     mockIsModuleDownloaded.mockResolvedValue(true)
     const user = userEvent.setup()
     render(<DownloadButton moduleId="mod-1" />)
-    await user.click(await screen.findByText('Offline'))
+    await user.click(await screen.findByRole('button', { name: /disponible offline/i }))
     await user.click(screen.getByText('Eliminar'))
     expect(mockRemoveModule).toHaveBeenCalledWith('mod-1')
   })
@@ -74,9 +76,25 @@ describe('DownloadButton', () => {
     mockIsModuleDownloaded.mockResolvedValue(true)
     const user = userEvent.setup()
     render(<DownloadButton moduleId="mod-1" />)
-    await user.click(await screen.findByText('Offline'))
+    await user.click(await screen.findByRole('button', { name: /disponible offline/i }))
     await user.click(screen.getByText('Cancelar'))
-    // Should return to the "Offline" chip
-    expect(await screen.findByText('Offline')).toBeInTheDocument()
+    // Should return to the checkmark icon button
+    expect(await screen.findByRole('button', { name: /disponible offline/i })).toBeInTheDocument()
+  })
+
+  it('renders error state with retry on download failure', async () => {
+    mockDownloadState = 'error'
+    render(<DownloadButton moduleId="mod-1" />)
+    const btn = await screen.findByRole('button', { name: /error al descargar/i })
+    expect(btn).toBeInTheDocument()
+  })
+
+  it('retries download when clicking error state', async () => {
+    mockDownloadState = 'error'
+    const user = userEvent.setup()
+    render(<DownloadButton moduleId="mod-1" />)
+    const btn = await screen.findByRole('button', { name: /error al descargar/i })
+    await user.click(btn)
+    expect(mockDownloadModule).toHaveBeenCalledWith('mod-1')
   })
 })

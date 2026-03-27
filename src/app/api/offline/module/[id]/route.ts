@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { anthropic, TUTOR_MODEL } from '@/lib/claude/client'
 import type { Concept, Exercise, Unit, UserProgress } from '@/lib/supabase/types'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { validateOrigin } from '@/lib/api-utils'
@@ -13,7 +12,9 @@ import * as Sentry from '@sentry/nextjs'
  * - module metadata
  * - units, concepts, exercises (excluding `listening` type)
  * - user_progress snapshot for these concepts
- * - pre-generated free-write prompts (one per concept, via Claude)
+ *
+ * Free-write prompts are not included — they require Claude and are
+ * only available online. The free_write_prompts array is always empty.
  */
 export async function GET(
   request: Request,
@@ -29,9 +30,9 @@ export async function GET(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    // Rate limit: 5 downloads per 10 minutes (triggers Claude API calls)
+    // Rate limit: 10 downloads per 10 minutes (no Claude calls now, just DB queries)
     const rl = await checkRateLimit(user.id, 'offline-module-download', {
-      maxRequests: 5,
+      maxRequests: 10,
       windowMs: 10 * 60 * 1000,
     })
     if (!rl.allowed) {
@@ -80,35 +81,33 @@ export async function GET(
 
     const conceptIds = concepts.map(c => c.id)
 
-    // Fetch exercises (exclude listening — requires TTS)
-    const { data: rawExercises } = await supabase
-      .from('exercises')
-      .select('id, concept_id, type, prompt, expected_answer, answer_variants, hint_1, hint_2, annotations, source, created_at')
-      .in('concept_id', conceptIds)
-      .neq('type', 'listening')
-    const exercises = (rawExercises ?? []) as Exercise[]
+    // Fetch exercises (exclude listening — requires TTS) and user progress in parallel
+    const [{ data: rawExercises }, { data: rawProgress }] = await Promise.all([
+      supabase
+        .from('exercises')
+        .select('id, concept_id, type, prompt, expected_answer, answer_variants, hint_1, hint_2, annotations, source, created_at')
+        .in('concept_id', conceptIds)
+        .neq('type', 'listening'),
+      supabase
+        .from('user_progress')
+        .select('concept_id, ease_factor, interval_days, due_date, repetitions, production_mastered, is_hard')
+        .eq('user_id', user.id)
+        .in('concept_id', conceptIds),
+    ])
 
-    // Fetch user progress for these concepts
-    const { data: rawProgress } = await supabase
-      .from('user_progress')
-      .select('concept_id, ease_factor, interval_days, due_date, repetitions, production_mastered, is_hard')
-      .eq('user_id', user.id)
-      .in('concept_id', conceptIds)
+    const exercises = (rawExercises ?? []) as Exercise[]
     const userProgress = (rawProgress ?? []) as Pick<
       UserProgress,
       'concept_id' | 'ease_factor' | 'interval_days' | 'due_date' | 'repetitions' | 'production_mastered' | 'is_hard'
     >[]
 
-    // Generate free-write prompts for each concept (limit concurrency to 3)
-    const freeWritePrompts = await generatePromptsWithConcurrency(concepts, 3)
-
     return NextResponse.json({
-      module,
+      module: moduleData,
       units,
       concepts,
       exercises,
       user_progress: userProgress,
-      free_write_prompts: freeWritePrompts,
+      free_write_prompts: [],
       version: Date.now(),
     }, {
       headers: { 'Cache-Control': 'private, max-age=1800' },
@@ -118,37 +117,4 @@ export async function GET(
     console.error('[offline/module] error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
-}
-
-async function generatePromptsWithConcurrency(
-  concepts: Concept[],
-  concurrency: number,
-): Promise<Array<{ concept_id: string; prompt: string }>> {
-  const results: Array<{ concept_id: string; prompt: string }> = []
-  const queue = [...concepts]
-
-  async function worker() {
-    while (queue.length > 0) {
-      const concept = queue.shift()!
-      try {
-        const message = await anthropic.messages.create({
-          model: TUTOR_MODEL,
-          max_tokens: 256,
-          system: `You are a creative Spanish writing coach for B1→B2 learners. Generate short, engaging writing prompts that require the student to actively use specific grammar concepts. Keep prompts concrete and relatable to daily life. The student should aim for 150–200 words. Respond with only the prompt text — no labels, no preamble, no quotes.`,
-          messages: [{
-            role: 'user',
-            content: `Grammar concept to practice:\n- ${concept.title}: ${concept.explanation}\n\nWrite a single relatable writing prompt (a realistic scenario: personal opinion, letter, or short narrative) that requires the student to use this concept naturally in 150–200 words. Do not mention the grammar rules explicitly in the prompt.`,
-          }],
-        })
-        const text = message.content[0].type === 'text' ? message.content[0].text.trim() : ''
-        results.push({ concept_id: concept.id, prompt: text })
-      } catch (err) {
-        console.error(`[offline/module] prompt gen failed for ${concept.id}:`, err)
-        results.push({ concept_id: concept.id, prompt: '' })
-      }
-    }
-  }
-
-  await Promise.all(Array.from({ length: concurrency }, () => worker()))
-  return results
 }
