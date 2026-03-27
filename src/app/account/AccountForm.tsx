@@ -7,6 +7,7 @@ import { useSpeech } from '@/lib/hooks/useSpeech'
 import { useTheme } from '@/components/ThemeProvider'
 import { LEVEL_CHIP } from '@/lib/constants'
 import { OfflineStorageManager } from '@/components/offline/OfflineStorageManager'
+import { DownloadAllButton } from '@/components/offline/DownloadAllButton'
 import type { Profile } from '@/lib/supabase/types'
 
 type ThemeValue = 'light' | 'dark' | 'system'
@@ -19,9 +20,11 @@ const THEME_OPTIONS: { value: ThemeValue; label: string }[] = [
 
 interface Props {
   profile: Profile
+  modules: Array<{ id: string; title: string }>
 }
 
-export function AccountForm({ profile }: Props) {
+export function AccountForm({ profile, modules }: Props) {
+  const [offlineRefreshKey, setOfflineRefreshKey] = useState(0)
   const [displayName, setDisplayName] = useState(profile.display_name ?? '')
   const [goalMinutes, setGoalMinutes] = useState(String(profile.daily_goal_minutes))
   const [saving, setSaving] = useState(false)
@@ -300,7 +303,11 @@ export function AccountForm({ profile }: Props) {
       {/* ── Section 5: Datos Offline ── */}
       <div style={{ padding: '0.25rem 0 1rem' }}>
         <span className="senda-eyebrow block mb-3">Datos Offline</span>
-        <OfflineStorageManager />
+        <DownloadAllButton
+          modules={modules}
+          onComplete={() => setOfflineRefreshKey(k => k + 1)}
+        />
+        <OfflineStorageManager key={offlineRefreshKey} />
       </div>
 
       <div style={{ height: '1.5rem' }} />

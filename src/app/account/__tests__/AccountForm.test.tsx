@@ -56,41 +56,41 @@ describe('AccountForm', () => {
   // --- Initial render ---
 
   it('pre-fills display name from profile', () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     expect((screen.getByLabelText('Nombre') as HTMLInputElement).value).toBe('Nicolas')
   })
 
   it('pre-fills daily goal from profile', () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     expect((screen.getByLabelText('Meta diaria') as HTMLInputElement).value).toBe('15')
   })
 
   it('shows "Guardar cambios" as initial button text', () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     expect(screen.getByRole('button', { name: 'Guardar cambios' })).toBeTruthy()
   })
 
   // --- Computed level display ---
 
   it('displays the computed level chip', () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     expect(screen.getByText('B1')).toBeTruthy()
   })
 
   it('shows B2 chip when computed_level is B2', () => {
     const profile = { ...baseProfile, computed_level: 'B2' }
-    renderWithTheme(<AccountForm profile={profile} />)
+    renderWithTheme(<AccountForm profile={profile} modules={[]} />)
     expect(screen.getByText('B2')).toBeTruthy()
   })
 
   it('shows C1 chip when computed_level is C1', () => {
     const profile = { ...baseProfile, computed_level: 'C1' }
-    renderWithTheme(<AccountForm profile={profile} />)
+    renderWithTheme(<AccountForm profile={profile} modules={[]} />)
     expect(screen.getByText('C1')).toBeTruthy()
   })
 
   it('does not render level picker buttons', () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     expect(screen.queryByRole('button', { name: /^A2/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /^B1/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /^B2/ })).toBeNull()
@@ -99,7 +99,7 @@ describe('AccountForm', () => {
   // --- Validation (client-side) ---
 
   it('shows error when daily goal is below 5', async () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.clear(screen.getByLabelText('Meta diaria'))
     await userEvent.type(screen.getByLabelText('Meta diaria'), '4')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
@@ -108,7 +108,7 @@ describe('AccountForm', () => {
   })
 
   it('shows error when daily goal exceeds 120', async () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.clear(screen.getByLabelText('Meta diaria'))
     await userEvent.type(screen.getByLabelText('Meta diaria'), '121')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
@@ -117,7 +117,7 @@ describe('AccountForm', () => {
   })
 
   it('shows error when daily goal is not a number', async () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.clear(screen.getByLabelText('Meta diaria'))
     await userEvent.type(screen.getByLabelText('Meta diaria'), 'abc')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
@@ -129,7 +129,7 @@ describe('AccountForm', () => {
 
   it('calls fetch with correct payload on save', async () => {
     mockFetchSuccess()
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/account/update',
@@ -146,7 +146,7 @@ describe('AccountForm', () => {
 
   it('does not include current_level in save payload', async () => {
     mockFetchSuccess()
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     const body = JSON.parse(vi.mocked(global.fetch).mock.calls[0][1]?.body as string)
     expect(body.current_level).toBeUndefined()
@@ -154,7 +154,7 @@ describe('AccountForm', () => {
 
   it('sends updated display name in payload', async () => {
     mockFetchSuccess()
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.clear(screen.getByLabelText('Nombre'))
     await userEvent.type(screen.getByLabelText('Nombre'), 'Carlos')
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
@@ -164,7 +164,7 @@ describe('AccountForm', () => {
 
   it('omits display_name from payload when field is empty', async () => {
     mockFetchSuccess()
-    renderWithTheme(<AccountForm profile={{ ...baseProfile, display_name: null }} />)
+    renderWithTheme(<AccountForm profile={{ ...baseProfile, display_name: null }} modules={[]} />)
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     const body = JSON.parse(vi.mocked(global.fetch).mock.calls[0][1]?.body as string)
     expect(body.display_name).toBeUndefined()
@@ -172,7 +172,7 @@ describe('AccountForm', () => {
 
   it('shows "Cambios guardados." after successful save', async () => {
     mockFetchSuccess()
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     await waitFor(() => {
       expect(screen.getByText('Cambios guardados.')).toBeTruthy()
@@ -186,7 +186,7 @@ describe('AccountForm', () => {
         resolveFetch = () => resolve({ ok: true, json: async () => ({ ok: true }) } as Response)
       })
     )
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     const clickPromise = userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     await waitFor(() => {
       expect(screen.queryByText('Guardando…')).toBeTruthy()
@@ -199,7 +199,7 @@ describe('AccountForm', () => {
 
   it('shows API error message on failed save', async () => {
     mockFetchError('Server is unavailable')
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     await waitFor(() => {
       expect(screen.getByText('Server is unavailable')).toBeTruthy()
@@ -208,7 +208,7 @@ describe('AccountForm', () => {
 
   it('does not show "Cambios guardados." after failed save', async () => {
     mockFetchError()
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     await waitFor(() => {
       expect(screen.queryByText('Cambios guardados.')).toBeNull()
@@ -218,12 +218,12 @@ describe('AccountForm', () => {
   // --- Character count ---
 
   it('does not show character count when display name is short', () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     expect(screen.queryByText(/\/50/)).toBeNull()
   })
 
   it('shows character count when display name is 35 or more chars', async () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     const input = screen.getByLabelText('Nombre')
     await userEvent.clear(input)
     await userEvent.type(input, 'A'.repeat(35))
@@ -233,7 +233,7 @@ describe('AccountForm', () => {
   // --- Theme toggle ---
 
   it('renders Sistema, Claro, and Oscuro theme buttons', () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     expect(screen.getByRole('button', { name: /sistema/i })).toBeTruthy()
     expect(screen.getByRole('button', { name: /claro/i })).toBeTruthy()
     expect(screen.getByRole('button', { name: /oscuro/i })).toBeTruthy()
@@ -241,7 +241,7 @@ describe('AccountForm', () => {
 
   it('clicking Oscuro theme button fires fetch to persist preference', async () => {
     vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as Response)
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.click(screen.getByRole('button', { name: /oscuro/i }))
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/account/update',
@@ -255,7 +255,7 @@ describe('AccountForm', () => {
 
   it('clears "Cambios guardados." when display name is edited', async () => {
     mockFetchSuccess()
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
     await waitFor(() => expect(screen.getByText('Cambios guardados.')).toBeTruthy())
     await userEvent.type(screen.getByLabelText('Nombre'), 'x')
@@ -265,13 +265,13 @@ describe('AccountForm', () => {
   // --- Skip gap_fill toggle ---
 
   it('renders skip gap_fill toggle with correct label', () => {
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     expect(screen.getByText('Omitir ejercicios de completar')).toBeTruthy()
   })
 
   it('clicking skip gap_fill toggle calls API with skip_gap_fill: true', async () => {
     vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({ ok: true }) } as Response)
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.click(screen.getByText('Omitir ejercicios de completar'))
     expect(global.fetch).toHaveBeenCalledWith(
       '/api/account/update',
@@ -282,13 +282,13 @@ describe('AccountForm', () => {
   })
 
   it('shows toggle as active when profile has skip_gap_fill=true', () => {
-    renderWithTheme(<AccountForm profile={{ ...baseProfile, skip_gap_fill: true }} />)
+    renderWithTheme(<AccountForm profile={{ ...baseProfile, skip_gap_fill: true }} modules={[]} />)
     expect(screen.getByText('Omitir ejercicios de completar')).toBeTruthy()
   })
 
   it('shows error text when skip gap_fill toggle API fails', async () => {
     vi.mocked(global.fetch).mockResolvedValueOnce({ ok: false, json: async () => ({}) } as Response)
-    renderWithTheme(<AccountForm profile={baseProfile} />)
+    renderWithTheme(<AccountForm profile={baseProfile} modules={[]} />)
     await userEvent.click(screen.getByText('Omitir ejercicios de completar'))
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeTruthy()

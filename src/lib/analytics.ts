@@ -208,6 +208,17 @@ export function trackOfflineModuleDownloaded(props: {
   posthog.capture('offline_module_downloaded', props)
 }
 
+export function trackOfflineDownloadAll(props: {
+  totalModules: number
+  downloadedModules: number
+  skippedModules: number
+  failedModules: number
+  durationMs: number
+}) {
+  if (typeof window === 'undefined') return
+  posthog.capture('offline_download_all', props)
+}
+
 export function trackOfflineSyncCompleted(props: {
   grammarCount: number
   verbCount: number

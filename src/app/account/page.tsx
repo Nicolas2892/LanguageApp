@@ -23,6 +23,12 @@ export default async function AccountPage() {
   if (!profileRes.data) redirect(ROUTES.dashboard)
   const profile = profileRes.data as Profile
 
+  const { data: rawModules } = await supabase
+    .from('modules')
+    .select('id, title, order_index')
+    .order('order_index')
+  const modules = (rawModules ?? []) as Array<{ id: string; title: string; order_index: number }>
+
   const isOAuthUser = user.app_metadata?.provider === 'google'
   const initials = getInitials(profile.display_name, user.email!)
 
@@ -62,7 +68,7 @@ export default async function AccountPage() {
 
       {/* Perfil */}
       <div className="mt-6">
-        <AccountForm profile={profile} />
+        <AccountForm profile={profile} modules={modules} />
       </div>
 
       <div className="mt-8">
