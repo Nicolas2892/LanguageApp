@@ -481,6 +481,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/components/ServiceWorkerRegistration.tsx` — SW registration + update detection; renders `<UpdateToast>` when a new SW is waiting; user-triggered `SKIP_WAITING` message → reload (no more silent auto-reload)
 - `src/components/UpdateToast.tsx` — fixed-bottom toast for PWA updates; "Actualizar" CTA + dismiss; follows `StreakFreezeNotification` pattern (`senda-card`, `animate-card-in`)
 - `src/lib/offline/db.ts` — IDB storage layer + `requestBackgroundSync()`
+- `src/lib/offline/useDownloadAll.ts` + `src/components/offline/DownloadAllButton.tsx` — "Descargar Todo" button on account page; sequential module download + parallel route prefetch (12 routes); skips already-downloaded modules; progress bar + cancel + retry
 
 ### Navigation
 
@@ -549,7 +550,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2598 tests across 162 files — all passing.**
+**Test suite: 2616 tests across 164 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
