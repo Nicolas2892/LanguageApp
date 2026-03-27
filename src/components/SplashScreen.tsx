@@ -129,7 +129,7 @@ export function SplashScreen() {
           fill="none"
           aria-hidden="true"
         >
-          <path d={S_STROKE_PATH} stroke="var(--d5-terracotta)" strokeWidth={2.5} strokeLinecap="round" />
+          <path d="M 6 21 C 2.5 20, 0.5 17, 1.5 14 C 2.5 11, 5.5 10, 9 9 C 12.5 8, 16 7, 18 5 C 19.5 3.5, 19 1.5, 17 1.5 C 16.5 1.5, 16.8 2.5, 17.5 3 C 19 2, 21 3, 20.5 5.5 C 20 8, 17 9.5, 13.5 10.5 C 10 11.5, 6.5 12, 4.5 14 C 2.5 16, 3 19, 5.5 20 C 7 20.8, 7.5 20, 6 21 Z" fill="var(--d5-terracotta)" />
         </svg>
         <span
           className="senda-heading"

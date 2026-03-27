@@ -1,8 +1,9 @@
 import { ImageResponse } from 'next/og'
 
 /**
- * Shared PWA icon renderer — white S-path on terracotta background.
- * Bold, full-bleed design that looks sharp at home screen size.
+ * Shared PWA icon renderer — white calligraphic S on terracotta.
+ * Strong bleed: the S extends beyond the icon boundary and is clipped
+ * by the rounded square, as if the brush stroke passes through the frame.
  *
  * @param rounded - set false for apple-icon (iOS applies its own mask)
  */
@@ -11,9 +12,10 @@ export function renderIcon(
   height: number,
   { rounded = true }: { rounded?: boolean } = {},
 ): ImageResponse {
-  // S-path fills ~70% of the icon for maximum visual impact
-  const svgSize = Math.round(width * 0.70)
-  const strokeWidth = width >= 512 ? 5 : width >= 180 ? 4 : 3.5
+  // S fills ~96% of the icon — bleeds past edges for cropped calligraphic effect
+  const svgSize = Math.round(width * 0.96)
+  // Offset to center the bleed (the S path sits in roughly 0-22 of the 24-unit viewBox)
+  const offset = Math.round((width - svgSize) / 2) - Math.round(width * 0.03)
 
   return new ImageResponse(
     (
@@ -25,6 +27,8 @@ export function renderIcon(
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          overflow: 'hidden',
+          position: 'relative',
           ...(rounded
             ? { borderRadius: width >= 512 ? 80 : 32 }
             : {}),
@@ -35,12 +39,16 @@ export function renderIcon(
           width={svgSize}
           height={svgSize}
           fill="none"
+          style={{
+            position: 'absolute',
+            left: offset,
+            top: offset,
+          }}
         >
+          {/* Calligraphic filled S — V2 broad-nib path */}
           <path
-            d="M 7 20 C 4 18, 1 15, 4 12 C 7 9, 14 9.5, 18 8 C 20.5 5.5, 20 1.5, 16.5 2.5"
-            stroke="#FDFCF9"
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
+            d="M 6 21 C 2.5 20, 0.5 17, 1.5 14 C 2.5 11, 5.5 10, 9 9 C 12.5 8, 16 7, 18 5 C 19.5 3.5, 19 1.5, 17 1.5 C 16.5 1.5, 16.8 2.5, 17.5 3 C 19 2, 21 3, 20.5 5.5 C 20 8, 17 9.5, 13.5 10.5 C 10 11.5, 6.5 12, 4.5 14 C 2.5 16, 3 19, 5.5 20 C 7 20.8, 7.5 20, 6 21 Z"
+            fill="#FDFCF9"
           />
         </svg>
       </div>

@@ -1,16 +1,14 @@
 // D5 Senda S-path — terracotta calligraphic mark, no background.
-// Refined uniform stroke with improved curve geometry:
-//   - Steeper entry angle (~30°) for confident pen-down feel
-//   - Clean middle sweep (no inflection hump)
-//   - Softened exit recurve (pen-lift flick, not wall-stop)
-// Used inline in the SideNav and AppHeader wordmarks.
+// Filled broad-nib S with natural variable width (thick bowls, thin crossing).
+// Used inline in the SideNav, AppHeader, splash screen, and tutor wordmarks.
 
-const S_PATH = 'M 7 20 C 4 18, 1 15, 4 12 C 7 9, 14 9.5, 18 8 C 20.5 5.5, 20 1.5, 16.5 2.5'
+// Calligraphic filled S — single closed path, broad-nib pen simulation
+const S_FILL_PATH = 'M 6 21 C 2.5 20, 0.5 17, 1.5 14 C 2.5 11, 5.5 10, 9 9 C 12.5 8, 16 7, 18 5 C 19.5 3.5, 19 1.5, 17 1.5 C 16.5 1.5, 16.8 2.5, 17.5 3 C 19 2, 21 3, 20.5 5.5 C 20 8, 17 9.5, 13.5 10.5 C 10 11.5, 6.5 12, 4.5 14 C 2.5 16, 3 19, 5.5 20 C 7 20.8, 7.5 20, 6 21 Z'
 
-// Legacy path kept for BackgroundMagicS and SplashScreen trail (larger viewBox scale)
+// Stroked path kept for BackgroundMagicS trail and SplashScreen trail (larger viewBox)
 export const S_STROKE_PATH = 'M 7 20 C 4 18, 1 15, 4 12 C 7 9, 14 9.5, 18 8 C 20.5 5.5, 20 1.5, 16.5 2.5'
 
-export function SvgSendaPath({ size = 20, strokeWidth = 3.5 }: { size?: number; strokeWidth?: number }) {
+export function SvgSendaPath({ size = 20 }: { size?: number; strokeWidth?: number }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -20,7 +18,7 @@ export function SvgSendaPath({ size = 20, strokeWidth = 3.5 }: { size?: number; 
       aria-hidden="true"
       style={{ flexShrink: 0 }}
     >
-      <path d={S_PATH} stroke="var(--d5-terracotta)" strokeWidth={strokeWidth} strokeLinecap="round" />
+      <path d={S_FILL_PATH} fill="var(--d5-terracotta)" />
     </svg>
   )
 }
