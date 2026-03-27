@@ -45,8 +45,8 @@ const UNITS = [
 ]
 
 const CONCEPTS = [
-  { id: 'con-1', unit_id: 'unit-1', title: 'Sin embargo', difficulty: 1, level: 'B1', grammar_focus: null },
-  { id: 'con-2', unit_id: 'unit-2', title: 'Que subjuntivo', difficulty: 2, level: 'B2', grammar_focus: 'Subjunctive' },
+  { id: 'con-1', unit_id: 'unit-1', title: 'Sin Embargo', difficulty: 1, level: 'B1', grammar_focus: null },
+  { id: 'con-2', unit_id: 'unit-2', title: 'Que Subjuntivo', difficulty: 2, level: 'B2', grammar_focus: 'Subjunctive' },
 ]
 
 const defaultProps = {
@@ -101,7 +101,7 @@ describe('CurriculumClient', () => {
     render(<CurriculumClient {...defaultProps} />)
 
     // Accordion content is in DOM but hidden (aria-hidden=true)
-    const conceptText = screen.getByText('Sin embargo')
+    const conceptText = screen.getByText('Sin Embargo')
     expect(conceptText.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'true')
 
     // Click the first module content area
@@ -118,7 +118,7 @@ describe('CurriculumClient', () => {
 
     const moduleTitle = screen.getByText('Conectores')
     await user.click(moduleTitle)
-    const conceptText = screen.getByText('Sin embargo')
+    const conceptText = screen.getByText('Sin Embargo')
     expect(conceptText.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'false')
 
     await user.click(moduleTitle)
@@ -141,7 +141,7 @@ describe('CurriculumClient', () => {
     await user.click(moduleTitle)
 
     // Concept row should link to /curriculum/con-1
-    const conceptLink = screen.getByRole('link', { name: /Sin embargo/ })
+    const conceptLink = screen.getByRole('link', { name: /Sin Embargo/ })
     expect(conceptLink).toHaveAttribute('href', '/curriculum/con-1')
   })
 
@@ -193,14 +193,14 @@ describe('CurriculumClient', () => {
     render(<CurriculumClient {...defaultProps} />)
 
     const searchInput = screen.getByLabelText('Buscar concepto')
-    await user.type(searchInput, 'Sin embargo')
+    await user.type(searchInput, 'Sin Embargo')
 
     // Module with match should be auto-expanded
-    const conceptText = screen.getByText('Sin embargo')
+    const conceptText = screen.getByText('Sin Embargo')
     expect(conceptText.closest('[aria-hidden]')).toHaveAttribute('aria-hidden', 'false')
 
     // Non-matching concept should not be visible
-    expect(screen.queryByText('Que subjuntivo')).not.toBeInTheDocument()
+    expect(screen.queryByText('Que Subjuntivo')).not.toBeInTheDocument()
   })
 
   it('clears search when X button is clicked', async () => {
@@ -270,6 +270,6 @@ describe('CurriculumClient', () => {
     await user.click(moduleTitle)
 
     // The B2 concept should be rendered with reduced opacity (locked)
-    expect(screen.getByText('Que subjuntivo')).toBeInTheDocument()
+    expect(screen.getByText('Que Subjuntivo')).toBeInTheDocument()
   })
 })

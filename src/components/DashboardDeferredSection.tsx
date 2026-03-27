@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { WindingPathSeparator } from '@/components/WindingPathSeparator'
 import { MASTERY_THRESHOLD } from '@/lib/constants'
+import { toTitleCase } from '@/lib/utils'
 import type { Concept } from '@/lib/supabase/types'
 
 interface Props {
@@ -117,7 +118,7 @@ export async function DashboardDeferredSection({
             Expresa tus ideas. Sin límites, solo práctica.
           </p>
           <p className="text-xs leading-relaxed" style={{ color: 'var(--d5-muted)' }}>
-            Concepto sugerido: {writeConcept.title}
+            Concepto sugerido: {toTitleCase(writeConcept.title)}
           </p>
           <Link href={`/write?suggested=${writeConcept.id}`} className="senda-cta-outline w-full">
             Empezar a Escribir

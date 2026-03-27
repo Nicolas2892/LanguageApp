@@ -381,7 +381,7 @@ Migrations (run once in Supabase SQL editor): 27 total (001–027). All applied.
 
 ### Curriculum Seed Content
 
-**Currently in DB** (120 concepts, ~1486 exercises):
+**Currently in DB** (120 concepts, ~1779 exercises):
 
 - Module 1: Connectors — 4 units, 23 concepts
 - Module 2a: The Subjunctive: Core — 1 unit, 8 concepts

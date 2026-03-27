@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
+import { toTitleCase } from '@/lib/utils'
 import Link from 'next/link'
 import { Lock, ChevronRight, ChevronDown, X, Search } from 'lucide-react'
 import {
@@ -467,7 +468,7 @@ export function CurriculumClient({ modules, units, concepts, progressEntries, un
                                         whiteSpace: 'nowrap',
                                       }}
                                     >
-                                      {concept.title}
+                                      {toTitleCase(concept.title)}
                                     </span>
                                   </div>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>

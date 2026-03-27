@@ -180,7 +180,7 @@ describe('ConceptDetailPage', () => {
       searchParams: Promise.resolve({}),
     })
     render(el)
-    expect(screen.getByText('Sin embargo')).toBeInTheDocument()
+    expect(screen.getByText('Sin Embargo')).toBeInTheDocument()
     expect(screen.getByText('Used to contrast two ideas.')).toBeInTheDocument()
     // No conjugation card for this concept
     expect(screen.queryByText('Conjugación de ejemplo')).not.toBeInTheDocument()

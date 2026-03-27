@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useTransition, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/lib/routes'
+import { toTitleCase } from '@/lib/utils'
 import { fireAndForget } from '@/lib/fireAndForget'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
@@ -586,7 +587,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
                     href={`/study?practice=true&concept=${c.id}`}
                     className="text-sm text-primary hover:underline"
                   >
-                    Practica: {c.title} →
+                    Practica: {toTitleCase(c.title)} →
                   </a>
                 </li>
               ))}
@@ -649,7 +650,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
           </DialogHeader>
           <p className="text-muted-foreground text-sm">
             Has dominado{' '}
-            <span className="font-semibold text-foreground">{masteredConceptTitle}</span>.
+            <span className="font-semibold text-foreground">{masteredConceptTitle ? toTitleCase(masteredConceptTitle) : ''}</span>.
             Ya está en tu memoria a largo plazo.
           </p>
           <DialogFooter className="sm:justify-center">
@@ -719,7 +720,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         <div className="flex items-center gap-1.5 text-xs flex-wrap">
           <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>{typeMeta.label}</span>
           <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-          <span className="text-[var(--d5-warm)]">{item.concept.title}</span>
+          <span className="text-[var(--d5-warm)]">{toTitleCase(item.concept.title)}</span>
           {item.concept.grammar_focus && (
             <>
               <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />

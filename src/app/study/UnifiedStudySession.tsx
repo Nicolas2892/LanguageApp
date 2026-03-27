@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { X, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/routes'
+import { toTitleCase } from '@/lib/utils'
 import { fireAndForget } from '@/lib/fireAndForget'
 import { isOnline } from '@/lib/platform/network'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
@@ -210,7 +211,7 @@ export function UnifiedStudySession({ items }: Props) {
   }
 
   const itemLabel = current.type === 'concept'
-    ? current.concept.title
+    ? toTitleCase(current.concept.title)
     : current.type === 'verb'
     ? current.verb.infinitive
     : current.vocabItem.expression

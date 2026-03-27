@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ROUTES } from '@/lib/routes'
+import { toTitleCase } from '@/lib/utils'
 import { SpeakButton } from '@/components/SpeakButton'
 import { getMasteryState, getMasteryProgress, MASTERY_BADGE } from '@/lib/mastery/badge'
 import { ChevronLeft, Pencil, Bot } from 'lucide-react'
@@ -215,7 +216,7 @@ export default async function ConceptDetailPage({ params, searchParams }: Props)
         {/* Title + hard flag */}
         <div className="flex items-start gap-2">
           <h1 className="senda-heading text-xl flex-1">
-            {concept.title}
+            {toTitleCase(concept.title)}
           </h1>
           <HardFlagButton conceptId={id} initialIsHard={isHard} />
         </div>
