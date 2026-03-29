@@ -9,7 +9,9 @@ import { toTitleCase } from '@/lib/utils'
 import { fireAndForget } from '@/lib/fireAndForget'
 import { isOnline } from '@/lib/platform/network'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
+import { ExerciseBottomBar } from '@/components/exercises/ExerciseBottomBar'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
+import { useIsLg } from '@/lib/hooks/useIsLg'
 import { VerbExerciseInline } from '@/components/exercises/VerbExerciseInline'
 import { VocabExerciseInline } from '@/components/exercises/VocabExerciseInline'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
@@ -22,6 +24,9 @@ import { verbOutcomeToSRS, vocabOutcomeToSRS } from '@/lib/srs/scoreMapping'
 import { useHaptics } from '@/lib/hooks/useHaptics'
 import type { UnifiedStudyItem } from './types'
 import type { GradeResult } from '@/lib/claude/grader'
+
+/** Exercise types whose inputs cannot be separated into a fixed bottom bar. */
+const NON_SEPARABLE_TYPES: readonly string[] = ['gap_fill', 'sentence_builder', 'proofreading']
 
 type Phase =
   | { kind: 'answering' }
@@ -37,6 +42,8 @@ interface Props {
 export function UnifiedStudySession({ items }: Props) {
   const router = useRouter()
   const { triggerSuccess, triggerError } = useHaptics()
+  const isLgScreen = useIsLg()
+  const [bottomBarEl, setBottomBarEl] = useState<HTMLDivElement | null>(null)
   const [index, setIndex] = useState(0)
   const [phase, setPhase] = useState<Phase>({ kind: 'answering' })
   const [flashClass, setFlashClass] = useState('')
@@ -216,7 +223,11 @@ export function UnifiedStudySession({ items }: Props) {
     ? current.verb.infinitive
     : current.vocabItem.expression
 
+  const isGrammarSeparable = current.type === 'concept' && !NON_SEPARABLE_TYPES.includes(current.exercise?.type ?? '')
+  const showBottomBar = !isLgScreen && isGrammarSeparable && (phase.kind === 'answering' || phase.kind === 'submitting')
+
   return (
+    <>
     <div className={`flex-1 flex flex-col ${flashClass}`}>
       {/* Header */}
       <div className="shrink-0 flex items-center gap-3 mb-4">
@@ -238,12 +249,15 @@ export function UnifiedStudySession({ items }: Props) {
         {/* Grammar: answering */}
         {current.type === 'concept' && (phase.kind === 'answering' || phase.kind === 'submitting') && (
           <div className="space-y-4 animate-exercise-in">
-            <ExerciseRenderer exercise={current.exercise} onSubmit={handleGrammarSubmit} disabled={disabled || phase.kind === 'submitting'} />
+            <ExerciseRenderer exercise={current.exercise} onSubmit={handleGrammarSubmit} disabled={disabled || phase.kind === 'submitting'} portalTarget={showBottomBar ? bottomBarEl : null} />
             {phase.kind === 'submitting' && (
               <div className="flex items-center justify-center gap-2 py-2">
                 <Loader2 size={16} className="animate-spin text-primary" />
                 <span className="text-sm" style={{ color: 'var(--d5-warm)' }}>Evaluando…</span>
               </div>
+            )}
+            {showBottomBar && (
+              <div className="h-[calc(10rem+env(safe-area-inset-bottom))] lg:hidden" />
             )}
           </div>
         )}
@@ -335,5 +349,13 @@ export function UnifiedStudySession({ items }: Props) {
         </DialogContent>
       </Dialog>
     </div>
+
+    {/* Fixed input bar for grammar exercises — outside flex column */}
+    {showBottomBar && (
+      <ExerciseBottomBar>
+        <div ref={setBottomBarEl} />
+      </ExerciseBottomBar>
+    )}
+    </>
   )
 }

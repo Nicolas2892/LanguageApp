@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { useAutoFocus } from '@/lib/hooks/useAutoFocus'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -25,12 +26,14 @@ interface Props {
   exercise: Exercise
   onSubmit: (answer: string) => void
   disabled?: boolean
+  portalTarget?: HTMLDivElement | null
 }
 
-export function Proofreading({ exercise, onSubmit, disabled }: Props) {
+export function Proofreading({ exercise, onSubmit, disabled, portalTarget }: Props) {
   const { text, errorCount } = parseProofreadingPrompt(exercise.prompt)
   const [value, setValue] = useState(text)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const formId = useId()
   useAutoFocus(textareaRef)
 
   function handleSubmit(e: React.FormEvent) {
@@ -39,28 +42,8 @@ export function Proofreading({ exercise, onSubmit, disabled }: Props) {
     onSubmit(value.trim())
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex items-start gap-2">
-        <div className="flex-1">
-          <p className="senda-eyebrow">Corrección De Texto</p>
-          <p className="senda-heading text-base leading-relaxed">
-            Encuentra y corrige los errores en el texto
-          </p>
-        </div>
-        <SpeakButton text={text} />
-      </div>
-
-      {/* Error count badge */}
-      {errorCount > 0 && (
-        <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-sm font-medium text-amber-800 dark:text-amber-200">
-          <span aria-label={`${errorCount} errores`}>
-            Este texto contiene {errorCount} {errorCount === 1 ? 'error' : 'errores'}
-          </span>
-        </div>
-      )}
-
-      {/* Pre-populated textarea */}
+  const inputArea = (
+    <div className="space-y-3">
       <div className="senda-dashed-input">
         <Textarea
           ref={textareaRef}
@@ -72,10 +55,36 @@ export function Proofreading({ exercise, onSubmit, disabled }: Props) {
           className="text-base resize-none border-0 shadow-none bg-transparent focus-visible:ring-0 px-0"
         />
       </div>
-
-      <Button type="submit" disabled={disabled || !value.trim()} className="w-full rounded-full">
+      <Button form={formId} type="submit" disabled={disabled || !value.trim()} className="w-full rounded-full">
         Confirmar →
       </Button>
-    </form>
+    </div>
+  )
+
+  return (
+    <>
+      <form id={formId} onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex items-start gap-2">
+          <div className="flex-1">
+            <p className="senda-eyebrow">Corrección De Texto</p>
+            <p className="senda-heading text-base leading-relaxed">
+              Encuentra y corrige los errores en el texto
+            </p>
+          </div>
+          <SpeakButton text={text} />
+        </div>
+
+        {errorCount > 0 && (
+          <div className="inline-flex items-center gap-2 rounded-full bg-amber-100 dark:bg-amber-900/30 px-3 py-1 text-sm font-medium text-amber-800 dark:text-amber-200">
+            <span aria-label={`${errorCount} errores`}>
+              Este texto contiene {errorCount} {errorCount === 1 ? 'error' : 'errores'}
+            </span>
+          </div>
+        )}
+
+        {!portalTarget && inputArea}
+      </form>
+      {portalTarget && createPortal(inputArea, portalTarget)}
+    </>
   )
 }

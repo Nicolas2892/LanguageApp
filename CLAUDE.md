@@ -267,6 +267,8 @@ Session configure page (`/study/configure`) builds these params via a UI before 
 
 All routed through shared `ExerciseRenderer` in `src/components/exercises/ExerciseRenderer.tsx`.
 
+**Mobile keyboard fix:** On mobile (<lg), exercise inputs are rendered in a fixed bottom bar above the keyboard to keep the prompt visible while typing. Verb/vocab sessions use `DrillInputBar` (extracted input). Grammar exercises with separable inputs (TextAnswer, ErrorCorrection, ListeningComprehension, RegisterShift) use `createPortal()` via `portalTarget` prop into `ExerciseBottomBar`. Non-separable types (GapFill, SentenceBuilder, Proofreading) render inputs inline as before. `NON_SEPARABLE_TYPES` constant defined in each session file.
+
 ### Core Learning Loop
 
 1. `StudySession.tsx` state: `answering → feedback → [try again | next] → done`
@@ -458,6 +460,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/lib/rate-limit.ts` — `checkRateLimit(userId, routeKey, opts)` sliding-window (backed by @vercel/kv)
 - `src/lib/api-utils.ts` — `updateStreakIfNeeded` + `updateComputedLevel` shared by submit + grade
 - `src/lib/timezone.ts` — `userLocalToday(tz?)` returns YYYY-MM-DD in user's IANA timezone
+- `src/lib/hooks/useIsLg.ts` — `useIsLg()` returns true when viewport ≥ 1024px (Tailwind `lg`); `useSyncExternalStore` + `matchMedia`; SSR-safe + jsdom-safe
 
 **Learning & Grading:**
 - `src/lib/constants.ts` — SESSION_SIZE=10, BOOTSTRAP_SIZE=5, MASTERY_THRESHOLD=21, MIN_PRACTICE_SIZE=5, EXERCISE_CAP_PER_TYPE=15
@@ -473,7 +476,9 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
 
 **UI Components:**
-- `src/components/exercises/ExerciseRenderer.tsx` — shared exercise type switch
+- `src/components/DrillInputBar.tsx` — fixed bottom input bar for verb/vocab drill sessions; mobile `position: fixed` above keyboard, desktop `lg:static` inline; props: `inputRef`, `value`, `onChange`, `onSubmit`, `placeholder`, `disabled`, `buttonLabel?`
+- `src/components/exercises/ExerciseBottomBar.tsx` — fixed bottom bar container for grammar exercise input portals; mobile only (caller checks `useIsLg`)
+- `src/components/exercises/ExerciseRenderer.tsx` — shared exercise type switch; optional `portalTarget` prop passes through to separable exercise components (TextAnswer, ErrorCorrection, ListeningComprehension, RegisterShift) for mobile fixed input bar
 - `src/components/ErrorBoundary.tsx` — wraps StudySession, DiagnosticSession, WriteSession, VerbSession, VocabSession
 - `src/components/HardFlagButton.tsx` — optimistic toggle for concept `is_hard` flag
 - `src/lib/hooks/useSpeech.ts` + `SpeakButton.tsx` — TTS (wired in all exercise types)

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { SpeakButton } from '@/components/SpeakButton'
@@ -25,11 +26,13 @@ interface Props {
   exercise: Exercise
   onSubmit: (answer: string) => void
   disabled?: boolean
+  portalTarget?: HTMLDivElement | null
 }
 
-export function ListeningComprehension({ exercise, onSubmit, disabled }: Props) {
+export function ListeningComprehension({ exercise, onSubmit, disabled, portalTarget }: Props) {
   const { passage, question } = parseListeningPrompt(exercise.prompt)
   const [answer, setAnswer] = useState('')
+  const formId = useId()
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -94,56 +97,8 @@ export function ListeningComprehension({ exercise, onSubmit, disabled }: Props) 
     onSubmit(answer.trim())
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Audio player section */}
-      <div className="senda-card flex flex-col items-center gap-3 py-6">
-        <p className="senda-eyebrow">Comprensión Auditiva</p>
-
-        {playCount === 0 ? (
-          <Button
-            type="button"
-            onClick={fetchAndPlay}
-            disabled={disabled || loading}
-            className="h-14 w-14 rounded-full p-0"
-            aria-label="Reproducir pasaje"
-          >
-            {loading ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              <Play className="h-6 w-6 ml-0.5" />
-            )}
-          </Button>
-        ) : (
-          <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              onClick={fetchAndPlay}
-              disabled={disabled || loading}
-              variant="outline"
-              className="rounded-full gap-2"
-              aria-label="Escuchar de nuevo"
-            >
-              <RotateCcw className="h-4 w-4" />
-              Escuchar de nuevo
-              <span className="ml-1 text-xs text-[var(--d5-muted)]">({playCount})</span>
-            </Button>
-          </div>
-        )}
-
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
-      </div>
-
-      {/* Question */}
-      {question && (
-        <div className="flex items-start gap-2">
-          <p className="senda-heading text-base leading-relaxed flex-1">{question}</p>
-        </div>
-      )}
-
-      {/* Answer textarea */}
+  const inputArea = (
+    <div className="space-y-3">
       <div className="senda-dashed-input">
         <Textarea
           value={answer}
@@ -154,13 +109,68 @@ export function ListeningComprehension({ exercise, onSubmit, disabled }: Props) 
           className="text-base resize-none border-0 shadow-none bg-transparent focus-visible:ring-0 px-0"
         />
       </div>
-
-      <Button type="submit" disabled={disabled || !answer.trim()} className="w-full rounded-full">
+      <Button form={formId} type="submit" disabled={disabled || !answer.trim()} className="w-full rounded-full">
         Confirmar →
       </Button>
+    </div>
+  )
 
-      {/* Hidden audio element for playback control */}
-      {audioUrl && <audio ref={audioRef} src={audioUrl} className="hidden" />}
-    </form>
+  return (
+    <>
+      <form id={formId} onSubmit={handleSubmit} className="space-y-4">
+        {/* Audio player section */}
+        <div className="senda-card flex flex-col items-center gap-3 py-6">
+          <p className="senda-eyebrow">Comprensión Auditiva</p>
+
+          {playCount === 0 ? (
+            <Button
+              type="button"
+              onClick={fetchAndPlay}
+              disabled={disabled || loading}
+              className="h-14 w-14 rounded-full p-0"
+              aria-label="Reproducir pasaje"
+            >
+              {loading ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <Play className="h-6 w-6 ml-0.5" />
+              )}
+            </Button>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Button
+                type="button"
+                onClick={fetchAndPlay}
+                disabled={disabled || loading}
+                variant="outline"
+                className="rounded-full gap-2"
+                aria-label="Escuchar de nuevo"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Escuchar de nuevo
+                <span className="ml-1 text-xs text-[var(--d5-muted)]">({playCount})</span>
+              </Button>
+            </div>
+          )}
+
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
+          )}
+        </div>
+
+        {/* Question */}
+        {question && (
+          <div className="flex items-start gap-2">
+            <p className="senda-heading text-base leading-relaxed flex-1">{question}</p>
+          </div>
+        )}
+
+        {!portalTarget && inputArea}
+
+        {/* Hidden audio element for playback control */}
+        {audioUrl && <audio ref={audioRef} src={audioUrl} className="hidden" />}
+      </form>
+      {portalTarget && createPortal(inputArea, portalTarget)}
+    </>
   )
 }

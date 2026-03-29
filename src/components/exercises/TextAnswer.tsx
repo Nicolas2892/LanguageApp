@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { focusWithoutScroll } from '@/lib/hooks/useAutoFocus'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -12,6 +13,7 @@ interface Props {
   exercise: Exercise
   onSubmit: (answer: string) => void
   disabled?: boolean
+  portalTarget?: HTMLDivElement | null
 }
 
 /**
@@ -50,9 +52,10 @@ export function splitPrompt(prompt: string): { instruction: string; source: stri
   return null
 }
 
-export function TextAnswer({ exercise, onSubmit, disabled }: Props) {
+export function TextAnswer({ exercise, onSubmit, disabled, portalTarget }: Props) {
   const [answer, setAnswer] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const formId = useId()
 
   function autoResize() {
     const el = textareaRef.current
@@ -80,34 +83,8 @@ export function TextAnswer({ exercise, onSubmit, disabled }: Props) {
   const isTransformType = exercise.type === 'translation' || exercise.type === 'transformation'
   const parsed = isTransformType ? splitPrompt(exercise.prompt) : null
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {parsed ? (
-        /* Split layout: instruction above, source sentence in styled card */
-        <div className="space-y-3">
-          <div className="flex items-start gap-2">
-            <p className="text-sm text-[var(--d5-warm)] flex-1">
-              ↳ {parsed.instruction}
-            </p>
-          </div>
-          <div className="flex items-start gap-2">
-            <div className="flex-1 rounded-xl bg-[rgba(140,106,63,0.07)] dark:bg-[rgba(184,170,153,0.10)] border border-[var(--d5-muted)]/20 px-4 py-3">
-              <p className="senda-heading text-base leading-relaxed">
-                <AnnotatedText text={parsed.source} annotations={exercise.annotations} />
-              </p>
-            </div>
-            <SpeakButton text={parsed.source} />
-          </div>
-        </div>
-      ) : (
-        /* Default: single block (free_write or unrecognised prompt format) */
-        <div className="flex items-start gap-2">
-          <p className="senda-heading text-base leading-relaxed flex-1">
-            <AnnotatedText text={exercise.prompt} annotations={exercise.annotations} />
-          </p>
-          <SpeakButton text={exercise.prompt} />
-        </div>
-      )}
+  const inputArea = (
+    <div className="space-y-3">
       <div className="senda-dashed-input">
         <Textarea
           ref={textareaRef}
@@ -119,9 +96,42 @@ export function TextAnswer({ exercise, onSubmit, disabled }: Props) {
           style={{ resize: 'none' }}
         />
       </div>
-      <Button type="submit" disabled={disabled || !answer.trim()} className="w-full rounded-full">
+      <Button form={formId} type="submit" disabled={disabled || !answer.trim()} className="w-full rounded-full">
         Confirmar →
       </Button>
-    </form>
+    </div>
+  )
+
+  return (
+    <>
+      <form id={formId} onSubmit={handleSubmit} className="space-y-4">
+        {parsed ? (
+          <div className="space-y-3">
+            <div className="flex items-start gap-2">
+              <p className="text-sm text-[var(--d5-warm)] flex-1">
+                ↳ {parsed.instruction}
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <div className="flex-1 rounded-xl bg-[rgba(140,106,63,0.07)] dark:bg-[rgba(184,170,153,0.10)] border border-[var(--d5-muted)]/20 px-4 py-3">
+                <p className="senda-heading text-base leading-relaxed">
+                  <AnnotatedText text={parsed.source} annotations={exercise.annotations} />
+                </p>
+              </div>
+              <SpeakButton text={parsed.source} />
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-start gap-2">
+            <p className="senda-heading text-base leading-relaxed flex-1">
+              <AnnotatedText text={exercise.prompt} annotations={exercise.annotations} />
+            </p>
+            <SpeakButton text={exercise.prompt} />
+          </div>
+        )}
+        {!portalTarget && inputArea}
+      </form>
+      {portalTarget && createPortal(inputArea, portalTarget)}
+    </>
   )
 }

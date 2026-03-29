@@ -6,6 +6,7 @@ import { ROUTES } from '@/lib/routes'
 import { fireAndForget } from '@/lib/fireAndForget'
 import { X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { DrillInputBar } from '@/components/DrillInputBar'
 import {
   Dialog,
   DialogContent,
@@ -364,32 +365,9 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
               )}
             </div>
 
-            {/* Input area — hidden during feedback (swap pattern) */}
+            {/* Spacer for fixed input bar on mobile */}
             {phase.kind === 'answering' && (
-              <div className="space-y-3">
-                <div className="senda-dashed-input">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter') handleCheck() }}
-                    placeholder={isInfinitiveDrill ? 'Escribe el infinitivo…' : 'Escribe la forma conjugada…'}
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck={false}
-                    className="w-full text-base border-0 bg-transparent focus:outline-none focus-visible:ring-0"
-                  />
-                </div>
-
-                <Button
-                  onClick={handleCheck}
-                  disabled={!answer.trim()}
-                  className="w-full rounded-full active:scale-95 transition-transform"
-                >
-                  Comprobar →
-                </Button>
-              </div>
+              <div className="h-[calc(7rem+env(safe-area-inset-bottom))] lg:hidden" />
             )}
 
             {/* Correct answer — inline success display (no full feedback card) */}
@@ -422,6 +400,18 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
           </div>
         </div>
       </div>
+
+      {/* Fixed input bar — outside flex column to avoid transform ancestor */}
+      {phase.kind === 'answering' && (
+        <DrillInputBar
+          inputRef={inputRef}
+          value={answer}
+          onChange={setAnswer}
+          onSubmit={handleCheck}
+          placeholder={isInfinitiveDrill ? 'Escribe el infinitivo…' : 'Escribe la forma conjugada…'}
+          disabled={!answer.trim()}
+        />
+      )}
     </>
   )
 }

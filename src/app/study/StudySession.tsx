@@ -6,9 +6,11 @@ import { ROUTES } from '@/lib/routes'
 import { toTitleCase } from '@/lib/utils'
 import { fireAndForget } from '@/lib/fireAndForget'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
+import { ExerciseBottomBar } from '@/components/exercises/ExerciseBottomBar'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
+import { useIsLg } from '@/lib/hooks/useIsLg'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -79,6 +81,9 @@ const EXERCISE_TYPE_META: Record<string, { label: string; Icon: React.ElementTyp
   register_shift:   { label: 'Cambio De Registro',      Icon: RefreshCw     },
 }
 
+/** Exercise types whose inputs cannot be separated into a fixed bottom bar. */
+const NON_SEPARABLE_TYPES: readonly string[] = ['gap_fill', 'sentence_builder', 'proofreading']
+
 function formatTime(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60)
   const s = totalSeconds % 60
@@ -88,6 +93,8 @@ function formatTime(totalSeconds: number): string {
 export function StudySession({ items: initialItems, practiceMode, generateConfig, returnHref, sprintConfig, freeWriteConceptId, sessionLabel }: Props) {
   const router = useRouter()
   const { triggerSuccess, triggerError } = useHaptics()
+  const isLg = useIsLg()
+  const [bottomBarEl, setBottomBarEl] = useState<HTMLDivElement | null>(null)
   const startedAt = useRef(new Date().toISOString())
   const [dynamicItems, setDynamicItems] = useState<StudyItem[]>(initialItems)
   const [index, setIndex] = useState(0)
@@ -636,8 +643,11 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const typeMeta = EXERCISE_TYPE_META[item.exercise.type] ?? { label: item.exercise.type, Icon: Type }
   const TypeIcon = typeMeta.Icon
   const isLast = index + 1 >= effectiveLength
+  const isSeparable = !NON_SEPARABLE_TYPES.includes(item.exercise.type)
+  const showBottomBar = !isLg && isSeparable && state.phase === 'answering'
 
   return (
+    <>
     <div className="relative overflow-hidden">
       <BackgroundMagicS opacity={0.05} />
 
@@ -765,7 +775,7 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 ${exiting ? 'animate-exercise-out' : 'animate-exercise-in'} ${flashClass ?? ''}`}>
           {(state.phase === 'answering' || flashClass) && (
             <div className="animate-in slide-in-from-right-2 duration-200">
-              <ExerciseRenderer exercise={item.exercise} onSubmit={handleSubmit} disabled={submitting} />
+              <ExerciseRenderer exercise={item.exercise} onSubmit={handleSubmit} disabled={submitting} portalTarget={showBottomBar ? bottomBarEl : null} />
               {submitting && (
                 <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -816,8 +826,21 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
               />
             </div>
           )}
+
+          {/* Spacer for fixed input bar on mobile */}
+          {showBottomBar && (
+            <div className="h-[calc(10rem+env(safe-area-inset-bottom))] lg:hidden" />
+          )}
         </div>
       </div>
     </div>
+
+    {/* Fixed input bar — outside overflow-hidden to avoid transform ancestor issues */}
+    {showBottomBar && (
+      <ExerciseBottomBar>
+        <div ref={setBottomBarEl} />
+      </ExerciseBottomBar>
+    )}
+    </>
   )
 }

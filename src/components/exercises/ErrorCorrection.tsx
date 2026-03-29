@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { useAutoFocus } from '@/lib/hooks/useAutoFocus'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -51,12 +52,14 @@ interface Props {
   exercise: Exercise
   onSubmit: (answer: string) => void
   disabled?: boolean
+  portalTarget?: HTMLDivElement | null
 }
 
-export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
+export function ErrorCorrection({ exercise, onSubmit, disabled, portalTarget }: Props) {
   const erroneous = extractSentence(exercise.prompt)
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const formId = useId()
   useAutoFocus(textareaRef)
 
   function handleSubmit(e: React.FormEvent) {
@@ -65,25 +68,8 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
     onSubmit(value.trim())
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex items-start gap-2">
-        <p className="senda-heading text-base leading-relaxed flex-1">{exercise.prompt}</p>
-        <SpeakButton text={exercise.prompt} />
-      </div>
-
-      {erroneous && (
-        <div className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200/60 dark:border-red-800/40 p-3 text-sm">
-          <span className="font-semibold text-[var(--d5-warm)]">Frase errónea: </span>
-          <span className="italic text-foreground">
-            <AnnotatedText
-              text={erroneous}
-              annotations={sliceAnnotationsForSentence(exercise.annotations, exercise.prompt, erroneous)}
-            />
-          </span>
-        </div>
-      )}
-
+  const inputArea = (
+    <div className="space-y-3">
       <div className="space-y-1">
         <p className="text-xs text-[var(--d5-muted)]">Escribe la frase corregida:</p>
         <div className="senda-dashed-input">
@@ -98,12 +84,37 @@ export function ErrorCorrection({ exercise, onSubmit, disabled }: Props) {
           />
         </div>
       </div>
-
       <div className="flex gap-2">
-        <Button type="submit" disabled={disabled || !value.trim()} className="flex-1 rounded-full">
+        <Button form={formId} type="submit" disabled={disabled || !value.trim()} className="flex-1 rounded-full">
           Confirmar →
         </Button>
       </div>
-    </form>
+    </div>
+  )
+
+  return (
+    <>
+      <form id={formId} onSubmit={handleSubmit} className="space-y-4">
+        <div className="flex items-start gap-2">
+          <p className="senda-heading text-base leading-relaxed flex-1">{exercise.prompt}</p>
+          <SpeakButton text={exercise.prompt} />
+        </div>
+
+        {erroneous && (
+          <div className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200/60 dark:border-red-800/40 p-3 text-sm">
+            <span className="font-semibold text-[var(--d5-warm)]">Frase errónea: </span>
+            <span className="italic text-foreground">
+              <AnnotatedText
+                text={erroneous}
+                annotations={sliceAnnotationsForSentence(exercise.annotations, exercise.prompt, erroneous)}
+              />
+            </span>
+          </div>
+        )}
+
+        {!portalTarget && inputArea}
+      </form>
+      {portalTarget && createPortal(inputArea, portalTarget)}
+    </>
   )
 }

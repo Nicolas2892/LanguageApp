@@ -4,9 +4,11 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/lib/routes'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
+import { ExerciseBottomBar } from '@/components/exercises/ExerciseBottomBar'
 import { OfflineFeedbackPanel } from '@/components/offline/OfflineFeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
+import { useIsLg } from '@/lib/hooks/useIsLg'
 import { Button } from '@/components/ui/button'
 import { BackgroundMagicS } from '@/components/BackgroundMagicS'
 import { CloudOff, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react'
@@ -26,12 +28,17 @@ type SessionState =
   | { phase: 'feedback'; userAnswer: string }
   | { phase: 'done'; total: number }
 
+/** Exercise types whose inputs cannot be separated into a fixed bottom bar. */
+const NON_SEPARABLE_TYPES: readonly string[] = ['gap_fill', 'sentence_builder', 'proofreading']
+
 interface Props {
   moduleId?: string
 }
 
 export function OfflineStudySession({ moduleId }: Props) {
   const router = useRouter()
+  const isLgScreen = useIsLg()
+  const [bottomBarEl, setBottomBarEl] = useState<HTMLDivElement | null>(null)
   const [items, setItems] = useState<StudyItem[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [state, setState] = useState<SessionState>({ phase: 'loading' })
@@ -69,6 +76,8 @@ export function OfflineStudySession({ moduleId }: Props) {
   }, [selectedModuleId])
 
   const currentItem = items[currentIndex]
+  const isSeparable = currentItem ? !NON_SEPARABLE_TYPES.includes(currentItem.exercise.type) : false
+  const showBottomBar = !isLgScreen && isSeparable && state.phase === 'answering'
 
   const handleSubmit = useCallback(async (answer: string) => {
     if (!currentItem) return
@@ -219,7 +228,9 @@ export function OfflineStudySession({ moduleId }: Props) {
                 exercise={currentItem.exercise}
                 onSubmit={handleSubmit}
                 disabled={false}
+                portalTarget={showBottomBar ? bottomBarEl : null}
               />
+              {showBottomBar && <div className="h-[calc(10rem+env(safe-area-inset-bottom))] lg:hidden" />}
             </div>
           )}
 
@@ -243,6 +254,13 @@ export function OfflineStudySession({ moduleId }: Props) {
             />
           )}
         </>
+      )}
+
+      {/* Fixed input bar for grammar exercises */}
+      {showBottomBar && (
+        <ExerciseBottomBar>
+          <div ref={setBottomBarEl} />
+        </ExerciseBottomBar>
       )}
     </div>
   )

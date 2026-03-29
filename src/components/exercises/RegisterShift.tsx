@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { useAutoFocus } from '@/lib/hooks/useAutoFocus'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -68,12 +69,14 @@ interface Props {
   exercise: Exercise
   onSubmit: (answer: string) => void
   disabled?: boolean
+  portalTarget?: HTMLDivElement | null
 }
 
-export function RegisterShift({ exercise, onSubmit, disabled }: Props) {
+export function RegisterShift({ exercise, onSubmit, disabled, portalTarget }: Props) {
   const { sourceRegister, targetRegister, context, text } = parseRegisterPrompt(exercise.prompt)
   const [answer, setAnswer] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const formId = useId()
   useAutoFocus(textareaRef)
 
   function handleSubmit(e: React.FormEvent) {
@@ -82,31 +85,8 @@ export function RegisterShift({ exercise, onSubmit, disabled }: Props) {
     onSubmit(answer.trim())
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <p className="senda-eyebrow">Cambio De Registro</p>
-      </div>
-
-      {/* Source text card */}
-      <div className="senda-card space-y-2">
-        <div className="flex items-center gap-2">
-          <RegisterBadge register={sourceRegister} />
-          <SpeakButton text={text} />
-        </div>
-        <p className="text-base leading-relaxed">{text}</p>
-      </div>
-
-      {/* Target register + context */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm text-[var(--d5-warm)]">→</span>
-        <RegisterBadge register={targetRegister} />
-        {context && (
-          <p className="text-sm text-[var(--d5-muted)] italic">{context}</p>
-        )}
-      </div>
-
-      {/* Answer textarea */}
+  const inputArea = (
+    <div className="space-y-3">
       <div className="senda-dashed-input">
         <Textarea
           ref={textareaRef}
@@ -118,10 +98,38 @@ export function RegisterShift({ exercise, onSubmit, disabled }: Props) {
           className="text-base resize-none border-0 shadow-none bg-transparent focus-visible:ring-0 px-0"
         />
       </div>
-
-      <Button type="submit" disabled={disabled || !answer.trim()} className="w-full rounded-full">
+      <Button form={formId} type="submit" disabled={disabled || !answer.trim()} className="w-full rounded-full">
         Confirmar →
       </Button>
-    </form>
+    </div>
+  )
+
+  return (
+    <>
+      <form id={formId} onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <p className="senda-eyebrow">Cambio De Registro</p>
+        </div>
+
+        <div className="senda-card space-y-2">
+          <div className="flex items-center gap-2">
+            <RegisterBadge register={sourceRegister} />
+            <SpeakButton text={text} />
+          </div>
+          <p className="text-base leading-relaxed">{text}</p>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm text-[var(--d5-warm)]">→</span>
+          <RegisterBadge register={targetRegister} />
+          {context && (
+            <p className="text-sm text-[var(--d5-muted)] italic">{context}</p>
+          )}
+        </div>
+
+        {!portalTarget && inputArea}
+      </form>
+      {portalTarget && createPortal(inputArea, portalTarget)}
+    </>
   )
 }
