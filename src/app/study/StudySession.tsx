@@ -6,11 +6,10 @@ import { ROUTES } from '@/lib/routes'
 import { toTitleCase } from '@/lib/utils'
 import { fireAndForget } from '@/lib/fireAndForget'
 import { ExerciseRenderer } from '@/components/exercises/ExerciseRenderer'
-import { ExerciseBottomBar } from '@/components/exercises/ExerciseBottomBar'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import { HintPanel } from '@/components/exercises/HintPanel'
 import { GrammarFocusChip } from '@/components/GrammarFocusChip'
-import { useIsLg } from '@/lib/hooks/useIsLg'
+import { SessionShell } from '@/components/SessionShell'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -81,9 +80,6 @@ const EXERCISE_TYPE_META: Record<string, { label: string; Icon: React.ElementTyp
   register_shift:   { label: 'Cambio De Registro',      Icon: RefreshCw     },
 }
 
-/** Exercise types whose inputs cannot be separated into a fixed bottom bar. */
-const NON_SEPARABLE_TYPES: readonly string[] = ['gap_fill', 'sentence_builder', 'proofreading']
-
 function formatTime(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60)
   const s = totalSeconds % 60
@@ -93,8 +89,6 @@ function formatTime(totalSeconds: number): string {
 export function StudySession({ items: initialItems, practiceMode, generateConfig, returnHref, sprintConfig, freeWriteConceptId, sessionLabel }: Props) {
   const router = useRouter()
   const { triggerSuccess, triggerError } = useHaptics()
-  const isLg = useIsLg()
-  const [bottomBarEl, setBottomBarEl] = useState<HTMLDivElement | null>(null)
   const startedAt = useRef(new Date().toISOString())
   const [dynamicItems, setDynamicItems] = useState<StudyItem[]>(initialItems)
   const [index, setIndex] = useState(0)
@@ -643,14 +637,9 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
   const typeMeta = EXERCISE_TYPE_META[item.exercise.type] ?? { label: item.exercise.type, Icon: Type }
   const TypeIcon = typeMeta.Icon
   const isLast = index + 1 >= effectiveLength
-  const isSeparable = !NON_SEPARABLE_TYPES.includes(item.exercise.type)
-  const showBottomBar = !isLg && isSeparable && state.phase === 'answering'
 
   return (
     <>
-    <div className="relative overflow-hidden">
-      <BackgroundMagicS opacity={0.05} />
-
       {/* UX-AA: Mastery milestone overlay */}
       <Dialog open={masteryOverlayOpen} onOpenChange={setMasteryOverlayOpen}>
         <DialogContent className="text-center max-w-sm">
@@ -691,156 +680,148 @@ export function StudySession({ items: initialItems, practiceMode, generateConfig
         </DialogContent>
       </Dialog>
 
-      <div className="space-y-4">
-        {/* Row 1: segmented progress dots + X exit button */}
-        <div className="flex items-center gap-2">
-          {sprintConfig?.limitType === 'time' ? (
-            /* Sprint time mode: continuous bar (segments don't map to time) */
-            <div className="flex-1 h-1 bg-[var(--d5-muted)]/30 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-1000 ${
-                  isTimeLow ? 'bg-amber-500 animate-pulse' : 'bg-primary'
-                }`}
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-          ) : (
-            /* Count mode: segmented dots */
-            <div className="flex flex-1 gap-1">
-              {Array.from({ length: effectiveLength }, (_, i) => (
+      <SessionShell>
+        <BackgroundMagicS opacity={0.05} />
+        <div className="shrink-0 space-y-4">
+          {/* Row 1: segmented progress dots + X exit button */}
+          <div className="flex items-center gap-2">
+            {sprintConfig?.limitType === 'time' ? (
+              /* Sprint time mode: continuous bar (segments don't map to time) */
+              <div className="flex-1 h-1 bg-[var(--d5-muted)]/30 rounded-full overflow-hidden">
                 <div
-                  key={i}
-                  className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                    i <= index ? 'bg-primary' : 'bg-[var(--d5-muted)]/30'
+                  className={`h-full rounded-full transition-all duration-1000 ${
+                    isTimeLow ? 'bg-amber-500 animate-pulse' : 'bg-primary'
                   }`}
+                  style={{ width: `${progressPct}%` }}
                 />
-              ))}
+              </div>
+            ) : (
+              /* Count mode: segmented dots */
+              <div className="flex flex-1 gap-1">
+                {Array.from({ length: effectiveLength }, (_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
+                      i <= index ? 'bg-primary' : 'bg-[var(--d5-muted)]/30'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+            <button
+              onClick={() => setShowExitDialog(true)}
+              aria-label="Salir de la sesión"
+              className="text-[var(--d5-muted)] hover:text-foreground transition-colors shrink-0"
+            >
+              <X className="h-4 w-4" strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {/* Row 2: type eyebrow · concept · counter/timer · Notes toggle */}
+          <div className="flex items-center gap-1.5 text-xs flex-wrap">
+            <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>{typeMeta.label}</span>
+            <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+            <span className="text-[var(--d5-warm)]">{toTitleCase(item.concept.title)}</span>
+            {item.concept.grammar_focus && (
+              <>
+                <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+                <GrammarFocusChip focus={item.concept.grammar_focus} />
+              </>
+            )}
+            <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+            {sprintConfig?.limitType === 'time' ? (
+              <span className={`font-mono font-semibold flex items-center gap-0.5 ${isTimeLow ? 'text-[var(--d5-warning)]' : 'text-[var(--d5-muted)]'}`}>
+                <Timer className="h-3 w-3" />
+                {formatTime(secondsLeft)}
+              </span>
+            ) : (
+              <span className="text-[var(--d5-muted)]">{index + 1}/{effectiveLength}</span>
+            )}
+            <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
+            <button
+              onClick={() => setExpandedConcepts((prev) => {
+                const next = new Set(prev)
+                if (next.has(item.concept.id)) next.delete(item.concept.id)
+                else next.add(item.concept.id)
+                return next
+              })}
+              aria-expanded={expandedConcepts.has(item.concept.id)}
+              className="text-[var(--d5-muted)] hover:text-foreground transition-colors"
+            >
+              Notas {expandedConcepts.has(item.concept.id) ? '↑' : '↓'}
+            </button>
+          </div>
+
+          {/* Concept notes panel — inline below metadata row */}
+          <div
+            className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
+            style={{ maxHeight: expandedConcepts.has(item.concept.id) ? '16rem' : '0' }}
+          >
+            <div className="bg-muted/50 rounded-lg text-sm px-4 py-3 max-w-prose">
+              <p>{item.concept.explanation}</p>
             </div>
-          )}
-          <button
-            onClick={() => setShowExitDialog(true)}
-            aria-label="Salir de la sesión"
-            className="text-[var(--d5-muted)] hover:text-foreground transition-colors shrink-0"
-          >
-            <X className="h-4 w-4" strokeWidth={1.5} />
-          </button>
-        </div>
-
-        {/* Row 2: type eyebrow · concept · counter/timer · Notes toggle */}
-        <div className="flex items-center gap-1.5 text-xs flex-wrap">
-          <span className="senda-eyebrow" style={{ color: 'var(--d5-terracotta)' }}>{typeMeta.label}</span>
-          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-          <span className="text-[var(--d5-warm)]">{toTitleCase(item.concept.title)}</span>
-          {item.concept.grammar_focus && (
-            <>
-              <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-              <GrammarFocusChip focus={item.concept.grammar_focus} />
-            </>
-          )}
-          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-          {sprintConfig?.limitType === 'time' ? (
-            <span className={`font-mono font-semibold flex items-center gap-0.5 ${isTimeLow ? 'text-[var(--d5-warning)]' : 'text-[var(--d5-muted)]'}`}>
-              <Timer className="h-3 w-3" />
-              {formatTime(secondsLeft)}
-            </span>
-          ) : (
-            <span className="text-[var(--d5-muted)]">{index + 1}/{effectiveLength}</span>
-          )}
-          <span className="w-1 h-1 rounded-full bg-[var(--d5-muted)]" aria-hidden />
-          <button
-            onClick={() => setExpandedConcepts((prev) => {
-              const next = new Set(prev)
-              if (next.has(item.concept.id)) next.delete(item.concept.id)
-              else next.add(item.concept.id)
-              return next
-            })}
-            aria-expanded={expandedConcepts.has(item.concept.id)}
-            className="text-[var(--d5-muted)] hover:text-foreground transition-colors"
-          >
-            Notas {expandedConcepts.has(item.concept.id) ? '↑' : '↓'}
-          </button>
-        </div>
-
-        {/* Concept notes panel — inline below metadata row */}
-        <div
-          className="transition-[max-height] duration-200 ease-in-out overflow-hidden"
-          style={{ maxHeight: expandedConcepts.has(item.concept.id) ? '16rem' : '0' }}
-        >
-          <div className="bg-muted/50 rounded-lg text-sm px-4 py-3 max-w-prose">
-            <p>{item.concept.explanation}</p>
           </div>
         </div>
 
-        {/* Exercise */}
-        <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 ${exiting ? 'animate-exercise-out' : 'animate-exercise-in'} ${flashClass ?? ''}`}>
-          {(state.phase === 'answering' || flashClass) && (
-            <div className="animate-in slide-in-from-right-2 duration-200">
-              <ExerciseRenderer exercise={item.exercise} onSubmit={handleSubmit} disabled={submitting} portalTarget={showBottomBar ? bottomBarEl : null} />
-              {submitting && (
-                <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Comprobando…</span>
-                </div>
-              )}
-              {submitError && (
-                <div className="flex items-center gap-2 mt-2">
-                  <p className="text-sm text-destructive">{submitError}</p>
-                  {failedAnswerRef.current && (
-                    <button
-                      onClick={() => {
-                        setSubmitError(null)
-                        handleSubmit(failedAnswerRef.current!)
-                      }}
-                      className="text-sm font-medium text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
-                    >
-                      Reintentar
-                    </button>
-                  )}
-                </div>
-              )}
-              {wrongAttempts > 0 && (
-                <div className="animate-in fade-in duration-300">
-                  <HintPanel
-                    hint1={item.exercise.hint_1}
-                    hint2={item.exercise.hint_2}
-                    claudeHint={claudeHint}
-                    wrongAttempts={wrongAttempts}
-                    loadingHint={loadingHint}
-                    onRequestHint={handleRequestClaudeHint}
-                  />
-                </div>
-              )}
-            </div>
-          )}
+        {/* Exercise area — top-aligned on mobile, centered on desktop */}
+        <div className="flex-1 flex flex-col pt-4 lg:justify-center lg:py-4">
+          <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 ${exiting ? 'animate-exercise-out' : 'animate-exercise-in'} ${flashClass ?? ''}`}>
+            {(state.phase === 'answering' || flashClass) && (
+              <div className="animate-in slide-in-from-right-2 duration-200">
+                <ExerciseRenderer exercise={item.exercise} onSubmit={handleSubmit} disabled={submitting} portalTarget={null} />
+                {submitting && (
+                  <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Comprobando…</span>
+                  </div>
+                )}
+                {submitError && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <p className="text-sm text-destructive">{submitError}</p>
+                    {failedAnswerRef.current && (
+                      <button
+                        onClick={() => {
+                          setSubmitError(null)
+                          handleSubmit(failedAnswerRef.current!)
+                        }}
+                        className="text-sm font-medium text-primary hover:text-primary/80 transition-colors whitespace-nowrap"
+                      >
+                        Reintentar
+                      </button>
+                    )}
+                  </div>
+                )}
+                {wrongAttempts > 0 && (
+                  <div className="animate-in fade-in duration-300">
+                    <HintPanel
+                      hint1={item.exercise.hint_1}
+                      hint2={item.exercise.hint_2}
+                      claudeHint={claudeHint}
+                      wrongAttempts={wrongAttempts}
+                      loadingHint={loadingHint}
+                      onRequestHint={handleRequestClaudeHint}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
-          {state.phase === 'feedback' && (
-            <div className="animate-in slide-in-from-bottom-3 duration-200">
-              <FeedbackPanel
-                result={state.result}
-                userAnswer={state.userAnswer}
-                onNext={handleNext}
-                onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
-                isLast={isLast}
-                isGenerating={streamingDetails}
-                conceptId={item.concept.id}
-              />
-            </div>
-          )}
-
-          {/* Spacer for fixed input bar on mobile */}
-          {showBottomBar && (
-            <div className="h-[calc(10rem+env(safe-area-inset-bottom))] lg:hidden" />
-          )}
+            {state.phase === 'feedback' && (
+              <div className="animate-in slide-in-from-bottom-3 duration-200">
+                <FeedbackPanel
+                  result={state.result}
+                  userAnswer={state.userAnswer}
+                  onNext={handleNext}
+                  onTryAgain={!state.result.is_correct ? handleTryAgain : undefined}
+                  isLast={isLast}
+                  isGenerating={streamingDetails}
+                  conceptId={item.concept.id}
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
-
-    {/* Fixed input bar — outside overflow-hidden to avoid transform ancestor issues */}
-    {showBottomBar && (
-      <ExerciseBottomBar>
-        <div ref={setBottomBarEl} />
-      </ExerciseBottomBar>
-    )}
+      </SessionShell>
     </>
   )
 }

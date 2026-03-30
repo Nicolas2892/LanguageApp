@@ -267,7 +267,7 @@ Session configure page (`/study/configure`) builds these params via a UI before 
 
 All routed through shared `ExerciseRenderer` in `src/components/exercises/ExerciseRenderer.tsx`.
 
-**Mobile keyboard fix:** On mobile (<lg), exercise inputs are rendered in a fixed bottom bar above the keyboard to keep the prompt visible while typing. Verb/vocab sessions use `DrillInputBar` (extracted input). Grammar exercises with separable inputs (TextAnswer, ErrorCorrection, ListeningComprehension, RegisterShift) use `createPortal()` via `portalTarget` prop into `ExerciseBottomBar`. Non-separable types (GapFill, SentenceBuilder, Proofreading) render inputs inline as before. `NON_SEPARABLE_TYPES` constant defined in each session file.
+**Mobile keyboard fix:** All session types (grammar, verb, vocab) use `SessionShell` — a `position: fixed; inset: 0;` container on mobile that fills the visual viewport. Content flows from top (prompt → input → whitespace). When the keyboard opens (`interactiveWidget: resizes-content`), the container shrinks from the bottom, consuming whitespace — nothing visible moves. All inputs render inline (no portals, no fixed bottom bars). On desktop (`lg:`), SessionShell is a static pass-through with no visual impact. `DrillInputBar` is a purely presentational inline component (input + submit button). `ExerciseBottomBar` and portal-based input placement are no longer used.
 
 ### Core Learning Loop
 
@@ -476,8 +476,9 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 - `src/lib/claude/client.ts` — anthropic client + TUTOR_MODEL + GRADE_MODEL constants
 
 **UI Components:**
-- `src/components/DrillInputBar.tsx` — fixed bottom input bar for verb/vocab drill sessions; mobile `position: fixed` above keyboard, desktop `lg:static` inline; props: `inputRef`, `value`, `onChange`, `onSubmit`, `placeholder`, `disabled`, `buttonLabel?`
-- `src/components/exercises/ExerciseBottomBar.tsx` — fixed bottom bar container for grammar exercise input portals; mobile only (caller checks `useIsLg`)
+- `src/components/SessionShell.tsx` — shared layout wrapper for all exercise sessions; mobile: `fixed inset-0 z-20` fills viewport, `overflow-y-auto`, content flows from top; desktop: `lg:static` pass-through; inner div: `relative overflow-hidden max-w-2xl mx-auto`
+- `src/components/DrillInputBar.tsx` — inline input bar for verb/vocab drill sessions; purely presentational (no positioning); props: `inputRef`, `value`, `onChange`, `onSubmit`, `placeholder`, `disabled`, `buttonLabel?`
+- `src/components/exercises/ExerciseBottomBar.tsx` — legacy fixed bottom bar container (no longer used; replaced by `SessionShell` inline layout)
 - `src/components/exercises/ExerciseRenderer.tsx` — shared exercise type switch; optional `portalTarget` prop passes through to separable exercise components (TextAnswer, ErrorCorrection, ListeningComprehension, RegisterShift) for mobile fixed input bar
 - `src/components/ErrorBoundary.tsx` — wraps StudySession, DiagnosticSession, WriteSession, VerbSession, VocabSession
 - `src/components/HardFlagButton.tsx` — optimistic toggle for concept `is_hard` flag
@@ -491,7 +492,7 @@ Art Direction 5 (D5) is the live brand. Key tokens and utilities defined in `src
 ### Navigation
 
 - **SideNav** (`src/components/SideNav.tsx`) — desktop sidebar (`hidden lg:flex`); D5 design: `SvgSendaPath` + DM Serif italic wordmark, left 3px terracotta accent bar per active item (no icons), `--d5-nav-inactive` for inactive items; 7 items: Dashboard → Study → Curriculum → Verbs → Pronunciación → Progress → Tutor; hidden on `/auth`, `/onboarding`, `/brand-preview`, `/admin`; `StreakBadge` (md) in bottom section above account link
-- **BottomNav** (`src/components/BottomNav.tsx`) — mobile 5-tab bar (`lg:hidden`); Dashboard → Study → Curriculum → Verbs → Progress (Tutor removed — surfaced via AppHeader icon + FeedbackPanel link instead); active pill uses inline `rgba(184,170,153,0.28)` bg; `HIDDEN_ROUTES` includes `/verbs/session`, `/vocab/session`; label font `text-[0.625rem]` (10px, WCAG compliant)
+- **BottomNav** (`src/components/BottomNav.tsx`) — mobile 5-tab bar (`lg:hidden`); Dashboard → Study → Curriculum → Verbs → Progress (Tutor removed — surfaced via AppHeader icon + FeedbackPanel link instead); active pill uses inline `rgba(184,170,153,0.28)` bg; hidden on `/study` (exact match) + `HIDDEN_ROUTES` (startsWith) includes `/verbs/session`, `/vocab/session`; label font `text-[0.625rem]` (10px, WCAG compliant)
 - **AppHeader** (`src/components/AppHeader.tsx`) — sticky mobile header (`lg:hidden`); `SvgSendaPath size={26}`; right side: tutor Bot icon (on `/dashboard`, `/curriculum`, `/verbs` + sub-routes only) + `StreakBadge` (sm) + avatar; hidden on `/auth`, `/study`, `/tutor`, `/onboarding`, `/brand-preview`
 
 ### Tutor Entry Points

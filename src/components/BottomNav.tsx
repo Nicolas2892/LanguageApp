@@ -15,6 +15,7 @@ const HIDDEN_ROUTES = ['/auth', ROUTES.onboarding, ROUTES.write, ROUTES.brandPre
 
 export function BottomNav() {
   const pathname = usePathname()
+  if (pathname === '/study') return null
   if (HIDDEN_ROUTES.some((r) => pathname.startsWith(r))) return null
 
   return (

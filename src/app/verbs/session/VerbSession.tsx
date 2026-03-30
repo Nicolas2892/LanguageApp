@@ -7,6 +7,7 @@ import { fireAndForget } from '@/lib/fireAndForget'
 import { X, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DrillInputBar } from '@/components/DrillInputBar'
+import { SessionShell } from '@/components/SessionShell'
 import {
   Dialog,
   DialogContent,
@@ -272,8 +273,8 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
         </DialogContent>
       </Dialog>
 
-      <div className="flex flex-col min-h-[calc(100dvh-10rem)]">
-        {/* Pinned top: progress + eyebrow */}
+      <SessionShell>
+        {/* Progress + eyebrow */}
         <div className="shrink-0 space-y-4">
           {/* Row 1: segmented progress dots + X exit button */}
           <div className="flex items-center gap-2">
@@ -314,8 +315,8 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
           </div>
         </div>
 
-        {/* Centered exercise area */}
-        <div className="flex-1 flex flex-col justify-center py-4">
+        {/* Exercise area — top-aligned on mobile, centered on desktop */}
+        <div className="flex-1 flex flex-col pt-6 lg:justify-center lg:py-4">
           <div key={index} className={`space-y-3 rounded-xl transition-colors duration-300 animate-exercise-in ${flashClass}`}>
             {/* Sentence card */}
             <div className="senda-card space-y-4">
@@ -365,9 +366,16 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
               )}
             </div>
 
-            {/* Spacer for fixed input bar on mobile */}
+            {/* Input bar — inline in flow */}
             {phase.kind === 'answering' && (
-              <div className="h-[calc(7rem+env(safe-area-inset-bottom))] lg:hidden" />
+              <DrillInputBar
+                inputRef={inputRef}
+                value={answer}
+                onChange={setAnswer}
+                onSubmit={handleCheck}
+                placeholder={isInfinitiveDrill ? 'Escribe el infinitivo…' : 'Escribe la forma conjugada…'}
+                disabled={!answer.trim()}
+              />
             )}
 
             {/* Correct answer — inline success display (no full feedback card) */}
@@ -399,19 +407,7 @@ export function VerbSession({ items, showHint, sessionUrl }: Props) {
             )}
           </div>
         </div>
-      </div>
-
-      {/* Fixed input bar — outside flex column to avoid transform ancestor */}
-      {phase.kind === 'answering' && (
-        <DrillInputBar
-          inputRef={inputRef}
-          value={answer}
-          onChange={setAnswer}
-          onSubmit={handleCheck}
-          placeholder={isInfinitiveDrill ? 'Escribe el infinitivo…' : 'Escribe la forma conjugada…'}
-          disabled={!answer.trim()}
-        />
-      )}
+      </SessionShell>
     </>
   )
 }
