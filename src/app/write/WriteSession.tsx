@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { FreeWritePrompt } from '@/components/exercises/FreeWritePrompt'
 import { FeedbackPanel } from '@/components/exercises/FeedbackPanel'
 import { trackFreeWriteSubmitted, trackFeatureFirstUse } from '@/lib/analytics'
+import { ROUTES } from '@/lib/routes'
 import type { GradeResult } from '@/lib/claude/grader'
 
 interface ConceptInfo {
@@ -24,6 +26,7 @@ interface Props {
 }
 
 export function WriteSession({ conceptIds, conceptInfos }: Props) {
+  const router = useRouter()
   const [state, setState] = useState<State>({ phase: 'loading_prompt' })
   const [error, setError] = useState<string | null>(null)
 
@@ -36,14 +39,27 @@ export function WriteSession({ conceptIds, conceptInfos }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ concept_ids: conceptIds }),
       })
-      if (!res.ok) throw new Error('Failed to generate prompt')
+      if (res.status === 401) {
+        router.push(`${ROUTES.login}?returnUrl=/write`)
+        return
+      }
+      if (res.status === 429) {
+        setError('Has alcanzado el límite. Espera unos minutos.')
+        setState({ phase: 'writing', prompt: '' })
+        return
+      }
+      if (!res.ok) {
+        console.error('[WriteSession] topic fetch failed:', res.status, await res.text().catch(() => ''))
+        throw new Error(`Failed to generate prompt: ${res.status}`)
+      }
       const data = await res.json() as { topic: string }
       setState({ phase: 'writing', prompt: data.topic })
-    } catch {
+    } catch (err) {
+      console.error('[WriteSession] fetchPrompt error:', err)
       setError('No se pudo generar un tema. Inténtalo de nuevo.')
       setState({ phase: 'writing', prompt: '' })
     }
-  }, [conceptIds])
+  }, [conceptIds, router])
 
   useEffect(() => {
     trackFeatureFirstUse('free_write')
@@ -68,11 +84,19 @@ export function WriteSession({ conceptIds, conceptInfos }: Props) {
           user_answer: answer,
         }),
       })
-      if (!res.ok) throw new Error('Failed to grade answer')
+      if (res.status === 401) {
+        router.push(`${ROUTES.login}?returnUrl=/write`)
+        return
+      }
+      if (!res.ok) {
+        console.error('[WriteSession] grade failed:', res.status, await res.text().catch(() => ''))
+        throw new Error(`Failed to grade answer: ${res.status}`)
+      }
       const result = await res.json() as GradeResult & { next_review_in_days: number }
       trackFreeWriteSubmitted(conceptIds[0])
       setState({ phase: 'feedback', prompt, answer, result })
-    } catch {
+    } catch (err) {
+      console.error('[WriteSession] handleSubmit error:', err)
       setError('No se pudo enviar tu respuesta. Inténtalo de nuevo.')
       setState({ phase: 'writing', prompt })
     }

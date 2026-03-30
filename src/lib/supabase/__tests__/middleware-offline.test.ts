@@ -23,6 +23,10 @@ vi.mock('next/server', async () => {
       redirect: vi.fn().mockReturnValue({
         cookies: { delete: vi.fn() },
       }),
+      json: vi.fn().mockImplementation((body: unknown, init?: { status?: number }) => ({
+        status: init?.status ?? 200,
+        body,
+      })),
     },
   }
 })
@@ -123,5 +127,30 @@ describe('middleware offline resilience (Fix-M)', () => {
 
     // Should NOT redirect to onboarding when DB is unreachable
     expect(result).toBeDefined()
+  })
+
+  it('returns 401 JSON for unauthenticated API routes instead of redirect', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const request = makeRequest('/api/topic', [])
+
+    await updateSession(request)
+
+    expect(NextResponse.json).toHaveBeenCalledWith(
+      { error: 'Unauthorized' },
+      { status: 401 },
+    )
+    expect(NextResponse.redirect).not.toHaveBeenCalled()
+  })
+
+  it('still redirects unauthenticated page routes to login', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null } })
+
+    const request = makeRequest('/dashboard', [])
+
+    await updateSession(request)
+
+    expect(NextResponse.redirect).toHaveBeenCalled()
+    expect(NextResponse.json).not.toHaveBeenCalled()
   })
 })

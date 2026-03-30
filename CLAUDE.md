@@ -192,10 +192,11 @@ KV_REST_API_TOKEN               # Upstash Redis token (@vercel/kv)
 
 ### Middleware Rules (`src/lib/supabase/middleware.ts`)
 
-- Unauthenticated → redirect to `/auth/login` (except `/auth/*`)
+- Unauthenticated → redirect to `/auth/login` (except `/auth/*` and `/api/*`)
+  - **API routes (`/api/*`)** return `401 JSON` instead of redirecting — prevents client `fetch` from following redirect to HTML login page
 - Authenticated + `onboarding_completed = false` → redirect to `/onboarding`
-  - **API routes (`/api/`*) are excluded from this redirect** — they must never be redirected to a page
-- Both checks skip `/auth/`*
+  - **API routes (`/api/*`) are excluded from this redirect** — they must never be redirected to a page
+- Both checks skip `/auth/*`
 
 ### Study Session Query Params (`/study`)
 
@@ -556,7 +557,7 @@ All 7 main routes have `loading.tsx` files that mirror the real page layout to p
 
 ## Current Status
 
-**Test suite: 2616 tests across 164 files — all passing.**
+**Test suite: 2623 tests across 165 files — all passing.**
 
 **E2E: Playwright smoke tests** (`pnpm test:e2e`) — 4 scenarios. Requires `.env.e2e` with `E2E_BASE_URL`, `E2E_EMAIL`, `E2E_PASSWORD`.
 
