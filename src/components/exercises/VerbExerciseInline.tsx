@@ -39,12 +39,10 @@ export function VerbExerciseInline({ item, showHint, onGraded }: Props) {
   const [flashClass, setFlashClass] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // State reset handled by key prop on parent — remount resets all state
   useEffect(() => {
-    setAnswer('')
-    setResult(null)
-    setFlashClass('')
     setTimeout(() => focusWithoutScroll(inputRef.current), 50)
-  }, [item.verbId, item.tense])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isInfinitive = item.tense === 'infinitive'
   const tenseLabel = TENSE_LABELS[item.tense as VerbTense] ?? item.tense

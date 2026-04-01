@@ -39,7 +39,7 @@ export function FreeWritePrompt({
 
   // Warn before leaving with unsaved answer
   const answerRef = useRef(answer)
-  answerRef.current = answer
+  useEffect(() => { answerRef.current = answer }, [answer])
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       if (answerRef.current.trim()) { e.preventDefault() }

@@ -279,6 +279,7 @@ export function UnifiedStudySession({ items }: Props) {
         {current.type === 'verb' && phase.kind === 'answering' && (
           <div className="animate-exercise-in">
             <VerbExerciseInline
+              key={`${current.verbId}-${current.tense}`}
               item={{
                 verbId: current.verbId,
                 infinitive: current.verb.infinitive,
@@ -299,6 +300,7 @@ export function UnifiedStudySession({ items }: Props) {
         {current.type === 'vocab' && phase.kind === 'answering' && (
           <div className="animate-exercise-in">
             <VocabExerciseInline
+              key={current.vocabId}
               item={{
                 vocabId: current.vocabId,
                 expression: current.vocabItem.expression,

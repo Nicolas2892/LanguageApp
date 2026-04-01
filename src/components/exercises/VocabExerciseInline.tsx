@@ -34,12 +34,10 @@ export function VocabExerciseInline({ item, showHint, onGraded }: Props) {
   const [flashClass, setFlashClass] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // State reset handled by key prop on parent — remount resets all state
   useEffect(() => {
-    setAnswer('')
-    setResult(null)
-    setFlashClass('')
     setTimeout(() => focusWithoutScroll(inputRef.current), 50)
-  }, [item.vocabId])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const categoryLabel = CATEGORY_LABELS[item.category as VocabCategory] ?? item.category
   const parts = item.sentence.split('_____')
