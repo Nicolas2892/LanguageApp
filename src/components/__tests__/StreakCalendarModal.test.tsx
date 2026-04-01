@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { StreakCalendarModal } from '../StreakCalendarModal'
@@ -13,6 +13,10 @@ const mockCalendarData = {
 }
 
 beforeEach(() => {
+  // Freeze only Date to March 2026 so the calendar renders the month matching mock data
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date('2026-03-15T12:00:00'))
+
   vi.stubGlobal(
     'fetch',
     vi.fn().mockResolvedValue({
@@ -20,6 +24,10 @@ beforeEach(() => {
       json: () => Promise.resolve(mockCalendarData),
     })
   )
+})
+
+afterEach(() => {
+  vi.useRealTimers()
 })
 
 const defaultProps = {
